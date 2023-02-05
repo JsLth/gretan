@@ -12,7 +12,7 @@ greta_theme <- create_theme(
     danger = "#BF616A",
     dark = "#F4F4F2"
   ),
-  bs4dash_layout(main_bg = "#FDFDFD"),
+  bs4dash_layout(main_bg = "#FDFDFD", sidebar_width = "350px"),
   bs4dash_sidebar_light(bg = "#F4F4F2", color = "#000000"),
   bs4dash_color(
     white = "#FDFDFD",
@@ -25,18 +25,63 @@ greta_theme <- create_theme(
 
 preloader <- list(html = tagList(spin_6(), "Loading ..."), color = "#B3DDFE")
 
+home_tab <- tabItem("home",
+  box("Test text")
+)
+
+hotspot_tab <- tabItem("hotspot",
+  box(
+    "Box content here", br(), "More box content",
+    sliderInput("slider", "Slider input:", 1, 100, 50),
+    textInput("text", "Text input:")
+  )
+)
+
+vl_tab <- tabItem("lotkavolterra",
+  box(
+    "Box content here", br(), "More box content",
+    sliderInput("slider", "Slider input:", 1, 100, 50),
+    textInput("text", "Text input:")
+  )
+)
+
+cluster_tab <- tabItem("cluster",
+  box(
+    "Box content here", br(), "More box content",
+    sliderInput("slider", "Slider input:", 1, 100, 50),
+    textInput("text", "Text input:")
+  )
+)
+
+reg_tab <- tabItem("regression",
+  box(
+    "Box content here", br(), "More box content",
+    sliderInput("slider", "Slider input:", 1, 100, 50),
+    textInput("text", "Text input:")
+  )
+)
+
+network_tab <- tabItem("network",
+  box(
+    "Box content here", br(), "More box content",
+    sliderInput("slider", "Slider input:", 1, 100, 50),
+    textInput("text", "Text input:")
+  )
+)
+
 ui <- dashboardPage(
   dashboardHeader(
     tags$div(
       a(
         href = "https://projectgreta.eu/",
-        tags$img(src = "https://projectgreta.eu/wp-content/uploads/2021/09/GRETA_Logo_Tekstilogo_RGB-1.svg", height = "30px"),
+        tags$img(src = "https://projectgreta.eu/wp-content/uploads/2021/08/GRETA_Logo_Acronym_RGB-1-1.svg", height = "35px"),
         style = "padding-top:10px; padding-bottom:10px;"
       ), class = "dropdown"
     ),
     title = "GIS tool",
     status = "secondary",
-    skin = "light"
+    skin = "light",
+    sidebarIcon = fontawesome::fa("bars", fill = "#000000")
   ),
   dashboardSidebar(
     sidebarMenu(
@@ -44,36 +89,50 @@ ui <- dashboardPage(
       sidebarSearchForm("textSearch", "buttonSearch", icon = icon("magnifying-glass")),
       menuItem(
         text = "Home",
-        icon = icon("house", lib = "font-awesome")
+        icon = icon("house", lib = "font-awesome"),
+        tabName = "home"
       ),
       menuItem(
         text = "Hotspot analysis",
-        icon = icon("map-pin", lib = "font-awesome")
+        icon = icon("map-pin", lib = "font-awesome"),
+        tabName = "hotspot"
       ),
       menuItem(
         text = "Lotka-Volterra analysis",
-        icon = icon("users", lib = "font-awesome")
+        icon = icon("users", lib = "font-awesome"),
+        tabName = "lotkavolterra"
       ),
       menuItem(
         text = "Cluster analysis",
-        icon = icon("arrows-to-circle", lib = "font-awesome")
+        icon = icon("arrows-to-circle", lib = "font-awesome"),
+        tabName = "cluster"
       ),
       menuItem(
         text = "Regression analysis",
-        icon = icon("chart-line", lib = "font-awesome")
+        icon = icon("chart-line", lib = "font-awesome"),
+        tabName = "regression"
       ),
       menuItem(
         text = "Network analysis",
-        icon = icon("circle-nodes", lib = "font-awesome")
+        icon = icon("circle-nodes", lib = "font-awesome"),
+        tabName = "network"
       ),
-      flat = TRUE
+      flat = TRUE,
+      id = "sidebar"
     ),
     skin = "light",
-    width = "2em"
+    minified = TRUE,
+    collapsed = FALSE
   ),
   dashboardBody(
-    includeCSS("www/font-family.css"),
-    actionButton("reload", "Reload")
+    tabItems(
+      home_tab,
+      hotspot_tab,
+      vl_tab,
+      cluster_tab,
+      reg_tab,
+      network_tab
+    )
   ),
   freshTheme = greta_theme,
   dark = NULL,
