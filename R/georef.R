@@ -28,16 +28,16 @@ nuts0 <- giscoR::gisco_get_nuts(
   year = "2021",
   nuts_level = "0",
   epsg = "3035",
-  resolution = "01",
+  resolution = "10",
   spatialtype = "RG",
   cache = TRUE
 )
 nuts2 <- giscoR::gisco_get_nuts(
   year = "2021",
-  nuts_level = "1",
+  nuts_level = "2",
   country = countries,
   epsg = "3035",
-  resolution = "01",
+  resolution = "03",
   spatialtype = "RG",
   cache = TRUE
 )
@@ -65,7 +65,7 @@ nuts0 <- mutate(nuts0, country = case_match(country,
   "Danmark" ~ "Denmark",
   "Österreich" ~ "Austria",
   "Belgique/België" ~ "Belgium",
-  "Elláda" ~ "Greece",
+  "Ελλάδα" ~ "Greece",
   "España" ~ "Spain",
   "Suomi/Finland" ~ "Finland",
   "Magyarország" ~ "Hungary",
@@ -73,20 +73,11 @@ nuts0 <- mutate(nuts0, country = case_match(country,
   "Italia" ~ "Italy",
   "Nederland" ~ "Netherlands",
   "Polska" ~ "Poland",
-  "România" ~ "Romania"
+  "România" ~ "Romania",
+  "Portugal" ~ "Portugal",
+  "France" ~ "France"
 ))
 
-# The GRETA survey seems to make use of different regional definitions
-# About 10% of municipalities and 50% of regions can be joined with NUTS2
-# and NUTS 3 levels, respectively.
-# I think there are two possible approaches:
-# 1. Go through national geodata authorities and stack the national boundaries
-# of the fitting boundaries
-# 2. Geocode toponyms as point data and perform spatial joins onto a more
-# standardized type of boundary (NUTS2/3).
-# 
-# Due to the better applicability and ease of linking to context data I tend
-# to appraoch 2.
 survey0 <- nuts0 %>%
   right_join(survey, by = "country", multiple = "all", keep = FALSE) %>%
   as_tibble() %>%
@@ -99,3 +90,54 @@ survey3 <- nuts3 %>%
   right_join(survey, by = c("municipality" = "c3"), multiple = "all", keep = FALSE) %>%
   as_tibble() %>%
   st_as_sf()
+
+
+check_survey_country <- function(country, survey, level = "c2", year = "2021") {
+  vcc <- survey[survey$country %in% country, ][[level]]
+  vcc <- na.omit(unique(vcc))
+  
+  nuts <- lapply(1:4, function(x) {
+    if (x < 4) {
+      giscoR::gisco_get_nuts(
+        year = year,
+        epsg = "4326",
+        resolution = "60",
+        nuts_level = x,
+        country = country
+      )
+    } else if (level == "c3") {
+      lau <- giscoR::gisco_get_lau(
+        year = "2020",
+        epsg = "4326",
+        country = country
+      )
+      lau <- dplyr::rename(lau, NAME_LATN = "LAU_NAME")
+    }
+  })
+  nuts[lengths(nuts) == 0] <- NULL
+  
+  diff <- lapply(nuts, function(x) setdiff(unique(x$NAME_LATN), vcc))
+  clevel <- which.min(lengths(diff) / sapply(nuts, nrow))
+  cnuts <- nuts[[clevel]]$NAME_LATN
+
+  rnuts <- janitor::make_clean_names(cnuts)
+  rvcc <- janitor::make_clean_names(vcc)
+  diff <- setdiff(rvcc, rnuts)
+
+  cli::cli_text("For {country}, the {level} column in the survey dataset likely corresponds to the NUTS-{clevel} level.")
+  cli::cli_text("In their own spelling, {length(setdiff(vcc, cnuts))} regions do not match.")
+  cli::cli_ul(setdiff(vcc, cnuts))
+  cli::cat_line()
+  cli::cli_text("In their cleaned form, {length(diff)} region{?s} do not match.")
+  cli::cli_ul(diff)
+  cli::cat_line()
+}
+
+# Stand 14.2.:
+# - C2 ist ~ NUTS1 bis NUTS2
+# - C3 ist manchmal LAU und manchmal irgendwas anderes
+# - Die hartnäckigsten Schreibunterschiede in C2 lassen sich mit janitor aushebeln
+# - Der Rest wahrscheinlich mit Regex
+# - C3 funktioniert leider noch gar nicht, da nicht einheitlich :(
+# - Manche Länder haben echt öde NUTS1/2 Regionen -> Alternieren zwischen C2 und C3?
+#     - z.B. Portugal: NUTS1 teilt das Land in Portugal und Inseln ein, C3 könnte das ganze etwas spannender machen
