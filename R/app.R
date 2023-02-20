@@ -3,6 +3,14 @@ library(shinydashboard)
 library(fresh)
 library(bs4Dash)
 library(waiter)
+library(leaflet)
+library(dplyr)
+
+srv <- survey_local
+
+all_pals <- RColorBrewer::brewer.pal.info %>%
+  filter(category == "seq") %>%
+  row.names()
 
 greta_theme <- create_theme(
   bs4dash_status(
@@ -21,7 +29,6 @@ greta_theme <- create_theme(
   ),
   bs4dash_font(family_sans_serif = "Literata")
 )
-"#B3DDFE"
 
 preloader <- list(html = tagList(spin_6(), "Loading ..."), color = "#B3DDFE")
 
@@ -29,11 +36,19 @@ home_tab <- tabItem("home",
   box("Test text")
 )
 
-hotspot_tab <- tabItem("hotspot",
-  box(
-    "Box content here", br(), "More box content",
-    sliderInput("slider", "Slider input:", 1, 100, 50),
-    textInput("text", "Text input:")
+explorer_tab <- tabItem("explorer",
+  class = "outer",
+  tags$head(includeCSS("../styles.css")),
+  leafletOutput("explorer", width = "100%", height = 900),
+  absolutePanel(
+    id = "controls",
+    draggable = TRUE, fixed = TRUE, class = "panel panel-default",
+    top = 80, left = "auto", right = 40, bottom = "auto",
+    width = 330, height = "auto",
+    
+    h2("Data explorer"),
+    selectInput("survey_col", "Topic", names(srv)),
+    selectInput("pal", "Color palette", all_pals)
   )
 )
 
@@ -69,6 +84,38 @@ network_tab <- tabItem("network",
   )
 )
 
+cs1_tab <- tabItem("cs1",
+  box(
+   "Box content here", br(), "More box content",
+   sliderInput("slider", "Slider input:", 1, 100, 50),
+   textInput("text", "Text input:")
+  )
+)
+
+cs2_tab <- tabItem("cs2",
+  box(
+   "Box content here", br(), "More box content",
+   sliderInput("slider", "Slider input:", 1, 100, 50),
+   textInput("text", "Text input:")
+  )
+)
+
+cs3_tab <- tabItem("cs3",
+  box(
+   "Box content here", br(), "More box content",
+   sliderInput("slider", "Slider input:", 1, 100, 50),
+   textInput("text", "Text input:")
+  )
+)
+
+cs4_tab <- tabItem("cs4",
+  box(
+   "Box content here", br(), "More box content",
+   sliderInput("slider", "Slider input:", 1, 100, 50),
+   textInput("text", "Text input:")
+  )
+)
+
 ui <- dashboardPage(
   dashboardHeader(
     tags$div(
@@ -93,9 +140,17 @@ ui <- dashboardPage(
         tabName = "home"
       ),
       menuItem(
-        text = "Hotspot analysis",
+        text = "Data explorer",
+        icon = icon("map", lib = "font-awesome"),
+        tabName = "explorer"
+      ),
+      menuItem(
+        text = "Case studies",
         icon = icon("map-pin", lib = "font-awesome"),
-        tabName = "hotspot"
+        menuSubItem(text = "Coopernico, Portugal", tabName = "cs1"),
+        menuSubItem(text = "Pilastro-Roveri, Italy", tabName = "cs2"),
+        menuSubItem(text = "UR Beroa, Spain", tabName = "cs3"),
+        menuSubItem(text = "Gas-free neighborhoods, Netherlands", tabName = "cs4")
       ),
       menuItem(
         text = "Lotka-Volterra analysis",
@@ -127,11 +182,15 @@ ui <- dashboardPage(
   dashboardBody(
     tabItems(
       home_tab,
-      hotspot_tab,
+      explorer_tab,
       vl_tab,
       cluster_tab,
       reg_tab,
-      network_tab
+      network_tab,
+      cs1_tab,
+      cs2_tab,
+      cs3_tab,
+      cs4_tab
     )
   ),
   freshTheme = greta_theme,
@@ -142,6 +201,12 @@ ui <- dashboardPage(
 server = function(input, output, session) {
   observeEvent(input$reload, {
     session$reload()
+  })
+  
+  output$explorer <- renderLeaflet({
+    leaflet() %>%
+      addTiles() %>%
+      setView(lng = 6, lat = 52, zoom = 4)
   })
 }
 

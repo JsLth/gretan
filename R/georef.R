@@ -8,6 +8,7 @@ library(countrycode)
 library(stringr)
 library(fastDummies)
 library(leaflet)
+library(readxl)
 
 # Read survey data
 survey <- haven::read_sav(
@@ -15,6 +16,18 @@ survey <- haven::read_sav(
   encoding = "utf-8"
 ) %>%
   janitor::clean_names()
+
+codebook <- readxl::read_xlsx(
+  "~/Datasets delivery/Codebook & Datamap.xlsx",
+  skip = 1,
+  sheet = "Variables"
+) %>%
+  janitor::clean_names() %>%
+  mutate(
+    variable = janitor::make_clean_names(variable),
+    level = str_to_lower(measurement_level)
+  ) %>%
+  select(variable, label, level)
 
 # Remove nominal coding
 survey$country <- haven::as_factor(survey$country)
@@ -191,10 +204,7 @@ survey_local <- pairs %>%
            st_centroid()) %>% # compute centroids for easier spatial aggregation
   st_as_sf() %>%
   filter(!is.na(.x)) %>%
-  select(
-    id, d1, d2, age, matches("^c[0-9]{1,2}"),
-    -contains("open"), -c2, -c3
-  )
+  select(id, d1, d2, age, matches("^c[0-9]{1,2}"), -c2, -c3)
 
 survey_local <- survey_local %>%
   mutate(across(everything(), .fns = function(x) {
