@@ -11,6 +11,13 @@ srv <- survey_local
 all_pals <- RColorBrewer::brewer.pal.info %>%
   filter(category == "seq") %>%
   row.names()
+all_pals <- list(
+  "Common palettes" = as.list(all_pals),
+  "Colorblind palettes" = list(
+    "Magma", "Inferno", "Plasma", "Viridis",
+    "Cividis", "Rocket", "Mako", "Turbo"
+  )
+)
 
 greta_theme <- create_theme(
   bs4dash_status(
@@ -39,7 +46,7 @@ home_tab <- tabItem("home",
 explorer_tab <- tabItem("explorer",
   class = "outer",
   tags$head(includeCSS("../styles.css")),
-  leafletOutput("explorer", width = "100%", height = 900),
+  leafletOutput("explorer", width = "100%", height = "100%"),
   absolutePanel(
     id = "controls",
     draggable = TRUE, fixed = TRUE, class = "panel panel-default",
@@ -47,7 +54,9 @@ explorer_tab <- tabItem("explorer",
     width = 330, height = "auto",
     
     h2("Data explorer"),
-    selectInput("survey_col", "Topic", names(srv)),
+    selectInput("survey_col", "Topic", setdiff(names(srv), "id")),
+    htmlOutput("question"),
+    selectInput("scale", "Geographic Scale", c("NUTS-0", "NUTS-1", "NUTS-2")),
     selectInput("pal", "Color palette", all_pals)
   )
 )
@@ -203,10 +212,50 @@ server = function(input, output, session) {
     session$reload()
   })
   
+  output$question <- renderUI({
+    if (!is.null(input$survey_col)) {
+      HTML(paste0(
+        "<b>Question</b> ",
+        codebook[codebook$variable == input$survey_col, ]$variable,
+        ": ", codebook[codebook$variable == input$survey_col, ]$label
+      ))
+    } else {
+      ""
+    }
+  })
+  
   output$explorer <- renderLeaflet({
+    poly <- switch(input$scale,
+                   "NUTS-0" = survey_nuts0,
+                   "NUTS-1" = survey_nuts1,
+                   "NUTS-2" = survey_nuts2
+    )
+    
+    if (input$pal %in% all_pals[["Colorblind palettes"]]) {
+      pal <- viridis::viridis_pal(option = tolower(input$pal))(5)
+    } else {
+      pal <- input$pal
+    }
+    pal <- leaflet::colorQuantile(pal, NULL, n = 5)
+    print(pal)
     leaflet() %>%
       addTiles() %>%
-      setView(lng = 6, lat = 52, zoom = 4)
+      setView(lng = 6, lat = 52, zoom = 4) %>%
+      addPolygons(
+        data = sf::st_transform(poly[input$survey_col], 4326),
+        fillColor = as.formula(paste0("~pal(", input$survey_col, ")")),
+        fillOpacity = 0.7,
+        weight = 1,
+        color = "black",
+        opacity = 0.5,
+        popup = htmltools::htmlEscape(poly[[input$survey_col]])
+      ) %>%
+      addLegend(
+        position = "bottomleft",
+        na.label = "No data",
+        pal = pal,
+        values = poly[[input$survey_col]]
+      )
   })
 }
 

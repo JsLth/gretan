@@ -9,6 +9,20 @@ library(stringr)
 library(fastDummies)
 library(leaflet)
 library(readxl)
+library(purrr)
+
+# Problem:
+# Die Daten haben unterschiedliche Skalenniveaus (Skalar, Ordinal, Likert)
+# Wie aggregiert man diese Daten am besten einheitlich?
+# 
+# Gedanken:
+# Dummy-Spalten für ordinale Daten finden und dann Summe und Mittel berechnen
+# Median und Mittel für Skalar und Likert
+# 
+# 
+# Problem 2:
+# Manche Variablen sind bereits in Dummy-Form, andere aber nicht. Wie lässt sich
+# automatisch bestimmen, welche Variable in Dummy-Form gebracht werden muss?
 
 # Read survey data
 survey <- haven::read_sav(
@@ -27,7 +41,32 @@ codebook <- readxl::read_xlsx(
     variable = janitor::make_clean_names(variable),
     level = str_to_lower(measurement_level)
   ) %>%
-  select(variable, label, level)
+  select(variable, label, level) %>%
+  #filter(str_starts(variable, "c35|c38|c48")) %>%
+  filter(!(str_ends(variable, "_open") & !level == "scale")) %>% # filter useless open questions
+  filter(!str_starts(variable, regex("p|b[0-9]"))) %>% # only citizen
+  filter(variable %in% c("id", "d1", "d2", # filter technical columns
+                         str_match_all(variable, "^c[0-9]{1,2}.*"))) %>%
+  filter(!variable %in% c("c2", "c3")) %>% # filter geo questions
+  mutate(is_dummy = map_lgl(survey[.$variable], ~length(attr(.x, "labels")) == 1)) %>% # find dummies based on number of values
+  mutate(category = if_else(is_dummy, str_remove_all(variable, "_.*$"), variable)) %>%
+  mutate(is_likert = !is_dummy & map_lgl(survey[.$variable], function(.x) {
+      lab <- names(attr(.x, "labels"))
+      if (is.null(lab)) {
+        FALSE
+      } else {
+        all(str_detect(setdiff(lab, c("Prefer not to say", "I do not know")), "^[0-9]+$"))
+      }
+    }
+  )) %>%
+  mutate(needs_dummy = level == "ordinal" & !variable == "id" & !is_dummy & !is_likert) %>%
+  mutate(
+    option = if_else(is_dummy, str_split_i(label, " - ", 1), NA),
+    label = if_else(is_dummy, str_split_i(label, " - ", 2), label)
+  )
+
+# c44_4
+# 
 
 # Remove nominal coding
 survey$country <- haven::as_factor(survey$country)
@@ -204,10 +243,8 @@ survey_local <- pairs %>%
            st_centroid()) %>% # compute centroids for easier spatial aggregation
   st_as_sf() %>%
   filter(!is.na(.x)) %>%
-  select(id, d1, d2, age, matches("^c[0-9]{1,2}"), -c2, -c3)
-
-survey_local <- survey_local %>%
-  mutate(across(everything(), .fns = function(x) {
+  select(all_of(codebook$variable)) %>%
+  mutate(across(everything(), .fns = function(x) { # remove SPSS labels
     if (inherits(x, "haven_labelled")) {
       haven::as_factor(x, levels = "label", ordered = TRUE)
     } else {
@@ -215,16 +252,17 @@ survey_local <- survey_local %>%
     }
   }))
 
+
 # Recode rating scale questions as numeric
-non_answers <- c("Prefer not to say", "I do not know")
-survey_local <- survey_local %>%
-  as_tibble() %>%
-  mutate(across(
-    where(~length(levels(.x)) > 1) & # select columns that are no dummies
-      where(~all(str_detect(setdiff(levels(.x), non_answers), "^[0-9]+$"))) & # select columns with numerical labels
-      -geometry,
-    .fns = as.numeric
-  ))
+# non_answers <- c("Prefer not to say", "I do not know")
+# survey_local <- survey_local %>%
+#   as_tibble() %>%
+#   mutate(across(
+#     where(~length(levels(.x)) > 1) & # select columns that are no dummies
+#       where(~all(str_detect(setdiff(levels(.x), non_answers), "^[0-9]+$"))) & # select columns with numerical labels
+#       -geometry,
+#     .fns = as.numeric
+#   ))
 
 # Select categorical columns that have no dummies yet
 to_be_dummified <- survey_local %>%
@@ -244,11 +282,39 @@ survey_local <- fastDummies::dummy_cols(
   mutate(across(where(is.factor), ~case_when(is.na(.x) ~ 0, .default = 1))) %>%
   st_as_sf()
 
-t <- aggregate(
+survey_nuts0 <- aggregate(
+  survey_local,
+  nuts0,
+  FUN = function(x) {
+    if (is.numeric(x)) {
+      mean(x, na.rm = TRUE)
+    } else {
+      sum(x, na.rm = TRUE)
+    }
+  }
+) %>%
+  as_tibble() %>%
+  st_as_sf()
+
+survey_nuts1 <- aggregate(
+  survey_local,
+  nuts1,
+  FUN = function(x) {
+    if (is.numeric(x)) {
+      mean(x, na.rm = TRUE)
+    } else {
+      sum(x, na.rm = TRUE)
+    }
+  }
+) %>%
+  as_tibble() %>%
+  st_as_sf()
+
+survey_nuts2 <- aggregate(
   survey_local,
   nuts2,
   FUN = function(x) {
-    if (any(x > 1, na.rm = TRUE)) {
+    if (is.numeric(x)) {
       mean(x, na.rm = TRUE)
     } else {
       sum(x, na.rm = TRUE)
@@ -259,7 +325,7 @@ t <- aggregate(
   st_as_sf()
 
 
-pal <-leaflet::colorFactor("Reds", NULL, n = 5)
+pal <- leaflet::colorFactor("Reds", NULL, n = 5)
 leaflet::leaflet() %>%
   leaflet::addTiles() %>%
   leaflet::addPolygons(
@@ -272,167 +338,3 @@ leaflet::leaflet() %>%
     popup = htmltools::htmlEscape(t$c18_1)
   )
 
-
-desc <- list(
-  gender = "d1",
-  occupation = "d2",
-  education = "c4",
-  place = "c5",
-  csystem = "c16",
-  csystem_morning = "c17_1",
-  csystem_afternoon = "c17_2",
-  csystem_night = "c17_3",
-  csystem_other = "c17_4",
-  heating_oilboil = "c18_1",
-  heating_gasboil = "c18_2",
-  heating_electric = "c18_3",
-  heating_district = "c18_4",
-  heating_pump = "c18_5",
-  heating_solar = "c18_6",
-  heating_biomass = "c18_7",
-  heating_other = "c18_8",
-  heating_none = "c18_9",
-  heating_idk = "c18_10",
-  hconfig = "c19",
-  heating_morning = "c20_1",
-  heating_afternoon = "c20_2",
-  heating_night = "c20_3",
-  heating_other = "c20_4",
-  items_solar = "c21_1",
-  items_ecar = "c21_2",
-  items_tariff = "c21_3",
-  items_battery = "c21_4",
-  items_none = "c21_5",
-  hcost = "c22",
-  hcost_accuracy = "c23",
-  water_cost = "c24",
-  water_accuracy = "c25",
-  elec_cost = "c26",
-  elec_accuracy = "c27",
-  ebill = "28_1",
-  threat = "28_2",
-  unsafe_winter = "28_3",
-  unsafe_summer = "28_4",
-  housing = "c29",
-  housing_area = "c30",
-  housing_age = "c31",
-  renov_insulation = "c32_1",
-  renov_heating = "c32_2",
-  renov_windows = "c32_3",
-  renov_nothing = "c32_4",
-  renov_idk = "c32_5",
-  renov_other = "c32_6",
-  epc = "c33",
-  energy_rating = "c34",
-  cars = "c35_1",
-  cars_fossil = "c35_2",
-  cars_hybrid = "c35_3",
-  cars_electic = "c35_4",
-  walking = "c36_1",
-  biking = "c36_2",
-  car = "c36_3",
-  ecar = "c36_4",
-  pubtrans_long = "c36_5",
-  pubtrans_short = "c36_6",
-  plane = "c37",
-  plane_vshort = "c38_1",
-  plane_short = "c38_2",
-  plane_medium = "c38_3",
-  plane_long = "c38_4",
-  plane_vlong = "c38_5",
-  ntrust = "c39_1",
-  nadvantage = "c39_2",
-  nhelp = "c39_3",
-  nfriendly = "c39_4",
-  nspirit = "c39_5",
-  ncommunity = "c39_6",
-  nrespect = "c39_7",
-  ntolerant = "c39_8",
-  nbelong = "c39_9",
-  policy = "c40",
-  participation = "c41",
-  fairness = "c42",
-  accept = "c43",
-  agree_attitude = "c44_1",
-  agree_concern = "c44_2",
-  agree_identity = "c44_3",
-  agree_behavior = "c44_5",
-  transition_idk = "c45_1",
-  transition_wrong = "c45_2",
-  transition_uninvolved = "c45_3",
-  transition_involved = "c45_4",
-  behavior_saving = "c46_1",
-  behavior_track = "c46_2",
-  behavior_talk = "c46_3",
-  behavior_engage = "c46_4",
-  behavior_protest = "c46_5",
-  behavior_member = "c46_6",
-  trust_eu = "c47_1",
-  trust_national = "c47_2",
-  trust_regional = "c47_3",
-  trust_local = "c47_4",
-  trust_agencies = "c47_5",
-  trust_legal = "c47_6",
-  trust_science = "c47_7",
-  trust_industry = "c47_8",
-  trust_media = "c47_9",
-  trust_citizens = "c47_10",
-  trust_providers = "c47_11",
-  tenants_adults = "c48_1",
-  tenants_children = "c48_2",
-  owner = "c49",
-  cost_of_living = "c50",
-  living_disability_air = "c51_1",
-  living_disability_heat = "c51_2",
-  living_disability_trans = "c51_3",
-  living_smoking = "c51_4",
-  living_support = "c51_5",
-  occupancy = "c52",
-  stable_income = "c53",
-  desc_income = "c54",
-  income = "c55",
-  national_policies = "c56_1",
-  social_policies = "c56_2",
-  conservative_policies = "c56_3",
-  liberal_policies = "c56_4",
-  environ_policies = "c56_5",
-  generation = "c57",
-  shortterm_generation = "c58_1",
-  longterm_generation = "c58_2",
-  problems_controllable = "c59_1",
-  problems_nothreat = "c59_2",
-  problems_local = "c59_3",
-  problems_nonfatal = "c59_4",
-  problems_equal = "c59_5",
-  problems_noncat = "c59_6",
-  problems_notfuture = "c59_7",
-  problems_voluntary = "c59_8",
-  problems_notme = "c59_9",
-  problems_observable = "c59_10",
-  problems_unknown = "c59_11",
-  problems_delay = "c59_12",
-  problems_newrisk = "c59_13",
-  problems_speculation = "c59_14",
-  general_effects = "c60_1",
-  shortterm_effects = "c60_2",
-  longterm_effects = "c60_3",
-  generation_safety = "c61_1",
-  generation_emission = "c61_2",
-  generation_comply = "c61_3",
-  generation_comfort = "c61_4",
-  generation_economy = "c61_5",
-  generation_autonomy = "c61_6",
-  generation_participation = "c61_7",
-  generation_health = "c61_8",
-  generation_privacy = "c61_9",
-  
-)
-
-
-
-# Stand Feb 16:
-# - C2 und C3 können zu 99% georeferenziert werden
-# - C3 scheint generell nützlicher, da von der kleinsten Ebene zuverlässig
-#   auf höhere Ebenen aggregiert werden kann
-# - Geoinformationen wurden noch nicht validiert, sieht aber generell gut aus
-# - ca. 300 Angaben sind "Prefer not to say", 1 Angabe ist falsch
