@@ -21,13 +21,17 @@ div.outer {
   opacity: 0.65;
   zoom: 0.9;
   transition: opacity 500ms 1s;
-  border-radius: 25px;
+  border-radius: 15px;
+  border-color: rgb(169,169,169);
+  box-shadow: 60px;
 }
 #controls:hover {
   /* Fade in while hovering */
   opacity: 0.95;
   transition-delay: 0;
-  border-radius: 25px;
+  border-radius: 15px;
+  border-color: rgb(169,169,169);
+  box-shadow: 60px;
 }
 
 /* Position and style citation */

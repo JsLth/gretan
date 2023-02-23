@@ -125,6 +125,14 @@ cs4_tab <- tabItem("cs4",
   )
 )
 
+cs5_tab <- tabItem("cs4",
+  box(
+   "Box content here", br(), "More box content",
+   sliderInput("slider", "Slider input:", 1, 100, 50),
+   textInput("text", "Text input:")
+  )
+)
+
 ui <- dashboardPage(
   dashboardHeader(
     tags$div(
@@ -156,10 +164,11 @@ ui <- dashboardPage(
       menuItem(
         text = "Case studies",
         icon = icon("map-pin", lib = "font-awesome"),
-        menuSubItem(text = "Coopernico, Portugal", tabName = "cs1"),
-        menuSubItem(text = "Pilastro-Roveri, Italy", tabName = "cs2"),
-        menuSubItem(text = "UR Beroa, Spain", tabName = "cs3"),
-        menuSubItem(text = "Gas-free neighborhoods, Netherlands", tabName = "cs4")
+        menuSubItem(text = "Pilastro-Roveri, Italy", tabName = "cs1"),
+        menuSubItem(text = "Coopernico, Portugal", tabName = "cs2"),
+        menuSubItem(text = "The Earnest App, Germany", tabName = "cs3"),
+        menuSubItem(text = "Gas-free neighborhoods, Netherlands", tabName = "cs4"),
+        menuSubItem(text = "UR Beroa, Spain", tabName = "cs5")
       ),
       menuItem(
         text = "Lotka-Volterra analysis",
@@ -199,7 +208,8 @@ ui <- dashboardPage(
       cs1_tab,
       cs2_tab,
       cs3_tab,
-      cs4_tab
+      cs4_tab,
+      cs5_tab
     )
   ),
   freshTheme = greta_theme,
@@ -215,9 +225,9 @@ server = function(input, output, session) {
   output$question <- renderUI({
     if (!is.null(input$survey_col)) {
       HTML(paste0(
-        "<b>Question</b> ",
-        codebook[codebook$variable == input$survey_col, ]$variable,
-        ": ", codebook[codebook$variable == input$survey_col, ]$label
+        "<b>Question ",
+        toupper(codebook[codebook$variable == input$survey_col, ]$variable),
+        ":</b> ", codebook[codebook$variable == input$survey_col, ]$label
       ))
     } else {
       ""
@@ -236,13 +246,14 @@ server = function(input, output, session) {
     } else {
       pal <- input$pal
     }
-    pal <- leaflet::colorQuantile(pal, NULL, n = 5)
-    print(pal)
-    leaflet() %>%
+    pal <- leaflet::colorNumeric(pal, NULL, n = 5)
+
+    invar <- cb_ext[cb_ext$topic %in% input$title, ]$variable
+    
+    leaflet(sf::st_transform(poly[input$survey_col], 4326)) %>%
       addTiles() %>%
       setView(lng = 6, lat = 52, zoom = 4) %>%
       addPolygons(
-        data = sf::st_transform(poly[input$survey_col], 4326),
         fillColor = as.formula(paste0("~pal(", input$survey_col, ")")),
         fillOpacity = 0.7,
         weight = 1,
@@ -251,10 +262,13 @@ server = function(input, output, session) {
         popup = htmltools::htmlEscape(poly[[input$survey_col]])
       ) %>%
       addLegend(
-        position = "bottomleft",
+        position = "bottomright",
         na.label = "No data",
         pal = pal,
-        values = poly[[input$survey_col]]
+        values = as.formula(paste0("~", input$survey_col)),
+        opacity = 0.9,
+        title = "Mean age",
+        labFormat = labelFormat(suffix = " years")
       )
   })
 }
