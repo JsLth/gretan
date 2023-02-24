@@ -199,6 +199,8 @@ topics <- tribble(
     "J" ~ "3-stage model"
   ))
 
+
+
 # Read survey data
 survey <- haven::read_sav(
   "~/Datasets delivery/Final Weighted Dataset - complete interviews.sav",
@@ -214,39 +216,37 @@ codebook <- readxl::read_xlsx(
   janitor::clean_names() %>%
   mutate(
     variable = janitor::make_clean_names(variable),
-    level = str_to_lower(measurement_level)
+    is_metric = map_lgl(survey[variable], ~!haven::is.labelled(.x) & is.numeric(.x))
   ) %>%
-  select(variable, label, level) %>%
-  #filter(str_starts(variable, "c35|c38|c48")) %>%
-  filter(!(str_ends(variable, "_open") & !level == "scale")) %>% # filter useless open questions
+  select(variable, label, is_metric) %>%
+  filter(!(str_ends(variable, "_open") & !is_metric)) %>% # filter useless open questions
   filter(!str_detect(label, "if applicable|<none>|all that apply")) %>% # filter weird optional questions with no proper label
   filter(!str_starts(variable, regex("p|b[0-9]"))) %>% # only citizen
   filter(variable %in% c("id", "d1", "d2", # filter technical columns
                          str_match_all(variable, "^c[0-9]{1,2}.*"))) %>%
   filter(!variable %in% c("c2", "c3")) %>% # filter geo questions
-  mutate(is_dummy = map_lgl(survey[.$variable], ~length(attr(.x, "labels")) == 1)) %>% # find dummies based on number of values
-  mutate(category = if_else(is_dummy, str_remove_all(variable, "_.*$"), variable)) %>%
-  mutate(is_likert = !is_dummy & map_lgl(survey[.$variable], function(.x) {
-      lab <- names(attr(.x, "labels"))
-      likert <- c(
-        "decrease", "agree", "between", "in favour",
-        "very", "not at all", "greater", "strongly", "somewhat",
-        "rarely", "occasionally", "[0-9]\\s?\\-\\s?[0-9]"
-      ) %>%
-        paste(collapse = "|") %>%
-        regex(ignore_case = TRUE)
-      non_answers <- c(
-        "do not know", "prefer not to say", "none of the above"
-      )
-      if (is.null(lab)) {
-        FALSE
-      } else {
-        all(str_detect(setdiff(lab, non_answers), "^[0-9]+$")) ||
-          any(str_detect(lab, likert) & !str_detect(lab, "Afternoon"))
-      }
-    }
-  )) %>%
-  mutate(needs_dummy = level == "ordinal" & !variable == "id" & !is_dummy & !is_likert) %>%
+  mutate(is_dummy = map_lgl(survey[variable], ~length(attr(.x, "labels")) == 1)) %>% # find dummies based on number of values
+  # mutate(is_likert = !is_dummy & map_lgl(survey[.$variable], function(.x) {
+  #     lab <- names(attr(.x, "labels"))
+  #     likert <- c(
+  #       "decrease", "agree", "in favour",
+  #       "very", "not at all", "greater", "strongly", "somewhat",
+  #       "rarely", "occasionally", "[0-9]\\s?\\-\\s?[0-9]"
+  #     ) %>%
+  #       paste(collapse = "|") %>%
+  #       regex(ignore_case = TRUE)
+  #     non_answers <- c(
+  #       "do not know", "prefer not to say", "none of the above"
+  #     )
+  #     if (is.null(lab)) {
+  #       FALSE
+  #     } else {
+  #       all(str_detect(setdiff(lab, non_answers), "^[0-9]+$")) ||
+  #         any(str_detect(lab, likert) & !str_detect(lab, "Afternoon"))
+  #     }
+  #   }
+  # )) %>%
+  mutate(needs_dummy = !is_metric & !variable == "id" & !is_dummy & !is_likert) %>%
   mutate( # split question labels for dummies
     option = if_else(is_dummy, str_split_i(label, " - ", 1), NA),
     label = if_else(is_dummy, str_split_i(label, " - ", 2), label)
@@ -254,7 +254,12 @@ codebook <- readxl::read_xlsx(
   mutate( # split question labels for multi-item questions
     subitem = if_else(str_detect(label, " - "), str_split_i(label, " - ", 1), NA),
     label = if_else(str_detect(label, " - "), str_split_i(label, " - ", 2), label)
-  )
+  ) %>%
+  mutate(category = if_else(
+    is_dummy | !is.na(subitem) | str_detect(variable, "_open"),
+    str_remove_all(variable, "_.*$"),
+    variable
+  ))
 
 # c44_4
 # 
@@ -478,18 +483,27 @@ cb_ext <- tibble(variable = setdiff(names(survey_local), "geometry")) %>%
     !variable %in% codebook$variable ~ str_remove_all(variable, "_([^_]*)$"),
     TRUE ~ variable
   )) %>%
-  left_join(codebook, by = c("og_var" = "variable")) %>%
+  left_join(codebook, by = c("og_var" = "variable"), multiple = "all") %>%
   left_join(topics, by = "category") %>%
   mutate(option = case_when(
     variable != og_var ~ str_remove(str_extract(variable, "_([^_]*)$"), "_"),
     TRUE ~ option
   )) %>%
-  select(variable, og_var, category, label, title, topic, option, subitem, is_likert) %>%
+  #select(variable, og_var, category, label, title, topic, option, subitem, is_likert) %>%
   filter(variable != "id") %>%
+  filter(!variable %in% c("c35_1", "c35_2", "c35_3", "c35_4", "c48_1", "c48_2")) %>%
+  mutate(variable = str_remove_all(variable, "_open")) %>%
   mutate(variable = janitor::make_clean_names(variable)) %>%
-  filter(!variable %in% (c("c35_1", "c35_2", "c35_3", "c35_4"))) %>%
   mutate(variable = str_remove(variable, fixed("_open")))
 
+survey_local <- survey_local %>%
+  mutate(
+    c35_2 = c35_2_open,
+    c35_3 = c35_3_open,
+    c35_4 = c35_4_open,
+    c48_1 = c48_1_open,
+    c48_2 = c48_2_open
+  )
 survey_local <- janitor::clean_names(survey_local)
   
 survey_nuts0 <- aggregate(

@@ -2,6 +2,7 @@ input[type="number"] {
   max-width: 80%;
 }
 
+/*
 div.outer {
   position: fixed;
   top: 41px;
@@ -10,6 +11,16 @@ div.outer {
   bottom: 0;
   overflow: hidden;
   padding: 0;
+}
+*/
+
+#exp_mapbox {
+  margin: 0px;
+}
+
+#exp_databox {
+  font-size: 14px;
+  margin: 0px;
 }
 
 #controls {
