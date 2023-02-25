@@ -20,7 +20,8 @@ div.outer {
 
 #exp_databox {
   font-size: 14px;
-  margin: 0px;
+  margin-right: 0px;
+  margin-left: 0px;
 }
 
 #controls {

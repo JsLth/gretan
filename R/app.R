@@ -62,6 +62,7 @@ explorer_tab <- tabItem("explorer",
         width = 12,
         solidHeader = FALSE, 
         collapsible = TRUE,
+        status = "primary",
         selectInput("title", "Topic", titles, "id"),
         htmlOutput("question"),
         tags$br(),
@@ -74,9 +75,29 @@ explorer_tab <- tabItem("explorer",
           div(id = "option_hide",
               selectInput("option", "Option", character())
           )
-        ),
+        )
+      ),
+      bs4Dash::box(
+        title = "Map configuration",
+        id = "exp_config",
+        width = 12,
+        solidHeader = FALSE,
+        collapsible = TRUE,
+        status = "primary",
         selectInput("scale", "Geographic Scale", c("NUTS-0", "NUTS-1", "NUTS-2")),
         selectInput("pal", "Color palette", all_pals)
+      ),
+      bs4Dash::box(
+        title = "Download",
+        id = "exp_download",
+        width = 12,
+        solidHeader = FALSE,
+        collapsible = TRUE,
+        status = "primary",
+        actionButton("download_button",
+          "Download data",
+          icon = icon("download", lib = "font-awesome")
+        )
       )
     ),
     column(
@@ -255,6 +276,7 @@ server = function(input, output, session) {
     session$reload()
   })
   
+  # Show question
   output$question <- renderUI({
     if (!is.null(input$title)) {
       indat <- cb_ext[cb_ext$title %in% input$title, ]
@@ -267,14 +289,17 @@ server = function(input, output, session) {
         indat <- indat[indat$option %in% input$option, ]
       }
 
-      HTML(paste0(
-        "<b>Question ", toupper(indat$og_var), ":</b><br>", indat$label
+      HTML(sprintf(
+        "<b>Question %s:</b><br>%s",
+        toupper(indat$og_var),
+        indat$label
       ))
     } else {
       ""
     }
   })
   
+  # Hide or show selectors for subitems or options depending on the question
   observeEvent(input$title, {
     invar <- cb_ext[cb_ext$title %in% input$title, ]$variable
     items <- cb_ext[cb_ext$variable %in% invar, ]$subitem
@@ -285,11 +310,14 @@ server = function(input, output, session) {
     if (show_subitems) {
       shinyjs::show("subitem_hide", anim = TRUE)
       updateSelectInput(inputId = "subitem", choices = items)
-    } else if (show_options) {
+    } else {
+      shinyjs::hide("subitem_hide", anim = TRUE)
+    }
+    
+    if (show_options) {
       shinyjs::show("option_hide", anim = TRUE)
       updateSelectInput(inputId = "option", choices = options)
     } else {
-      shinyjs::hide("subitem_hide", anim = TRUE)
       shinyjs::hide("option_hide", anim = TRUE)
     }
   })
