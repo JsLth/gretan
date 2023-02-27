@@ -3,7 +3,7 @@ library(haven)
 library(sf)
 library(dplyr)
 library(janitor)
-library(reclin2)
+#library(reclin2) do not attach reclin2 for compatibility reasons
 library(countrycode)
 library(stringr)
 library(fastDummies)
@@ -246,7 +246,7 @@ codebook <- readxl::read_xlsx(
   #     }
   #   }
   # )) %>%
-  mutate(needs_dummy = !is_metric & !variable == "id" & !is_dummy & !is_likert) %>%
+  mutate(needs_dummy = !is_metric & !variable == "id" & !is_dummy) %>%
   mutate( # split question labels for dummies
     option = if_else(is_dummy, str_split_i(label, " - ", 1), NA),
     label = if_else(is_dummy, str_split_i(label, " - ", 2), label)
@@ -283,6 +283,7 @@ countries <- c(
 nuts0 <- giscoR::gisco_get_nuts(
   year = "2021",
   nuts_level = "0",
+  country = countries,
   epsg = "3035",
   resolution = "10",
   spatialtype = "RG",
@@ -291,6 +292,7 @@ nuts0 <- giscoR::gisco_get_nuts(
 nuts1 <- giscoR::gisco_get_nuts(
   year = "2021",
   nuts_level = "1",
+  country = countries,
   epsg = "3035",
   resolution = "10",
   spatialtype = "RG",
@@ -313,6 +315,7 @@ nuts2 <- nuts2[c("NUTS_ID", "NUTS_NAME", "CNTR_CODE")]
 nuts0 <- rename(nuts0, country = "NUTS_NAME")
 nuts1 <- rename(nuts1, place = "NUTS_NAME", code = "CNTR_CODE")
 nuts2 <- rename(nuts2, place = "NUTS_NAME", code = "CNTR_CODE")
+nuts0 <- filter(nuts0, )
 
 # Retrieve local regions corresponding to C3 level
 lau <- sf::st_read("https://gisco-services.ec.europa.eu/distribution/v2/lau/geojson/LAU_RG_01M_2021_3035.geojson") %>%
@@ -388,7 +391,7 @@ pairs <- reclin2::pair_blocking(nuts12, survey, on = "code")
 reclin2::compare_pairs(
   pairs,
   on = "clean_c2",
-  default_comparator = jaro_winkler(),
+  default_comparator = reclin2::jaro_winkler(),
   inplace = TRUE
 )
 
@@ -415,7 +418,7 @@ pairs <- reclin2::pair_blocking(lau, survey, on = "code")
 reclin2::compare_pairs(
   pairs,
   on = "clean_c3",
-  default_comparator = jaro_winkler(threshold = 0.9),
+  default_comparator = reclin2::jaro_winkler(threshold = 0.9),
   inplace = TRUE
 )
 
@@ -547,18 +550,3 @@ survey_nuts2 <- aggregate(
 ) %>%
   as_tibble() %>%
   st_as_sf()
-
-
-pal <- leaflet::colorFactor("Reds", NULL, n = 5)
-leaflet::leaflet() %>%
-  leaflet::addTiles() %>%
-  leaflet::addPolygons(
-    data = sf::st_transform(t["c18_1"], 4326),
-    fillColor = ~pal(c18_1),
-    fillOpacity = 0.7,
-    weight = 1,
-    color = "black",
-    opacity = 0.5,
-    popup = htmltools::htmlEscape(t$c18_1)
-  )
-
