@@ -3,7 +3,7 @@ library(haven)
 library(sf)
 library(dplyr)
 library(janitor)
-#library(reclin2) do not attach reclin2 for compatibility reasons
+#library(reclin2) do not attach for compatibility reasons
 library(countrycode)
 library(stringr)
 library(fastDummies)
@@ -216,7 +216,7 @@ codebook <- readxl::read_xlsx(
   janitor::clean_names() %>%
   mutate(
     variable = janitor::make_clean_names(variable),
-    is_metric = map_lgl(survey[variable], ~!haven::is.labelled(.x) & is.numeric(.x))
+    is_metric = map_lgl(survey[variable], ~!is.labelled(.x) & is.numeric(.x))
   ) %>%
   select(variable, label, is_metric) %>%
   filter(!(str_ends(variable, "_open") & !is_metric)) %>% # filter useless open questions
@@ -225,28 +225,16 @@ codebook <- readxl::read_xlsx(
   filter(variable %in% c("id", "d1", "d2", # filter technical columns
                          str_match_all(variable, "^c[0-9]{1,2}.*"))) %>%
   filter(!variable %in% c("c2", "c3")) %>% # filter geo questions
-  mutate(is_dummy = map_lgl(survey[variable], ~length(attr(.x, "labels")) == 1)) %>% # find dummies based on number of values
-  # mutate(is_likert = !is_dummy & map_lgl(survey[.$variable], function(.x) {
-  #     lab <- names(attr(.x, "labels"))
-  #     likert <- c(
-  #       "decrease", "agree", "in favour",
-  #       "very", "not at all", "greater", "strongly", "somewhat",
-  #       "rarely", "occasionally", "[0-9]\\s?\\-\\s?[0-9]"
-  #     ) %>%
-  #       paste(collapse = "|") %>%
-  #       regex(ignore_case = TRUE)
-  #     non_answers <- c(
-  #       "do not know", "prefer not to say", "none of the above"
-  #     )
-  #     if (is.null(lab)) {
-  #       FALSE
-  #     } else {
-  #       all(str_detect(setdiff(lab, non_answers), "^[0-9]+$")) ||
-  #         any(str_detect(lab, likert) & !str_detect(lab, "Afternoon"))
-  #     }
-  #   }
-  # )) %>%
-  mutate(needs_dummy = !is_metric & !variable == "id" & !is_dummy) %>%
+  mutate(is_pdummy = map_lgl( # pseudo dummies = Yes/No questions - don't need dummifying
+    survey[variable],
+    ~is.labelled(.x) & all(names(attr(.x, "labels")) %in% c("Yes", "No")))) %>%
+  mutate(is_dummy = map_lgl( # find dummies based on number of labels
+    survey[variable],
+    ~length(attr(.x, "labels")) == 1)) %>% 
+  mutate(needs_dummy = !is_metric &
+           !variable == "id" &
+           !is_dummy &
+           !is_pdummy) %>%
   mutate( # split question labels for dummies
     option = if_else(is_dummy, str_split_i(label, " - ", 1), NA),
     label = if_else(is_dummy, str_split_i(label, " - ", 2), label)
@@ -261,8 +249,7 @@ codebook <- readxl::read_xlsx(
     variable
   ))
 
-# c44_4
-# 
+# TODO: Harmonize currencies!
 
 # Remove nominal coding
 survey$country <- haven::as_factor(survey$country)
@@ -434,7 +421,7 @@ survey_local <- pairs %>%
   slice_max(order_by = weights, with_ties = FALSE) %>%
   ungroup() %>%
   bind_cols(threshold = TRUE) %>%
-  as.data.table() %>%
+  data.table::as.data.table() %>%
   reclin2::link(selection = "threshold", x = lau, y = survey, all_y = TRUE) %>%
   as_tibble() %>%
   mutate(geometry = geometry %>%
@@ -449,6 +436,13 @@ survey_local <- pairs %>%
     } else {
       x
     }
+  })) %>%
+  mutate(across(all_of(codebook$variable[codebook$is_pdummy]), .fns = function(x) {
+    case_match(as.character(x),
+      "Yes" ~ TRUE,
+      "No"  ~ FALSE,
+      .default = NA
+    )
   }))
 
 # Select categorical columns that have no dummies yet
@@ -465,7 +459,13 @@ survey_local <- fastDummies::dummy_cols(
 ) %>%
   # adjust columns that were dummies before
   mutate(across(where(is.factor), ~case_when(is.na(.x) ~ FALSE, .default = TRUE))) %>%
-  st_as_sf()
+  st_as_sf() %>%
+  relocate(geometry, .before = ncol(.))
+
+to_be_deleted <- c(
+  "c35_1", "c35_2_open", "c35_3_open", "c35_4_open", "c48_1_open", "c48_2_open",
+  "c38_1_open", "c38_2_open", "c38_3_open", "c38_4_open", "c38_5_open"
+)
 
 # Creates an extended codebook that includes all dummies in seperate rows.
 # `variable`: Unique identifier for each column in the `survey_local` dataset
@@ -492,9 +492,8 @@ cb_ext <- tibble(variable = setdiff(names(survey_local), "geometry")) %>%
     variable != og_var ~ str_remove(str_extract(variable, "_([^_]*)$"), "_"),
     TRUE ~ option
   )) %>%
-  #select(variable, og_var, category, label, title, topic, option, subitem, is_likert) %>%
   filter(variable != "id") %>%
-  filter(!variable %in% c("c35_1", "c35_2", "c35_3", "c35_4", "c48_1", "c48_2")) %>%
+  filter(!variable %in% to_be_deleted) %>%
   mutate(variable = str_remove_all(variable, "_open")) %>%
   mutate(variable = janitor::make_clean_names(variable)) %>%
   mutate(variable = str_remove(variable, fixed("_open")))
@@ -504,49 +503,59 @@ survey_local <- survey_local %>%
     c35_2 = c35_2_open,
     c35_3 = c35_3_open,
     c35_4 = c35_4_open,
+    c38_1 = c38_1_open,
+    c38_2 = c38_2_open,
+    c38_3 = c38_3_open,
+    c38_4 = c38_4_open,
+    c38_5 = c38_5_open,
     c48_1 = c48_1_open,
     c48_2 = c48_2_open
-  )
+  ) %>%
+  select(-all_of(to_be_deleted))
 survey_local <- janitor::clean_names(survey_local)
-  
-survey_nuts0 <- aggregate(
-  survey_local,
-  nuts0,
-  FUN = function(x) {
-    if (is.numeric(x)) {
-      mean(x, na.rm = TRUE)
-    } else {
-      sum(x, na.rm = TRUE)
-    }
+
+# link codebook to survey dataset
+for (x in names(survey_local)) {
+  if (x %in% cb_ext$variable) {
+    attributes(survey_local[[x]]) <- as.list(cb_ext[cb_ext$variable %in% x, ])
   }
+}
+
+survey_nuts0 <- aggregate(
+  survey_local %>% select(-id),
+  nuts0,
+  FUN = mean,
+  na.rm = TRUE
 ) %>%
   as_tibble() %>%
   st_as_sf()
+
+count_nuts0 <- aggregate(survey_local["id"], nuts0, FUN = length) %>%
+  rename(sample = "id")
+survey_nuts0 <- st_join(survey_nuts0, count_nuts0, st_equals)
 
 survey_nuts1 <- aggregate(
   survey_local,
   nuts1,
-  FUN = function(x) {
-    if (is.numeric(x)) {
-      mean(x, na.rm = TRUE)
-    } else {
-      sum(x, na.rm = TRUE)
-    }
-  }
+  FUN = mean,
+  na.rm = TRUE
 ) %>%
   as_tibble() %>%
   st_as_sf()
 
+count_nuts1 <- aggregate(survey_local["id"], nuts1, FUN = length) %>%
+  rename(sample = "id")
+survey_nuts1 <- st_join(survey_nuts1, count_nuts1, st_equals)
+
 survey_nuts2 <- aggregate(
   survey_local,
   nuts2,
-  FUN = function(x) {
-    if (is.numeric(x)) {
-      mean(x, na.rm = TRUE)
-    } else {
-      sum(x, na.rm = TRUE)
-    }
-  }
+  FUN = mean,
+  na.rm = TRUE
 ) %>%
   as_tibble() %>%
   st_as_sf()
+
+count_nuts2 <- aggregate(survey_local["id"], nuts2, FUN = length) %>%
+  rename(sample = "id")
+survey_nuts2 <- st_join(survey_nuts2, count_nuts2, st_equals)
