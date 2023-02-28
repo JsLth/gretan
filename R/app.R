@@ -8,6 +8,7 @@ library(leaflet)
 library(leaflegend)
 library(dplyr)
 library(purrr)
+library(htmltools)
 
 srv <- survey_local[cb_ext[cb_ext$topic %in% "Demographics", ]$variable]
 
@@ -240,7 +241,10 @@ ui <- dashboardPage(
         style = "padding-top:10px; padding-bottom:10px;"
       ), class = "dropdown"
     ),
-    title = "GIS tool",
+    title = HTML(paste(
+      img(src = "https://projectgreta.eu/wp-content/uploads/2021/09/salama.svg", align = "center", width = 50, height = 50),
+      span("GIS tool", class = "brand-text font-weight-light", style = "font-size: 130%; valign: bottom")
+    ), sep = "\n"),
     status = "secondary",
     skin = "light",
     sidebarIcon = fontawesome::fa("bars", fill = "#000000")
@@ -478,19 +482,23 @@ server = function(input, output, session) {
     show_options <- length(invar) > 1 & !all(is.na(options))
     
     if (show_subitems) {
-      shinyjs::show("subitem_hide", anim = TRUE)
       updateSelectInput(inputId = "subitem", choices = items)
+      shinyjs::show("subitem_hide", anim = TRUE)
+      Sys.sleep(1)
     } else {
       shinyjs::hide("subitem_hide", anim = TRUE)
     }
     
     if (show_options) {
-      shinyjs::show("option_hide", anim = TRUE)
       updateSelectInput(inputId = "option", choices = options)
+      shinyjs::show("option_hide", anim = TRUE)
+      Sys.sleep(1)
     } else {
       shinyjs::hide("option_hide", anim = TRUE)
     }
   })
+  
+  # TODO: Remove reactivity and add a refresh button
   
   output$explorer <- renderLeaflet({
     poly <- switch(input$scale,
@@ -507,16 +515,36 @@ server = function(input, output, session) {
     pal <- leaflet::colorNumeric(pal, NULL, n = 5)
 
     has_title <- cb_ext$title %in% input$title
-    invar <- cb_ext[has_title, ]$variable
-    
-    if (length(invar) > 1) {
-      has_subitem <- cb_ext$subitem %in% input$subitem
-      invar <- cb_ext[has_title & has_subitem, ]$variable
+    invar <- cb_ext[has_title, ]
+    invar
+    # case: subitems exist
+    if (nrow(invar) > 1) {
+      has_subitem <- invar$subitem %in% input$subitem
+      invar <- invar[has_subitem, ]
     }
+
+    # case: options exist
+    if (nrow(invar) > 1 || !nrow(invar)) {
+      has_option <- invar$option %in% input$option
+      invar <- invar[has_option, ]
+    }
+
+    invar <- invar$variable
     
-    if (length(invar) > 1 || !length(invar)) {
-      has_option <- cb_ext$option %in% input$option
-      invar <- cb_ext[has_title & has_option, ]$variable
+    is_metric <- cb_ext[cb_ext$variable %in% invar, ]$is_metric
+    is_dummy <- cb_ext[cb_ext$variable %in% invar, ]$is_dummy ||
+      cb_ext[cb_ext$variable %in% invar, ]$is_pdummy
+    print(invar)
+    if (identical(invar, "c1")) {
+      lgd <- "Mean age"
+      unit <- " years"
+    } else if (is_metric) {
+      lgd <- "Mean"
+      unit <- ""
+    } else if (is_dummy) {
+      lgd <- "Share"
+      unit <- " %"
+      poly <- poly[invar] * 100
     }
     
     tryCatch({
@@ -529,7 +557,7 @@ server = function(input, output, session) {
           weight = 1,
           color = "black",
           opacity = 0.5,
-          popup = htmltools::htmlEscape(poly[[invar]])
+          popup = htmltools::htmlEscape(paste0(lgd, ": ", poly[[invar]]))
         ) %>%
         addLegend(
           position = "bottomright",
@@ -537,8 +565,8 @@ server = function(input, output, session) {
           pal = pal,
           values = as.formula(paste0("~", invar)),
           opacity = 0.9,
-          title = "Mean age"#,
-          #labFormat = labelFormat(suffix = " years")
+          title = lgd,
+          labFormat = labelFormat(suffix = unit)
         )
     }, error = \(e) NULL)
   })
