@@ -469,19 +469,19 @@ survey_local <- survey_local %>%
 
 # Harmonize currencies
 not_euro <- countries[!countries$curr %in% "EUR", ]
-not_euro <- left_join(nuts0, not_euro, by = c("id" = "iso")) %>%
+not_euro <- left_join(nuts0, not_euro, by = c("nid" = "iso")) %>%
   filter(!is.na(curr))
 survey_local <- survey_local %>%
   mutate(c50 = case_when(
-    st_within(geometry, not_euro[1, ], sparse = FALSE)[1] ~
+    st_within(geometry, not_euro[1, ], sparse = FALSE)[, 1] ~
       priceR::convert_currencies(c50, "DKK", "EUR", as.Date("2022-10-01")),
-    st_within(geometry, not_euro[2, ], sparse = FALSE)[1] ~
+    st_within(geometry, not_euro[2, ], sparse = FALSE)[, 1] ~
       priceR::convert_currencies(c50, "PLN", "EUR", as.Date("2022-10-01")),
-    st_within(geometry, not_euro[3, ], sparse = FALSE)[1] ~
+    st_within(geometry, not_euro[3, ], sparse = FALSE)[, 1] ~
       priceR::convert_currencies(c50, "RON", "EUR", as.Date("2022-10-01")),
-    st_within(geometry, not_euro[4, ], sparse = FALSE)[1] ~
+    st_within(geometry, not_euro[4, ], sparse = FALSE)[, 1] ~
       priceR::convert_currencies(c50, "CZK", "EUR", as.Date("2022-10-01")),
-    st_within(geometry, not_euro[5, ], sparse = FALSE)[1] ~
+    st_within(geometry, not_euro[5, ], sparse = FALSE)[, 1] ~
       priceR::convert_currencies(c50, "HUF", "EUR", as.Date("2022-10-01")),
     TRUE ~ c50
   ))
