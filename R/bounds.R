@@ -7,13 +7,16 @@ countries <- c(
   "Austria", "Belgium", "Czechia", "Denmark", "Finland", "France", "Germany",
   "Greece", "Hungary", "Ireland", "Italy", "Netherlands", "Poland", "Portugal",
   "Romania", "Spain"
-)
+) %>%
+  countrycode(origin = "country.name", destination = "eurostat")
+
+dir.create("data/bounds", recursive = TRUE, showWarnings = FALSE)
 
 # EU regional boundaries ----
 # NUTS, LAU and COM
 
 # Retrieve NUTS boundaries from GISCO
-nuts0 <- giscoR::gisco_get_nuts(
+gisco_get_nuts(
   year = "2021",
   nuts_level = "0",
   country = countries,
@@ -24,7 +27,7 @@ nuts0 <- giscoR::gisco_get_nuts(
 ) %>%
   select(nid = NUTS_ID, name = NUTS_NAME) %>%
   saveRDS(file = "data/bounds/nuts0.rds")
-nuts1 <- giscoR::gisco_get_nuts(
+gisco_get_nuts(
   year = "2021",
   nuts_level = "1",
   country = countries,
@@ -35,7 +38,7 @@ nuts1 <- giscoR::gisco_get_nuts(
 ) %>%
   select(nid = NUTS_ID, name = NUTS_NAME, code = CNTR_CODE) %>%
   saveRDS(file = "data/bounds/nuts1.rds")
-nuts2 <- giscoR::gisco_get_nuts(
+gisco_get_nuts(
   year = "2021",
   nuts_level = "2",
   country = countries,
@@ -46,7 +49,7 @@ nuts2 <- giscoR::gisco_get_nuts(
 ) %>%
   select(nid = NUTS_ID, name = NUTS_NAME, code = CNTR_CODE) %>%
   saveRDS(file = "data/bounds/nuts2.rds")
-nuts2 <- giscoR::gisco_get_nuts(
+gisco_get_nuts(
   year = "2021",
   nuts_level = "3",
   country = countries,
@@ -59,11 +62,17 @@ nuts2 <- giscoR::gisco_get_nuts(
   saveRDS(file = "data/bounds/nuts3.rds")
 
 # Retrieve local regions corresponding to C3 level
-lau <- sf::st_read("https://gisco-services.ec.europa.eu/distribution/v2/lau/geojson/LAU_RG_01M_2021_3035.geojson") %>%
+read_sf(
+  "https://gisco-services.ec.europa.eu/distribution/v2/lau/geojson/LAU_RG_01M_2021_3035.geojson",
+  quiet = TRUE
+) %>%
   select(nid = LAU_ID, name = LAU_NAME, code = CNTR_CODE) %>%
   filter(code %in% countries) %>%
   saveRDS(file = "data/bounds/lau.rds")
-com <- sf::st_read("https://gisco-services.ec.europa.eu/distribution/v2/communes/geojson/COMM_RG_01M_2016_3035.geojson") %>%
+read_sf(
+  "https://gisco-services.ec.europa.eu/distribution/v2/communes/geojson/COMM_RG_01M_2016_3035.geojson",
+  quiet = TRUE
+) %>%
   select(nid = COMM_ID, name = COMM_NAME, code = CNTR_CODE) %>%
   filter(code %in% countries) %>%
   saveRDS(file = "data/bounds/com.rds")
@@ -76,13 +85,13 @@ com <- sf::st_read("https://gisco-services.ec.europa.eu/distribution/v2/communes
 
 bgn_query <- function(id) {
   blgn_url <- "https://opendata.comune.bologna.it/api/v2"
-  httr2::request(blgn_url) %>%
-    httr2::req_method("GET") %>%
-    httr2::req_url_path_append("catalog/datasets") %>%
-    httr2::req_url_path_append(id) %>%
-    httr2::req_url_path_append("exports/geojson") %>%
-    httr2::req_perform() %>%
-    httr2::resp_body_string() %>%
+  request(blgn_url) %>%
+    req_method("GET") %>%
+    req_url_path_append("catalog/datasets") %>%
+    req_url_path_append(id) %>%
+    req_url_path_append("exports/geojson") %>%
+    req_perform() %>%
+    resp_body_string() %>%
     read_sf(quiet = TRUE)
 }
 
@@ -123,7 +132,7 @@ read_sf(
   
 
 # Get minor units
-don_2 <- read_sf(
+read_sf(
   "https://www.donostia.eus/datosabiertos/recursos/mapa_unidades_menores/unitatetxikiak.json",
   quiet = TRUE
 ) %>%
@@ -136,7 +145,7 @@ download.file(
   .temp <- tempfile(fileext = ".zip")
 )
 unzip(.temp, exdir = tempdir())
-st_read(file.path(tempdir(), "Sekzio.shp")) %>%
+read_sf(file.path(tempdir(), "Sekzio.shp"), quiet = TRUE) %>%
   saveRDS("data/bounds/don_3.rds")
 
 
