@@ -104,6 +104,8 @@ home_tab <- tabItem("home",
   )
 )
 
+
+
 explorer_tab <- tabItem("explorer",
   tags$head(includeCSS("../styles.css")),
   fluidRow(
@@ -126,7 +128,7 @@ explorer_tab <- tabItem("explorer",
         ),
         shinyjs::hidden(
           div(id = "option_hide",
-              selectInput("exp_option", "Option", character())
+            selectInput("exp_option", "Option", character())
           )
         )
       ),
@@ -583,18 +585,21 @@ server = function(input, output, session) {
     has_title <- cb_ext$title %in% input$exp_title
     invar <- cb_ext[has_title, ]
 
-    # case: subitems exist
+    # case: multiple items exist, look for subitems
     if (length(invar$variable) > 1) {
       has_subitem <- invar$subitem %in% input$exp_subitem
-      if (all(!has_subitem)) {
-        has_subitem <- 1
+      
+      # only select subitems if any exist
+      if (any(has_subitem)) {
+        invar <- invar[has_subitem, ]
       }
-      invar <- invar[has_subitem, ]
     }
 
-    # case: options exist
+    # case: there's still multiple items, look for options
     if (length(invar$variable) > 1 || !length(invar$variable)) {
       has_option <- invar$option %in% input$exp_option
+      
+      # if neither option nor subitem exist, select first row to prevent errors
       if (all(!has_option)) {
         has_option <- 1
       }
@@ -613,10 +618,6 @@ server = function(input, output, session) {
     } else if (is_metric) {
       lgd <- "Mean"
       unit <- ""
-    } else if (is_dummy) {
-      lgd <- "Share"
-      unit <- " %"
-      poly[[invar]] <- poly[[invar]] * 100
     } else {
       lgd <- "Share"
       unit <- " %"
