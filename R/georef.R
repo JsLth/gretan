@@ -225,6 +225,8 @@ codebook <- readxl::read_xlsx(
   filter(variable %in% c("id", "d1", "d2", # filter technical columns
                          str_match_all(variable, "^c[0-9]{1,2}.*"))) %>%
   filter(!variable %in% c("c2", "c3")) %>% # filter geo questions
+  mutate(label = str_remove_all(label, fixed(", please specify"))) %>%
+  mutate(label = str_remove_all(label, ":")) %>%
   mutate(is_pdummy = map_lgl( # pseudo dummies = Yes/No questions - don't need dummifying
     survey[variable],
     ~is.labelled(.x) & all(names(attr(.x, "labels")) %in% c("Yes", "No")))) %>%
@@ -259,68 +261,31 @@ survey$c3 <- haven::as_factor(survey$c3)
 # Filter out rows with no spatial information
 survey <- survey[!is.na(survey$c2) & !is.na(survey$c3) & !is.na(survey$country), ]
 
-countries <- c(
+countries <- data.frame(
+  iso = c(
   "Austria", "Belgium", "Czechia", "Denmark", "Finland", "France", "Germany",
   "Greece", "Hungary", "Ireland", "Italy", "Netherlands", "Poland", "Portugal",
   "Romania", "Spain"
-) %>%
-  countrycode(origin = "country.name", destination = "eurostat")
-
-# Retrieve NUTS boundaries from GISCO
-nuts0 <- giscoR::gisco_get_nuts(
-  year = "2021",
-  nuts_level = "0",
-  country = countries,
-  epsg = "3035",
-  resolution = "10",
-  spatialtype = "RG",
-  cache = TRUE
-)
-nuts1 <- giscoR::gisco_get_nuts(
-  year = "2021",
-  nuts_level = "1",
-  country = countries,
-  epsg = "3035",
-  resolution = "10",
-  spatialtype = "RG",
-  cache = TRUE
-)
-nuts2 <- giscoR::gisco_get_nuts(
-  year = "2021",
-  nuts_level = "2",
-  country = countries,
-  epsg = "3035",
-  resolution = "03",
-  spatialtype = "RG",
-  cache = TRUE
+  ) %>%
+    countrycode(origin = "country.name", destination = "eurostat"),
+  curr = c(
+    "EUR", "EUR", "CZK", "DKK", "EUR", "EUR", "EUR", "EUR", "HUF", "EUR", "EUR",
+    "EUR", "PLN", "EUR", "RON", "EUR"
+  )
 )
 
-# Clean boundary datasets
-nuts0 <- nuts0[c("NUTS_ID", "NUTS_NAME")]
-nuts1 <- nuts1[c("NUTS_ID", "NUTS_NAME", "CNTR_CODE")]
-nuts2 <- nuts2[c("NUTS_ID", "NUTS_NAME", "CNTR_CODE")]
-nuts0 <- rename(nuts0, country = "NUTS_NAME")
-nuts1 <- rename(nuts1, place = "NUTS_NAME", code = "CNTR_CODE")
-nuts2 <- rename(nuts2, place = "NUTS_NAME", code = "CNTR_CODE")
-nuts0 <- filter(nuts0, )
-
-# Retrieve local regions corresponding to C3 level
-lau <- sf::st_read("https://gisco-services.ec.europa.eu/distribution/v2/lau/geojson/LAU_RG_01M_2021_3035.geojson") %>%
-  select(LAU_ID, LAU_NAME, CNTR_CODE) %>%
-  rename(locality = "LAU_NAME", code = "CNTR_CODE") %>%
-  filter(code %in% countries)
-com <- sf::st_read("https://gisco-services.ec.europa.eu/distribution/v2/communes/geojson/COMM_RG_01M_2016_3035.geojson") %>%
-  select(COMM_ID, COMM_NAME, CNTR_CODE) %>%
-  rename(locality = "COMM_NAME", code = "CNTR_CODE") %>%
-  filter(code %in% countries) %>%
-  filter(!locality %in% lau$locality)
+nuts0 <- readRDS("data/bounds/nuts0.rds")
+nuts1 <- readRDS("data/bounds/nuts1.rds")
+nuts2 <- readRDS("data/bounds/nuts2.rds")
+lau <- readRDS("data/bounds/lau.rds")
+com <- readRDS("data/bounds/com.rds") %>%
+  filter(!name %in% lau$name)
 lau <- bind_rows(lau, com)
-
 
 # Remove country specifications after place names because these are very
 # inconsistent
-nuts1$place <- str_remove_all(nuts1$place, "\\([A-Z]{2}\\)") %>% trimws()
-nuts2$place <- str_remove_all(nuts2$place, "\\([A-Z]{2}\\)") %>% trimws()
+nuts1$place <- str_remove_all(nuts1$name, "\\([A-Z]{2}\\)") %>% trimws()
+nuts2$place <- str_remove_all(nuts2$name, "\\([A-Z]{2}\\)") %>% trimws()
 survey$c2   <- str_remove_all(survey$c2,   "\\([A-Z]{2}\\)") %>% trimws()
 
 survey$c3 <- survey$c3 %>%
@@ -337,11 +302,11 @@ survey$clean_c2 <- janitor::make_clean_names(survey$c2, allow_dupes = TRUE, repl
 survey$clean_c3 <- janitor::make_clean_names(survey$c3, allow_dupes = TRUE, replace = replace)
 nuts1$clean_c2  <- janitor::make_clean_names(nuts1$place, allow_dupes = TRUE, replace = replace)
 nuts2$clean_c2  <- janitor::make_clean_names(nuts2$place, allow_dupes = TRUE, replace = replace)
-lau$clean_c3    <- janitor::make_clean_names(lau$locality, allow_dupes = TRUE, replace = replace)
+lau$clean_c3    <- janitor::make_clean_names(lau$name, allow_dupes = TRUE, replace = replace)
 
 # Survey country labels are standardized while nuts country labels are
 # localized. Recode to match survey labelling.
-nuts0 <- mutate(nuts0, country = case_match(country,
+nuts0 <- mutate(nuts0, name = case_match(name,
   "Česko" ~ "Czechia",
   "Deutschland" ~ "Germany",
   "Danmark" ~ "Denmark",
@@ -458,13 +423,13 @@ survey_local <- fastDummies::dummy_cols(
   remove_selected_columns = TRUE
 ) %>%
   # adjust columns that were dummies before
-  mutate(across(where(is.factor), ~case_when(is.na(.x) ~ FALSE, .default = TRUE))) %>%
+  mutate(across(where(is.factor), ~case_when(is.na(.x) ~ 0, .default = 1))) %>%
   st_as_sf() %>%
   relocate(geometry, .before = ncol(.))
 
 to_be_deleted <- c(
-  "c35_1", "c35_2_open", "c35_3_open", "c35_4_open", "c48_1_open", "c48_2_open",
-  "c38_1_open", "c38_2_open", "c38_3_open", "c38_4_open", "c38_5_open"
+  "c35_1", "c35_2", "c35_3", "c35_4", "c48_1", "c48_2",
+  "c38_1", "c38_2", "c38_3", "c38_4", "c38_5"
 )
 
 # Creates an extended codebook that includes all dummies in seperate rows.
@@ -499,20 +464,27 @@ cb_ext <- tibble(variable = setdiff(names(survey_local), "geometry")) %>%
   mutate(variable = str_remove(variable, fixed("_open")))
 
 survey_local <- survey_local %>%
-  mutate(
-    c35_2 = c35_2_open,
-    c35_3 = c35_3_open,
-    c35_4 = c35_4_open,
-    c38_1 = c38_1_open,
-    c38_2 = c38_2_open,
-    c38_3 = c38_3_open,
-    c38_4 = c38_4_open,
-    c38_5 = c38_5_open,
-    c48_1 = c48_1_open,
-    c48_2 = c48_2_open
-  ) %>%
-  select(-all_of(to_be_deleted))
-survey_local <- janitor::clean_names(survey_local)
+  select(-all_of(to_be_deleted)) %>%
+  janitor::clean_names()
+
+# Harmonize currencies
+not_euro <- countries[!countries$curr %in% "EUR", ]
+not_euro <- left_join(nuts0, not_euro, by = c("id" = "iso")) %>%
+  filter(!is.na(curr))
+survey_local <- survey_local %>%
+  mutate(c50 = case_when(
+    st_within(geometry, not_euro[1, ], sparse = FALSE)[1] ~
+      priceR::convert_currencies(c50, "DKK", "EUR", as.Date("2022-10-01")),
+    st_within(geometry, not_euro[2, ], sparse = FALSE)[1] ~
+      priceR::convert_currencies(c50, "PLN", "EUR", as.Date("2022-10-01")),
+    st_within(geometry, not_euro[3, ], sparse = FALSE)[1] ~
+      priceR::convert_currencies(c50, "RON", "EUR", as.Date("2022-10-01")),
+    st_within(geometry, not_euro[4, ], sparse = FALSE)[1] ~
+      priceR::convert_currencies(c50, "CZK", "EUR", as.Date("2022-10-01")),
+    st_within(geometry, not_euro[5, ], sparse = FALSE)[1] ~
+      priceR::convert_currencies(c50, "HUF", "EUR", as.Date("2022-10-01")),
+    TRUE ~ c50
+  ))
 
 # link codebook to survey dataset
 for (x in names(survey_local)) {
