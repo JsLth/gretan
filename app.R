@@ -359,11 +359,31 @@ ui <- dashboardPage(
         tabName = "explorer"
       ),
       sidebarHeader("Case studies"),
-      menuItem(text = "Pilastro-Roveri, Italy", tabName = "cs1", icon = icon("map-pin", lib = "font-awesome")),
-      menuItem(text = "Coopernico, Portugal", tabName = "cs2", icon = icon("map-pin", lib = "font-awesome")),
-      menuItem(text = "The Earnest App, Germany", tabName = "cs3", icon = icon("map-pin", lib = "font-awesome")),
-      menuItem(text = "Gas-free neighborhoods, Netherlands", tabName = "cs4", icon = icon("map-pin", lib = "font-awesome")),
-      menuItem(text = "UR Beroa, Spain", tabName = "cs5", icon = icon("map-pin", lib = "font-awesome")),
+      menuItem(
+        text = "Pilastro-Roveri, Italy",
+        tabName = "cs1",
+        icon = icon("map-pin", lib = "font-awesome")
+      ),
+      menuItem(
+        text = "Coopernico, Portugal",
+        tabName = "cs2",
+        icon = icon("map-pin", lib = "font-awesome")
+      ),
+      menuItem(
+        text = "The Earnest App, Germany",
+        tabName = "cs3",
+        icon = icon("map-pin", lib = "font-awesome")
+      ),
+      menuItem(
+        text = "Gas-free neighborhoods, Netherlands",
+        tabName = "cs4",
+        icon = icon("map-pin", lib = "font-awesome")
+      ),
+      menuItem(
+        text = "UR Beroa, Spain",
+        tabName = "cs5",
+        icon = icon("map-pin", lib = "font-awesome")
+      ),
       sidebarHeader("Individual analyses"),
       menuItem(
         text = "Simulation study",
