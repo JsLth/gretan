@@ -55,10 +55,6 @@ topics <- tribble(
   "c37", "Plane travel", "E",
   "c38", "Frequency of plane travel", "E",
   "c39", "Opinion about the neighborhood", "F",
-  "c40", "Support for policy", "F",
-  "c41", "Support for Citizens' Assemblies", "F",
-  "c42", "Fairness of decision making", "F",
-  "c43", "Acceptance of decision making", "F",
   "c44", "Environmental identity", "G",
   "c45", "Contribution to the energy transition", "H",
   "c46", "Energy activities", "H",
@@ -143,6 +139,8 @@ survey <- haven::read_sav(
 ) %>%
   janitor::clean_names()
 
+# Read in the provided codebook, filter out some stuff that's not needed and
+# add columns that help with cleaning
 codebook <- readxl::read_xlsx(
   "~/Datasets delivery/Codebook & Datamap.xlsx",
   skip = 1,
@@ -189,8 +187,7 @@ codebook <- readxl::read_xlsx(
   ))
 
 
-
-# Remove nominal coding
+# Remove nominal coding from geo columns
 survey$country <- haven::as_factor(survey$country)
 survey$c2 <- haven::as_factor(survey$c2)
 survey$c3 <- haven::as_factor(survey$c3)
@@ -198,6 +195,7 @@ survey$c3 <- haven::as_factor(survey$c3)
 # Filter out rows with no spatial information
 survey <- survey[!is.na(survey$c2) & !is.na(survey$c3) & !is.na(survey$country), ]
 
+# Define countries and their currencies
 countries <- data.frame(
   iso = c(
   "Austria", "Belgium", "Czechia", "Denmark", "Finland", "France", "Germany",
@@ -211,6 +209,7 @@ countries <- data.frame(
   )
 )
 
+# Read boundary data
 nuts0 <- readRDS("data/bounds/nuts0.rds")
 nuts1 <- readRDS("data/bounds/nuts1.rds")
 nuts2 <- readRDS("data/bounds/nuts2.rds")
@@ -225,6 +224,7 @@ nuts1$place <- str_remove_all(nuts1$name, "\\([A-Z]{2}\\)") %>% trimws()
 nuts2$place <- str_remove_all(nuts2$name, "\\([A-Z]{2}\\)") %>% trimws()
 survey$c2   <- str_remove_all(survey$c2,   "\\([A-Z]{2}\\)") %>% trimws()
 
+# Manually revise some place names
 survey$c3 <- survey$c3 %>%
   str_remove_all("União das freguesias") %>%
   str_replace_all("St.", "Sankt") %>%
@@ -233,7 +233,7 @@ survey$c3 <- survey$c3 %>%
   str_replace_all("Stillorgan", "Sanktllorgan") %>%
   str_replace_all("Siegen", "Siegen, Universitätsstadt")
 
-# standardize spelling of places
+# Standardize spelling of places
 replace <- c(`'` = "", "\u03bc" = "u", "´" = "")
 survey$clean_c2 <- janitor::make_clean_names(survey$c2, allow_dupes = TRUE, replace = replace)
 survey$clean_c3 <- janitor::make_clean_names(survey$c3, allow_dupes = TRUE, replace = replace)
@@ -268,39 +268,13 @@ survey$code <- countrycode::countrycode(
   destination = "eurostat"
 )
 
+# Append NUTS-1 and NUTS-2 because the C2 column includes both
 nuts12 <- bind_rows(nuts1, nuts2)
 
-# Record linkage for C2 regions
+# Record linkage for C3 regions
 # The idea is to fuzzy match regions based on the heuristic Jaro Winkler string
 # distance. Every record of a country is matched with every other record of
 # the same country and a score is calculated based on how well they match.
-pairs <- reclin2::pair_blocking(nuts12, survey, on = "code")
-
-# Compute string distances
-reclin2::compare_pairs(
-  pairs,
-  on = "clean_c2",
-  default_comparator = reclin2::jaro_winkler(),
-  inplace = TRUE
-)
-
-# Fit model
-m <- reclin2::problink_em(~clean_c2, data = pairs)
-
-# Compute predictions for each pair
-pairs <- predict(m, pairs = pairs, add = TRUE, type = "all")
-
-# Select matching regions and link back to survey dataset
-reclin2::select_threshold(pairs, "weight", variable = "threshold", threshold = 2, inplace = TRUE)
-survey_regional <- pairs %>%
-  reclin2::link(selection = "threshold", all_y = TRUE) %>%
-  as_tibble() %>%
-  mutate(geometry = geometry %>%
-           st_sfc() %>% # fix empty geometries
-           st_centroid()) %>% # compute centroids for easier spatial aggregation
-  st_as_sf()
-
-# Record linkage for C3
 pairs <- reclin2::pair_blocking(lau, survey, on = "code")
 
 # Compute string distances
@@ -333,7 +307,7 @@ survey_local <- pairs %>%
   filter(!is.na(.x)) %>%
   select(all_of(codebook$variable)) %>%
   mutate(across(everything(), .fns = function(x) { # remove SPSS labels
-    if (inherits(x, "haven_labelled")) {
+    if (is.labelled(x)) {
       haven::as_factor(x, levels = "label", ordered = TRUE)
     } else {
       x
@@ -398,8 +372,7 @@ cb_ext <- tibble(variable = setdiff(names(survey_local), "geometry")) %>%
   filter(!variable %in% to_be_deleted) %>%
   mutate(variable = str_remove_all(variable, "_open")) %>%
   mutate(variable = janitor::make_clean_names(variable)) %>%
-  mutate(variable = str_remove(variable, fixed("_open"))) %>%
-  filter(topic != "Social cohesion and collective action") # until i know what to do with this
+  mutate(variable = str_remove(variable, fixed("_open")))
 
 survey_local <- survey_local %>%
   select(-all_of(to_be_deleted)) %>%

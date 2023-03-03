@@ -2,6 +2,7 @@ library(sf)
 library(httr2)
 library(dplyr)
 library(giscoR)
+library(countrycode)
 
 countries <- c(
   "Austria", "Belgium", "Czechia", "Denmark", "Finland", "France", "Germany",
@@ -142,7 +143,8 @@ read_sf(
 # Get census sections
 download.file(
   "https://www.donostia.eus/ide/ADMINISTRAZIO_MUGAK-LIMITES_ADMINISTRATIVOS/shp/Sekzio.zip",
-  .temp <- tempfile(fileext = ".zip")
+  .temp <- tempfile(fileext = ".zip"),
+  quiet = TRUE
 )
 unzip(.temp, exdir = tempdir())
 read_sf(file.path(tempdir(), "Sekzio.shp"), quiet = TRUE) %>%

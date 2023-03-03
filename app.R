@@ -102,7 +102,7 @@ home_tab <- tabItem("home",
         title = "Case study descriptions",
         width = 12,
         status = "primary",
-        div(style = "overflow-y: scroll;overflow-x: scroll;", uiOutput("csdesc"))
+        uiOutput("csdesc")
       )
     )
   )
@@ -127,8 +127,7 @@ explorer_tab <- tabItem("explorer",
           titles,
           options = pickerOptions(
             windowPadding = c(30, 0, 0, 0),
-            liveSearch = TRUE,
-            style = "background-color: primary"
+            liveSearch = TRUE
           )
         ),
         htmlOutput("question"),
@@ -183,7 +182,23 @@ explorer_tab <- tabItem("explorer",
   )
 )
 
-cluster_tab <- tabItem("cluster",
+simulation_tab <- tabItem("simulation",
+  box(
+    "Box content here", br(), "More box content",
+    sliderInput("slider", "Slider input:", 1, 100, 50),
+    textInput("text", "Text input:")
+  )
+)
+
+spatial_tab <- tabItem("spatial",
+  box(
+    "Box content here", br(), "More box content",
+    sliderInput("slider", "Slider input:", 1, 100, 50),
+    textInput("text", "Text input:")
+  )
+)
+
+document_tab <- tabItem("document",
   box(
     "Box content here", br(), "More box content",
     sliderInput("slider", "Slider input:", 1, 100, 50),
@@ -332,7 +347,6 @@ ui <- dashboardPage(
   ),
   dashboardSidebar(
     sidebarMenu(
-      sidebarHeader("Navigation"),
       sidebarSearchForm("textSearch", "buttonSearch", icon = icon("magnifying-glass")),
       menuItem(
         text = "Home",
@@ -340,38 +354,31 @@ ui <- dashboardPage(
         tabName = "home"
       ),
       menuItem(
-        text = "Data explorer",
+        text = "Multinational survey",
         icon = icon("map", lib = "font-awesome"),
         tabName = "explorer"
       ),
+      sidebarHeader("Case studies"),
+      menuItem(text = "Pilastro-Roveri, Italy", tabName = "cs1", icon = icon("map-pin", lib = "font-awesome")),
+      menuItem(text = "Coopernico, Portugal", tabName = "cs2", icon = icon("map-pin", lib = "font-awesome")),
+      menuItem(text = "The Earnest App, Germany", tabName = "cs3", icon = icon("map-pin", lib = "font-awesome")),
+      menuItem(text = "Gas-free neighborhoods, Netherlands", tabName = "cs4", icon = icon("map-pin", lib = "font-awesome")),
+      menuItem(text = "UR Beroa, Spain", tabName = "cs5", icon = icon("map-pin", lib = "font-awesome")),
+      sidebarHeader("Individual analyses"),
       menuItem(
-        text = "Case studies",
-        icon = icon("map-pin", lib = "font-awesome"),
-        menuSubItem(text = "Pilastro-Roveri, Italy", tabName = "cs1"),
-        menuSubItem(text = "Coopernico, Portugal", tabName = "cs2"),
-        menuSubItem(text = "The Earnest App, Germany", tabName = "cs3"),
-        menuSubItem(text = "Gas-free neighborhoods, Netherlands", tabName = "cs4"),
-        menuSubItem(text = "UR Beroa, Spain", tabName = "cs5")
-      ),
-      menuItem(
-        text = "Lotka-Volterra analysis",
+        text = "Simulation study",
         icon = icon("users", lib = "font-awesome"),
-        tabName = "lotkavolterra"
+        tabName = "simulation"
       ),
       menuItem(
-        text = "Cluster analysis",
-        icon = icon("arrows-to-circle", lib = "font-awesome"),
-        tabName = "cluster"
+        text = "Spatial analysis",
+        icon = icon("layer-group", lib = "font-awesome"),
+        tabName = "spatial"
       ),
       menuItem(
-        text = "Regression analysis",
-        icon = icon("chart-line", lib = "font-awesome"),
-        tabName = "regression"
-      ),
-      menuItem(
-        text = "Network analysis",
-        icon = icon("circle-nodes", lib = "font-awesome"),
-        tabName = "network"
+        text = "Document template",
+        icon = icon("file-lines", lib = "font-awesome"),
+        tabName = "document"
       ),
       flat = TRUE,
       id = "sidebar"
@@ -386,10 +393,9 @@ ui <- dashboardPage(
     tabItems(
       home_tab,
       explorer_tab,
-      #vl_tab,
-      cluster_tab,
-      #reg_tab,
-      #network_tab,
+      simulation_tab,
+      spatial_tab,
+      document_tab,
       cs1_tab,
       #cs2_tab,
       #cs3_tab,
