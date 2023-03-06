@@ -1,3 +1,5 @@
+library(dplyr)
+
 countries <- c(
   "AT", "BE", "CZ", "DK", "FI", "FR", "DE", "EL", "HU", "IE",
   "IT", "NL", "PL", "PT", "RO", "ES"

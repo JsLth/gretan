@@ -216,7 +216,7 @@ server <- function(input, output, session) {
     
   })
   
-  output$explorer <- renderLeaflet({
+  output$explorer <- leaflet::renderLeaflet({
     poly <- switch(
       input$scale,
       "NUTS-0" = survey_nuts0,
@@ -330,6 +330,8 @@ server <- function(input, output, session) {
   # Individual analyses ----
   output$tempmap <- leaflet::renderLeaflet({
     sf <- srv_nuts2
+    pal <- viridis::viridis_pal(option = "D")(5)
+    pal <- leaflet::colorNumeric(pal, NULL, n = 5)
     sf[["c53"]] <- round(sf[["c53"]], 2)
     leaflet::leaflet(st_transform(sf["c53"], 4326)) %>%
       leaflet::setView(lng = 9, lat = 55, zoom = 4) %>%
@@ -353,16 +355,16 @@ server <- function(input, output, session) {
         title = "Share",
         labFormat = leaflet::labelFormat(suffix = " %")
       ) %>%
-      addTiles()
+      leaflet::addTiles()
   })
   
   output$tempdensity <- plotly::renderPlotly({
-    df <- st_drop_geometry(srv_nuts2[c("c1", "c53")])
+    df <- sf::st_drop_geometry(srv_nuts2[c("c1", "c53")])
     names(df) <- c("Age", "Stable income")
     df <- as.data.frame(scale(df))
     
     p <- ggplot2::ggplot(df, ggplot2::aes(x = `Stable income`)) +
-      ggplot2::geom_density() +
+      ggplot2::geom_density(na.rm = TRUE) +
       ggplot2::theme_bw() +
       ggplot2::scale_x_continuous(expand = c(0, 0))
     
@@ -375,13 +377,13 @@ server <- function(input, output, session) {
   })
   
   output$tempscatter <- plotly::renderPlotly({
-    df <- st_drop_geometry(srv_nuts2[c("c1", "c53")])
+    df <- sf::st_drop_geometry(srv_nuts2[c("c1", "c53")])
     names(df) <- c("Age", "Stable income")
     df <- as.data.frame(scale(df))
     
     p <- ggplot2::ggplot(df, ggplot2::aes(x = `Stable income`, y = Age)) +
       ggplot2::geom_point() +
-      ggplot2::geom_smooth(method = "lm") +
+      ggplot2::geom_smooth(method = "lm", na.rm = TRUE) +
       ggplot2::theme_bw()
     
     plotly::config(plotly::ggplotly(p), displayModeBar = FALSE)

@@ -190,7 +190,7 @@ app_ui <- function() {
     ),
     fluidRow(
       col_6(
-        box(
+        bs4Dash::box(
           title = "Introduction",
           status = "primary",
           width = 12,
@@ -221,7 +221,7 @@ app_ui <- function() {
         )
       ),
       col_6(
-        box(
+        bs4Dash::box(
           title = "Methodology",
           status = "primary",
           width = 12,
@@ -256,7 +256,7 @@ app_ui <- function() {
     ), ## end first row
     fluidRow(
       col_12(
-        box(
+        bs4Dash::box(
           width = 12,
           title = "Spatial distribution of income stability",
           leaflet::leafletOutput("tempmap", height = 700)
@@ -264,12 +264,12 @@ app_ui <- function() {
       )
     ),
     fluidRow(
-      col_6(box(
+      col_6(bs4Dash::box(
         plotly::plotlyOutput("tempdensity"),
         width = 12,
         title = "Distribution of income stability"
       )),
-      col_6(box(
+      col_6(bs4Dash::box(
         plotly::plotlyOutput("tempscatter"),
         width = 12,
         title = "Relationship between age and income stability"
@@ -277,7 +277,7 @@ app_ui <- function() {
     ),
     fluidRow(
       col_6(
-        box(
+        bs4Dash::box(
           width = 12,
           title = "Discussion",
           p2(
@@ -314,7 +314,7 @@ app_ui <- function() {
         )
       ),
       col_6(
-        box(
+        bs4Dash::box(
           width = 12,
           title = "Conclusion",
           p2(
@@ -335,7 +335,7 @@ app_ui <- function() {
         )
       )
     ),
-    box(
+    bs4Dash::box(
       title = "References",
       width = 12,
       tags$ul(
@@ -382,7 +382,7 @@ app_ui <- function() {
            ),
            tags$style("padding-left: 10px"),
            bs4Dash::column(width = 4,
-             tags$head(includeCSS("inst/app/www/styles.css")),
+             use_css,
              div(
                shinyWidgets::prettyRadioButtons(
                  "cs1bg",
@@ -397,7 +397,7 @@ app_ui <- function() {
            ),
            bs4Dash::column(
              width = 4,
-             tags$head(includeCSS("inst/app/www/styles.css")),
+             use_css,
              sliderInput(
                "cs1opacity",
                label = "Opacity",
@@ -554,8 +554,8 @@ app_ui <- function() {
           tabName = "spatial"
         ),
         bs4Dash::menuItem(
-          text = "Document template",
-          icon = icon("file-lines", lib = "font-awesome"),
+          text = "Income stability",
+          icon = icon("money-bill-trend-up", lib = "font-awesome"),
           tabName = "document"
         ),
         flat = TRUE,

@@ -1,3 +1,14 @@
+library(giscoR)
+library(haven)
+library(sf)
+library(dplyr)
+library(janitor)
+#library(reclin2) do not attach for compatibility reasons
+library(stringr)
+library(fastDummies)
+library(readxl)
+library(purrr)
+
 topics <- dplyr::tribble(
   ~category, ~title, ~topic,
   "d1", "Gender", "A",
@@ -212,11 +223,11 @@ countries <- data.frame(
 )
 
 # Read boundary data
-nuts0 <- readRDS("data/bounds/nuts0.rds")
-nuts1 <- readRDS("data/bounds/nuts1.rds")
-nuts2 <- readRDS("data/bounds/nuts2.rds")
-lau <- readRDS("data/bounds/lau.rds")
-com <- readRDS("data/bounds/com.rds") %>%
+nuts0 <- readRDS("data/nuts0.rds")
+nuts1 <- readRDS("data/nuts1.rds")
+nuts2 <- readRDS("data/nuts2.rds")
+lau <- readRDS("data/lau.rds")
+com <- readRDS("data/com.rds") %>%
   filter(!name %in% lau$name)
 lau <- dplyr::bind_rows(lau, com)
 
