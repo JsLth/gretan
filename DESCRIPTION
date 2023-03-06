@@ -20,7 +20,9 @@ Imports:
     shinyjs,
     shinyWidgets,
     viridis,
-    waiter
+    waiter,
+    ggplot2,
+    plotly
 Suggests: 
     spelling,
     testthat (>= 3.0.0),
