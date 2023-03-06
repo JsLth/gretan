@@ -1,0 +1,40 @@
+Package: greta
+Title: GIS tool of the GRETA project
+Version: 0.0.0.9000
+Authors@R: 
+    person("Jonas", "Lieth", , "jonas.lieth@gesis.org", role = c("cre", "aut"))
+Description: PKG_DESC.
+License: GPL (>= 3)
+Imports: 
+    bs4Dash,
+    dplyr,
+    fresh,
+    golem (>= 0.3.5),
+    htmltools,
+    leaflegend,
+    leaflet,
+    purrr,
+    RColorBrewer,
+    sf,
+    shiny (>= 1.7.4),
+    shinyjs,
+    shinyWidgets,
+    viridis,
+    waiter
+Suggests: 
+    spelling,
+    testthat (>= 3.0.0),
+    readxl,
+    fastDummies,
+    giscoR,
+    janitor,
+    reclin2,
+    stringr,
+    httr2,
+    data.table,
+    haven
+Config/testthat/edition: 3
+Encoding: UTF-8
+Language: en-US
+LazyData: true
+RoxygenNote: 7.2.3

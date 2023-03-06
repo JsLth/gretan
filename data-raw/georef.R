@@ -1,17 +1,4 @@
-library(giscoR)
-library(haven)
-library(sf)
-library(dplyr)
-library(janitor)
-#library(reclin2) do not attach for compatibility reasons
-library(countrycode)
-library(stringr)
-library(fastDummies)
-library(leaflet)
-library(readxl)
-library(purrr)
-
-topics <- tribble(
+topics <- dplyr::tribble(
   ~category, ~title, ~topic,
   "d1", "Gender", "A",
   "c1", "Age", "A",
@@ -149,23 +136,27 @@ codebook <- readxl::read_xlsx(
   janitor::clean_names() %>%
   mutate(
     variable = janitor::make_clean_names(variable),
-    is_metric = map_lgl(survey[variable], ~!is.labelled(.x) & is.numeric(.x))
+    is_metric = purrr::map_lgl(
+      survey[variable],
+      ~!haven::is.labelled(.x) & is.numeric(.x)
+    )
   ) %>%
   select(variable, label, is_metric) %>%
-  filter(!(str_ends(variable, "_open") & !is_metric)) %>% # filter useless open questions
-  filter(!str_detect(label, "if applicable|<none>|all that apply")) %>% # filter weird optional questions with no proper label
-  filter(!str_starts(variable, regex("p|b[0-9]"))) %>% # only citizen
+  filter(!(stringr::str_ends(variable, "_open") & !is_metric)) %>% # filter useless open questions
+  filter(!stringr::str_detect(label, "if applicable|<none>|all that apply")) %>% # filter weird optional questions with no proper label
+  filter(!stringr::str_starts(variable, stringr::regex("p|b[0-9]"))) %>% # only citizen
   filter(variable %in% c("id", "d1", "d2", # filter technical columns
-                         str_match_all(variable, "^c[0-9]{1,2}.*"))) %>%
+                         stringr::str_match_all(variable, "^c[0-9]{1,2}.*"))) %>%
   filter(!variable %in% c("c2", "c3")) %>% # filter geo questions
   filter(!variable %in% "c8_13") %>% # this subitem is not suitable for mapping
-  mutate(label = str_remove_all(label, fixed(", please specify"))) %>% # remove label appendices that don't look good in the app
-  mutate(label = str_remove_all(label, ":")) %>%
-  mutate(label = str_remove_all(label, fixed(" - Please answer the following questions"))) %>%
+  mutate(label = stringr::str_remove_all(label, stringr::fixed(", please specify"))) %>% # remove label appendices that don't look good in the app
+  mutate(label = stringr::str_remove_all(label, ":$")) %>%
+  mutate(label = stringr::str_remove_all(label, stringr::fixed(" - Please answer the following questions"))) %>%
+  mutate(label = stringr::str_remove_all(label, "\\s\\[OPEN\\]")) %>%
   mutate(is_pdummy = map_lgl( # pseudo dummies = Yes/No questions - don't need dummifying
     survey[variable],
     ~is.labelled(.x) & all(names(attr(.x, "labels")) %in% c("Yes", "No")))) %>%
-  mutate(is_dummy = map_lgl( # find dummies based on number of labels
+  mutate(is_dummy = purrr::map_lgl( # find dummies based on number of labels
     survey[variable],
     ~length(attr(.x, "labels")) == 1)) %>% 
   mutate(needs_dummy = !is_metric &
@@ -173,16 +164,24 @@ codebook <- readxl::read_xlsx(
            !is_dummy &
            !is_pdummy) %>%
   mutate( # split question labels for dummies
-    option = if_else(is_dummy, str_split_i(label, " - ", 1), NA),
-    label = if_else(is_dummy, str_split_i(label, " - ", 2), label)
+    option = dplyr::if_else(is_dummy, stringr::str_split_i(label, " - ", 1), NA),
+    label = dplyr::if_else(is_dummy, stringr::str_split_i(label, " - ", 2), label)
   ) %>%
   mutate( # split question labels for multi-item questions
-    subitem = if_else(str_detect(label, " - "), str_split_i(label, " - ", 1), NA),
-    label = if_else(str_detect(label, " - "), str_split_i(label, " - ", 2), label)
+    subitem = dplyr::if_else(
+      stringr::str_detect(label, " - "),
+      stringr::str_split_i(label, " - ", 1),
+      NA
+    ),
+    label = dplyr::if_else(
+      stringr::str_detect(label, " - "),
+      stringr::str_split_i(label, " - ", 2),
+      label
+    )
   ) %>%
   mutate(category = if_else(
-    is_dummy | !is.na(subitem) | str_detect(variable, "_open"),
-    str_remove_all(variable, "_.*$"),
+    is_dummy | !is.na(subitem) | stringr::str_detect(variable, "_open"),
+    stringr::str_remove_all(variable, "_.*$"),
     variable
   ))
 
@@ -197,12 +196,15 @@ survey <- survey[!is.na(survey$c2) & !is.na(survey$c3) & !is.na(survey$country),
 
 # Define countries and their currencies
 countries <- data.frame(
+  name = c(
+    "Austria", "Belgium", "Czechia", "Denmark", "Finland", "France", "Germany",
+    "Greece", "Hungary", "Ireland", "Italy", "Netherlands", "Poland", "Portugal",
+    "Romania", "Spain"
+  ),
   iso = c(
-  "Austria", "Belgium", "Czechia", "Denmark", "Finland", "France", "Germany",
-  "Greece", "Hungary", "Ireland", "Italy", "Netherlands", "Poland", "Portugal",
-  "Romania", "Spain"
-  ) %>%
-    countrycode(origin = "country.name", destination = "eurostat"),
+    "AT", "BE", "CZ", "DK", "FI", "FR", "DE", "EL", "HU", "IE", 
+    "IT", "NL", "PL", "PT", "RO", "ES"
+  ),
   curr = c(
     "EUR", "EUR", "CZK", "DKK", "EUR", "EUR", "EUR", "EUR", "HUF", "EUR", "EUR",
     "EUR", "PLN", "EUR", "RON", "EUR"
@@ -216,22 +218,22 @@ nuts2 <- readRDS("data/bounds/nuts2.rds")
 lau <- readRDS("data/bounds/lau.rds")
 com <- readRDS("data/bounds/com.rds") %>%
   filter(!name %in% lau$name)
-lau <- bind_rows(lau, com)
+lau <- dplyr::bind_rows(lau, com)
 
 # Remove country specifications after place names because these are very
 # inconsistent
-nuts1$place <- str_remove_all(nuts1$name, "\\([A-Z]{2}\\)") %>% trimws()
-nuts2$place <- str_remove_all(nuts2$name, "\\([A-Z]{2}\\)") %>% trimws()
-survey$c2   <- str_remove_all(survey$c2,   "\\([A-Z]{2}\\)") %>% trimws()
+nuts1$place <- stringr::str_remove_all(nuts1$name, "\\([A-Z]{2}\\)") %>% trimws()
+nuts2$place <- stringr::str_remove_all(nuts2$name, "\\([A-Z]{2}\\)") %>% trimws()
+survey$c2   <- stringr::str_remove_all(survey$c2,   "\\([A-Z]{2}\\)") %>% trimws()
 
 # Manually revise some place names
 survey$c3 <- survey$c3 %>%
-  str_remove_all("União das freguesias") %>%
-  str_replace_all("St.", "Sankt") %>%
-  str_remove_all(regex(", .*stadt.*", ignore_case = TRUE)) %>%
-  str_replace_all("Sligo Strandhill", "Sligo-Sanktandhill") %>% # manual revision
-  str_replace_all("Stillorgan", "Sanktllorgan") %>%
-  str_replace_all("Siegen", "Siegen, Universitätsstadt")
+  stringr::str_remove_all("União das freguesias") %>%
+  stringr::str_replace_all("St.", "Sankt") %>%
+  stringr::str_remove_all(stringr::regex(", .*stadt.*", ignore_case = TRUE)) %>%
+  stringr::str_replace_all("Sligo Strandhill", "Sligo-Sanktandhill") %>%
+  stringr::str_replace_all("Stillorgan", "Sanktllorgan") %>%
+  stringr::str_replace_all("Siegen", "Siegen, Universitätsstadt")
 
 # Standardize spelling of places
 replace <- c(`'` = "", "\u03bc" = "u", "´" = "")
@@ -243,7 +245,7 @@ lau$clean_c3    <- janitor::make_clean_names(lau$name, allow_dupes = TRUE, repla
 
 # Survey country labels are standardized while nuts country labels are
 # localized. Recode to match survey labelling.
-nuts0 <- mutate(nuts0, name = case_match(name,
+nuts0 <- mutate(nuts0, name = dplyr::case_match(name,
   "Česko" ~ "Czechia",
   "Deutschland" ~ "Germany",
   "Danmark" ~ "Denmark",
@@ -269,7 +271,7 @@ survey$code <- countrycode::countrycode(
 )
 
 # Append NUTS-1 and NUTS-2 because the C2 column includes both
-nuts12 <- bind_rows(nuts1, nuts2)
+nuts12 <- dplyr::bind_rows(nuts1, nuts2)
 
 # Record linkage for C3 regions
 # The idea is to fuzzy match regions based on the heuristic Jaro Winkler string
@@ -293,38 +295,41 @@ pairs <- predict(m, pairs = pairs, add = TRUE)
 
 # Select matching regions and link back to survey dataset
 survey_local <- pairs %>%
-  group_by(.y) %>%
-  slice_max(order_by = weights, with_ties = FALSE) %>%
-  ungroup() %>%
-  bind_cols(threshold = TRUE) %>%
+  dplyr::group_by(.y) %>%
+  dplyr::slice_max(order_by = weights, with_ties = FALSE) %>%
+  dplyr::ungroup() %>%
+  dplyr::bind_cols(threshold = TRUE) %>%
   data.table::as.data.table() %>%
   reclin2::link(selection = "threshold", x = lau, y = survey, all_y = TRUE) %>%
-  as_tibble() %>%
+  dplyr::as_tibble() %>%
   mutate(geometry = geometry %>%
-           st_sfc() %>% # fix geometries
-           st_centroid()) %>% # compute centroids for easier spatial aggregation
-  st_as_sf() %>%
+           sf::st_sfc() %>% # fix geometries
+           sf::st_centroid()) %>% # compute centroids for easier spatial aggregation
+  sf::st_as_sf() %>%
   filter(!is.na(.x)) %>%
   select(all_of(codebook$variable)) %>%
-  mutate(across(everything(), .fns = function(x) { # remove SPSS labels
-    if (is.labelled(x)) {
+  mutate(dplyr::across(dplyr::everything(), .fns = function(x) { # remove SPSS labels
+    if (haven::is.labelled(x)) {
       haven::as_factor(x, levels = "label", ordered = TRUE)
     } else {
       x
     }
   })) %>%
-  mutate(across(all_of(codebook$variable[codebook$is_pdummy]), .fns = function(x) {
-    case_match(as.character(x),
-      "Yes" ~ TRUE,
-      "No"  ~ FALSE,
-      .default = NA
-    )
-  }))
+  mutate(dplyr::across(
+    dplyr::all_of(codebook$variable[codebook$is_pdummy]),
+    .fns = function(x) {
+      dplyr::case_match(as.character(x),
+        "Yes" ~ TRUE,
+        "No"  ~ FALSE,
+        .default = NA
+      )
+    }
+  ))
 
 # Select categorical columns that have no dummies yet
 to_be_dummified <- codebook %>%
   filter(needs_dummy) %>%
-  pull(variable)
+  dplyr::pull(variable)
 
 # Create dummy columns
 survey_local <- fastDummies::dummy_cols(
@@ -334,9 +339,12 @@ survey_local <- fastDummies::dummy_cols(
   remove_selected_columns = TRUE
 ) %>%
   # adjust columns that were dummies before
-  mutate(across(where(is.factor), ~case_when(is.na(.x) ~ 0, .default = 1))) %>%
-  st_as_sf() %>%
-  relocate(geometry, .before = ncol(.))
+  mutate(dplyr::across(
+    dplyr::where(is.factor),
+    ~dplyr::case_when(is.na(.x) ~ 0, .default = 1))
+  ) %>%
+  sf::st_as_sf() %>%
+  dplyr::relocate(geometry, .before = ncol(.))
 
 to_be_deleted <- c(
   "c35_1", "c35_2", "c35_3", "c35_4", "c48_1", "c48_2",
@@ -357,42 +365,44 @@ to_be_deleted <- c(
 # `topic`   : Question topic as defined in the questionnaire
 # `option`  : For dummy questions, stores the option dummy label to a question.
 # `subitem` : For multi-item questions, stores the item label.
-cb_ext <- tibble(variable = setdiff(names(survey_local), "geometry")) %>%
+cb_ext <- dplyr::tibble(variable = setdiff(names(survey_local), "geometry")) %>%
   mutate(og_var = case_when( # remove dummy extensions
-    !variable %in% codebook$variable ~ str_remove_all(variable, "_([^_]*)$"),
+    !variable %in% codebook$variable ~ stringr::str_remove_all(variable, "_([^_]*)$"),
     TRUE ~ variable
   )) %>%
-  left_join(codebook, by = c("og_var" = "variable"), multiple = "all") %>%
-  left_join(topics, by = "category") %>%
-  mutate(option = case_when(
-    variable != og_var ~ str_remove(str_extract(variable, "_([^_]*)$"), "_"),
+  dplyr::left_join(codebook, by = c("og_var" = "variable"), multiple = "all") %>%
+  dplyr::left_join(topics, by = "category") %>%
+  mutate(option = dplyr::case_when(
+    variable != og_var ~ stringr::str_remove(
+      stringr::str_extract(variable, "_([^_]*)$"), "_"
+    ),
     TRUE ~ option
   )) %>%
   filter(variable != "id") %>%
   filter(!variable %in% to_be_deleted) %>%
-  mutate(variable = str_remove_all(variable, "_open")) %>%
-  mutate(variable = janitor::make_clean_names(variable)) %>%
-  mutate(variable = str_remove(variable, fixed("_open")))
+  mutate(variable = janitor::make_clean_names(variable))
+
+saveRDS(cb_ext, file = "data/codebook.rds")
 
 survey_local <- survey_local %>%
-  select(-all_of(to_be_deleted)) %>%
+  select(-dplyr::all_of(to_be_deleted)) %>%
   janitor::clean_names()
 
 # Harmonize currencies
 not_euro <- countries[!countries$curr %in% "EUR", ]
-not_euro <- left_join(nuts0, not_euro, by = c("nid" = "iso")) %>%
+not_euro <- dplyr::left_join(nuts0, not_euro, by = c("nid" = "iso")) %>%
   filter(!is.na(curr))
 survey_local <- survey_local %>%
-  mutate(c50 = case_when(
-    st_within(geometry, not_euro[1, ], sparse = FALSE)[, 1] ~
+  mutate(c50 = dplyr::case_when(
+    sf::st_within(geometry, not_euro[1, ], sparse = FALSE)[, 1] ~
       priceR::convert_currencies(c50, "DKK", "EUR", as.Date("2022-10-01")),
-    st_within(geometry, not_euro[2, ], sparse = FALSE)[, 1] ~
+    sf::st_within(geometry, not_euro[2, ], sparse = FALSE)[, 1] ~
       priceR::convert_currencies(c50, "PLN", "EUR", as.Date("2022-10-01")),
-    st_within(geometry, not_euro[3, ], sparse = FALSE)[, 1] ~
+    sf::st_within(geometry, not_euro[3, ], sparse = FALSE)[, 1] ~
       priceR::convert_currencies(c50, "RON", "EUR", as.Date("2022-10-01")),
-    st_within(geometry, not_euro[4, ], sparse = FALSE)[, 1] ~
+    sf::st_within(geometry, not_euro[4, ], sparse = FALSE)[, 1] ~
       priceR::convert_currencies(c50, "CZK", "EUR", as.Date("2022-10-01")),
-    st_within(geometry, not_euro[5, ], sparse = FALSE)[, 1] ~
+    sf::st_within(geometry, not_euro[5, ], sparse = FALSE)[, 1] ~
       priceR::convert_currencies(c50, "HUF", "EUR", as.Date("2022-10-01")),
     TRUE ~ c50
   ))
@@ -411,12 +421,12 @@ survey_nuts0 <- aggregate(
   FUN = mean,
   na.rm = TRUE
 ) %>%
-  as_tibble() %>%
-  st_as_sf()
+  dplyr::as_tibble() %>%
+  sf::st_as_sf()
 
 count_nuts0 <- aggregate(survey_local["id"], nuts0, FUN = length) %>%
-  rename(sample = "id")
-survey_nuts0 <- st_join(survey_nuts0, count_nuts0, st_equals)
+  dplyr::rename(sample = "id")
+survey_nuts0 <- sf::st_join(survey_nuts0, count_nuts0, st_equals)
 
 survey_nuts1 <- aggregate(
   survey_local,
@@ -424,12 +434,12 @@ survey_nuts1 <- aggregate(
   FUN = mean,
   na.rm = TRUE
 ) %>%
-  as_tibble() %>%
-  st_as_sf()
+  dplyr::as_tibble() %>%
+  sf::st_as_sf()
 
 count_nuts1 <- aggregate(survey_local["id"], nuts1, FUN = length) %>%
-  rename(sample = "id")
-survey_nuts1 <- st_join(survey_nuts1, count_nuts1, st_equals)
+  dplyr::rename(sample = "id")
+survey_nuts1 <- sf::st_join(survey_nuts1, count_nuts1, st_equals)
 
 survey_nuts2 <- aggregate(
   survey_local,
@@ -437,12 +447,12 @@ survey_nuts2 <- aggregate(
   FUN = mean,
   na.rm = TRUE
 ) %>%
-  as_tibble() %>%
-  st_as_sf()
+  dplyr::as_tibble() %>%
+  sf::st_as_sf()
 
 count_nuts2 <- aggregate(survey_local["id"], nuts2, FUN = length) %>%
-  rename(sample = "id")
-survey_nuts2 <- st_join(survey_nuts2, count_nuts2, st_equals)
+  dplyr::rename(sample = "id")
+survey_nuts2 <- sf::st_join(survey_nuts2, count_nuts2, st_equals)
 
 saveRDS(survey_nuts0, "data/srv_nuts0.rds")
 saveRDS(survey_nuts1, "data/srv_nuts1.rds")

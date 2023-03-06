@@ -2,13 +2,18 @@ input[type="number"] {
   max-width: 80%;
 }
 
+p.running-text {
+  text-indent: 25px;
+  align: justify;
+}
+
 a.logo {
   height: 45px;
   background-color: #F4F4F2;
 }
 
 a.logo:hover {
-  background-color: #deded8;
+  background-color: #DEDED8;
 }
 
 a.logo img {
