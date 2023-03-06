@@ -1,7 +1,7 @@
-# Steps to get the app running:
+# Install
 
-1. Clone the repository
-2. Source `deps.R` and run `install_deps()`
-3. Source `bounds.R` (downloads boundary data)
-4. Source `georef.R` (cleans dataset)
-5. Source `app.R`
+The app is built under the golem framework and installs like a package:
+
+```
+devtools::install_github("JsLth/greta-gis-tool")
+```
