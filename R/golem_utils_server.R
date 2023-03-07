@@ -1,3 +1,37 @@
+text_on_leaflet <- function(id,
+                            ref,
+                            texts,
+                            on = "marker",
+                            do = "click",
+                            tol = 1) {
+  input <- get("input", envir = parent.frame())
+  renderUI({
+    click <- input[[paste(id, on, do, sep = "_")]]
+    target <- "none"
+    if (!is.null(click)) {
+      marker <- sf::st_sfc(sf::st_point(c(click$lng, click$lat)), crs = 4326)
+
+      target <- ref[sf::st_is_within_distance(
+        ref$geometry,
+        marker,
+        dist = tol,
+        sparse = FALSE
+      ), ]$name
+    }
+    
+    texts[[target]]
+  })
+}
+
+info_popup <- function(text, title = "Info") {
+  shinyalert::shinyalert(
+    title = title,
+    text = text,
+    type = "info",
+    confirmButtonCol = "#5E81AC"
+  )
+}
+
 #' Inverted versions of in, is.null and is.na
 #'
 #' @noRd

@@ -48,6 +48,7 @@ golem_add_external_resources <- function() {
   golem::add_resource_path("www", app_sys("app/www"))
   tags$head(
     golem::favicon(),
-    shinyjs::useShinyjs()
+    shinyjs::useShinyjs(),
+    includeCSS(app_sys("app/www/styles.css"))
   )
 }

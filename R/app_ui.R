@@ -46,7 +46,6 @@ app_ui <- function() {
   
   home_tab <- bs4Dash::tabItem(
     "home",
-    tags$head(includeCSS("inst/app/www/styles.css")),
     fluidRow(
       bs4Dash::column(
         width = 6,
@@ -85,7 +84,7 @@ app_ui <- function() {
   
   explorer_tab <- bs4Dash::tabItem(
     "explorer",
-    tags$head(includeCSS("inst/app/www/styles.css")),
+    
     fluidRow(
       bs4Dash::column(
         width = 3,
@@ -130,7 +129,17 @@ app_ui <- function() {
             "Aggregation level",
             c("NUTS-0", "NUTS-1", "NUTS-2")
           ),
-          shinyWidgets::pickerInput("pal", "Color palette", all_pals)
+          shinyWidgets::pickerInput("pal", "Color palette", all_pals),
+          shinyjs::disabled(div(
+            id = "fixed_hide",
+            shinyWidgets::prettyRadioButtons(
+              "expfixed",
+              "Legend values",
+              choices = c("Full contrast", "Full range"),
+              selected = "Full contrast",
+              inline = TRUE
+            )
+          ))
         ),
         bs4Dash::box(
           title = "Download",
@@ -348,6 +357,15 @@ app_ui <- function() {
   
   cs1_tab <- bs4Dash::tabItem(
     "cs1",
+    make_header(
+      title = "Case study 1: Reneweable energy district Pilastro-Roveri",
+      authors = c("Prepared by: Author A", "Author B"),
+      affil = list(
+        "Author A" = "University of Bologna, Department of Architecture",
+        "Author B" = "University of Bologna, Department of Architecture"
+      ),
+      date = "2023-mm-dd"
+    ),
     fluidRow(
      bs4Dash::column(
        width = 6,
@@ -377,7 +395,8 @@ app_ui <- function() {
                "cs1bounds",
                label = "Boundaries",
                choices = c("Quarters", "Zones", "Statistical areas"),
-               shinyWidgets::pickerOptions(windowPadding = c(0, 0, 1000, 0))
+               shinyWidgets::pickerOptions(windowPadding = c(0, 0, 1000, 0)),
+               width = 200
              )
            ),
            tags$style("padding-left: 10px"),
@@ -415,7 +434,7 @@ app_ui <- function() {
          title = "",
          width = 12,
          status = "primary",
-         uiOutput("cs1desc")
+         uiOutput("cs1poi")
        )
      )
     )
@@ -423,6 +442,15 @@ app_ui <- function() {
   
   cs2_tab <- bs4Dash::tabItem(
     "cs2",
+    make_header(
+      title = "Case study 2: Coopérnico – renewable energy-driven cooperative",
+      authors = c("Prepared by: Author A", "Author B"),
+      affil = list(
+        "Author A" = "Cleanwatts",
+        "Author B" = "Cleanwatts"
+      ),
+      date = "2023-mm-dd"
+    ),
     bs4Dash::box(
      "bs4Dash::box content here", br(), "More bs4Dash::box content",
      sliderInput("slider", "Slider input:", 1, 100, 50),
@@ -432,6 +460,15 @@ app_ui <- function() {
   
   cs3_tab <- bs4Dash::tabItem(
     "cs3",
+    make_header(
+      title = "Case study 3: The Earnest App – a virtual community for sustainable mobility in Darmstadt",
+      authors = c("Prepared by: Author A", "Author B"),
+      affil = list(
+        "Author A" = "Fraunhofer Institute for Systems and Innovation Research",
+        "Author B" = "Fraunhofer Institute for Systems and Innovation Research"
+      ),
+      date = "2023-mm-dd"
+    ),
     bs4Dash::box(
      "bs4Dash::box content here", br(), "More bs4Dash::box content",
      sliderInput("slider", "Slider input:", 1, 100, 50),
@@ -441,6 +478,15 @@ app_ui <- function() {
   
   cs4_tab <- bs4Dash::tabItem(
     "cs4",
+    make_header(
+      title = "Case study 4: Natural gas-free neighbourhoods",
+      authors = c("Prepared by: Author A", "Author B"),
+      affil = list(
+        "Author A" = "Netherlands Organisation for Applied Scientific Research",
+        "Author B" = "Netherlands Organisation for Applied Scientific Research"
+      ),
+      date = "2023-mm-dd"
+    ),
     bs4Dash::box(
      "bs4Dash::box content here", br(), "More bs4Dash::box content",
      sliderInput("slider", "Slider input:", 1, 100, 50),
@@ -450,6 +496,15 @@ app_ui <- function() {
   
   cs5_tab <- bs4Dash::tabItem(
     "cs5",
+    make_header(
+      title = "Case study 5: UR BEROA – energy efficiency-driven cooperative",
+      authors = c("Prepared by: Author A", "Author B"),
+      affil = list(
+        "Author A" = "Tecnalia Research and Innovation",
+        "Author B" = "Tecnalia Research and Innovation"
+      ),
+      date = "2023-mm-dd"
+    ),
     bs4Dash::box(
      "bs4Dash::box content here", br(), "More bs4Dash::box content",
      sliderInput("slider", "Slider input:", 1, 100, 50),
@@ -471,7 +526,6 @@ app_ui <- function() {
         ), class = "dropdown"
       ),
       tags$span(style = "display:inline-block; width: 350%"),
-      tags$head(includeCSS("inst/app/www/styles.css")),
       tagList(
         a(
           class = "logo",
@@ -570,13 +624,13 @@ app_ui <- function() {
       bs4Dash::tabItems(
         home_tab,
         explorer_tab,
-        simulation_tab,
+        #simulation_tab,
         spatial_tab,
         document_tab,
         cs1_tab,
-        #cs2_tab,
-        #cs3_tab,
-        #cs4_tab,
+        cs2_tab,
+        cs3_tab,
+        cs4_tab,
         cs5_tab
       )
     ),

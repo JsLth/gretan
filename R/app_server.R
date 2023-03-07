@@ -1,5 +1,5 @@
 cs_coords <- sf::st_sf(
-  cs = c("Italy", "Portugal", "Germany", "The Netherlands", "Spain"),
+  name = c("Italy", "Portugal", "Germany", "The Netherlands", "Spain"),
   geometry = sf::st_sfc(
     sf::st_point(c(11.399926, 44.507145)),
     sf::st_point(c(-9.136693, 38.710479)),
@@ -9,6 +9,8 @@ cs_coords <- sf::st_sf(
     crs = 4326
   )
 )
+
+txts <- list()
 
 srv_nuts0 <- readRDS("data/srv_nuts0.rds")
 srv_nuts1 <- readRDS("data/srv_nuts1.rds")
@@ -21,6 +23,12 @@ don_2 <- readRDS("data/don_2.rds")
 don_3 <- readRDS("data/don_3.rds")
 
 server <- function(input, output, session) {
+  rct <- reactiveValues()
+  
+  shinyjs::onclick("tab-cs5", info_popup(
+    "This tab has not yet been filled with elements."
+  ))
+  
   # Home ----
   # Plot geographical overview map
   output$csmaps <- leaflet::renderLeaflet({
@@ -52,107 +60,11 @@ server <- function(input, output, session) {
   })
   
   # Show case study description based on map clicks
-  output$csdesc <- renderUI({
-    click <- input$csmaps_marker_click
-    target <- NULL
-    if (!is.null(click)) {
-      marker <- sf::st_sfc(sf::st_point(c(click$lng, click$lat)), crs = 4326)
-      target <- cs_coords[sf::st_is_within_distance(
-        cs_coords$geometry,
-        marker,
-        dist = 1,
-        sparse = FALSE
-      ), ]$cs
-    }
-    
-    if (identical(target, "Italy")) {
-      HTML(paste(
-        h2("Renewable energy district Pilastro-Roveri"),
-        p(HTML(paste(
-          "The case study takes place in the Pilastro-Roveri district in",
-          "the northeast of Bologna, where a financed Green Energy",
-          "Community project (GECO) has been running since 2019 to",
-          "support communities in the process of designing and creating",
-          "a green energy community. Pilastro-Roveri is a",
-          "socio-economically stratified district composed of two",
-          "areas:"
-        )), style = "margin-bottom: 0.5cm;"),
-        p(HTML(paste(
-          "<b>Pilastro “Rione”</b> (neighbourhood): a residential neighborhood",
-          "with a long history of activism but also of socio-economic issues."
-        )), style = "margin-bottom: 0.5cm;"),
-        p(HTML(paste(
-          "<b>Roveri</b> area: distinctly separated from Pilastro by a former",
-          "railway terminal, is an industrial and productive neighborhood",
-          "hosting a variety of companies in sectors such as packaging,",
-          "mechanics, and electric vehicles. The area also hosts the",
-          "Agriculture and Food Center of Bologna’s (CAAB) food and",
-          "agriculture theme park (FICO) with its industrial partners, which",
-          "has the largest solar power plant on industrial roofs within the EU."
-        )), style = "margin-bottom: 0.5cm;")
-      ))
-    } else if (identical(target, "Portugal")) {
-      HTML(paste(
-        h2("Coopérnico – renewable energy-driven cooperative"),
-        p(paste(
-          "The case study examines Coopérnico, Portugal’s first renewable",
-          "energy cooperative, founded in 2013. Coopérnico has more than",
-          "1,700 members, including citizens, small and medium-sized",
-          "enterprises, and municipalities all over Portugal. Its mission is",
-          "to involve its members in reshaping the energy sector to be more",
-          "renewable, socially just and collaborative."
-        ))
-      ))
-    } else if (identical(target, "Germany")) {
-      HTML(paste(
-        h2("The Earnest App – a virtual community for sustainable mobility in Darmstadt"),
-        p(paste(
-          "The case study explores how the regular use of a sustainability",
-          "app can foster energy citizenship among members of a virtual",
-          "community. The case study is conducted in Darmstadt – a city with",
-          "160.000 inhabitants located in the state of Hesse in Germany. In",
-          "cooperation with students from the University for Applied Science",
-          "in Darmstadt (h_da), the case study explores how a virtual energy",
-          "community – connected by the shared experience of using an app –",
-          "affects citizens’ awareness and behaviour in regard to their",
-          "mobility and energy consumption choices in everyday life."
-        ))
-      ))
-    } else if (identical(target, "The Netherlands")) {
-      HTML(paste(
-        h2("Natural gas-free neighbourhoods"),
-        p(paste(
-          "Most Dutch households currently use natural gas to, for example,",
-          "heat their homes. The gas has been mainly produced in the Groningen",
-          "gas field, in the northeastern part of the Netherlands. However,",
-          "the exploitation of Groningen has caused increasing earthquakes and",
-          "damage to the city and nearby areas since the late 1980s. Because",
-          "of this, the Netherlands has decided that all its neighbourhoods",
-          "will become natural gas-free by 2050. The case study examines the",
-          "transition towards natural gas-free homes in the Netherlands."
-        ))
-      ))
-    } else if (identical(target, "Spain")) {
-      HTML(paste(
-        h2("UR BEROA – energy efficiency-driven cooperative"),
-        p(paste(
-          "The case study examines UR BEROA, a cooperative providing energy to",
-          "the Bera Bera neighbourhood in San Sebastian, Spain. The",
-          "cooperative was founded in 1985 to provide hot water and community",
-          "heating to the residents and improve the energy efficiency of the",
-          "neighbourhood. Since its establishment, the cooperative has",
-          "successfully introduced cleaner energy sources and ways to measure",
-          "the energy consumption of each household. Now, the cooperative is",
-          "slowly making its way toward decarbonisation."
-        ))
-      ))
-    } else {
-      HTML(paste(
-        p("Click on a map marker to learn more about the GRETA case studies.")
-      ))
-    }
-  })
-  
+  output$csdesc <- text_on_leaflet(
+    id = "csmaps",
+    ref = cscoords,
+    texts = txts$csdesc
+  )
   
   
   # Data explorer ----
@@ -181,11 +93,11 @@ server <- function(input, output, session) {
   
   # Hide or show selectors for subitems or options depending on the question
   observeEvent(input$exp_title, {
-    invar <- cb_ext[cb_ext$title %in% input$exp_title, ]$variable
-    items <- unique(cb_ext[cb_ext$variable %in% invar, ]$subitem)
-    options <- unique(cb_ext[cb_ext$variable %in% invar, ]$option)
-    show_subitems <- length(invar) > 1 & !all(is.na(items))
-    show_options <- length(invar) > 1 & !all(is.na(options))
+    varsel <- cb_ext[cb_ext$title %in% input$exp_title, ]$variable
+    items <- unique(cb_ext[cb_ext$variable %in% varsel, ]$subitem)
+    options <- unique(cb_ext[cb_ext$variable %in% varsel, ]$option)
+    show_subitems <- length(varsel) > 1 & !all(is.na(items))
+    show_options <- length(varsel) > 1 & !all(is.na(options))
     
     if (show_subitems) {
       shinyWidgets::updatePickerInput(
@@ -210,27 +122,8 @@ server <- function(input, output, session) {
     }
   })
   
-  # TODO: Remove reactivity and add a refresh button
   
-  invar <- observeEvent(input$exp_refresh, {
-    
-  })
-  
-  output$explorer <- leaflet::renderLeaflet({
-    poly <- switch(
-      input$scale,
-      "NUTS-0" = survey_nuts0,
-      "NUTS-1" = survey_nuts1,
-      "NUTS-2" = survey_nuts2
-    )
-    
-    if (input$pal %in% all_pals[["Colorblind palettes"]]) {
-      pal <- viridis::viridis_pal(option = tolower(input$pal))(5)
-    } else {
-      pal <- input$pal
-    }
-    pal <- leaflet::colorNumeric(pal, NULL, n = 5)
-    
+  invar <- observeEvent(input$exp_title, {
     has_title <- cb_ext$title %in% input$exp_title
     invar <- cb_ext[has_title, ]
     
@@ -255,11 +148,38 @@ server <- function(input, output, session) {
       invar <- invar[has_option, ]
     }
     
-    invar <- invar$variable
+    invar <- rct$invar <- invar$variable
     
+    is_metric <- cb_ext[cb_ext$variable %in% invar, ]$is_metric
+    if (is_metric) {
+      shinyjs::disable("fixed_hide")
+    } else {
+      shinyjs::enable("fixed_hide")
+    }
+  })
+  
+  
+  output$explorer <- leaflet::renderLeaflet({
+    poly <- switch(
+      input$scale,
+      "NUTS-0" = survey_nuts0,
+      "NUTS-1" = survey_nuts1,
+      "NUTS-2" = survey_nuts2
+    )
+    
+    if (input$pal %in% all_pals[["Colorblind palettes"]]) {
+      pal <- viridis::viridis_pal(option = tolower(input$pal))(5)
+    } else {
+      pal <- input$pal
+    }
+    
+    invar <- rct$invar
     is_metric <- cb_ext[cb_ext$variable %in% invar, ]$is_metric
     is_dummy <- cb_ext[cb_ext$variable %in% invar, ]$is_dummy ||
       cb_ext[cb_ext$variable %in% invar, ]$is_pdummy
+    
+    domain <- NULL
+    pal_values <- as.formula(paste0("~", invar))
     
     if (identical(invar, "c1")) {
       lgd <- "Mean age"
@@ -268,10 +188,16 @@ server <- function(input, output, session) {
       lgd <- "Mean"
       unit <- ""
     } else {
+      if (identical(input$expfixed, "Full range")) {
+        domain <- seq(0, 100, 10)
+        pal_values <- domain
+      }
       lgd <- "Share"
       unit <- " %"
       poly[[invar]] <- poly[[invar]] * 100
     }
+    
+    pal <- leaflet::colorNumeric(pal, domain = domain)
     
     leaflet::leaflet(sf::st_transform(poly[invar], 4326)) %>%
       leaflet::addTiles() %>%
@@ -291,7 +217,7 @@ server <- function(input, output, session) {
         position = "bottomright",
         na.label = "No data",
         pal = pal,
-        values = as.formula(paste0("~", invar)),
+        values = pal_values,
         opacity = 0.9,
         title = lgd,
         labFormat = leaflet::labelFormat(suffix = unit)
@@ -316,7 +242,8 @@ server <- function(input, output, session) {
         weight = 2,
         opacity = 1,
         fillOpacity = input$cs1opacity
-      )
+      ) %>%
+      leaflet::addMarkers(lng = 11.399926, lat = 44.507145)
     
     if (identical(input$cs1bg, "Satellite")) {
       m <- leaflet::addProviderTiles(m, "Esri.WorldImagery")
@@ -324,6 +251,12 @@ server <- function(input, output, session) {
       m <- leaflet::addTiles(m)
     }
   })
+  
+  output$cs1poi <- text_on_leaflet(
+    id = "cs1map",
+    ref = cs1coords,
+    texts = txts$cs1poi
+  )
   
   
   
@@ -333,7 +266,7 @@ server <- function(input, output, session) {
     pal <- viridis::viridis_pal(option = "D")(5)
     pal <- leaflet::colorNumeric(pal, NULL, n = 5)
     sf[["c53"]] <- round(sf[["c53"]], 2)
-    leaflet::leaflet(st_transform(sf["c53"], 4326)) %>%
+    leaflet::leaflet(sf::st_transform(sf["c53"], 4326)) %>%
       leaflet::setView(lng = 9, lat = 55, zoom = 4) %>%
       leaflet::addPolygons(
         fillColor = ~pal(c53),
@@ -361,7 +294,6 @@ server <- function(input, output, session) {
   output$tempdensity <- plotly::renderPlotly({
     df <- sf::st_drop_geometry(srv_nuts2[c("c1", "c53")])
     names(df) <- c("Age", "Stable income")
-    df <- as.data.frame(scale(df))
     
     p <- ggplot2::ggplot(df, ggplot2::aes(x = `Stable income`)) +
       ggplot2::geom_density(na.rm = TRUE) +
@@ -379,7 +311,6 @@ server <- function(input, output, session) {
   output$tempscatter <- plotly::renderPlotly({
     df <- sf::st_drop_geometry(srv_nuts2[c("c1", "c53")])
     names(df) <- c("Age", "Stable income")
-    df <- as.data.frame(scale(df))
     
     p <- ggplot2::ggplot(df, ggplot2::aes(x = `Stable income`, y = Age)) +
       ggplot2::geom_point() +
