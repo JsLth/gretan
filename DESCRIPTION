@@ -22,7 +22,8 @@ Imports:
     viridis,
     waiter,
     ggplot2,
-    plotly
+    plotly,
+    purrr
 Suggests: 
     spelling,
     testthat (>= 3.0.0),
