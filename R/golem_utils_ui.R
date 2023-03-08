@@ -39,6 +39,7 @@ make_header <- function(title,
 
 p2 <- function(...) p(..., class = "running-text")
 
+noWS <- function(.f) function(...) .f(..., .noWS = c("inside", "outside")) 
 
 list_palettes <- function() {
   all_pals <- RColorBrewer::brewer.pal.info %>%
