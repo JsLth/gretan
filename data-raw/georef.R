@@ -9,6 +9,20 @@ library(fastDummies)
 library(readxl)
 library(purrr)
 
+sort_variables <- function(var) {
+  case_when(var %in% c("id", "d1", "d2") ~ "0", TRUE ~ var) %>%
+    str_extract_all("[0-9]{1,3}(_[0-9]{1,2})?(_[0-9]{1,2})?") %>%
+    str_replace_all("_", ".") %>%
+    numeric_version() %>%
+    sort() %>%
+    as.character() %>%
+    tail(-3) %>%
+    paste0("c", .) %>%
+    str_replace_all("\\.", "_") %>%
+    c(c("id", "d1", "d2"), .) %>%
+    match(var)
+}
+
 topics <- dplyr::tribble(
   ~category, ~title, ~topic,
   "d1", "Gender", "A",
@@ -194,7 +208,8 @@ codebook <- readxl::read_xlsx(
     is_dummy | !is.na(subitem) | stringr::str_detect(variable, "_open"),
     stringr::str_remove_all(variable, "_.*$"),
     variable
-  ))
+  )) %>%
+  slice(sort_codebook(variable))
 
 
 # Remove nominal coding from geo columns
