@@ -39,7 +39,9 @@ server <- function(input, output, session) {
         icon = leaflet::makeIcon(
           "https://www.svgrepo.com/download/352253/map-pin.svg",
           iconWidth = 25,
-          iconHeight = 25
+          iconHeight = 25,
+          iconAnchorY = 25,
+          iconAnchorX = 12.5
         )
       ) %>%
       leaflet::addPolylines(
@@ -59,10 +61,46 @@ server <- function(input, output, session) {
       )
   })
   
+  observeEvent(input$csmaps_marker_click, {
+    target <- leaflet_select_click(
+      id = "csmaps",
+      on = "marker",
+      ref = cs_coords,
+      input = input
+    )
+    
+    if (!is.null(target)) {
+      cc <- cs_coords[!cs_coords$name %in% target$name, ]
+      leaflet::leafletProxy("csmaps") %>%
+        leaflet::clearMarkers() %>%
+        leaflet::addMarkers(
+          data = cc,
+          icon = leaflet::makeIcon(
+            "https://www.svgrepo.com/download/352253/map-pin.svg",
+            iconWidth = 25,
+            iconHeight = 25,
+            iconAnchorY = 25,
+            iconAnchorX = 12.5
+          )
+        ) %>%
+        leaflet::addMarkers(
+          data = target,
+          icon = leaflet::makeIcon(
+            "https://www.svgrepo.com/download/352253/map-pin.svg",
+            iconWidth = 37.5,
+            iconHeight = 37.5,
+            iconAnchorY = 37.5,
+            iconAnchorX = 18.75,
+            className = "hgl_marker"
+          )
+        )
+    }
+  })
+  
   # Show case study description based on map clicks
-  output$csdesc <- text_on_leaflet(
+  output$csdesc <- leaflet_text_on_click(
     id = "csmaps",
-    ref = cscoords,
+    ref = cs_coords,
     texts = txts$csdesc
   )
   
@@ -123,7 +161,7 @@ server <- function(input, output, session) {
   })
   
   
-  invar <- observeEvent(input$exp_title, {
+  observeEvent(input$exp_title, {
     has_title <- cb_ext$title %in% input$exp_title
     invar <- cb_ext[has_title, ]
     
@@ -158,15 +196,19 @@ server <- function(input, output, session) {
     }
   })
   
-  
-  output$explorer <- leaflet::renderLeaflet({
-    poly <- switch(
+  observeEvent(input$scale, {
+    rct$poly <- switch(
       input$scale,
       "NUTS-0" = survey_nuts0,
       "NUTS-1" = survey_nuts1,
       "NUTS-2" = survey_nuts2
     )
-    
+  })
+  
+  output$explorer <- leaflet::renderLeaflet({
+    poly <- rct$poly
+    all_pals <- list_palettes()
+
     if (input$pal %in% all_pals[["Colorblind palettes"]]) {
       pal <- viridis::viridis_pal(option = tolower(input$pal))(5)
     } else {
@@ -211,7 +253,15 @@ server <- function(input, output, session) {
         popup = htmltools::htmlEscape(paste0(
           lgd, ": ",
           round(poly[[invar]], 2), unit
-        ))
+        )),
+        highlightOptions = leaflet::highlightOptions(
+          weight = 2,
+          color = "black",
+          opacity = 0.5,
+          fillOpacity = 0.8,
+          bringToFront = TRUE,
+          sendToBack = TRUE
+        )
       ) %>%
       leaflet::addLegend(
         position = "bottomright",
@@ -252,7 +302,7 @@ server <- function(input, output, session) {
     }
   })
   
-  output$cs1poi <- text_on_leaflet(
+  output$cs1poi <- leaflet_text_on_click(
     id = "cs1map",
     ref = cs1coords,
     texts = txts$cs1poi

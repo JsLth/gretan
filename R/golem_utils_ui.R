@@ -40,6 +40,20 @@ make_header <- function(title,
 p2 <- function(...) p(..., class = "running-text")
 
 
+list_palettes <- function() {
+  all_pals <- RColorBrewer::brewer.pal.info %>%
+    dplyr::filter(category == "seq") %>%
+    row.names()
+  list(
+    "Common palettes" = as.list(all_pals),
+    "Colorblind palettes" = list(
+      "Magma", "Inferno", "Plasma", "Viridis",
+      "Cividis", "Rocket", "Mako", "Turbo"
+    )
+  )
+}
+
+
 #' Turn an R list into an HTML list
 #'
 #' @param list An R list

@@ -1,16 +1,7 @@
 app_ui <- function() {
   use_css <- tags$style(includeCSS(app_sys("app/www/styles.css")))
   
-  all_pals <- RColorBrewer::brewer.pal.info %>%
-    dplyr::filter(category == "seq") %>%
-    row.names()
-  all_pals <- list(
-    "Common palettes" = as.list(all_pals),
-    "Colorblind palettes" = list(
-      "Magma", "Inferno", "Plasma", "Viridis",
-      "Cividis", "Rocket", "Mako", "Turbo"
-    )
-  )
+  all_pals <- list_palettes()
   
   cb_ext <- readRDS("data/codebook.rds")
   

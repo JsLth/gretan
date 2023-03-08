@@ -1,22 +1,40 @@
-text_on_leaflet <- function(id,
-                            ref,
-                            texts,
-                            on = "marker",
-                            do = "click",
-                            tol = 1) {
+leaflet_select_click <- function(id, on, ref, input, tol = 1) {
+  click <- input[[paste(id, on, "click", sep = "_")]]
+  target <- NULL
+  if (!is.null(click)) {
+    marker <- sf::st_sfc(sf::st_point(c(click$lng, click$lat)), crs = 4326)
+    
+    target <- ref[sf::st_is_within_distance(
+      ref$geometry,
+      marker,
+      dist = tol,
+      sparse = FALSE
+    ), ]
+  }
+  
+  target
+}
+
+leaflet_text_on_click <- function(id,
+                                  ref,
+                                  texts,
+                                  on = "marker",
+                                  do = "click",
+                                  tol = 1) {
   input <- get("input", envir = parent.frame())
   renderUI({
-    click <- input[[paste(id, on, do, sep = "_")]]
-    target <- "none"
-    if (!is.null(click)) {
-      marker <- sf::st_sfc(sf::st_point(c(click$lng, click$lat)), crs = 4326)
-
-      target <- ref[sf::st_is_within_distance(
-        ref$geometry,
-        marker,
-        dist = tol,
-        sparse = FALSE
-      ), ]$name
+    target <- leaflet_select_click(
+      id = id,
+      on = on,
+      ref = ref,
+      input = input,
+      tol = tol
+    )
+    
+    if (is.null(target)) {
+      target <- "none"
+    } else {
+      target <- target$name
     }
     
     texts[[target]]
