@@ -2,9 +2,6 @@
 - Template for Coopernico (maybe investment analysis)
 - Add functionality to search bar (maybe just remove the search bar)
 - Add all 8 corporate logos
-- Change color of markers on click
-- Change border of polygon on hover
-- Add names of polygons to popups
 - Fix inputPicker overlapping with Leaflet UI
 - Create separate R files for each category (cs.R, indan.R, explorer.R, intro.R)
   to store function files and texts
