@@ -9,18 +9,30 @@ library(fastDummies)
 library(readxl)
 library(purrr)
 
+# Variables are hard to sort because they're not just numerics, but combine
+# a 'version-like' structure (i.e. 2.1.1) with letters and words. This function
+# uses the base numeric_version function to convert variables to versions and
+# then sort them
 sort_variables <- function(var) {
-  case_when(var %in% c("id", "d1", "d2") ~ "0", TRUE ~ var) %>%
-    str_extract_all("[0-9]{1,3}(_[0-9]{1,2})?(_[0-9]{1,2})?") %>%
-    str_replace_all("_", ".") %>%
-    numeric_version() %>%
-    sort() %>%
-    as.character() %>%
-    tail(-3) %>%
-    paste0("c", .) %>%
-    str_replace_all("\\.", "_") %>%
-    c(c("id", "d1", "d2"), .) %>%
-    match(var)
+  x <- case_when( # id, d1 and d2 should always be first
+    var %in% "id" ~ "0_1",
+    var %in% "d1" ~ "0_2",
+    var %in% "d2" ~ "0_3",
+    TRUE ~ var
+  ) %>%
+    str_extract_all("[0-9]{1,3}(_[0-9]{1,2})?(_[0-9]{1,2})?") %>% # extract numeric part
+    str_replace_all("_", ".") # bring name into 'version' form
+
+  numeric_version(x) %>% # convert to numeric version
+    sort() %>% # sort numeric versions
+    as.character() %>% # convert back to character
+    match(x) %>%
+    # In some cases, multiple variables get the same index (e.g. 2_1_a, 2_1_b).
+    # After sorting, these cases are grouped and then converted to a sequence
+    # (e.g. c(1, 1, 1) -> c(1, 2, 3))
+    ave(as.character(.), FUN = function(i) {
+      seq(i[1], i[1] + length(i) - 1, 1)
+    })
 }
 
 topics <- dplyr::tribble(
@@ -208,8 +220,7 @@ codebook <- readxl::read_xlsx(
     is_dummy | !is.na(subitem) | stringr::str_detect(variable, "_open"),
     stringr::str_remove_all(variable, "_.*$"),
     variable
-  )) %>%
-  slice(sort_codebook(variable))
+  ))
 
 
 # Remove nominal coding from geo columns
@@ -404,15 +415,17 @@ cb_ext <- dplyr::tibble(variable = setdiff(names(survey_local), "geometry")) %>%
     ),
     TRUE ~ option
   )) %>%
-  filter(variable != "id") %>%
   filter(!variable %in% to_be_deleted) %>%
-  mutate(variable = janitor::make_clean_names(variable))
+  mutate(variable = janitor::make_clean_names(variable)) %>%
+  slice(sort_variables(og_var))
 
 saveRDS(cb_ext, file = "data/codebook.rds")
 
 survey_local <- survey_local %>%
   select(-dplyr::all_of(to_be_deleted)) %>%
-  janitor::clean_names()
+  relocate(geometry, .after = last_col()) %>%
+  janitor::clean_names() %>%
+  select(all_of(cb_ext$variable))
 
 # Harmonize currencies
 not_euro <- countries[!countries$curr %in% "EUR", ]
@@ -452,7 +465,10 @@ survey_nuts0 <- aggregate(
 
 count_nuts0 <- aggregate(survey_local["id"], nuts0, FUN = length) %>%
   dplyr::rename(sample = "id")
-survey_nuts0 <- sf::st_join(survey_nuts0, count_nuts0, st_equals)
+survey_nuts0 <- survey_nuts0 %>%
+  sf::st_join(count_nuts0, sf::st_equals) %>%
+  sf::st_join(nuts0["name"], sf::st_equals) %>%
+  rename(nuts0 = "name")
 
 survey_nuts1 <- aggregate(
   survey_local,
@@ -465,7 +481,11 @@ survey_nuts1 <- aggregate(
 
 count_nuts1 <- aggregate(survey_local["id"], nuts1, FUN = length) %>%
   dplyr::rename(sample = "id")
-survey_nuts1 <- sf::st_join(survey_nuts1, count_nuts1, st_equals)
+survey_nuts1 <- survey_nuts1 %>%
+  sf::st_join(count_nuts1, sf::st_equals) %>%
+  sf::st_join(nuts1["name"], sf::st_equals) %>%
+  sf::st_join(nuts0["name"], sf::st_within) %>%
+  rename(nuts1 = "name.x", nuts0 = "name.y")
 
 survey_nuts2 <- aggregate(
   survey_local,
@@ -478,7 +498,13 @@ survey_nuts2 <- aggregate(
 
 count_nuts2 <- aggregate(survey_local["id"], nuts2, FUN = length) %>%
   dplyr::rename(sample = "id")
-survey_nuts2 <- sf::st_join(survey_nuts2, count_nuts2, st_equals)
+survey_nuts2 <- survey_nuts2 %>%
+  sf::st_join(count_nuts2, sf::st_equals) %>%
+  sf::st_join(nuts2["name"], sf::st_equals) %>%
+  sf::st_join(nuts0["name"], sf::st_nearest_feature) %>%
+  rename(nuts2 = "name.x", nuts0 = "name.y") %>%
+  sf::st_join(nuts1["name"], sf::st_nearest_feature) %>%
+  rename(nuts1 = "name")
 
 saveRDS(survey_nuts0, "data/srv_nuts0.rds")
 saveRDS(survey_nuts1, "data/srv_nuts1.rds")
