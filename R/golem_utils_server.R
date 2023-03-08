@@ -1,3 +1,30 @@
+explorer_hover_label <- function(var, poly, title = "Share", unit = "%", round = 2) {
+  rows <- list()
+  
+  for (i in seq(0, 2)) {
+    nts <- paste0("nuts", i)
+    if (nts %in% names(poly)) {
+      rows[[nts]] <- html_align_at_char(paste0("NUTS-", i), poly[[nts]])
+    }
+  }
+  
+  rows$val <- html_align_at_char(title, paste0(round(poly[[var]], round), unit))
+  lapply(do.call(paste, rows), HTML)
+}
+
+html_align_at_char <- function(x, y, char = " ", bold = TRUE) {
+  div2 <- noWS(div)
+  span2 <- noWS(span)
+  mapply(FUN = function(x, y) {
+    if (bold) x <- tags$b(paste(x, ":"))
+    str_remove_all(as.character(div(
+      class = "progress-ww",
+      div2(span2(x), char, span2(y))
+    )), "\n")
+  }, x = x, y = y, SIMPLIFY = FALSE, USE.NAMES = FALSE) %>%
+  unlist()
+}
+
 leaflet_select_click <- function(id, on, ref, input, tol = 1) {
   click <- input[[paste(id, on, "click", sep = "_")]]
   target <- NULL

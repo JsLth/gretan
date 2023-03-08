@@ -1,3 +1,4 @@
+# Coordinates and place names of the case studies
 cs_coords <- sf::st_sf(
   name = c("Italy", "Portugal", "Germany", "The Netherlands", "Spain"),
   geometry = sf::st_sfc(
@@ -10,8 +11,10 @@ cs_coords <- sf::st_sf(
   )
 )
 
+# Global list to store all texts so that they don't spam the code files
 txts <- list()
 
+# Read all the data files
 srv_nuts0 <- readRDS("data/srv_nuts0.rds")
 srv_nuts1 <- readRDS("data/srv_nuts1.rds")
 srv_nuts2 <- readRDS("data/srv_nuts1.rds")
@@ -161,7 +164,7 @@ server <- function(input, output, session) {
   })
   
   
-  observeEvent(input$exp_title, {
+  observe({
     has_title <- cb_ext$title %in% input$exp_title
     invar <- cb_ext[has_title, ]
     
@@ -174,7 +177,7 @@ server <- function(input, output, session) {
         invar <- invar[has_subitem, ]
       }
     }
-    
+
     # case: there's still multiple items, look for options
     if (length(invar$variable) > 1 || !length(invar$variable)) {
       has_option <- invar$option %in% input$exp_option
@@ -185,7 +188,7 @@ server <- function(input, output, session) {
       }
       invar <- invar[has_option, ]
     }
-    
+
     invar <- rct$invar <- invar$variable
     
     is_metric <- cb_ext[cb_ext$variable %in% invar, ]$is_metric
@@ -235,13 +238,30 @@ server <- function(input, output, session) {
         pal_values <- domain
       }
       lgd <- "Share"
-      unit <- " %"
+      unit <- "%"
       poly[[invar]] <- poly[[invar]] * 100
     }
     
     pal <- leaflet::colorNumeric(pal, domain = domain)
     
-    leaflet::leaflet(sf::st_transform(poly[invar], 4326)) %>%
+    poly$label <- explorer_hover_label(
+      var = invar,
+      poly = poly,
+      title = lgd,
+      unit = unit,
+      round = 2
+    )
+    
+    highlight_opts <- leaflet::highlightOptions(
+      weight = 2,
+      color = "black",
+      opacity = 0.5,
+      fillOpacity = 0.8,
+      bringToFront = TRUE,
+      sendToBack = TRUE
+    )
+
+    leaflet::leaflet(sf::st_transform(poly, 4326)) %>%
       leaflet::addTiles() %>%
       leaflet::setView(lng = 9, lat = 55, zoom = 4) %>%
       leaflet::addPolygons(
@@ -250,18 +270,8 @@ server <- function(input, output, session) {
         weight = 1,
         color = "black",
         opacity = 0.5,
-        popup = htmltools::htmlEscape(paste0(
-          lgd, ": ",
-          round(poly[[invar]], 2), unit
-        )),
-        highlightOptions = leaflet::highlightOptions(
-          weight = 2,
-          color = "black",
-          opacity = 0.5,
-          fillOpacity = 0.8,
-          bringToFront = TRUE,
-          sendToBack = TRUE
-        )
+        label = ~label,
+        highlightOptions = highlight_opts
       ) %>%
       leaflet::addLegend(
         position = "bottomright",

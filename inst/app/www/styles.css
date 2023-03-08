@@ -53,15 +53,22 @@ a.logo img {
   background-color: #FED22B !important;
 }
 
-#exp_mapbox {
-  margin: 0px;
+/* align two spans around character */
+.progress-ww div {
+  display: flex;
 }
 
-/* Set margins for data explorer controls */
-#exp_databox {
-  font-size: 14px;
-  margin-right: 0px;
-  margin-left: 0px;
+.progress-ww div span {
+  flex: 1;
+}
+
+.progress-ww div span:first-of-type {
+  text-align: left;
+  padding-right: 5px;
+}
+
+.progress-ww div span:last-of-type {
+  padding-left: 5px;
 }
 
 /* If not using map tiles, show a white background */
