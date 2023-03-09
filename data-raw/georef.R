@@ -1,3 +1,23 @@
+# Description: Reads the raw survey data, georeferences them and creates a
+#              codebook to prepare the data for presentation
+# Author:      Jonas Lieth
+# R version:   R version 4.2.1 (2022-06-23 ucrt)
+# OS:          Windows 10 x64 (build 22621)
+# Requirements: 
+#   - GRETA multinational survey results in ~/Datasets delivery
+#   - Boundary data created by bounds.R
+# Packages:
+#   - giscoR 0.3.3
+#   - haven 2.5.1
+#   - sf 1.0-9
+#   - dplyr 2.3.1
+#   - janitor 2.2.0
+#   - reclin2 0.2.0
+#   - stringr 1.5.0
+#   - fastDummies 1.6.3
+#   - readxl 1.4.2
+#   - purrr 1.0.1
+
 library(giscoR)
 library(haven)
 library(sf)

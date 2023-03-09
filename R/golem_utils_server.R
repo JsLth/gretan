@@ -77,6 +77,15 @@ info_popup <- function(text, title = "Info") {
   )
 }
 
+highlight_opts <- leaflet::highlightOptions(
+  weight = 2,
+  color = "black",
+  opacity = 0.5,
+  fillOpacity = 0.8,
+  bringToFront = TRUE,
+  sendToBack = TRUE
+)
+
 #' Inverted versions of in, is.null and is.na
 #'
 #' @noRd

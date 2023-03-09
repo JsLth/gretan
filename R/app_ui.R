@@ -173,15 +173,45 @@ app_ui <- function() {
   
   spatial_tab <- bs4Dash::tabItem(
     "spatial",
-    bs4Dash::box(
-     "bs4Dash::box content here", br(), "More bs4Dash::box content",
-     sliderInput("slider", "Slider input:", 1, 100, 50),
-     textInput("text", "Text input:")
+    make_header(
+      title = "Investment in the Coopérnico project: An examplary analysis of two projects",
+      authors = c("Dennis Abel", "Jonas Lieth"),
+      affil = "GESIS - Leibniz Institute for the Social Sciences",
+      date = "08-03-2023"
+    ),
+    fluidRow(
+      col_6(
+        bs4Dash::box(
+          title = "Introduction",
+          status = "primary",
+          width = 12,
+          collapsible = TRUE,
+          p2(shinipsum::random_text(nwords = 200))
+        )
+      ),
+      col_6(
+        bs4Dash::box(
+          title = "Methodology",
+          status = "primary",
+          width = 12,
+          collapsible = TRUE,
+          p2(shinipsum::random_text(nwords = 200))
+        )
+      )
+    ),
+    fluidRow(
+      col_4(
+        bs4Dash::box(
+          width = 12,
+          title = "Geographical distribution of Coopérnico investments",
+          leaflet::leafletOutput("coopmap", height = 700)
+        )
+      )
     )
   )
   
-  document_tab <- bs4Dash::tabItem(
-    "document",
+  income_tab <- bs4Dash::tabItem(
+    "income",
     make_header(
       title = "Income stability: a trivial example to illustrate what a page can look like",
       authors = c("Jonas Lieth", "Dennis Abel", "Stefan Jünger"),
@@ -195,29 +225,7 @@ app_ui <- function() {
           status = "primary",
           width = 12,
           collapsible = TRUE,
-          p2(
-            "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam
-            nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam
-            erat, sed diam voluptua. At vero eos et accusam et justo duo dolores
-            et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est
-            Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur
-            sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et
-            dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam
-            et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea
-            takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit
-            amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor
-            invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.
-            At vero eos et accusam et justo duo dolores et ea rebum. Stet clita
-            kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit
-            amet. [1]"
-          ),
-          p2(
-            "Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse
-            molestie consequat, vel illum dolore eu feugiat nulla facilisis at
-            vero eros et accumsan et iusto odio dignissim qui blandit praesent
-            luptatum zzril delenit augue duis dolore te feugait nulla facilisi.
-            Lorem ipsum dolor sit amet. [2]"
-          )
+          p2(shinipsum::random_text(nwords = 200))
         )
       ),
       col_6(
@@ -226,31 +234,7 @@ app_ui <- function() {
           status = "primary",
           width = 12,
           collapsible = TRUE,
-          p2(
-            "Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper
-            suscipit lobortis nisl ut aliquip ex ea commodo consequat. Duis autem
-            vel eum iriure dolor in hendrerit in vulputate velit esse molestie
-            consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et
-            accumsan et iusto odio dignissim qui blandit praesent luptatum zzril
-            delenit augue duis dolore te feugait nulla facilisi."
-            ),
-          p2(
-            "Nam liber tempor cum soluta nobis eleifend option congue nihil
-            imperdiet doming id quod mazim placerat facer possim assum. Lorem
-            ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy
-            nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.
-            Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper
-            suscipit lobortis nisl ut aliquip ex ea commodo consequat."
-            ),
-          p2(
-            "Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse
-            molestie consequat, vel illum dolore eu feugiat nulla facilisis."
-            ),
-          p2(
-            "At vero eos et accusam et justo duo dolores et ea rebum. Stet clita
-            kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit
-            amet. Lorem ipsum dolor sit amet, consetetur"
-          )
+          p2(shinipsum::random_text(nwords = 200))
         )
       )
     ), ## end first row
@@ -280,58 +264,14 @@ app_ui <- function() {
         bs4Dash::box(
           width = 12,
           title = "Discussion",
-          p2(
-            "At vero eos et accusam et justo duo dolores et ea rebum. Stet
-            clita kasd gubergren, no sea takimata sanctus est Lorem ipsum
-            dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing
-            elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore
-            magna aliquyam erat, sed diam voluptua. At vero eos et accusam et
-            justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea
-            takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor
-            sit amet, consetetur sadipscing elitr, At accusam aliquyam diam
-            diam dolore dolores duo eirmod eos erat, et nonumy sed tempor et
-            et invidunt justo labore Stet clita ea et gubergren, kasd magna no
-            rebum. sanctus sea sed takimata ut vero voluptua. est Lorem ipsum
-            dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing
-            elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore
-            magna aliquyam erat."
-          ),
-          p2(
-            "Consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt
-            ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero
-            eos et accusam et justo duo dolores et ea rebum. Stet clita kasd
-            gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
-            Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam
-            nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam
-            erat, sed diam voluptua. At vero eos et accusam et justo duo dolores
-            et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est
-            Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur
-            sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore
-            et dolore magna aliquyam erat, sed diam voluptua. At vero eos et
-            accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren,
-            no sea takimata sanctus." 
-          )
+          p2(shinipsum::random_text(nwords = 200))
         )
       ),
       col_6(
         bs4Dash::box(
           width = 12,
           title = "Conclusion",
-          p2(
-            "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam
-             nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam
-             erat, sed diam voluptua. At vero eos et accusam et justo duo
-             dolores et ea rebum. Stet clita kasd gubergren, no sea takimata
-             sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet,
-             consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt
-             ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero
-             eos et accusam et justo duo dolores et ea rebum. Stet clita kasd
-             gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
-             Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam
-             nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam
-             erat, sed diam voluptua. At vero eos et accusam et justo duo
-             dolores et ea rebum. Stet clita kasd gubergren, no sea"
-          )
+          p2(shinipsum::random_text(nwords = 150))
         )
       )
     ),
@@ -601,7 +541,7 @@ app_ui <- function() {
         bs4Dash::menuItem(
           text = "Income stability",
           icon = icon("money-bill-trend-up", lib = "font-awesome"),
-          tabName = "document"
+          tabName = "income"
         ),
         flat = TRUE,
         id = "sidebar"
@@ -617,7 +557,7 @@ app_ui <- function() {
         explorer_tab,
         #simulation_tab,
         spatial_tab,
-        document_tab,
+        income_tab,
         cs1_tab,
         cs2_tab,
         cs3_tab,

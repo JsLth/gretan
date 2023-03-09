@@ -1,4 +1,20 @@
+# Description: Loads boundary data to be used for everything else
+# Author:      Jonas Lieth
+# R version:   R version 4.2.1 (2022-06-23 ucrt)
+# OS:          Windows 10 x64 (build 22621)
+# Requirements: 
+#   - GRETA multinational survey results in ~/Datasets delivery
+#   - Boundary data created by bounds.R
+# Packages:
+#   - giscoR 0.3.3
+#   - sf 1.0-9
+#   - dplyr 2.3.1
+#   - httr2 0.2.2
+
 library(dplyr)
+library(giscoR)
+library(sf)
+library(httr2)
 
 countries <- c(
   "AT", "BE", "CZ", "DK", "FI", "FR", "DE", "EL", "HU", "IE",

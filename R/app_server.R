@@ -24,6 +24,7 @@ bgn_3 <- readRDS("data/bgn_3.rds")
 don_1 <- readRDS("data/don_1.rds")
 don_2 <- readRDS("data/don_2.rds")
 don_3 <- readRDS("data/don_3.rds")
+coopernico <- readRDS("data/coopernico.rds")
 
 server <- function(input, output, session) {
   rct <- reactiveValues()
@@ -251,15 +252,6 @@ server <- function(input, output, session) {
       unit = unit,
       round = 2
     )
-    
-    highlight_opts <- leaflet::highlightOptions(
-      weight = 2,
-      color = "black",
-      opacity = 0.5,
-      fillOpacity = 0.8,
-      bringToFront = TRUE,
-      sendToBack = TRUE
-    )
 
     leaflet::leaflet(sf::st_transform(poly, 4326)) %>%
       leaflet::addTiles() %>%
@@ -321,6 +313,59 @@ server <- function(input, output, session) {
   
   
   # Individual analyses ----
+  output$coopmap <- leaflet::renderLeaflet({
+    #pal <- viridis::viridis_pal(option = "G")(5)
+    pal <- leaflet::colorNumeric("Spectral", NULL, n = 5)
+    
+    coopernico_projects <- data.frame(
+      project = c("Escola JG Zarco", "Lar S. Silvestre"), 
+      lat = c(38.700671, 39.879235), lng = c(-9.237519, -7.396333),
+      label = c("<b>Project name</b>: Escola JG Zarco", "<b>Project name</b>: Lar S. Silvestre")
+    )
+    
+    coopernico_projects <- st_as_sf(coopernico_projects, coords = c("lng", "lat"), remove = FALSE, 
+                                    crs = 4326, agr = "constant")
+    
+    # Create regional capitals database (five continental regions = NUTS 2)
+    capitals <- data.frame(city = c("Lisboa", "Porto", "Coimbra", "Faro", "Evora"), 
+                           lat = c(38.725267, 41.162142, 40.211111, 37.016111, 38.566667), 
+                           lng = c(-9.150019, -8.621953, -8.429167, -7.935, -7.9))
+    
+    capitals <- st_as_sf(capitals, coords = c("lng", "lat"), remove = FALSE, crs = 4326, agr = "constant")
+    
+    leaflet::leaflet(coopernico, TRUE) %>%
+      leaflet::addTiles() %>%
+      leaflet::setView(lng = -8, lat = 39.2, zoom = 7) %>%
+      leaflet::addPolygons(
+        fillColor = ~pal(total_amount),
+        #fillOpacity = 1,
+        color = "black",
+        weight = 0.5,
+        highlightOptions = highlight_opts,
+        label = ~total_amount
+      ) %>%
+      leaflet::addLegend(
+        position = "bottomright",
+        na.label = "No data",
+        pal = pal,
+        values = ~total_amount,
+        opacity = 0.9,
+        title = "Total investment",
+        labFormat = leaflet::labelFormat(suffix = " €")
+       ) %>%
+      leaflet::addCircleMarkers(
+        color = "black",
+        fillColor = "red",
+        fillOpacity = 1,
+        opacity = 1,
+        weight = 1,
+        radius = 5,
+        data = capitals
+      ) %>%
+      leaflet::addAwesomeMarkers(data = coopernico_projects, popup = ~label)
+      
+  })
+  
   output$tempmap <- leaflet::renderLeaflet({
     sf <- srv_nuts2
     pal <- viridis::viridis_pal(option = "D")(5)
