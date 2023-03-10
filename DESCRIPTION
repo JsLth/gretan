@@ -24,7 +24,8 @@ Imports:
     ggplot2,
     plotly,
     purrr,
-    shinipsum
+    shinipsum,
+    pkgload
 Suggests: 
     spelling,
     testthat (>= 3.0.0),
