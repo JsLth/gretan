@@ -1,15 +1,39 @@
-explorer_hover_label <- function(var, poly, title = "Share", unit = "%", round = 2) {
-  rows <- list()
-  
-  for (i in seq(0, 2)) {
-    nts <- paste0("nuts", i)
-    if (nts %in% names(poly)) {
-      rows[[nts]] <- html_align_at_char(paste0("NUTS-", i), poly[[nts]])
+locm_colors_abel <- function(locm, df) {
+  n <- nrow(df)
+  vec <- seq(1, n)
+  vec <- locm[, 5] < 0.05
+  q <- attributes(locm)$quadr$mean
+  colors <- seq(1, n)
+  for (i in 1:n) {
+    if (q[i] == "High-High") colors[i] <- "red"
+    if (q[i] == "Low-Low")   colors[i] <- "blue"
+    if (q[i] == "Low-High")  colors[i] <- "lightblue"
+    if (q[i] == "High-Low")  colors[i] <- "pink"
+  }
+  locm.dt <- as.numeric(as.factor(q)) * vec
+  colors1 <- colors
+  for (i in 1:n) {
+    if (!is.na(locm.dt[i]) )  {
+      if (locm.dt[i] == 0) colors1[i] <- "white"
     }
   }
   
-  rows$val <- html_align_at_char(title, paste0(round(poly[[var]], round), unit))
-  lapply(do.call(paste, rows), HTML)
+  list(colors, colors1)
+}
+
+make_html_label <- function(..., sep = " ", bold = TRUE) {
+  dots <- list(...)
+  lhs <- names(dots)
+  labels <- mapply(
+    html_align_at_char,
+    x = lhs,
+    y = dots,
+    char = sep,
+    bold = bold,
+    SIMPLIFY = FALSE
+  )
+
+  lapply(do.call(paste, labels), HTML)
 }
 
 html_align_at_char <- function(x, y, char = " ", bold = TRUE) {
@@ -81,7 +105,7 @@ highlight_opts <- leaflet::highlightOptions(
   weight = 2,
   color = "black",
   opacity = 0.5,
-  fillOpacity = 0.8,
+  fillOpacity = 1,
   bringToFront = TRUE,
   sendToBack = TRUE
 )
