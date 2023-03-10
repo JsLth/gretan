@@ -15,6 +15,7 @@ cs_coords <- sf::st_sf(
 txts <- list()
 
 # Read all the data files
+cb_ext <- readRDS("data/codebook.rds")
 srv_nuts0 <- readRDS("data/srv_nuts0.rds")
 srv_nuts1 <- readRDS("data/srv_nuts1.rds")
 srv_nuts2 <- readRDS("data/srv_nuts1.rds")
@@ -49,7 +50,7 @@ server <- function(input, output, session) {
         )
       ) %>%
       leaflet::addPolylines(
-        data = sf::st_transform(nuts0, 4326),
+        data = sf::st_transform(srv_nuts0, 4326),
         fillOpacity = 0,
         weight = 1,
         color = "red"
@@ -94,8 +95,7 @@ server <- function(input, output, session) {
             iconWidth = 37.5,
             iconHeight = 37.5,
             iconAnchorY = 37.5,
-            iconAnchorX = 18.75,
-            className = "hgl_marker"
+            iconAnchorX = 18.75
           )
         )
     }
@@ -203,9 +203,9 @@ server <- function(input, output, session) {
   observeEvent(input$scale, {
     rct$poly <- switch(
       input$scale,
-      "NUTS-0" = survey_nuts0,
-      "NUTS-1" = survey_nuts1,
-      "NUTS-2" = survey_nuts2
+      "NUTS-0" = srv_nuts0,
+      "NUTS-1" = srv_nuts1,
+      "NUTS-2" = srv_nuts2
     )
   })
   
@@ -245,13 +245,12 @@ server <- function(input, output, session) {
     
     pal <- leaflet::colorNumeric(pal, domain = domain)
     
-    poly$label <- explorer_hover_label(
-      var = invar,
-      poly = poly,
-      title = lgd,
-      unit = unit,
-      round = 2
+    label_values <- list(
+      poly[["nuts0"]], poly[["nuts1"]], poly[["nuts2"]],
+      paste0(round(poly[[invar]], 2), unit)
     )
+    names(label_values) <- c("NUTS-0", "NUTS-1", "NUTS-2", lgd)
+    labels <- do.call(make_html_label, label_values)
 
     leaflet::leaflet(sf::st_transform(poly, 4326)) %>%
       leaflet::addTiles() %>%
@@ -262,7 +261,7 @@ server <- function(input, output, session) {
         weight = 1,
         color = "black",
         opacity = 0.5,
-        label = ~label,
+        label = labels,
         highlightOptions = highlight_opts
       ) %>%
       leaflet::addLegend(
@@ -312,10 +311,9 @@ server <- function(input, output, session) {
   
   
   
-  # Individual analyses ----
-  output$coopmap <- leaflet::renderLeaflet({
-    #pal <- viridis::viridis_pal(option = "G")(5)
-    pal <- leaflet::colorNumeric("Spectral", NULL, n = 5)
+  # Spatial analysis ----
+  output$coopmap1 <- leaflet::renderLeaflet({
+    pal <- leaflet::colorNumeric("Spectral", NULL)
     
     coopernico_projects <- data.frame(
       project = c("Escola JG Zarco", "Lar S. Silvestre"), 
@@ -333,16 +331,19 @@ server <- function(input, output, session) {
     
     capitals <- st_as_sf(capitals, coords = c("lng", "lat"), remove = FALSE, crs = 4326, agr = "constant")
     
+    labels <- make_html_label("Total investment" = coopernico$total_amount)
+    
     leaflet::leaflet(coopernico, TRUE) %>%
       leaflet::addTiles() %>%
-      leaflet::setView(lng = -8, lat = 39.2, zoom = 7) %>%
+      leaflet::setView(lng = -7.5, lat = 39.5, zoom = 7) %>%
       leaflet::addPolygons(
         fillColor = ~pal(total_amount),
-        #fillOpacity = 1,
+        fillOpacity = 1,
         color = "black",
         weight = 0.5,
+        smoothFactor = 0, # necessary to remove gaps between polygons
         highlightOptions = highlight_opts,
-        label = ~total_amount
+        label = labels
       ) %>%
       leaflet::addLegend(
         position = "bottomright",
@@ -363,9 +364,102 @@ server <- function(input, output, session) {
         data = capitals
       ) %>%
       leaflet::addAwesomeMarkers(data = coopernico_projects, popup = ~label)
-      
   })
   
+  observe({
+    nb <- spdep::poly2nb(coopernico, queen = TRUE)
+    rct$lw <- spdep::nb2listwdist(
+      nb,
+      sf::st_centroid(sf::st_geometry(coopernico)),
+      type = "idw",
+      alpha = 2,
+      style = "S",
+      longlat = TRUE,
+      zero.policy = TRUE
+    )
+    rct$locm <- localmoran(
+      coopernico$total_amount,
+      listw = rct$lw,
+      zero.policy = TRUE
+    )
+  })
+  
+  output$coopmap2 <- leaflet::renderLeaflet({
+    locm <- rct$locm
+    colors <- locm_colors_abel(locm, coopernico)
+    colors1 <- colors[[2]]
+    colors <- colors[[1]]
+
+    labels <- do.call(make_html_label, list(
+      "Moran's I" = round(locm[, "Ii"], 4),
+      "p-value" = round(locm[, "Pr(z != E(Ii))"], 4)
+    ))
+    
+    pal <- leaflet::colorFactor(unique(colors), domain = NULL)
+    
+    leaflet::leaflet(coopernico) %>%
+      leaflet::addTiles() %>%
+      leaflet::setView(lng = -7.5, lat = 39.5, zoom = 7) %>%
+      leaflet::addPolygons(
+        fillColor = colors1,
+        color = colors,
+        fillOpacity = 1,
+        weight = 1,
+        smoothFactor = 0,
+        label = labels,
+        highlightOptions = highlight_opts
+      ) %>%
+      leaflet::addLegend(
+        position = "bottomright",
+        colors = c(unique(colors), "white"),
+        labels = c(levels(attributes(locm)$quadr$mean), "Not significant"),
+        title = "LISA"
+      )
+  })
+  
+  output$coopscatter <- plotly::renderPlotly({
+    coopernico$sponsors_lag <- lag.listw(
+      lw,
+      coopernico$total_amount,
+      zero.policy = TRUE
+    )
+
+    coopernico <- coopernico %>%
+      rename(
+        "Spatial lag" = "sponsors_lag",
+        "Total amount" = "total_amount",
+        "Municipality" = "name"
+      )
+    
+    p <- ggplot2::ggplot(
+      data = coopernico,
+      ggplot2::aes(x = `Spatial lag`, y = `Total amount`)) +
+      ggplot2::geom_point(
+        aes(group = Municipality),
+        shape = 1,
+        size = 2,
+        color = "black",
+        stroke = 0.3
+      ) +
+      ggplot2::geom_smooth(
+        method = "lm",
+        se = FALSE,
+        linetype = "dashed",
+        color = "darkred"
+      ) +
+      ggplot2::xlab("Spatial lag") + 
+      ggplot2::ylab("Total investment (in €)") +
+      ggplot2::theme(panel.grid.major = ggplot2::element_line(
+        color = "#CCCCCC",
+        linetype = "dashed", size = 0.5
+      ))
+    
+    plotly::config(plotly::ggplotly(p), displayModeBar = FALSE)
+  })
+  
+  
+  
+  # Income stability ----
   output$tempmap <- leaflet::renderLeaflet({
     sf <- srv_nuts2
     pal <- viridis::viridis_pal(option = "D")(5)
@@ -419,7 +513,7 @@ server <- function(input, output, session) {
     
     p <- ggplot2::ggplot(df, ggplot2::aes(x = `Stable income`, y = Age)) +
       ggplot2::geom_point() +
-      ggplot2::geom_smooth(method = "lm", na.rm = TRUE) +
+      ggplot2::geom_smooth(method = "lm", na.rm = TRUE, formula = y ~ x) +
       ggplot2::theme_bw()
     
     plotly::config(plotly::ggplotly(p), displayModeBar = FALSE)
