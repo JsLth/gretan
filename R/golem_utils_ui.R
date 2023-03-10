@@ -37,6 +37,52 @@ make_header <- function(title,
 }
 
 
+dummy_bibliography <- function() {
+  tags$ul(
+    class = "list-style: none",
+    p("Bollinger, B., & Gillingham, K. (2012). Peer Effects in the Diffusion of
+      Solar Photovoltaic Panels. Marketing Science, 31(6), 900–912.
+      https://doi.org/10.1287/mksc.1120.0727"),
+    p("Boschma, R. (2005). Proximity and Innovation: A Critical Assessment.
+      Regional Studies, 39(1), 61–74.
+      https://doi.org/10.1080/0034340052000320887"),
+    p("Bouzarovski, S., & Simcock, N. (2017). Spatializing energy justice.
+      Energy Policy, 107, 640–648.
+      https://doi.org/10.1016/j.enpol.2017.03.064"),
+    p("Bridge, G., Bouzarovski, S., Bradshaw, M., & Eyre, N. (2013). Geographies
+      of energy transition: Space, place and the low-carbon economy. Energy
+      Policy, 53, 331–340. https://doi.org/10.1016/j.enpol.2012.10.066"),
+    p("Graziano, M., & Gillingham, K. (2015). Spatial patterns of solar
+      photovoltaic system adoption: The influence of neighbors and the built
+      environment ‡. Journal of Economic Geography, 15(4), 815–839.
+      https://doi.org/10.1093/jeg/lbu036"),
+    p("Irwin, N. B. (2021). Sunny days: Spatial spillovers in photovoltaic
+      system adoptions. Energy Policy, 151, 112192.
+      https://doi.org/10.1016/j.enpol.2021.112192")
+  )
+}
+
+
+corp_logo <- function(inst) {
+  web <- list(
+    gesis = "https://www.gesis.org/",
+    unibo = "https://www.unibo.it/",
+    tecnalia = "https://www.tecnalia.com/",
+    lut = "https://www.lut.fi/",
+    kaskas = "https://kaskas.fi/",
+    tno = "https://www.tno.nl/",
+    cleanwatts = "https://www.cleanwatts.energy/",
+    isi = "https://www.isi.fraunhofer.de/"
+  )
+  
+  a(
+    class = "logo",
+    href = web[[inst]],
+    img(src = sprintf("www/%s_logo.png", inst))
+  )
+}
+
+
 p2 <- function(...) p(..., class = "running-text")
 
 noWS <- function(.f) function(...) .f(..., .noWS = c("inside", "outside")) 
