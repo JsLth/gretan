@@ -1,11 +1,7 @@
-- Template for spatial analysis (maybe some arbitrary cluster analysis)
-  - Coopernico analysis
-  - Rework code
-  - aggregate onto more levels
-  - fix the weird geometries
-- Add functionality to search bar (maybe just remove the search bar)
-- Add all 8 corporate logos
-- Fix inputPicker overlapping with Leaflet UI
+- Add functionality to search bar (maybe just remove the search bar) -> is this even realistically possible?
+- ***** Add all 8 corporate logos
+- Fix inputPicker overlapping with Leaflet UI -> still no idea
 - Create separate R files for each category (cs.R, indan.R, explorer.R, intro.R)
   to store function files and texts
 - Add texts to global `txts` object
+- make empty tabs more presentable
