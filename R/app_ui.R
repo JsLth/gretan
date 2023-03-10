@@ -200,11 +200,45 @@ app_ui <- function() {
       )
     ),
     fluidRow(
-      col_4(
+      col_6(
         bs4Dash::box(
           width = 12,
+          status = "primary",
           title = "Geographical distribution of Coopérnico investments",
-          leaflet::leafletOutput("coopmap", height = 700)
+          leaflet::leafletOutput("coopmap1", height = 700)
+        )
+      ),
+      col_6(
+        bs4Dash::box(
+          width = 12,
+          status = "primary",
+          title = "Spatial clusters of Coopérnico investments",
+          leaflet::leafletOutput("coopmap2", height = 700)
+        )
+      )
+    ),
+    fluidRow(
+      col_6(
+        bs4Dash::box(
+          title = "Discussion",
+          status = "primary",
+          width = 12,
+          collapsible = TRUE,
+          p2(shinipsum::random_text(nwords = 550))
+        )
+      ),
+      col_6(
+        bs4Dash::box(
+          width = 12,
+          status = "primary",
+          title = "Scatterplot of Moran's I",
+          plotly::plotlyOutput("coopscatter")
+        ),
+        bs4Dash::box(
+          title = "References",
+          status = "primary",
+          width = 12,
+          dummy_bibliography()
         )
       )
     )
@@ -242,6 +276,7 @@ app_ui <- function() {
       col_12(
         bs4Dash::box(
           width = 12,
+          status = "primary",
           title = "Spatial distribution of income stability",
           leaflet::leafletOutput("tempmap", height = 700)
         )
@@ -251,11 +286,13 @@ app_ui <- function() {
       col_6(bs4Dash::box(
         plotly::plotlyOutput("tempdensity"),
         width = 12,
+        status = "primary",
         title = "Distribution of income stability"
       )),
       col_6(bs4Dash::box(
         plotly::plotlyOutput("tempscatter"),
         width = 12,
+        status = "primary",
         title = "Relationship between age and income stability"
       ))
     ),
@@ -264,6 +301,7 @@ app_ui <- function() {
         bs4Dash::box(
           width = 12,
           title = "Discussion",
+          status = "primary",
           p2(shinipsum::random_text(nwords = 200))
         )
       ),
@@ -271,6 +309,7 @@ app_ui <- function() {
         bs4Dash::box(
           width = 12,
           title = "Conclusion",
+          status = "primary",
           p2(shinipsum::random_text(nwords = 150))
         )
       )
@@ -278,11 +317,8 @@ app_ui <- function() {
     bs4Dash::box(
       title = "References",
       width = 12,
-      tags$ul(
-        class = "list-style: none",
-        p("[1] Bryan Bollinger, Kenneth Gillingham (2012). Peer Effects in the Diffusion of Solar Photovoltaic Panels. Marketing Science 31(6):900-912."),
-        p("[2] Ron Boschma (2005) Proximity and Innovation: A Critical Assessment, Regional Studies, 39:1, 61-74."),
-      )
+      status = "primary",
+      dummy_bibliography()
     )
   )
   
@@ -458,21 +494,9 @@ app_ui <- function() {
       ),
       tags$span(style = "display:inline-block; width: 350%"),
       tagList(
-        a(
-          class = "logo",
-          href = "https://www.gesis.org/",
-          img(src = "www/gesis_logo.png")
-        ),
-        a(
-          class = "logo",
-          href = "https://www.unibo.it/",
-          img(src = "www/unibo_logo.png")
-        ),
-        a(
-          class = "logo",
-          href = "https://www.tecnalia.com/",
-          img(src = "www/tecnalia_logo.png")
-        )
+        corp_logo("gesis"), corp_logo("lut"), corp_logo("unibo"),
+        corp_logo("tecnalia"), corp_logo("cleanwatts"), corp_logo("tno"),
+        corp_logo("cleanwatts"), corp_logo("isi"), corp_logo("kaskas")
       ),
       title = HTML(paste(
         img(src = "www/greta_flash.svg", width = 50, height = 50),
