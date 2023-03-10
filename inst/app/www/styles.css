@@ -18,6 +18,7 @@ a.logo:hover {
 
 a.logo img {
   max-height: 35px;
+  margin: 5px;
 }
 
 /* Slider color */
