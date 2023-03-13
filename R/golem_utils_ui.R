@@ -75,11 +75,11 @@ corp_logo <- function(inst) {
     isi = "https://www.isi.fraunhofer.de/"
   )
   
-  a(
+  div(class = "container-logo", a(
     class = "logo",
     href = web[[inst]],
     img(src = sprintf("www/%s_logo.png", inst))
-  )
+  ))
 }
 
 

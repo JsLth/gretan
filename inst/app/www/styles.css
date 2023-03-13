@@ -7,8 +7,16 @@ p.running-text {
   align: justify;
 }
 
+.container-logo {
+   display: inline-grid;
+   column-gap: 5px;
+   row-gap: 5px;
+   grid-template-columns: repeat(4, auto);
+   grid-template-rows: repeat(2, auto);
+}
+
 a.logo {
-  height: 45px;
+  display: inline;
   background-color: #F4F4F2;
 }
 
@@ -17,8 +25,12 @@ a.logo:hover {
 }
 
 a.logo img {
-  max-height: 35px;
-  margin: 5px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: auto;
+  margin-top: auto;
+  height: 17.5px;
 }
 
 /* Slider color */
@@ -54,21 +66,19 @@ a.logo img {
 }
 
 /* align two spans around character */
-.progress-ww div {
-  display: flex;
-}
+dl.map-labels-align {
+  text-align: center;
+  margin: auto;
 
-.progress-ww div span {
-  flex: 1;
 }
-
-.progress-ww div span:first-of-type {
+dt.map-labels-item, dd.map-labels-item {
+  display: inline-block;
   text-align: left;
-  padding-right: 5px;
+  margin: 0;
+  padding: 0 5px 0 0;
 }
-
-.progress-ww div span:last-of-type {
-  padding-left: 5px;
+dt.map-labels-item:after {
+  content: ':';
 }
 
 /* If not using map tiles, show a white background */

@@ -22,17 +22,16 @@ locm_colors_abel <- function(locm, df) {
 }
 
 make_html_label <- function(..., sep = " ", bold = TRUE) {
-  dots <- list(...)
+  dots <- drop_nulls(list(...))
   lhs <- names(dots)
   labels <- mapply(
-    html_align_at_char,
+    align_dl,
     x = lhs,
     y = dots,
     char = sep,
     bold = bold,
     SIMPLIFY = FALSE
   )
-
   lapply(do.call(paste, labels), HTML)
 }
 
@@ -41,12 +40,45 @@ html_align_at_char <- function(x, y, char = " ", bold = TRUE) {
   span2 <- noWS(span)
   mapply(FUN = function(x, y) {
     if (bold) x <- tags$b(paste(x, ":"))
-    str_remove_all(as.character(div(
+    as.character(div(
       class = "progress-ww",
       div2(span2(x), char, span2(y))
-    )), "\n")
+    ))
   }, x = x, y = y, SIMPLIFY = FALSE, USE.NAMES = FALSE) %>%
   unlist()
+}
+
+align_dl <- function(..., sep = " ", bold = TRUE) {
+  dots <- drop_nulls(list(...))
+  lhs <- names(dots)
+  labels <- mapply(
+    align_dl_items,
+    x = lhs,
+    y = dots,
+    char = sep,
+    bold = bold,
+    SIMPLIFY = FALSE
+  )
+  lapply(
+    do.call(paste, c(labels, sep = "<br>")),
+    function(x) protect_html(tags$dl(HTML(x), class = "map-labels-align"))
+  )
+}
+
+align_dl_items <- function(x, y, char = " ", bold = TRUE) {
+  div2 <- noWS(div)
+  dl2 <- noWS(tags$dl)
+  aligned <- mapply(FUN = function(dti, ddi) {
+    dtlst <- unlist(lapply(
+      dti,
+      function(it) as.character(tags$dt(it, class = "map-labels-item"))
+    ))
+    ddlst <- unlist(lapply(
+      ddi,
+      function(it) as.character(tags$dd(it, class = "map-labels-item"))
+    ))
+    HTML(riffle(dtlst, ddlst))
+  }, dti = x, ddi = y, SIMPLIFY = FALSE, USE.NAMES = FALSE)
 }
 
 leaflet_select_click <- function(id, on, ref, input, tol = 1) {
@@ -109,6 +141,37 @@ highlight_opts <- leaflet::highlightOptions(
   bringToFront = TRUE,
   sendToBack = TRUE
 )
+
+
+protect_html <- function(x) HTML(as.character(x))
+
+#' Riffle-merges two vectors, possibly of different lengths
+#'
+#' Takes two vectors and interleaves the elements.  If one vector is longer than
+#' the other, it appends on the tail of the longer vector to the output vector.
+#' @param a First vector
+#' @param b Second vector
+#' @return Interleaved vector as described above.
+#' @author Matt Pettis
+riffle <- function(a, b) {
+  len_a <- length(a)
+  len_b <- length(b)
+  len_comm <- pmin(len_a, len_b)
+  len_tail <- abs(len_a - len_b)
+  
+  if (len_a < 1) stop("First vector has length less than 1")
+  if (len_b < 1) stop("Second vector has length less than 1")
+  
+  riffle_common <- c(rbind(a[1:len_comm], b[1:len_comm]))
+  
+  if (len_tail == 0) return(riffle_common)
+  
+  if (len_a > len_b) {
+    return(c(riffle_common, a[(len_comm + 1):len_a]))
+  } else {
+    return(c(riffle_common, b[(len_comm + 1):len_b]))
+  }
+}
 
 #' Inverted versions of in, is.null and is.na
 #'

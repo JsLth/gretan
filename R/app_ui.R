@@ -12,20 +12,28 @@ app_ui <- function() {
                  as.list()) %>%
     purrr::set_names(categories)
   
+  # source: agendahelsinki.tailored.css
   greta_theme <- fresh::create_theme(
     fresh::bs4dash_status(
       primary = "#FED22B",
       secondary = "#F4F4F2",
-      info = "#5E81AC",
+      info = "#B3DDFE",
       danger = "#BF616A",
       dark = "#F4F4F2"
     ),
     fresh::bs4dash_layout(main_bg = "#FDFDFD", sidebar_width = "350px"),
-    fresh::bs4dash_sidebar_light(bg = "#F4F4F2", color = "#000000"),
+    fresh::bs4dash_sidebar_light(bg = "#F4F4F2", color = "#000"),
     fresh::bs4dash_color(
       white = "#FDFDFD",
-      gray_800 = "#000000",
-      gray_900 = "#000000"
+      black = "#000",
+      gray_600 = "#CFCFCF",
+      gray_800 = "#B4B4B4",
+      gray_900 = "#999",
+      red = "#C1120E",
+      purple = "#3F1354",
+      yellow = "#FFFD37",
+      blue = "#002562",
+      teal = "#00767E"
     ),
     fresh::bs4dash_font(family_sans_serif = "Arial")
   )
@@ -205,6 +213,7 @@ app_ui <- function() {
           width = 12,
           status = "primary",
           title = "Geographical distribution of Coopérnico investments",
+          maximizable = TRUE,
           leaflet::leafletOutput("coopmap1", height = 700)
         )
       ),
@@ -213,7 +222,53 @@ app_ui <- function() {
           width = 12,
           status = "primary",
           title = "Spatial clusters of Coopérnico investments",
-          leaflet::leafletOutput("coopmap2", height = 700)
+          maximizable = TRUE,
+          leaflet::leafletOutput("coopmap2", height = 700),
+          sidebar = bs4Dash::boxSidebar(
+            id = "coopmap2_sidebar",
+            background = "#999",
+            shinyWidgets::prettyRadioButtons(
+              "coopmap2_sidebar_scheme",
+              label = "Coding scheme",
+              choices = c(
+                "Raw" = "raw",
+                "Binary" = "B",
+                "Row standardized" = "W",
+                "Globally standardized" = "C",
+                "Universally standardized" = "U",
+                "Minmax" = "minmax",
+                "Variance stabilizing" = "S"
+              ),
+              selected = "raw",
+              status = "default",
+              animation = "smooth"
+            ),
+            shinyWidgets::pickerInput(
+              "coopmap2_sidebar_dist",
+              label = "Distance modelling",
+              choices = c(
+                "Inverse distance weighting" = "idw",
+                "Exponential distance decay" = "exp",
+                "Double-power distance weighting" = "dpd"
+              ),
+              width = "90%"
+            ),
+            numericInput(
+              "coopmap2_sidebar_alpha",
+              label = "Distance modelling parameter",
+              min = 0, max = NA, value = 1, step = 0.1
+            ),
+            numericInput(
+              "coopmap2_sidebar_dmax",
+              label = "Maximum distance threshold",
+              min = 1, max = NA, value = 1
+            ),
+            actionButton(
+              "coopmap2_sidebar_apply",
+              label = "Apply changes",
+              icon = icon("refresh", lib = "font-awesome")
+            )
+          )
         )
       )
     ),
@@ -232,6 +287,7 @@ app_ui <- function() {
           width = 12,
           status = "primary",
           title = "Scatterplot of Moran's I",
+          maximizable = TRUE,
           plotly::plotlyOutput("coopscatter")
         ),
         bs4Dash::box(
@@ -278,6 +334,7 @@ app_ui <- function() {
           width = 12,
           status = "primary",
           title = "Spatial distribution of income stability",
+          maximizable = TRUE,
           leaflet::leafletOutput("tempmap", height = 700)
         )
       )
@@ -287,12 +344,14 @@ app_ui <- function() {
         plotly::plotlyOutput("tempdensity"),
         width = 12,
         status = "primary",
+        maximizable = TRUE,
         title = "Distribution of income stability"
       )),
       col_6(bs4Dash::box(
         plotly::plotlyOutput("tempscatter"),
         width = 12,
         status = "primary",
+        maximizable = TRUE,
         title = "Relationship between age and income stability"
       ))
     ),
@@ -368,7 +427,6 @@ app_ui <- function() {
            ),
            tags$style("padding-left: 10px"),
            bs4Dash::column(width = 4,
-             use_css,
              div(
                shinyWidgets::prettyRadioButtons(
                  "cs1bg",
@@ -383,7 +441,6 @@ app_ui <- function() {
            ),
            bs4Dash::column(
              width = 4,
-             use_css,
              sliderInput(
                "cs1opacity",
                label = "Opacity",
@@ -485,18 +542,19 @@ app_ui <- function() {
   ui <- bs4Dash::dashboardPage(
     bs4Dash::dashboardHeader(
       tags$style(".fa-bars {color: #00000}"),
-      tags$div(
+      div(
         a(
           href = "https://projectgreta.eu/",
           tags$img(src = "www/greta_logo.svg", height = "35px"),
           style = "padding-top:10px; padding-bottom:10px;"
         ), class = "dropdown"
       ),
-      tags$span(style = "display:inline-block; width: 350%"),
-      tagList(
+      span(style = "display:inline-block; width: 350%"), # logos at the end of header
+      div( # insert logos in a grid
+        class = "container-logo",
         corp_logo("gesis"), corp_logo("lut"), corp_logo("unibo"),
         corp_logo("tecnalia"), corp_logo("cleanwatts"), corp_logo("tno"),
-        corp_logo("cleanwatts"), corp_logo("isi"), corp_logo("kaskas")
+        corp_logo("isi"), corp_logo("kaskas")
       ),
       title = HTML(paste(
         img(src = "www/greta_flash.svg", width = 50, height = 50),
