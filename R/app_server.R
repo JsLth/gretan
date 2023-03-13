@@ -190,9 +190,9 @@ server <- function(input, output, session) {
       invar <- invar[has_option, ]
     }
 
-    invar <- rct$invar <- invar$variable
+    rct$invar <- invar$variable
     
-    is_metric <- cb_ext[cb_ext$variable %in% invar, ]$is_metric
+    is_metric <- cb_ext[cb_ext$variable %in% rct$invar, ]$is_metric
     if (is_metric) {
       shinyjs::disable("fixed_hide")
     } else {
@@ -211,6 +211,7 @@ server <- function(input, output, session) {
   
   output$explorer <- leaflet::renderLeaflet({
     poly <- rct$poly
+    invar <- rct$invar
     all_pals <- list_palettes()
 
     if (input$pal %in% all_pals[["Colorblind palettes"]]) {
@@ -219,7 +220,6 @@ server <- function(input, output, session) {
       pal <- input$pal
     }
     
-    invar <- rct$invar
     is_metric <- cb_ext[cb_ext$variable %in% invar, ]$is_metric
     is_dummy <- cb_ext[cb_ext$variable %in% invar, ]$is_dummy ||
       cb_ext[cb_ext$variable %in% invar, ]$is_pdummy
@@ -247,10 +247,10 @@ server <- function(input, output, session) {
     
     label_values <- list(
       poly[["nuts0"]], poly[["nuts1"]], poly[["nuts2"]],
-      paste0(round(poly[[invar]], 2), unit)
+      paste0(round(poly[[invar]], 2), unit), ":"
     )
-    names(label_values) <- c("NUTS-0", "NUTS-1", "NUTS-2", lgd)
-    labels <- do.call(make_html_label, label_values)
+    names(label_values) <- c("NUTS-0", "NUTS-1", "NUTS-2", lgd, "sep")
+    labels <- do.call(align_dl, label_values)
 
     leaflet::leaflet(sf::st_transform(poly, 4326)) %>%
       leaflet::addTiles() %>%
@@ -321,17 +321,30 @@ server <- function(input, output, session) {
       label = c("<b>Project name</b>: Escola JG Zarco", "<b>Project name</b>: Lar S. Silvestre")
     )
     
-    coopernico_projects <- st_as_sf(coopernico_projects, coords = c("lng", "lat"), remove = FALSE, 
-                                    crs = 4326, agr = "constant")
+    coopernico_projects <- sf::st_as_sf(
+      coopernico_projects,
+      coords = c("lng", "lat"),
+      remove = FALSE, 
+      crs = 4326,
+      agr = "constant"
+    )
     
     # Create regional capitals database (five continental regions = NUTS 2)
-    capitals <- data.frame(city = c("Lisboa", "Porto", "Coimbra", "Faro", "Evora"), 
-                           lat = c(38.725267, 41.162142, 40.211111, 37.016111, 38.566667), 
-                           lng = c(-9.150019, -8.621953, -8.429167, -7.935, -7.9))
+    capitals <- data.frame(
+      city = c("Lisboa", "Porto", "Coimbra", "Faro", "Evora"), 
+      lat = c(38.725267, 41.162142, 40.211111, 37.016111, 38.566667), 
+      lng = c(-9.150019, -8.621953, -8.429167, -7.935, -7.9)
+    )
     
-    capitals <- st_as_sf(capitals, coords = c("lng", "lat"), remove = FALSE, crs = 4326, agr = "constant")
+    capitals <- sf::st_as_sf(
+      capitals,
+      coords = c("lng", "lat"),
+      remove = FALSE,
+      crs = 4326,
+      agr = "constant"
+    )
     
-    labels <- make_html_label("Total investment" = coopernico$total_amount)
+    labels <- align_dl("Total investment" = coopernico$total_amount)
     
     leaflet::leaflet(coopernico, TRUE) %>%
       leaflet::addTiles() %>%
@@ -367,65 +380,83 @@ server <- function(input, output, session) {
   })
   
   observe({
-    nb <- spdep::poly2nb(coopernico, queen = TRUE)
-    rct$lw <- spdep::nb2listwdist(
-      nb,
-      sf::st_centroid(sf::st_geometry(coopernico)),
-      type = "idw",
-      alpha = 2,
-      style = "S",
-      longlat = TRUE,
-      zero.policy = TRUE
-    )
-    rct$locm <- localmoran(
-      coopernico$total_amount,
-      listw = rct$lw,
-      zero.policy = TRUE
-    )
+    init <- isTRUE(rct$coopscatter_init) || isTRUE(rct$coopmap2_init)
+    if (input$coopmap2_sidebar_apply == 1L || !init) {
+      nb <- spdep::poly2nb(coopernico, queen = TRUE)
+      rct$coopmap2_lw <- spdep::nb2listwdist(
+        nb,
+        sf::st_centroid(sf::st_geometry(coopernico)),
+        type = input$coopmap2_sidebar_dist,
+        alpha = input$coopmap2_sidebar_alpha,
+        style = input$coopmap2_sidebar_scheme,
+        dmax = input$coopmap2_sidebar_dmax,
+        longlat = TRUE,
+        zero.policy = TRUE
+      )
+      rct$coopmap2_locm <- spdep::localmoran(
+        coopernico$total_amount,
+        listw = rct$coopmap2_lw,
+        zero.policy = TRUE
+      )
+      rct$coopmap2_colors <- locm_colors_abel(rct$coopmap2_locm, coopernico)
+      rct$coopmap2_labels <- do.call(align_dl, list(
+        "Moran's I" = round(rct$coopmap2_locm[, "Ii"], 4),
+        "p-value" = round(rct$coopmap2_locm[, "Pr(z != E(Ii))"], 4)
+      ))
+      
+      if (isTRUE(rct$coopmap2_init)) {
+        leaflet::leafletProxy("coopmap2") %>%
+          leaflet::clearShapes() %>%
+          leaflet::addPolygons(
+            fillColor = rct$coopmap2_colors[[2]],
+            color = rct$coopmap2_colors[[1]],
+            fillOpacity = 1,
+            weight = 1,
+            smoothFactor = 0,
+            label = rct$coopmap2_labels,
+            highlightOptions = highlight_opts,
+            data = coopernico
+          )
+      }
+    }
   })
   
   output$coopmap2 <- leaflet::renderLeaflet({
-    locm <- rct$locm
-    colors <- locm_colors_abel(locm, coopernico)
-    colors1 <- colors[[2]]
-    colors <- colors[[1]]
-
-    labels <- do.call(make_html_label, list(
-      "Moran's I" = round(locm[, "Ii"], 4),
-      "p-value" = round(locm[, "Pr(z != E(Ii))"], 4)
-    ))
-    
-    pal <- leaflet::colorFactor(unique(colors), domain = NULL)
+    locm <- rct$coopmap2_locm
+    colors <- rct$coopmap2_colors
+    rct$coopmap2_init <- TRUE
+    pal <- leaflet::colorFactor(unique(colors[[1]]), domain = NULL)
     
     leaflet::leaflet(coopernico) %>%
       leaflet::addTiles() %>%
       leaflet::setView(lng = -7.5, lat = 39.5, zoom = 7) %>%
       leaflet::addPolygons(
-        fillColor = colors1,
-        color = colors,
+        fillColor = colors[[2]],
+        color = colors[[1]],
         fillOpacity = 1,
         weight = 1,
         smoothFactor = 0,
-        label = labels,
+        label = rct$labels,
         highlightOptions = highlight_opts
       ) %>%
       leaflet::addLegend(
         position = "bottomright",
-        colors = c(unique(colors), "white"),
+        colors = c(unique(colors[[1]]), "white"),
         labels = c(levels(attributes(locm)$quadr$mean), "Not significant"),
         title = "LISA"
       )
   })
   
   output$coopscatter <- plotly::renderPlotly({
-    coopernico$sponsors_lag <- lag.listw(
-      lw,
+    coopernico$sponsors_lag <- spdep::lag.listw(
+      rct$coopmap2_lw,
       coopernico$total_amount,
       zero.policy = TRUE
     )
+    rct$coopscatter_init <- TRUE
 
     coopernico <- coopernico %>%
-      rename(
+      dplyr::rename(
         "Spatial lag" = "sponsors_lag",
         "Total amount" = "total_amount",
         "Municipality" = "name"
@@ -435,7 +466,7 @@ server <- function(input, output, session) {
       data = coopernico,
       ggplot2::aes(x = `Spatial lag`, y = `Total amount`)) +
       ggplot2::geom_point(
-        aes(group = Municipality),
+        ggplot2::aes(group = Municipality),
         shape = 1,
         size = 2,
         color = "black",
