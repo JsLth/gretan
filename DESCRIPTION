@@ -25,7 +25,8 @@ Imports:
     plotly,
     purrr,
     shinipsum,
-    pkgload
+    pkgload,
+    spdep
 Suggests: 
     spelling,
     testthat (>= 3.0.0),
