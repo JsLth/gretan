@@ -48,7 +48,11 @@ golem_add_external_resources <- function() {
   golem::add_resource_path("www", app_sys("app/www"))
   tags$head(
     golem::favicon(),
+    waiter::useWaiter(),
+    shinyWidgets::useSweetAlert(theme = "bootstrap-4"),
     shinyjs::useShinyjs(),
-    includeCSS(app_sys("app/www/styles.css"))
+    includeCSS(app_sys("app/www/styles.css")),
+    shinyWidgets::chooseSliderSkin(skin = "HTML5", color = "#FED22B")
+    #recolor_all_sliders(color = "#FED22B")
   )
 }
