@@ -125,13 +125,24 @@ leaflet_text_on_click <- function(id,
 }
 
 info_popup <- function(text, title = "Info") {
-  shinyalert::shinyalert(
+  shinyWidgets::sendSweetAlert(
     title = title,
     text = text,
     type = "info",
-    confirmButtonCol = "#5E81AC"
+    btn_colors = "#5E81AC"
   )
 }
+
+# 4, wobblebar, pulse, throbber, riplle, ring, wave
+waiter_default <- list(
+  color = "rgba(179, 221, 254, 0.8)", # greta blue
+  html = tagList(
+    waiter::spin_pulse(),
+    h4("Loading figure...")
+  ),
+  hide_on_render = TRUE,
+  hide_on_error = FALSE # on error, spin forever
+)
 
 highlight_opts <- leaflet::highlightOptions(
   weight = 2,
@@ -141,6 +152,13 @@ highlight_opts <- leaflet::highlightOptions(
   bringToFront = TRUE,
   sendToBack = TRUE
 )
+
+
+read_rda <- function(file) {
+  env <- new.env()
+  objs <- load(file, env = env)
+  browser()
+}
 
 
 protect_html <- function(x) HTML(as.character(x))
