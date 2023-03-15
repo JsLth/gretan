@@ -1,3 +1,54 @@
+#' Columns wrappers
+#'
+#' These are convenient wrappers around
+#' `column(12, ...)`, `column(6, ...)`, `column(4, ...)`...
+#'
+#' @noRd
+#'
+#' @importFrom shiny column
+col_12 <- function(...) {
+  bs4Dash::column(12, ...)
+}
+
+#' @importFrom shiny column
+col_10 <- function(...) {
+  bs4Dash::column(10, ...)
+}
+
+#' @importFrom shiny column
+col_8 <- function(...) {
+  bs4Dash::column(8, ...)
+}
+
+#' @importFrom shiny column
+col_6 <- function(...) {
+  bs4Dash::column(6, ...)
+}
+
+
+#' @importFrom shiny column
+col_4 <- function(...) {
+  bs4Dash::column(4, ...)
+}
+
+
+#' @importFrom shiny column
+col_3 <- function(...) {
+  bs4Dash::column(3, ...)
+}
+
+
+#' @importFrom shiny column
+col_2 <- function(...) {
+  bs4Dash::column(2, ...)
+}
+
+
+#' @importFrom shiny column
+col_1 <- function(...) {
+  bs4Dash::column(1, ...)
+}
+
 make_header <- function(title,
                         authors,
                         affil = NULL,
@@ -54,7 +105,7 @@ dummy_bibliography <- function() {
       Policy, 53, 331–340. https://doi.org/10.1016/j.enpol.2012.10.066"),
     p("Graziano, M., & Gillingham, K. (2015). Spatial patterns of solar
       photovoltaic system adoption: The influence of neighbors and the built
-      environment ‡. Journal of Economic Geography, 15(4), 815–839.
+      environment. Journal of Economic Geography, 15(4), 815–839.
       https://doi.org/10.1093/jeg/lbu036"),
     p("Irwin, N. B. (2021). Sunny days: Spatial spillovers in photovoltaic
       system adoptions. Energy Policy, 151, 112192.
@@ -83,6 +134,14 @@ corp_logo <- function(inst) {
 }
 
 
+recolor_all_sliders <- function(color) {
+  ui_path <- app_sys("R/app_ui.R")
+  code <- readLines(ui_path)
+  n <- sum(stringr::str_detect(code, "sliderInput"))
+  shinyWidgets::setSliderColor(rep(color, n), seq_len(n))
+}
+
+
 p2 <- function(...) p(..., class = "running-text")
 
 noWS <- function(.f) function(...) .f(..., .noWS = c("inside", "outside")) 
@@ -99,6 +158,154 @@ list_palettes <- function() {
     )
   )
 }
+
+
+countries <- list(
+  "France", "United Kingdom", "Germany", "United States of America", "Belgium", "China", "Spain", "Netherlands", "Mexico",
+  "Italy", "Canada", "Brazil", "Denmark", "Norway", "Switzerland", "Luxembourg", "Israel", "Russian Federation",
+  "Turkey", "Saudi Arabia", "United Arab Emirates"
+)
+flags <- c("fr", "gb", "de", "us", "be", "cn", "es", "nl", "mx", "it", "ca", "br", "dk", "no", "ch", "lu", "il", "ru", "tr", "sa", "ae")
+flags <- sprintf("https://cdn.rawgit.com/lipis/flag-icon-css/master/flags/4x3/%s.svg", flags)
+sandbox <- bs4Dash::tabItem(
+  "sandbox",
+  fluidRow(
+    col_6(
+      bs4Dash::box(
+        title = "Example title",
+        footer = "Example footer",
+        status = "info",
+        closable = TRUE,
+        maximizable = TRUE,
+        width = 12,
+        icon = icon("lightbulb", lib = "font-awesome"),
+        label = bs4Dash::boxLabel("label", status = "info", tooltip = "This is an optional label"),
+        sidebar = bs4Dash::boxSidebar(
+          id = "sandbox_sidebar",
+          shinyWidgets::switchInput("sandbox_switch")
+        ),
+        dropdownMenu = bs4Dash::boxDropdown(
+          bs4Dash::boxDropdownItem("Dropdown item"),
+          bs4Dash::boxDropdownItem("GRETA website", href = "https://projectgreta.eu/")
+        ),
+        p2("This is an exemplary box content. Boxes constitute the general building
+       blocks of the tabs in this tool. They can contain text paragraphs,
+       interactive maps and plots as well as static figures. Boxes can also
+       contain additional features such as sidebars, dropdown menus and buttons
+       to minimize, maximize or close the box (as shown in the header of this box)."),
+       tags$br(),
+       p2("The following button dynamically generates text, in the same way it could
+       also generate a figure or a plot."),
+       actionButton("sandbox_button", label = "Generate text"),
+       uiOutput("sandbox_text")
+      ),
+      bs4Dash::box(
+        title = "Checkbox buttons",
+        status = "primary",
+        width = 12,
+        shinyWidgets::checkboxGroupButtons(
+          inputId = "Id051",
+          label = "Preselected buttons",
+          choices = c("A", "B", "C", "D"),
+          selected = c("B", "D")
+        ),
+        shinyWidgets::checkboxGroupButtons(
+          inputId = "Id057",
+          label = "Buttons with icons", 
+          choices = c(`<i class='fa fa-bar-chart'></i>` = "bar", `<i class='fa fa-line-chart'></i>` = "line", 
+                      `<i class='fa fa-pie-chart'></i>` = "pie"),
+          justified = TRUE
+        ),
+        shinyWidgets::radioGroupButtons(
+          inputId = "Id073",
+          label = "Radio buttons",
+          choices = c("Option 1", 
+                      "Option 2", "Option 3", "Option 4"),
+          individual = TRUE,
+          checkIcon = list(
+            yes = tags$i(class = "fa fa-circle", 
+                         style = "color: steelblue"),
+            no = tags$i(class = "fa fa-circle-o", 
+                        style = "color: steelblue"))
+        )
+      ),
+      bs4Dash::box(
+        title = "Numeric input",
+        status = "secondary",
+        width = 12,
+        sliderInput("slider2", label = h3("Slider Range"), min = 0, 
+                    max = 100, value = c(40, 60)
+        ),
+        numericInput("num", label = h3("Numeric input"), value = 1),
+        shinyWidgets::airDatepickerInput(
+          "airdatesandbox",
+          label = "Time picker",
+          range = TRUE
+        )
+      )
+    ),
+    col_6(
+      bs4Dash::box(
+        title = "Checkboxes",
+        status = "primary",
+        width = 12,
+        shinyWidgets::prettyCheckbox(
+          inputId = "Id021",
+          label = "Single checkbox", 
+          value = TRUE,
+          status = "danger",
+          shape = "curve"
+        ),
+        shinyWidgets::prettyCheckboxGroup(
+          inputId = "Id032",
+          label = "Multiple checkboxes", 
+          choices = c("Click me!", "Me!", "Or me!")
+        ),
+        shinyWidgets::prettyRadioButtons(
+          inputId = "Id036",
+          label = "Radio Buttons", 
+          choices = c("Click me !", "Me !", "Or me !")
+        )
+      ),
+      bs4Dash::box(
+        title = "Input pickers",
+        status = "danger",
+        width = 12,
+        shinyWidgets::pickerInput(
+          inputId = "Id082",
+          label = "Picker with search and categories", 
+          choices = list(
+            lower = c("a", "b", "c", "d"),
+            upper = c("A", "B", "C", "D")),
+          options = list("live-search" = TRUE)
+        ),
+        shinyWidgets::multiInput(
+          inputId = "Id010",
+          label = "Picker with multiple choices", 
+          choices = NULL,
+          choiceNames = lapply(seq_along(countries), 
+                               function(i) tagList(tags$img(src = flags[i],
+                                                            width = 20, 
+                                                            height = 15), countries[i])),
+          choiceValues = countries
+        )
+      ),
+      bs4Dash::box(
+        title = "Buttons",
+        status = "primary",
+        width = 12,
+        actionButton(inputId = "success", label = "Success !", width = "100%",
+                     class = "btn-success", style = "text-color: #FFF"),
+        actionButton(inputId = "info", label = "Info", width = "100%",
+                     class = "btn-info", style = "text-color: #FFF"),
+        actionButton(inputId = "error", label = "Error", width = "100%",
+                     class = "btn-danger", style = "text-color: #FFF"),
+        actionButton(inputId = "warning", label = "Warning", width = "100%",
+                     class = "btn-warning", style = "text-color: #FFF")
+      )
+    )
+  )
+)
 
 
 #' Turn an R list into an HTML list
@@ -217,108 +424,6 @@ named_to_li <- function(list, class = NULL) {
   }
 }
 
-#' Remove a tag attribute
-#'
-#' @param tag the tag
-#' @param ... the attributes to remove
-#'
-#' @return a new tag
-#' @noRd
-#'
-#' @examples
-#' a <- shiny::tags$p(src = "plop", "pouet")
-#' tagRemoveAttributes(a, "src")
-tagRemoveAttributes <- function(tag, ...) {
-  attrs <- as.character(list(...))
-  for (i in seq_along(attrs)) {
-    tag$attribs[[attrs[i]]] <- NULL
-  }
-  tag
-}
-
-#' Hide or display a tag
-#'
-#' @param tag the tag
-#'
-#' @return a tag
-#' @noRd
-#'
-#' @examples
-#' ## Hide
-#' a <- shiny::tags$p(src = "plop", "pouet")
-#' undisplay(a)
-#' b <- shiny::actionButton("go_filter", "go")
-#' undisplay(b)
-#' @importFrom shiny tagList
-undisplay <- function(tag) {
-  # if not already hidden
-  if (
-    !is.null(tag$attribs$style) &&
-      !grepl("display:\\s+none", tag$attribs$style)
-  ) {
-    tag$attribs$style <- paste(
-      "display: none;",
-      tag$attribs$style
-    )
-  } else {
-    tag$attribs$style <- "display: none;"
-  }
-  tag
-}
-
-#' @importFrom shiny tagList
-display <- function(tag) {
-  if (
-    !is.null(tag$attribs$style) &&
-      grepl("display:\\s+none", tag$attribs$style)
-  ) {
-    tag$attribs$style <- gsub(
-      "(\\s)*display:(\\s)*none(\\s)*(;)*(\\s)*",
-      "",
-      tag$attribs$style
-    )
-  }
-  tag
-}
-
-#' Hide an elements by calling jquery hide on it
-#'
-#' @param id the id of the element to hide
-#'
-#' @noRd
-#'
-#' @importFrom shiny tags
-jq_hide <- function(id) {
-  tags$script(sprintf("$('#%s').hide()", id))
-}
-
-#' Add a red star at the end of the text
-#'
-#' Adds a red star at the end of the text
-#' (for example for indicating mandatory fields).
-#'
-#' @param text the HTLM text to put before the red star
-#'
-#' @return an html element
-#' @noRd
-#'
-#' @examples
-#' with_red_star("Enter your name here")
-#' @importFrom shiny tags HTML
-with_red_star <- function(text) {
-  shiny::tags$span(
-    HTML(
-      paste0(
-        text,
-        shiny::tags$span(
-          style = "color:red",
-          "*"
-        )
-      )
-    )
-  )
-}
-
 
 
 #' Repeat tags$br
@@ -333,72 +438,6 @@ with_red_star <- function(text) {
 #' @importFrom shiny HTML
 rep_br <- function(times = 1) {
   HTML(rep("<br/>", times = times))
-}
-
-#' Create an url
-#'
-#' @param url the URL
-#' @param text the text to display
-#'
-#' @return an a tag
-#' @noRd
-#'
-#' @examples
-#' enurl("https://www.thinkr.fr", "ThinkR")
-#' @importFrom shiny tags
-enurl <- function(url, text) {
-  tags$a(href = url, text)
-}
-
-#' Columns wrappers
-#'
-#' These are convenient wrappers around
-#' `column(12, ...)`, `column(6, ...)`, `column(4, ...)`...
-#'
-#' @noRd
-#'
-#' @importFrom shiny column
-col_12 <- function(...) {
-  bs4Dash::column(12, ...)
-}
-
-#' @importFrom shiny column
-col_10 <- function(...) {
-  bs4Dash::column(10, ...)
-}
-
-#' @importFrom shiny column
-col_8 <- function(...) {
-  bs4Dash::column(8, ...)
-}
-
-#' @importFrom shiny column
-col_6 <- function(...) {
-  bs4Dash::column(6, ...)
-}
-
-
-#' @importFrom shiny column
-col_4 <- function(...) {
-  bs4Dash::column(4, ...)
-}
-
-
-#' @importFrom shiny column
-col_3 <- function(...) {
-  bs4Dash::column(3, ...)
-}
-
-
-#' @importFrom shiny column
-col_2 <- function(...) {
-  bs4Dash::column(2, ...)
-}
-
-
-#' @importFrom shiny column
-col_1 <- function(...) {
-  bs4Dash::column(1, ...)
 }
 
 
