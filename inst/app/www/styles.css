@@ -33,33 +33,6 @@ a.logo img {
   height: 17.5px;
 }
 
-/* Slider color */
-.js-irs-0 .irs-bar {
-  border-top-color: #FED22B;
-  border-bottom-color: #FED22B;
-} 
-
-.js-irs-0 .irs-bar-edge {
-  border-color: #FED22B;
-}
-
-.js-irs-0 .irs-single, .js-irs-0 .irs-bar-edge, .js-irs-0 .irs-bar {
-  background: #FED22B;
-}
-
-.js-irs-1 .irs-bar {
-  border-top-color: #FED22B;
-  border-bottom-color: #FED22B;
-} 
-
-.js-irs-1 .irs-bar-edge {
-  border-color: #FED22B;
-}
-
-.js-irs-1 .irs-single, .js-irs-1 .irs-bar-edge, .js-irs-1 .irs-bar {
-  background: #FED22B;
-}
-
 /* Radio buttons */
 .pretty.p-default input:checked~.state label:after {
   background-color: #FED22B !important;

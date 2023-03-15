@@ -439,8 +439,6 @@ cb_ext <- dplyr::tibble(variable = setdiff(names(survey_local), "geometry")) %>%
   mutate(variable = janitor::make_clean_names(variable)) %>%
   slice(sort_variables(og_var))
 
-saveRDS(cb_ext, file = "data/codebook.rds")
-
 survey_local <- survey_local %>%
   select(-dplyr::all_of(to_be_deleted)) %>%
   relocate(geometry, .after = last_col()) %>%
@@ -474,7 +472,7 @@ for (x in names(survey_local)) {
   }
 }
 
-survey_nuts0 <- aggregate(
+srv_nuts0 <- aggregate(
   survey_local %>% select(-id),
   nuts0,
   FUN = mean,
@@ -485,12 +483,12 @@ survey_nuts0 <- aggregate(
 
 count_nuts0 <- aggregate(survey_local["id"], nuts0, FUN = length) %>%
   dplyr::rename(sample = "id")
-survey_nuts0 <- survey_nuts0 %>%
+srv_nuts0 <- srv_nuts0 %>%
   sf::st_join(count_nuts0, sf::st_equals) %>%
   sf::st_join(nuts0["name"], sf::st_equals) %>%
   rename(nuts0 = "name")
 
-survey_nuts1 <- aggregate(
+srv_nuts1 <- aggregate(
   survey_local,
   nuts1,
   FUN = mean,
@@ -501,13 +499,13 @@ survey_nuts1 <- aggregate(
 
 count_nuts1 <- aggregate(survey_local["id"], nuts1, FUN = length) %>%
   dplyr::rename(sample = "id")
-survey_nuts1 <- survey_nuts1 %>%
+srv_nuts1 <- srv_nuts1 %>%
   sf::st_join(count_nuts1, sf::st_equals) %>%
   sf::st_join(nuts1["name"], sf::st_equals) %>%
   sf::st_join(nuts0["name"], sf::st_within) %>%
   rename(nuts1 = "name.x", nuts0 = "name.y")
 
-survey_nuts2 <- aggregate(
+srv_nuts2 <- aggregate(
   survey_local,
   nuts2,
   FUN = mean,
@@ -518,7 +516,7 @@ survey_nuts2 <- aggregate(
 
 count_nuts2 <- aggregate(survey_local["id"], nuts2, FUN = length) %>%
   dplyr::rename(sample = "id")
-survey_nuts2 <- survey_nuts2 %>%
+srv_nuts2 <- srv_nuts2 %>%
   sf::st_join(count_nuts2, sf::st_equals) %>%
   sf::st_join(nuts2["name"], sf::st_equals) %>%
   sf::st_join(nuts0["name"], sf::st_nearest_feature) %>%
@@ -526,6 +524,7 @@ survey_nuts2 <- survey_nuts2 %>%
   sf::st_join(nuts1["name"], sf::st_nearest_feature) %>%
   rename(nuts1 = "name")
 
-saveRDS(survey_nuts0, "data/srv_nuts0.rds")
-saveRDS(survey_nuts1, "data/srv_nuts1.rds")
-saveRDS(survey_nuts2, "data/srv_nuts2.rds")
+output <- list(
+  cb_ext = cb_ext, srv_nuts0 = srv_nuts0,
+  srv1_nuts1 = srv_nuts1, srv_nuts2 = srv_nuts2
+)
