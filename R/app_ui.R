@@ -1,9 +1,5 @@
 app_ui <- function() {
-  use_css <- tags$style(includeCSS(app_sys("app/www/styles.css")))
-  
   all_pals <- list_palettes()
-  
-  cb_ext <- readRDS("data/codebook.rds")
   
   categories <- unique(na.omit(cb_ext$topic))
   titles <- categories %>%
@@ -28,7 +24,7 @@ app_ui <- function() {
       black = "#000",
       gray_600 = "#CFCFCF",
       gray_800 = "#B4B4B4",
-      gray_900 = "#999",
+      gray_900 = "#000",
       red = "#C1120E",
       purple = "#3F1354",
       yellow = "#FFFD37",
@@ -38,6 +34,7 @@ app_ui <- function() {
     fresh::bs4dash_font(family_sans_serif = "Arial")
   )
   
+  # Configure loading screen
   preloader <- list(
     html = tagList(waiter::spin_6(), "Loading ..."),
     color = "#B3DDFE"
@@ -83,7 +80,6 @@ app_ui <- function() {
   
   explorer_tab <- bs4Dash::tabItem(
     "explorer",
-    
     fluidRow(
       bs4Dash::column(
         width = 3,
@@ -226,7 +222,7 @@ app_ui <- function() {
           leaflet::leafletOutput("coopmap2", height = 700),
           sidebar = bs4Dash::boxSidebar(
             id = "coopmap2_sidebar",
-            background = "#999",
+            background = "#CFCFCF",
             shinyWidgets::prettyRadioButtons(
               "coopmap2_sidebar_scheme",
               label = "Coding scheme",
@@ -625,6 +621,12 @@ app_ui <- function() {
           icon = icon("money-bill-trend-up", lib = "font-awesome"),
           tabName = "income"
         ),
+        bs4Dash::sidebarHeader("Other"),
+        bs4Dash::menuItem(
+          text = "Sandbox",
+          icon = icon("wand-magic", lib = "font-awesome"),
+          tabName = "sandbox"
+        ),
         flat = TRUE,
         id = "sidebar"
       ),
@@ -637,14 +639,15 @@ app_ui <- function() {
       bs4Dash::tabItems(
         home_tab,
         explorer_tab,
-        #simulation_tab,
+        simulation_tab,
         spatial_tab,
         income_tab,
         cs1_tab,
         cs2_tab,
         cs3_tab,
         cs4_tab,
-        cs5_tab
+        cs5_tab,
+        sandbox
       )
     ),
     freshTheme = greta_theme,

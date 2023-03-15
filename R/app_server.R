@@ -14,25 +14,38 @@ cs_coords <- sf::st_sf(
 # Global list to store all texts so that they don't spam the code files
 txts <- list()
 
-# Read all the data files
-cb_ext <- readRDS("data/codebook.rds")
-srv_nuts0 <- readRDS("data/srv_nuts0.rds")
-srv_nuts1 <- readRDS("data/srv_nuts1.rds")
-srv_nuts2 <- readRDS("data/srv_nuts1.rds")
-bgn_1 <- readRDS("data/bgn_1.rds")
-bgn_2 <- readRDS("data/bgn_2.rds")
-bgn_3 <- readRDS("data/bgn_3.rds")
-don_1 <- readRDS("data/don_1.rds")
-don_2 <- readRDS("data/don_2.rds")
-don_3 <- readRDS("data/don_3.rds")
-coopernico <- readRDS("data/coopernico.rds")
+# Read internal data
+load("R/sysdata.rda")
 
 server <- function(input, output, session) {
   rct <- reactiveValues()
   
+  # Think about using these functions/packages:
+  # shinyWidgets::execute_safely()
+  # package:bulmaExtensions
+  
+  # Employ waiters
+  w_coopmap1 <- do.call(waiter::Waiter$new, c(id = "coopmap2", waiter_default))
+  w_coopmap2 <- do.call(waiter::Waiter$new, c(id = "coopmap2", waiter_default))
+  w_coopscatter <- do.call(waiter::Waiter$new, c(id = "coopscatter", waiter_default))
+
+  # Show popups as long as tabs are not filled with contents
+  shinyjs::onclick("tab-cs2", info_popup(
+    "This tab has not yet been filled with elements."
+  ))
+  shinyjs::onclick("tab-cs3", info_popup(
+    "This tab has not yet been filled with elements."
+  ))
+  shinyjs::onclick("tab-cs4", info_popup(
+    "This tab has not yet been filled with elements."
+  ))
   shinyjs::onclick("tab-cs5", info_popup(
     "This tab has not yet been filled with elements."
   ))
+  shinyjs::onclick("tab-cs5", info_popup(
+    "This tab has not yet been filled with elements."
+  ))
+  
   
   # Home ----
   # Plot geographical overview map
@@ -165,15 +178,16 @@ server <- function(input, output, session) {
   })
   
   
+  # Determine the variable based on combination of topic, subitem and option
   observe({
     has_title <- cb_ext$title %in% input$exp_title
     invar <- cb_ext[has_title, ]
-    
+
     # case: multiple items exist, look for subitems
     if (length(invar$variable) > 1) {
       has_subitem <- invar$subitem %in% input$exp_subitem
       
-      # only select subitems if any exist
+      # only select subitem if any exist
       if (any(has_subitem)) {
         invar <- invar[has_subitem, ]
       }
@@ -183,13 +197,17 @@ server <- function(input, output, session) {
     if (length(invar$variable) > 1 || !length(invar$variable)) {
       has_option <- invar$option %in% input$exp_option
       
-      # if neither option nor subitem exist, select first row to prevent errors
-      if (all(!has_option)) {
-        has_option <- 1
+      # only select option if any exist
+      if (any(has_option)) {
+        invar <- invar[has_option, ]
       }
-      invar <- invar[has_option, ]
     }
-
+    
+    # if all strings fail, just select the first one
+    if (length(invar$variable) > 1) {
+      invar <- invar[1, ]
+    }
+    
     rct$invar <- invar$variable
     
     is_metric <- cb_ext[cb_ext$variable %in% rct$invar, ]$is_metric
@@ -208,7 +226,7 @@ server <- function(input, output, session) {
       "NUTS-2" = srv_nuts2
     )
   })
-  
+
   output$explorer <- leaflet::renderLeaflet({
     poly <- rct$poly
     invar <- rct$invar
@@ -313,6 +331,7 @@ server <- function(input, output, session) {
   
   # Spatial analysis ----
   output$coopmap1 <- leaflet::renderLeaflet({
+    w_coopmap1$show()
     pal <- leaflet::colorNumeric("Spectral", NULL)
     
     coopernico_projects <- data.frame(
@@ -346,7 +365,7 @@ server <- function(input, output, session) {
     
     labels <- align_dl("Total investment" = coopernico$total_amount)
     
-    leaflet::leaflet(coopernico, TRUE) %>%
+    m <- leaflet::leaflet(coopernico, TRUE) %>%
       leaflet::addTiles() %>%
       leaflet::setView(lng = -7.5, lat = 39.5, zoom = 7) %>%
       leaflet::addPolygons(
@@ -377,6 +396,9 @@ server <- function(input, output, session) {
         data = capitals
       ) %>%
       leaflet::addAwesomeMarkers(data = coopernico_projects, popup = ~label)
+    
+    w_coopmap1$hide()
+    m
   })
   
   observe({
@@ -422,12 +444,13 @@ server <- function(input, output, session) {
   })
   
   output$coopmap2 <- leaflet::renderLeaflet({
+    w_coopmap2$show()
     locm <- rct$coopmap2_locm
     colors <- rct$coopmap2_colors
     rct$coopmap2_init <- TRUE
     pal <- leaflet::colorFactor(unique(colors[[1]]), domain = NULL)
     
-    leaflet::leaflet(coopernico) %>%
+    m <- leaflet::leaflet(coopernico) %>%
       leaflet::addTiles() %>%
       leaflet::setView(lng = -7.5, lat = 39.5, zoom = 7) %>%
       leaflet::addPolygons(
@@ -445,9 +468,13 @@ server <- function(input, output, session) {
         labels = c(levels(attributes(locm)$quadr$mean), "Not significant"),
         title = "LISA"
       )
+    
+    w_coopmap2$show()
+    m
   })
   
   output$coopscatter <- plotly::renderPlotly({
+    w_coopscatter$show()
     coopernico$sponsors_lag <- spdep::lag.listw(
       rct$coopmap2_lw,
       coopernico$total_amount,
@@ -485,7 +512,9 @@ server <- function(input, output, session) {
         linetype = "dashed", size = 0.5
       ))
     
-    plotly::config(plotly::ggplotly(p), displayModeBar = FALSE)
+    p <- plotly::config(plotly::ggplotly(p), displayModeBar = FALSE)
+    w_coopscatter$hide()
+    p
   })
   
   
@@ -548,5 +577,64 @@ server <- function(input, output, session) {
       ggplot2::theme_bw()
     
     plotly::config(plotly::ggplotly(p), displayModeBar = FALSE)
+  })
+  
+  
+  
+  #sandbox
+  sbtext <- eventReactive(input$sandbox_button, {
+    num <- sample(c("a","b","c","d","e"), 1)
+    switch(
+      num,
+      a = "I'm a generated text.",
+      b = "<b>I'm a bold text</b>",
+      c = "<del>I'm not a text</del>",
+      d = "<small>I'm a small text</small>",
+      e = "<em>I'm an emphasized text</em>"
+    )
+  })
+  
+  output$sandbox_text <- renderUI({
+    HTML(sbtext())
+  })
+  
+  observeEvent(input$sandbox_switch, {
+    bs4Dash::updateBoxSidebar("coopmap2_sidebar")
+  })
+  
+  observeEvent(input$success, {
+    shinyWidgets::sendSweetAlert(
+      session = session,
+      title = "Success !!",
+      text = "All in order",
+      type = "success"
+    )
+  })
+  
+  observeEvent(input$error, {
+    shinyWidgets::sendSweetAlert(
+      session = session,
+      title = "Error...",
+      text = "Oups !",
+      type = "error"
+    )
+  })
+  
+  observeEvent(input$info, {
+    shinyWidgets::sendSweetAlert(
+      session = session,
+      title = "Information",
+      text = "Something helpful",
+      type = "info"
+    )
+  })
+  
+  observeEvent(input$warning, {
+    shinyWidgets::sendSweetAlert(
+      session = session,
+      title = "Warning !!!",
+      text = NULL,
+      type = "warning"
+    )
   })
 }
