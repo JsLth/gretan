@@ -5,6 +5,8 @@ Authors@R:
     person("Jonas", "Lieth", , "jonas.lieth@gesis.org", role = c("cre", "aut"))
 Description: PKG_DESC.
 License: GPL (>= 3)
+Depends: 
+    R (>= 4.2.0)
 Imports: 
     bs4Dash,
     dplyr,
