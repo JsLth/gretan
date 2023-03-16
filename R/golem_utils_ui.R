@@ -171,13 +171,14 @@ sandbox <- bs4Dash::tabItem(
   "sandbox",
   fluidRow(
     col_6(
-      bs4Dash::box(
+      bs4Dash::tabBox(
         title = "Example title",
         footer = "Example footer",
         status = "info",
         closable = TRUE,
         maximizable = TRUE,
         width = 12,
+        type = "tabs",
         icon = icon("lightbulb", lib = "font-awesome"),
         label = bs4Dash::boxLabel("label", status = "info", tooltip = "This is an optional label"),
         sidebar = bs4Dash::boxSidebar(
@@ -188,16 +189,21 @@ sandbox <- bs4Dash::tabItem(
           bs4Dash::boxDropdownItem("Dropdown item"),
           bs4Dash::boxDropdownItem("GRETA website", href = "https://projectgreta.eu/")
         ),
-        p2("This is an exemplary box content. Boxes constitute the general building
-       blocks of the tabs in this tool. They can contain text paragraphs,
-       interactive maps and plots as well as static figures. Boxes can also
-       contain additional features such as sidebars, dropdown menus and buttons
-       to minimize, maximize or close the box (as shown in the header of this box)."),
-       tags$br(),
-       p2("The following button dynamically generates text, in the same way it could
-       also generate a figure or a plot."),
-       actionButton("sandbox_button", label = "Generate text"),
-       uiOutput("sandbox_text")
+        tabPanel(
+          title = "Tab 1",
+          p2("This is an exemplary box content. Boxes constitute the general building
+             blocks of the tabs in this tool. They can contain text paragraphs,
+             interactive maps and plots as well as static figures. Boxes can also
+             contain additional features such as sidebars, dropdown menus and buttons
+             to minimize, maximize or close the box (as shown in the header of this box).")
+        ),
+       tabPanel(
+         title = "Tab 2",
+         p2("The following button dynamically generates text, in the same way it could
+            also generate a figure or a plot."),
+         actionButton("sandbox_button", label = "Generate text"),
+         uiOutput("sandbox_text")
+       )
       ),
       bs4Dash::box(
         title = "Checkbox buttons",
@@ -279,6 +285,7 @@ sandbox <- bs4Dash::tabItem(
             upper = c("A", "B", "C", "D")),
           options = list("live-search" = TRUE)
         ),
+        tags$style(HTML(".item {color: black;}")),
         shinyWidgets::multiInput(
           inputId = "Id010",
           label = "Picker with multiple choices", 
