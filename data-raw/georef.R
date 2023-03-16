@@ -4,8 +4,8 @@
 # R version:   R version 4.2.1 (2022-06-23 ucrt)
 # OS:          Windows 10 x64 (build 22621)
 # Requirements: 
-#   - GRETA multinational survey results in ~/Datasets delivery
-#   - Boundary data created by bounds.R
+#   - GRETA multinational survey results in ./greta_survey/
+#   - Boundary data created by bounds.R (needs to be in evaluated environment)
 # Packages:
 #   - giscoR 0.3.3
 #   - haven 2.5.1
@@ -119,10 +119,10 @@ topics <- dplyr::tribble(
   "c61", "Personal effects from cooperative self-generation", "J",
   "c62", "Support for cooperative self-generation", "J",
   "c63", "Knowledge and resources for cooperative self-generation", "J",
-  "c64", "Relation to businesses on self-generation - currently", "J",
-  "c65", "Relation to businesses on self-generation - optimally", "J",
-  "c66", "Relation to government on self-generation - currently", "J",
-  "c67", "Relation to government on self-generation - optimally", "J",
+  "c64", "Current relation to businesses on self-generation", "J",
+  "c65", "Optimal relation to businesses on self-generation", "J",
+  "c66", "Current relation to government on self-generation", "J",
+  "c67", "Optimal relation to government on self-generation", "J",
   "c68", "Feelings towards cooperative self-generation", "J",
   "c69", "Use of ustainable transport", "J",
   "c70", "Future use of sustainable transport", "J",
@@ -131,10 +131,10 @@ topics <- dplyr::tribble(
   "c73", "Personal effects from sustainable transport", "J",
   "c74", "Support for sustainable transport", "J",
   "c75", "Knowledge and resources for sustainable transport", "J",
-  "c76", "Relation to businesses on sustainable transport - currently", "J",
-  "c77", "Relation to businesses on sustainable transport - optimally", "J",
-  "c78", "Relation to government on sustainable transport - currently", "J",
-  "c79", "Relation to government on sustainable transport - optimally", "J",
+  "c76", "Current relation to businesses on sustainable transport", "J",
+  "c77", "Optimal relation to businesses on sustainable transport", "J",
+  "c78", "Current relation to government on sustainable transport", "J",
+  "c79", "Optimal relation to government on sustainable transport", "J",
   "c80", "Feelings towards sustainable transport", "J",
   "c81", "Use of electric vehicles", "J",
   "c82", "Future use of electric vehicles", "J",
@@ -143,10 +143,10 @@ topics <- dplyr::tribble(
   "c85", "Personal effects from electric vehicles", "J",
   "c86", "Support for electric vehicles", "J",
   "c87", "Knowledge and resources for electric vehicles", "J",
-  "c88", "Relation to businesses on electric vehicles - currently", "J",
-  "c89", "Relation to businesses on electric vehicles - optimally", "J",
-  "c90", "Relation to government on electric vehicles - currently", "J",
-  "c91", "Relation to government on electric vehicles - optimally", "J",
+  "c88", "Current relation to businesses on electric vehicles", "J",
+  "c89", "Optimal relation to businesses on electric vehicles", "J",
+  "c90", "Current relation to government on electric vehicles", "J",
+  "c91", "Optimal relation to government on electric vehicles", "J",
   "c92", "Feelings towards electric vehicles", "J",
   "c93", "Use of gas in appliances", "J",
   "c94", "Future use of gas in appliances", "J",
@@ -155,10 +155,10 @@ topics <- dplyr::tribble(
   "c97", "Personal effects from replacing gas in appliances", "J",
   "c98", "Support for replacement of gas in appliances", "J",
   "c99", "Knowledge and resources for replacing gas in appliances", "J",
-  "c100", "Relation to businesses on gas in appliances - currently", "J",
-  "c101", "Relation to businesses on gas in appliances - optimally", "J",
-  "c102", "Relation to government on gas in appliances - currently", "J",
-  "c103", "Relation to government on gas in appliances - optimally", "J",
+  "c100", "Current relation to businesses on gas in appliances", "J",
+  "c101", "Optimal relation to businesses on gas in appliances", "J",
+  "c102", "Current relation to government on gas in appliances", "J",
+  "c103", "Optimal relation to government on gas in appliances", "J",
   "c104", "Feelings towards replacing gas in appliances", "B"
 ) %>%
   mutate(topic = case_match(topic,
@@ -178,7 +178,7 @@ topics <- dplyr::tribble(
 
 # Read survey data
 survey <- haven::read_sav(
-  "~/Datasets delivery/Final Weighted Dataset - complete interviews.sav",
+  "greta_survey/final_dataset.sav",
   encoding = "utf-8"
 ) %>%
   janitor::clean_names()
@@ -186,7 +186,7 @@ survey <- haven::read_sav(
 # Read in the provided codebook, filter out some stuff that's not needed and
 # add columns that help with cleaning
 codebook <- readxl::read_xlsx(
-  "~/Datasets delivery/Codebook & Datamap.xlsx",
+  "greta_survey/codebook.xlsx",
   skip = 1,
   sheet = "Variables"
 ) %>%
@@ -268,14 +268,8 @@ countries <- data.frame(
   )
 )
 
-# Read boundary data
-nuts0 <- readRDS("data/nuts0.rds")
-nuts1 <- readRDS("data/nuts1.rds")
-nuts2 <- readRDS("data/nuts2.rds")
-lau <- readRDS("data/lau.rds")
-com <- readRDS("data/com.rds") %>%
-  filter(!name %in% lau$name)
-lau <- dplyr::bind_rows(lau, com)
+# Prepare lau
+lau <- dplyr::bind_rows(lau, com[!com$name %in% lau$name, ])
 
 # Remove country specifications after place names because these are very
 # inconsistent
@@ -524,7 +518,4 @@ srv_nuts2 <- srv_nuts2 %>%
   sf::st_join(nuts1["name"], sf::st_nearest_feature) %>%
   rename(nuts1 = "name")
 
-output <- list(
-  cb_ext = cb_ext, srv_nuts0 = srv_nuts0,
-  srv1_nuts1 = srv_nuts1, srv_nuts2 = srv_nuts2
-)
+output <- list("cb_ext", "srv_nuts0", "srv_nuts1", "srv_nuts2")

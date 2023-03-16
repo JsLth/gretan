@@ -161,7 +161,6 @@ don_3 <- sf::read_sf(file.path(tempdir(), "Sekzio.shp"), quiet = TRUE)
 
 
 output <- list(
-  nuts0 = nuts0, nuts1 = nuts1, nuts2 = nuts2, nuts3 = nuts3,
-  lau = lau, com = com, bgn_1 = bgn_1, bgn_2 = bgn_2, bgn_3 = bgn_3,
-  don_1 = don_1, don_2 = don_2, don_3 = don_3
+  "nuts0", "nuts1", "nuts2", "nuts3", "lau", "com", "bgn_1", "bgn_2", "bgn_3",
+  "don_1", "don_2", "don_3"
 )

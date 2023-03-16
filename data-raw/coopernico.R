@@ -19,7 +19,7 @@ library(dplyr)
 library(rmapshaper)
 
 # Let's load the data first
-coopernico <- readxl::read_xlsx("inst/coopernico_data/coopernico_two_cases_long.xlsx", 1)
+coopernico <- readxl::read_xlsx("coopernico-data/coopernico-sample.xlsx", 1)
 
 # The file contains 57 observations for two funding projects of Coopernico: Lar S. Silvestre and
 # Escola JG Zarco. The data reports the gender of the sponsors, the ZIP code of residence and the
@@ -35,13 +35,13 @@ coopernico <- subset(coopernico, ZIP != "Switzerland")
 # Public sources do not offer ZIP-code-based shapefiles for Portugal. There is one Github-repository, though,
 # which transformed ZIP code data into a shapefile. We will use this data.
 # https://github.com/temospena/CP7
-ZIP_shape <- st_read("inst/coopernico_data/ZIP_shapefile/CP4_EstimativaPoligonos.shp") %>%
+ZIP_shape <- st_read("coopernico-data/pt-cp4-shapes/CP4_EstimativaPoligonos.shp") %>%
   st_make_valid()
 
 # Use official municipality geometries instead of automated wonky zip
 # code boundaries.
 # Municipality geometries: https://dados.gov.pt/en/datasets/concelhos-de-portugal/
-concelhos <- st_read("inst/coopernico_data/concelhos-shapefile/concelhos.shp") %>%
+concelhos <- st_read("coopernico-data/pt-concelhos-shapes/concelhos.shp") %>%
   rmapshaper::ms_simplify( # Official geometries are very complex and take a long time to plot
     keep = 0.1, # Keep 10% of original edges
     method = NULL, # Modified Visvalingam algorithm
@@ -81,4 +81,4 @@ coopernico <- aggregate(
   st_join(select(concelhos, name = NAME_2), st_equals) %>%
   mutate(across(everything(), .fns = ~replace(.x, is.na(.x), 0)))
 
-output <- list(coopernico = coopernico)
+output <- list("coopernico")

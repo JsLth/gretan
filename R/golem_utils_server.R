@@ -154,13 +154,6 @@ highlight_opts <- leaflet::highlightOptions(
 )
 
 
-read_rda <- function(file) {
-  env <- new.env()
-  objs <- load(file, env = env)
-  browser()
-}
-
-
 protect_html <- function(x) HTML(as.character(x))
 
 #' Riffle-merges two vectors, possibly of different lengths

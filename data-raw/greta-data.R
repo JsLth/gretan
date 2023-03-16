@@ -10,14 +10,19 @@ library(usethis)
 sysdata <- list()
 
 # First source the data generating scripts for the data explorer
-source("data-raw/bounds.R")
+source("data-raw/bounds.R", local = TRUE)
 sysdata <- append(sysdata, output) # boundary data
-source("data-raw/georef.R")
+source("data-raw/georef.R", local = TRUE)
 sysdata <- append(sysdata, output) # aggregated survey data + codebook
 
 # Then source the data generating scripts for the case studies
-source("data-raw/coopernico.R")
+source("data-raw/coopernico.R", local = TRUE)
 sysdata <- append(sysdata, output)
 
+# Prepare data for saving
+sysdata <- lapply(output, as.name)
+sysdata$internal <- TRUE
+sysdata$overwrite <- TRUE
+sysdata$compress <- "xz"
 
 do.call(use_data, sysdata)
