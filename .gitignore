@@ -1,3 +1,7 @@
+# Data paths
+greta_survey/
+coopernico_data/
+
 # History files
 .Rhistory
 .Rapp.history
