@@ -33,6 +33,12 @@ a.logo img {
   height: 17.5px;
 }
 
+/* Slider color */
+.irs-bar-edge, .irs-bar, .irs-single, .irs-from, .irs-to {
+  background: #FED22B !important;
+  border-color: #B4B4B4 !important;
+}
+
 /* Radio buttons */
 .pretty.p-default input:checked~.state label:after {
   background-color: #FED22B !important;
@@ -42,16 +48,22 @@ a.logo img {
 dl.map-labels-align {
   text-align: center;
   margin: auto;
-
 }
+
 dt.map-labels-item, dd.map-labels-item {
   display: inline-block;
   text-align: left;
   margin: 0;
   padding: 0 5px 0 0;
 }
+
 dt.map-labels-item:after {
   content: ':';
+}
+
+/* Remove padding from specific leaflet boxes */
+#exp_mapbox .card-header, #exp_mapbox .card-body {
+  padding: 0em;
 }
 
 /* If not using map tiles, show a white background */
