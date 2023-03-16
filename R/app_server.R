@@ -23,6 +23,8 @@ server <- function(input, output, session) {
   # Think about using these functions/packages:
   # shinyWidgets::execute_safely()
   # package:bulmaExtensions
+  # package:gargoyle
+  # package:R6
   
   # Employ waiters
   w_coopmap1 <- do.call(waiter::Waiter$new, c(id = "coopmap2", waiter_default))
@@ -31,19 +33,19 @@ server <- function(input, output, session) {
 
   # Show popups as long as tabs are not filled with contents
   shinyjs::onclick("tab-cs2", info_popup(
-    "This tab has not yet been filled with elements."
+    "This tab has not yet been filled with contents."
   ))
   shinyjs::onclick("tab-cs3", info_popup(
-    "This tab has not yet been filled with elements."
+    "This tab has not yet been filled with contents."
   ))
   shinyjs::onclick("tab-cs4", info_popup(
-    "This tab has not yet been filled with elements."
+    "This tab has not yet been filled with contents."
   ))
   shinyjs::onclick("tab-cs5", info_popup(
-    "This tab has not yet been filled with elements."
+    "This tab has not yet been filled with contents."
   ))
-  shinyjs::onclick("tab-cs5", info_popup(
-    "This tab has not yet been filled with elements."
+  shinyjs::onclick("tab-simulation", info_popup(
+    "This tab has not yet been filled with contents."
   ))
   
   
