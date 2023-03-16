@@ -168,10 +168,14 @@ app_ui <- function() {
   
   simulation_tab <- bs4Dash::tabItem(
     "simulation",
-    bs4Dash::box(
-      "bs4Dash::box content here", br(), "More bs4Dash::box content",
-      sliderInput("slider", "Slider input:", 1, 100, 50),
-      textInput("text", "Text input:")
+    make_header(
+      title = "Title for a GRETA-related analysis",
+      authors = c("Author 1", "Author 2"),
+      affil = list(
+        "Author 1" = c("Institution 1", "Institution 2"),
+        "Author 2" = c("Institution 2")
+      ),
+      date = "DD-MM-YYYY"
     )
   )
   
@@ -470,11 +474,6 @@ app_ui <- function() {
         "Author B" = "Cleanwatts"
       ),
       date = "2023-mm-dd"
-    ),
-    bs4Dash::box(
-     "bs4Dash::box content here", br(), "More bs4Dash::box content",
-     sliderInput("slider", "Slider input:", 1, 100, 50),
-     textInput("text", "Text input:")
     )
   )
   
@@ -488,11 +487,6 @@ app_ui <- function() {
         "Author B" = "Fraunhofer Institute for Systems and Innovation Research"
       ),
       date = "2023-mm-dd"
-    ),
-    bs4Dash::box(
-     "bs4Dash::box content here", br(), "More bs4Dash::box content",
-     sliderInput("slider", "Slider input:", 1, 100, 50),
-     textInput("text", "Text input:")
     )
   )
   
@@ -506,11 +500,6 @@ app_ui <- function() {
         "Author B" = "Netherlands Organisation for Applied Scientific Research"
       ),
       date = "2023-mm-dd"
-    ),
-    bs4Dash::box(
-     "bs4Dash::box content here", br(), "More bs4Dash::box content",
-     sliderInput("slider", "Slider input:", 1, 100, 50),
-     textInput("text", "Text input:")
     )
   )
   
@@ -524,11 +513,6 @@ app_ui <- function() {
         "Author B" = "Tecnalia Research and Innovation"
       ),
       date = "2023-mm-dd"
-    ),
-    bs4Dash::box(
-     "bs4Dash::box content here", br(), "More bs4Dash::box content",
-     sliderInput("slider", "Slider input:", 1, 100, 50),
-     textInput("text", "Text input:")
     )
   )
   
