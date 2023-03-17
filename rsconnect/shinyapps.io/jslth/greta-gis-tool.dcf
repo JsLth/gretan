@@ -1,0 +1,11 @@
+name: greta-gis-tool
+title:
+username:
+account: jslth
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 8596251
+bundleId: 6971304
+url: https://jslth.shinyapps.io/greta-gis-tool/
+when: 1679060279.51456
+lastSyncTime: 1679060279.51458
