@@ -11,7 +11,7 @@ txts$csdesc <- list(
       "areas:"
     )), style = "margin-bottom: 0.5cm;"),
     p(HTML(paste(
-      "<b>Pilastro “Rione”</b> (neighbourhood): a residential neighborhood",
+      "<b>Pilastro &quot;Rione&quot;</b> (neighbourhood): a residential neighborhood",
       "with a long history of activism but also of socio-economic issues."
     )), style = "margin-bottom: 0.5cm;"),
     p(HTML(paste(
@@ -19,16 +19,16 @@ txts$csdesc <- list(
       "railway terminal, is an industrial and productive neighborhood",
       "hosting a variety of companies in sectors such as packaging,",
       "mechanics, and electric vehicles. The area also hosts the",
-      "Agriculture and Food Center of Bologna’s (CAAB) food and",
+      "Agriculture and Food Center of Bologna&apos;s (CAAB) food and",
       "agriculture theme park (FICO) with its industrial partners, which",
       "has the largest solar power plant on industrial roofs within the EU."
     )), style = "margin-bottom: 0.5cm;")
   )),
   Portugal = HTML(paste(
-    h2("Coopérnico – renewable energy-driven cooperative"),
+    h2("Coop&eacute;rnico &ndash; renewable energy-driven cooperative"),
     p(paste(
-      "The case study examines Coopérnico, Portugal’s first renewable",
-      "energy cooperative, founded in 2013. Coopérnico has more than",
+      "The case study examines Coop&eacute;rnico, Portugal&apos;s first renewable",
+      "energy cooperative, founded in 2013. Coop&eacute;rnico has more than",
       "1,700 members, including citizens, small and medium-sized",
       "enterprises, and municipalities all over Portugal. Its mission is",
       "to involve its members in reshaping the energy sector to be more",
@@ -36,16 +36,16 @@ txts$csdesc <- list(
     ))
   )),
   Germany = HTML(paste(
-    h2("The Earnest App – a virtual community for sustainable mobility in Darmstadt"),
+    h2("The Earnest App &ndash; a virtual community for sustainable mobility in Darmstadt"),
     p(paste(
       "The case study explores how the regular use of a sustainability",
       "app can foster energy citizenship among members of a virtual",
-      "community. The case study is conducted in Darmstadt – a city with",
+      "community. The case study is conducted in Darmstadt &ndash; a city with",
       "160.000 inhabitants located in the state of Hesse in Germany. In",
       "cooperation with students from the University for Applied Science",
       "in Darmstadt (h_da), the case study explores how a virtual energy",
-      "community – connected by the shared experience of using an app –",
-      "affects citizens’ awareness and behaviour in regard to their",
+      "community &ndash; connected by the shared experience of using an app &ndash;",
+      "affects citizens&apos; awareness and behaviour in regard to their",
       "mobility and energy consumption choices in everyday life."
     ))
   )),
@@ -63,7 +63,7 @@ txts$csdesc <- list(
     ))
   )),
   Spain = HTML(paste(
-    h2("UR BEROA – energy efficiency-driven cooperative"),
+    h2("UR BEROA &ndash; energy efficiency-driven cooperative"),
     p(paste(
       "The case study examines UR BEROA, a cooperative providing energy to",
       "the Bera Bera neighbourhood in San Sebastian, Spain. The",

@@ -92,20 +92,20 @@ dummy_bibliography <- function() {
   tags$ul(
     class = "list-style: none",
     p("Bollinger, B., & Gillingham, K. (2012). Peer Effects in the Diffusion of
-      Solar Photovoltaic Panels. Marketing Science, 31(6), 900–912.
+      Solar Photovoltaic Panels. Marketing Science, 31(6), 900&ndash;912.
       https://doi.org/10.1287/mksc.1120.0727"),
     p("Boschma, R. (2005). Proximity and Innovation: A Critical Assessment.
-      Regional Studies, 39(1), 61–74.
+      Regional Studies, 39(1), 61&ndash;74.
       https://doi.org/10.1080/0034340052000320887"),
     p("Bouzarovski, S., & Simcock, N. (2017). Spatializing energy justice.
-      Energy Policy, 107, 640–648.
+      Energy Policy, 107, 640&ndash;648.
       https://doi.org/10.1016/j.enpol.2017.03.064"),
     p("Bridge, G., Bouzarovski, S., Bradshaw, M., & Eyre, N. (2013). Geographies
       of energy transition: Space, place and the low-carbon economy. Energy
-      Policy, 53, 331–340. https://doi.org/10.1016/j.enpol.2012.10.066"),
+      Policy, 53, 331&ndash;340. https://doi.org/10.1016/j.enpol.2012.10.066"),
     p("Graziano, M., & Gillingham, K. (2015). Spatial patterns of solar
       photovoltaic system adoption: The influence of neighbors and the built
-      environment. Journal of Economic Geography, 15(4), 815–839.
+      environment. Journal of Economic Geography, 15(4), 815&ndash;839.
       https://doi.org/10.1093/jeg/lbu036"),
     p("Irwin, N. B. (2021). Sunny days: Spatial spillovers in photovoltaic
       system adoptions. Energy Policy, 151, 112192.
@@ -126,7 +126,7 @@ corp_logo <- function(inst) {
     isi = "https://www.isi.fraunhofer.de/"
   )
   
-  div(class = "container-logo", a(
+  div(class = "logo", a(
     class = "logo",
     href = web[[inst]],
     img(src = sprintf("www/%s_logo.png", inst))

@@ -164,6 +164,7 @@ protect_html <- function(x) HTML(as.character(x))
 #' @param b Second vector
 #' @return Interleaved vector as described above.
 #' @author Matt Pettis
+#' @noRd
 riffle <- function(a, b) {
   len_a <- length(a)
   len_b <- length(b)

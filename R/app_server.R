@@ -14,17 +14,8 @@ cs_coords <- sf::st_sf(
 # Global list to store all texts so that they don't spam the code files
 txts <- list()
 
-# Read internal data
-load("R/sysdata.rda")
-
 server <- function(input, output, session) {
   rct <- reactiveValues()
-  
-  # Think about using these functions/packages:
-  # shinyWidgets::execute_safely()
-  # package:bulmaExtensions
-  # package:gargoyle
-  # package:R6
   
   # Employ waiters
   w_coopmap1 <- do.call(waiter::Waiter$new, c(id = "coopmap2", waiter_default))
@@ -386,7 +377,7 @@ server <- function(input, output, session) {
         values = ~total_amount,
         opacity = 0.9,
         title = "Total investment",
-        labFormat = leaflet::labelFormat(suffix = " €")
+        labFormat = leaflet::labelFormat(suffix = " &euro;")
        ) %>%
       leaflet::addCircleMarkers(
         color = "black",
@@ -508,7 +499,7 @@ server <- function(input, output, session) {
         color = "darkred"
       ) +
       ggplot2::xlab("Spatial lag") + 
-      ggplot2::ylab("Total investment (in €)") +
+      ggplot2::ylab("Total investment (in &euro;)") +
       ggplot2::theme(panel.grid.major = ggplot2::element_line(
         color = "#CCCCCC",
         linetype = "dashed", size = 0.5
@@ -535,10 +526,10 @@ server <- function(input, output, session) {
         weight = 1,
         color = "black",
         opacity = 0.5,
-        popup = htmltools::htmlEscape(paste0(
+        popup = paste0(
           "Share", ": ",
           round(sf[["c53"]], 2), " %"
-        ))
+        )
       ) %>%
       leaflet::addLegend(
         position = "bottomright",
