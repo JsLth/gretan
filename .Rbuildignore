@@ -7,3 +7,7 @@ $run_dev.*
 ^LICENSE\.md$
 ^app\.R$
 ^rsconnect$
+^.rscignore$
+^greta_survey$
+^coopernico_data$
+^TODO$
