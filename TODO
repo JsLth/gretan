@@ -1,7 +1,13 @@
-- Add functionality to search bar (maybe just remove the search bar) -> is this even realistically possible?
-- ***** Add all 8 corporate logos
-- Fix inputPicker overlapping with Leaflet UI -> still no idea
+- Add functionality to search bar -> search through tab names
+- Fix inputPicker overlapping with Leaflet UI
 - Create separate R files for each category (cs.R, indan.R, explorer.R, intro.R)
   to store function files and texts
 - Add texts to global `txts` object
-- make empty tabs more presentable
+- reduce dependencies
+- implement SQL workflows and remove data from memory
+
+
+Think about using these functions/packages:
+- shinyWidgets::execute_safely() (show popups instead of failing on error)
+- package:gargoyle (more careful observing)
+- package:R6 (standardized workflow pipelines)
