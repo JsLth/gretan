@@ -1,7 +1,7 @@
 app_ui <- function() {
   all_pals <- list_palettes()
   
-  categories <- unique(na.omit(cb_ext$topic))
+  categories <- unique(cb_ext$topic[!is.na(cb_ext$topic)])
   titles <- categories %>%
     purrr::map(~dplyr::filter(cb_ext, topic == .x) %>%
                  dplyr::pull(title) %>% unique() %>%
@@ -182,7 +182,7 @@ app_ui <- function() {
   spatial_tab <- bs4Dash::tabItem(
     "spatial",
     make_header(
-      title = "Investment in the Coopérnico project: An examplary analysis of two projects",
+      title = "Investment in the Coop&eacute;rnico project: An examplary analysis of two projects",
       authors = c("Dennis Abel", "Jonas Lieth"),
       affil = "GESIS - Leibniz Institute for the Social Sciences",
       date = "08-03-2023"
@@ -212,7 +212,7 @@ app_ui <- function() {
         bs4Dash::box(
           width = 12,
           status = "primary",
-          title = "Geographical distribution of Coopérnico investments",
+          title = "Geographical distribution of Coop&eacute;rnico investments",
           maximizable = TRUE,
           leaflet::leafletOutput("coopmap1", height = 700)
         )
@@ -221,7 +221,7 @@ app_ui <- function() {
         bs4Dash::box(
           width = 12,
           status = "primary",
-          title = "Spatial clusters of Coopérnico investments",
+          title = "Spatial clusters of Coop&eacute;rnico investments",
           maximizable = TRUE,
           leaflet::leafletOutput("coopmap2", height = 700),
           sidebar = bs4Dash::boxSidebar(
@@ -304,7 +304,7 @@ app_ui <- function() {
     "income",
     make_header(
       title = "Income stability: a trivial example to illustrate what a page can look like",
-      authors = c("Jonas Lieth", "Dennis Abel", "Stefan Jünger"),
+      authors = c("Jonas Lieth", "Dennis Abel", "Stefan J&uuml;nger"),
       affil = "GESIS - Leibniz Institute for the Social Sciences",
       date = "06-03-2023"
     ),
@@ -467,7 +467,7 @@ app_ui <- function() {
   cs2_tab <- bs4Dash::tabItem(
     "cs2",
     make_header(
-      title = "Case study 2: Coopérnico – renewable energy-driven cooperative",
+      title = "Case study 2: Coop&eacute;rnico &ndash; renewable energy-driven cooperative",
       authors = c("Prepared by: Author A", "Author B"),
       affil = list(
         "Author A" = "Cleanwatts",
@@ -480,7 +480,7 @@ app_ui <- function() {
   cs3_tab <- bs4Dash::tabItem(
     "cs3",
     make_header(
-      title = "Case study 3: The Earnest App – a virtual community for sustainable mobility in Darmstadt",
+      title = "Case study 3: The Earnest App &ndash; a virtual community for sustainable mobility in Darmstadt",
       authors = c("Prepared by: Author A", "Author B"),
       affil = list(
         "Author A" = "Fraunhofer Institute for Systems and Innovation Research",
@@ -506,7 +506,7 @@ app_ui <- function() {
   cs5_tab <- bs4Dash::tabItem(
     "cs5",
     make_header(
-      title = "Case study 5: UR BEROA – energy efficiency-driven cooperative",
+      title = "Case study 5: UR BEROA &ndash; energy efficiency-driven cooperative",
       authors = c("Prepared by: Author A", "Author B"),
       affil = list(
         "Author A" = "Tecnalia Research and Innovation",
@@ -521,15 +521,38 @@ app_ui <- function() {
   # TODO: find a way to darken link image hovers
   ui <- bs4Dash::dashboardPage(
     bs4Dash::dashboardHeader(
-      tags$style(".fa-bars {color: #00000}"),
+      tags$style("
+        /* color sidebar button in black */
+        .fa-bars {
+          color: #00000;
+        }
+        
+        /* set sidebar header to the same height as navbar (roughly) */
+        .sidebar-header {
+          height: 4.37rem
+        }
+        
+        /* align sidebar logo and title */
+        .brand-text {
+          display: inline-block;
+          vertical-align: middle;
+          font-weight: bold;
+        }
+        
+        /* remove white space from header */
+        .navbar {
+          padding-top: 0em;
+          padding-bottom: 0em;
+          padding-right: 0em
+        }"),
       div(
         a(
           href = "https://projectgreta.eu/",
           tags$img(src = "www/greta_logo.svg", height = "35px"),
-          style = "padding-top:10px; padding-bottom:10px;"
-        ), class = "dropdown"
+          style = "padding: 0.77em"
+        ), class = "logo"
       ),
-      span(style = "display:inline-block; width: 350%"), # logos at the end of header
+      span(style = "display:inline-block; width: 100%"), # logos at the end of header
       div( # insert logos in a grid
         class = "container-logo",
         corp_logo("gesis"), corp_logo("lut"), corp_logo("unibo"),
@@ -537,22 +560,46 @@ app_ui <- function() {
         corp_logo("isi"), corp_logo("kaskas")
       ),
       title = HTML(paste(
+        #style = "display: inline-block; vertical-align: middle;",
         img(src = "www/greta_flash.svg", width = 50, height = 50),
-        span("GIS tool", class = "brand-text font-weight-light")
-      ), sep = "\n"),
+        span("GIS tool", class = "brand-text")
+      )),
       status = "secondary",
       skin = "light",
       sidebarIcon = tags$i(class = "fa fa-bars", style = "color: rgb(0, 0, 0)")
     ),
     bs4Dash::dashboardSidebar(
+      tags$style(HTML("
+        .layout-fixed .wrapper .sidebar {
+          height: calc(95vh - (3.5rem + 1px));
+        }" # TODO: quick workaround, maybe reconsider
+      )),
       bs4Dash::sidebarMenu(
-        shinyWidgets::searchInput(
-          "textSearch",
-          placeholder = "Search",
-          btnSearch = icon("search"),
-          btnReset = icon("remove"),
-          width = "100%"
+        tags$form(
+          class = "sidebar-form",
+          span(
+            class = "input-group-btn",
+            style = "display:inline-flex; width: 85%;",
+            tags$button(
+              id = "searchButton",
+              type = "button",
+              class = "btn btn-flat action-button",
+              icon("search", lib = "font-awesome")
+            ),
+            div(
+              class = "input-group",
+              style = "margin-left: 0.5em",
+              tags$input(
+                id = "textSearch",
+                type = "text",
+                class = "form-control", 
+                placeholder = "Search...",
+                style = "margin: 5px"
+              )
+            )
+          )
         ),
+        bs4Dash::sidebarHeader("Start"),
         bs4Dash::menuItem(
           text = "Home",
           icon = icon("house", lib = "font-awesome"),
@@ -616,7 +663,8 @@ app_ui <- function() {
       ),
       skin = "light",
       minified = TRUE,
-      collapsed = FALSE
+      collapsed = TRUE,
+      fixed = TRUE
     ),
     bs4Dash::dashboardBody(
       golem_add_external_resources(),
@@ -636,6 +684,7 @@ app_ui <- function() {
     ),
     freshTheme = greta_theme,
     dark = NULL,
-    preloader = preloader
+    preloader = preloader,
+    options = list(sidebarSlimScroll = TRUE)
   )
 }
