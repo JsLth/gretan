@@ -6,13 +6,13 @@ Authors@R:
 Description: PKG_DESC.
 License: GPL (>= 3)
 Depends: 
-    R (>= 4.2.0)
+    R (>= 4.2.0),
+    stats
 Imports: 
     bs4Dash,
     dplyr,
     fresh,
     golem (>= 0.3.5),
-    htmltools,
     leaflegend,
     leaflet,
     purrr,
@@ -25,7 +25,6 @@ Imports:
     waiter,
     ggplot2,
     plotly,
-    purrr,
     shinipsum,
     pkgload,
     spdep
