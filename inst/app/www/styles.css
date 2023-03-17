@@ -1,37 +1,50 @@
-input[type="number"] {
-  max-width: 80%;
-}
-
+*/ Hanging indent for paragraphs */
 p.running-text {
   text-indent: 25px;
   align: justify;
 }
 
+
+*/ Header design */
+.navbar {
+  padding-bottom: 0rem;
+  padding-top: 0rem;
+}
+
 .container-logo {
    display: inline-grid;
-   column-gap: 5px;
-   row-gap: 5px;
+   column-gap: 0px;
+   row-gap: 0px;
    grid-template-columns: repeat(4, auto);
    grid-template-rows: repeat(2, auto);
 }
 
-a.logo {
-  display: inline;
+div.logo {
+  display: inline-flex;
+  padding-top: 0.3em;
+  padding-bottom: 0.3em;
+  padding-left: 0.2em;
+  padding-right: 0.2em;
   background-color: #F4F4F2;
 }
 
-a.logo:hover {
+div.logo:hover {
   background-color: #DEDED8;
 }
 
-a.logo img {
-  display: block;
+a.logo {
+  color: #FED22B;
+  text-decoration: none;
+  background-color: transparent;
+  display: inline-flex;
   margin-left: auto;
   margin-right: auto;
-  margin-bottom: auto;
-  margin-top: auto;
-  height: 17.5px;
 }
+
+a.logo img {
+  height: 25px;
+}
+
 
 /* Slider color */
 .irs-bar-edge, .irs-bar, .irs-single, .irs-from, .irs-to {
