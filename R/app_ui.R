@@ -548,8 +548,8 @@ app_ui <- function() {
       div(
         a(
           href = "https://projectgreta.eu/",
-          tags$img(src = "www/greta_logo.svg", height = "35px"),
-          style = "padding: 0.77em"
+          tags$img(src = "www/greta_logo.svg", height = "37em"),
+          style = "padding: 0.45em"
         ), class = "logo"
       ),
       span(style = "display:inline-block; width: 100%"), # logos at the end of header
@@ -667,7 +667,7 @@ app_ui <- function() {
       fixed = TRUE
     ),
     bs4Dash::dashboardBody(
-      golem_add_external_resources(),
+      add_external_resources(),
       bs4Dash::tabItems(
         home_tab,
         explorer_tab,

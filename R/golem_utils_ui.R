@@ -129,16 +129,8 @@ corp_logo <- function(inst) {
   div(class = "logo", a(
     class = "logo",
     href = web[[inst]],
-    img(src = sprintf("www/%s_logo.png", inst))
+    img(src = sprintf("www/%s_logo.png", inst), style = "height: 1.3em")
   ))
-}
-
-
-recolor_all_sliders <- function(color) {
-  ui_path <- app_sys("R/app_ui.R")
-  code <- readLines(ui_path)
-  n <- sum(stringr::str_detect(code, "sliderInput"))
-  shinyWidgets::setSliderColor(rep(color, n), seq_len(n))
 }
 
 
@@ -147,11 +139,12 @@ p2 <- function(...) p(..., class = "running-text")
 noWS <- function(.f) function(...) .f(..., .noWS = c("inside", "outside")) 
 
 list_palettes <- function() {
-  all_pals <- RColorBrewer::brewer.pal.info %>%
-    dplyr::filter(category == "seq") %>%
-    row.names()
   list(
-    "Common palettes" = as.list(all_pals),
+    "Common palettes" = list(
+      "Blues", "BuGn", "BuPu", "GnBu", "Greens", "Greys", "Oranges", "OrRd",
+      "PuBu", "PuBuGn", "PuRd", "Purples", "RdPu", "Reds", "YlGn", "YlGnBu",
+      "YlOrBr", "YlOrRd"
+    ),
     "Colorblind palettes" = list(
       "Magma", "Inferno", "Plasma", "Viridis",
       "Cividis", "Rocket", "Mako", "Turbo"
