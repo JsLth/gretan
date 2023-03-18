@@ -12,11 +12,9 @@ Imports:
     bs4Dash,
     dplyr,
     fresh,
-    golem (>= 0.3.5),
     leaflegend,
     leaflet,
     purrr,
-    RColorBrewer,
     sf,
     shiny (>= 1.7.4),
     shinyjs,
@@ -30,17 +28,7 @@ Imports:
     spdep
 Suggests: 
     spelling,
-    testthat (>= 3.0.0),
-    readxl,
-    fastDummies,
-    giscoR,
-    janitor,
-    reclin2,
-    stringr,
-    httr2,
-    data.table,
-    haven,
-    priceR
+    testthat (>= 3.0.0)
 Config/testthat/edition: 3
 Encoding: UTF-8
 Language: en-US
