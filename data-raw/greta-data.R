@@ -20,7 +20,7 @@ source("data-raw/coopernico.R", local = TRUE)
 sysdata <- append(sysdata, output)
 
 # Prepare data for saving
-sysdata <- lapply(output, as.name)
+sysdata <- lapply(sysdata, as.name)
 sysdata$internal <- TRUE
 sysdata$overwrite <- TRUE
 sysdata$compress <- "xz"
