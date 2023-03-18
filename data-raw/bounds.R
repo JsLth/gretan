@@ -161,6 +161,14 @@ don_3 <- sf::read_sf(file.path(tempdir(), "Sekzio.shp"), quiet = TRUE)
 
 
 output <- list(
-  "nuts0", "nuts1", "nuts2", "nuts3", "lau", "com", "bgn_1", "bgn_2", "bgn_3",
-  "don_1", "don_2", "don_3"
+  "nuts0", "nuts1", "nuts2", #"nuts3",
+  "bgn_1", "bgn_2", "bgn_3"#,
+  #"don_1", "don_2", "don_3"
 )
+
+st_write(nuts0, dsn = "bounds.sqlite", layer = "nuts0", append = FALSE)
+st_write(nuts1, dsn = "bounds.sqlite", layer = "nuts1", append = FALSE)
+st_write(nuts2, dsn = "bounds.sqlite", layer = "nuts2", append = FALSE)
+st_write(bgn_1, dsn = "bounds.sqlite", layer = "bgn_1", append = FALSE)
+st_write(bgn_2, dsn = "bounds.sqlite", layer = "bgn_2", append = FALSE)
+st_write(bgn_3, dsn = "bounds.sqlite", layer = "bgn_3", append = FALSE)
