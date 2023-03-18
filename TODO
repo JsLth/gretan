@@ -11,3 +11,27 @@ Think about using these functions/packages:
 - shinyWidgets::execute_safely() (show popups instead of failing on error)
 - package:gargoyle (more careful observing)
 - package:R6 (standardized workflow pipelines)
+
+
+Dependencies:
+  Core:
+  - bs4Dash
+  - fresh
+  - leaflegend
+  - leaflet
+  - shiny
+  - shinyWidgets
+  - waiter
+  - pkgload
+  - plotly
+  - ggplot2
+  
+  Replaceable:
+  - sf (sfheaders?)
+  - spdep (sfdep?)
+  
+  Not necessary (replacable with base R):
+  - purrr
+  - viridis
+  - shinipsum
+  - dplyr
