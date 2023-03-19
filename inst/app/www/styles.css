@@ -1,7 +1,8 @@
 /* Paragraph indent for paragraphs */
 p.running-text {
-  text-indent: 25px;
-  align: justify;
+  text-indent: 20px;
+  text-align: justify;
+  text-justify: inter-word;
 }
 
 /* Hanging indent for bibliographies */
