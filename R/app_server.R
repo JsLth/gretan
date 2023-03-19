@@ -18,7 +18,7 @@ server <- function(input, output, session) {
   rct <- reactiveValues()
   
   # Employ waiters
-  w_coopmap1 <- do.call(waiter::Waiter$new, c(id = "coopmap2", waiter_default))
+  w_coopmap1 <- do.call(waiter::Waiter$new, c(id = "coopmap1", waiter_default))
   w_coopmap2 <- do.call(waiter::Waiter$new, c(id = "coopmap2", waiter_default))
   w_coopscatter <- do.call(waiter::Waiter$new, c(id = "coopscatter", waiter_default))
 
