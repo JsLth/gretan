@@ -377,7 +377,7 @@ server <- function(input, output, session) {
         values = ~total_amount,
         opacity = 0.9,
         title = "Total investment",
-        labFormat = leaflet::labelFormat(suffix = " &euro;")
+        labFormat = leaflet::labelFormat(suffix = " \u20ac")
        ) %>%
       leaflet::addCircleMarkers(
         color = "black",
@@ -499,7 +499,7 @@ server <- function(input, output, session) {
         color = "darkred"
       ) +
       ggplot2::xlab("Spatial lag") + 
-      ggplot2::ylab("Total investment (in &euro;)") +
+      ggplot2::ylab("Total investment (in \u20ac)") +
       ggplot2::theme(panel.grid.major = ggplot2::element_line(
         color = "#CCCCCC",
         linetype = "dashed", size = 0.5

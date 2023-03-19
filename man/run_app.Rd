@@ -5,14 +5,12 @@
 \alias{run_greta}
 \title{Run the "greta" Shiny Application}
 \usage{
-run_app(..., golem_opts = list())
+run_app(...)
 
 run_greta(...)
 }
 \arguments{
 \item{...}{Arguments passed on to \code{\link[shiny]{shinyApp}}}
-
-\item{golem_opts}{Options for \code{\link[golem]{with_golem_options}}}
 }
 \description{
 Run the "greta" Shiny Application

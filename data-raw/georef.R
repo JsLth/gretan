@@ -480,11 +480,10 @@ count_nuts0 <- aggregate(survey_local["id"], nuts0, FUN = length) %>%
 srv_nuts0 <- srv_nuts0 %>%
   sf::st_join(count_nuts0, sf::st_equals) %>%
   sf::st_join(nuts0["name"], sf::st_equals) %>%
-  rename(nuts0 = "name") %>%
-  select(-id)
+  rename(nuts0 = "name")
 
 srv_nuts1 <- aggregate(
-  survey_local,
+  survey_local %>% select(-id),
   nuts1,
   FUN = mean,
   na.rm = TRUE
@@ -498,11 +497,10 @@ srv_nuts1 <- srv_nuts1 %>%
   sf::st_join(count_nuts1, sf::st_equals) %>%
   sf::st_join(nuts1["name"], sf::st_equals) %>%
   sf::st_join(nuts0["name"], sf::st_within) %>%
-  rename(nuts1 = "name.x", nuts0 = "name.y") %>%
-  select(-id)
+  rename(nuts1 = "name.x", nuts0 = "name.y")
 
 srv_nuts2 <- aggregate(
-  survey_local,
+  survey_local %>% select(-id),
   nuts2,
   FUN = mean,
   na.rm = TRUE
@@ -518,8 +516,7 @@ srv_nuts2 <- srv_nuts2 %>%
   sf::st_join(nuts0["name"], sf::st_nearest_feature) %>%
   rename(nuts2 = "name.x", nuts0 = "name.y") %>%
   sf::st_join(nuts1["name"], sf::st_nearest_feature) %>%
-  rename(nuts1 = "name") %>%
-  select(-id)
+  rename(nuts1 = "name")
 
 output <- list("cb_ext", "srv_nuts0", "srv_nuts1", "srv_nuts2")
 

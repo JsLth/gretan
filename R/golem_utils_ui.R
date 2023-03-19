@@ -79,9 +79,9 @@ make_header <- function(title,
 
   div(
     id = "header",
-    h2(title, class = "title toc-ignore"),
+    h2(HTML(title), class = "title toc-ignore"),
     h5(HTML(paste(authors, collapse = ", ")), class = "author"),
-    h5(Sys.Date(), class = "date"),
+    h5(date, class = "date"),
     h6(HTML(paste(affil, collapse = "; ")), class = "affil"),
     align = "center"
   )
@@ -91,23 +91,24 @@ make_header <- function(title,
 dummy_bibliography <- function() {
   tags$ul(
     class = "list-style: none",
-    p("Bollinger, B., & Gillingham, K. (2012). Peer Effects in the Diffusion of
-      Solar Photovoltaic Panels. Marketing Science, 31(6), 900&ndash;912.
+    style = "margin-left: -30px",
+    pbib("Bollinger, B., & Gillingham, K. (2012). Peer Effects in the Diffusion of
+      Solar Photovoltaic Panels. Marketing Science, 31(6), 900\u2013912.
       https://doi.org/10.1287/mksc.1120.0727"),
-    p("Boschma, R. (2005). Proximity and Innovation: A Critical Assessment.
-      Regional Studies, 39(1), 61&ndash;74.
+    pbib("Boschma, R. (2005). Proximity and Innovation: A Critical Assessment.
+      Regional Studies, 39(1), 61\u201374.
       https://doi.org/10.1080/0034340052000320887"),
-    p("Bouzarovski, S., & Simcock, N. (2017). Spatializing energy justice.
-      Energy Policy, 107, 640&ndash;648.
+    pbib("Bouzarovski, S., & Simcock, N. (2017). Spatializing energy justice.
+      Energy Policy, 107, 640\u2013648.
       https://doi.org/10.1016/j.enpol.2017.03.064"),
-    p("Bridge, G., Bouzarovski, S., Bradshaw, M., & Eyre, N. (2013). Geographies
+    pbib("Bridge, G., Bouzarovski, S., Bradshaw, M., & Eyre, N. (2013). Geographies
       of energy transition: Space, place and the low-carbon economy. Energy
-      Policy, 53, 331&ndash;340. https://doi.org/10.1016/j.enpol.2012.10.066"),
-    p("Graziano, M., & Gillingham, K. (2015). Spatial patterns of solar
+      Policy, 53, 331\u2013340. https://doi.org/10.1016/j.enpol.2012.10.066"),
+    pbib("Graziano, M., & Gillingham, K. (2015). Spatial patterns of solar
       photovoltaic system adoption: The influence of neighbors and the built
-      environment. Journal of Economic Geography, 15(4), 815&ndash;839.
+      environment. Journal of Economic Geography, 15(4), 815\u2013839.
       https://doi.org/10.1093/jeg/lbu036"),
-    p("Irwin, N. B. (2021). Sunny days: Spatial spillovers in photovoltaic
+    pbib("Irwin, N. B. (2021). Sunny days: Spatial spillovers in photovoltaic
       system adoptions. Energy Policy, 151, 112192.
       https://doi.org/10.1016/j.enpol.2021.112192")
   )
@@ -133,6 +134,7 @@ corp_logo <- function(inst) {
   ))
 }
 
+pbib <- function(...) p(..., class = "bib")
 
 p2 <- function(...) p(..., class = "running-text")
 
@@ -294,14 +296,17 @@ sandbox <- bs4Dash::tabItem(
         title = "Buttons",
         status = "primary",
         width = 12,
-        actionButton(inputId = "success", label = "Success !", width = "100%",
-                     class = "btn-success", style = "text-color: #FFF"),
-        actionButton(inputId = "info", label = "Info", width = "100%",
-                     class = "btn-info", style = "text-color: #FFF"),
-        actionButton(inputId = "error", label = "Error", width = "100%",
-                     class = "btn-danger", style = "text-color: #FFF"),
-        actionButton(inputId = "warning", label = "Warning", width = "100%",
-                     class = "btn-warning", style = "text-color: #FFF")
+        actionButton(inputId = "success", label = "Success!", width = "80%",
+                     class = "btn-success", style = "color: #FFF"),
+        br(),
+        actionButton(inputId = "info", label = "Info", width = "80%",
+                     class = "btn-info", style = "color: #FFF"),
+        br(),
+        actionButton(inputId = "error", label = "Error", width = "80%",
+                     class = "btn-danger", style = "color: #FFF"),
+        br(),
+        actionButton(inputId = "warning", label = "Warning", width = "80%",
+                     class = "btn-warning", style = "color: #FFF")
       )
     )
   )

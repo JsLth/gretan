@@ -1,5 +1,6 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^\.RDataTmp$
 ^data-raw$
 dev_history.R
 ^dev$

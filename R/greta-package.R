@@ -1,4 +1,5 @@
 #' @keywords internal
+#' @importFrom stats as.formula dnorm
 "_PACKAGE"
 
 ## usethis namespace: start
