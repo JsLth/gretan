@@ -1,11 +1,17 @@
-*/ Hanging indent for paragraphs */
+/* Paragraph indent for paragraphs */
 p.running-text {
   text-indent: 25px;
   align: justify;
 }
 
+/* Hanging indent for bibliographies */
+p.bib {
+  padding-left: 22px;
+  text-indent: -22px;
+}
 
-*/ Header design */
+
+/* Navbar design */
 .navbar {
   padding-bottom: 0rem;
   padding-top: 0rem;
