@@ -213,7 +213,6 @@ app_ui <- function() {
           width = 12,
           status = "primary",
           title = "Geographical distribution of Coop\u00e9rnico investments",
-          maximizable = TRUE,
           leaflet::leafletOutput("coopmap1", height = 700)
         )
       ),
@@ -222,7 +221,6 @@ app_ui <- function() {
           width = 12,
           status = "primary",
           title = "Spatial clusters of Coop\u00e9rnico investments",
-          maximizable = TRUE,
           leaflet::leafletOutput("coopmap2", height = 700),
           sidebar = bs4Dash::boxSidebar(
             id = "coopmap2_sidebar",
@@ -287,7 +285,6 @@ app_ui <- function() {
           width = 12,
           status = "primary",
           title = "Scatterplot of Moran's I",
-          maximizable = TRUE,
           plotly::plotlyOutput("coopscatter")
         ),
         bs4Dash::box(
@@ -334,7 +331,6 @@ app_ui <- function() {
           width = 12,
           status = "primary",
           title = "Spatial distribution of income stability",
-          maximizable = TRUE,
           leaflet::leafletOutput("tempmap", height = 700)
         )
       )
@@ -344,14 +340,12 @@ app_ui <- function() {
         plotly::plotlyOutput("tempdensity"),
         width = 12,
         status = "primary",
-        maximizable = TRUE,
         title = "Distribution of income stability"
       )),
       col_6(bs4Dash::box(
         plotly::plotlyOutput("tempscatter"),
         width = 12,
         status = "primary",
-        maximizable = TRUE,
         title = "Relationship between age and income stability"
       ))
     ),
