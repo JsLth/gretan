@@ -23,19 +23,19 @@ server <- function(input, output, session) {
   w_coopscatter <- do.call(waiter::Waiter$new, c(id = "coopscatter", waiter_default))
 
   # Show popups as long as tabs are not filled with contents
-  shinyjs::onclick("tab-cs2", info_popup(
+  shinyjs::onclick("tab-cs2", send_info(
     "This tab has not yet been filled with contents."
   ))
-  shinyjs::onclick("tab-cs3", info_popup(
+  shinyjs::onclick("tab-cs3", send_info(
     "This tab has not yet been filled with contents."
   ))
-  shinyjs::onclick("tab-cs4", info_popup(
+  shinyjs::onclick("tab-cs4", send_info(
     "This tab has not yet been filled with contents."
   ))
-  shinyjs::onclick("tab-cs5", info_popup(
+  shinyjs::onclick("tab-cs5", send_info(
     "This tab has not yet been filled with contents."
   ))
-  shinyjs::onclick("tab-simulation", info_popup(
+  shinyjs::onclick("tab-simulation", send_info(
     "This tab has not yet been filled with contents."
   ))
   
@@ -72,7 +72,7 @@ server <- function(input, output, session) {
       )
   })
   
-  observeEvent(input$csmaps_marker_click, {
+  observe({
     target <- leaflet_select_click(
       id = "csmaps",
       on = "marker",
@@ -105,14 +105,20 @@ server <- function(input, output, session) {
           )
         )
     }
-  })
+  }) %>%
+    bindEvent(input$csmaps_marker_click)
   
   # Show case study description based on map clicks
-  output$csdesc <- leaflet_text_on_click(
-    id = "csmaps",
-    ref = cs_coords,
-    texts = txts$csdesc
-  )
+  output$csdesc <- renderUI({
+    id <- "csmaps"
+    click <- input[[paste(id, "marker", "click", sep = "_")]]
+    leaflet_text_on_click(
+      id = "csmaps",
+      ref = sf::st_geometry(cs_coords),
+      texts = txts$csdesc,
+      click = click
+    )
+  })
   
   
   # Data explorer ----
@@ -140,7 +146,7 @@ server <- function(input, output, session) {
   })
   
   # Hide or show selectors for subitems or options depending on the question
-  observeEvent(input$exp_title, {
+  observe({
     varsel <- cb_ext[cb_ext$title %in% input$exp_title, ]$variable
     items <- unique(cb_ext[cb_ext$variable %in% varsel, ]$subitem)
     options <- unique(cb_ext[cb_ext$variable %in% varsel, ]$option)
@@ -168,11 +174,12 @@ server <- function(input, output, session) {
     } else {
       shinyjs::hide("option_hide", anim = TRUE)
     }
-  })
+  }) %>%
+    bindEvent(input$exp_title)
   
   
   # Determine the variable based on combination of topic, subitem and option
-  observe({
+  exp_invar <- reactive({
     has_title <- cb_ext$title %in% input$exp_title
     invar <- cb_ext[has_title, ]
 
@@ -201,9 +208,11 @@ server <- function(input, output, session) {
       invar <- invar[1, ]
     }
     
-    rct$invar <- invar$variable
-    
-    is_metric <- cb_ext[cb_ext$variable %in% rct$invar, ]$is_metric
+    invar$variable
+  })
+  
+  observe({
+    is_metric <- cb_ext[cb_ext$variable %in% exp_invar(), ]$is_metric
     if (is_metric) {
       shinyjs::disable("fixed_hide")
     } else {
@@ -211,25 +220,28 @@ server <- function(input, output, session) {
     }
   })
   
-  observeEvent(input$scale, {
-    rct$poly <- switch(
+  exp_poly <- reactive({
+    switch(
       input$scale,
       "NUTS-0" = srv_nuts0,
       "NUTS-1" = srv_nuts1,
       "NUTS-2" = srv_nuts2
     )
-  })
+  }) %>%
+    bindEvent(input$scale)
 
   output$explorer <- leaflet::renderLeaflet({
-    poly <- rct$poly
-    invar <- rct$invar
+    poly <- isolate(exp_poly())
+    invar <- isolate(exp_invar())
     all_pals <- list_palettes()
 
-    if (input$pal %in% all_pals[["Colorblind palettes"]]) {
-      pal <- viridis::viridis_pal(option = tolower(input$pal))(5)
-    } else {
-      pal <- input$pal
-    }
+    isolate({
+      if (input$pal %in% all_pals[["Colorblind palettes"]]) {
+        pal <- viridis::viridis_pal(option = tolower(input$pal))(5)
+      } else {
+        pal <- input$pal
+      }
+    })
     
     is_metric <- cb_ext[cb_ext$variable %in% invar, ]$is_metric
     is_dummy <- cb_ext[cb_ext$variable %in% invar, ]$is_dummy ||

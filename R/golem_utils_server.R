@@ -81,50 +81,31 @@ align_dl_items <- function(x, y, char = " ", bold = TRUE) {
   }, dti = x, ddi = y, SIMPLIFY = FALSE, USE.NAMES = FALSE)
 }
 
-leaflet_select_click <- function(id, on, ref, input, tol = 1) {
-  click <- input[[paste(id, on, "click", sep = "_")]]
+
+leaflet_text_on_click <- function(id, geom, texts, click, tol = 1) {
   target <- NULL
   if (!is.null(click)) {
     marker <- sf::st_sfc(sf::st_point(c(click$lng, click$lat)), crs = 4326)
     
     target <- ref[sf::st_is_within_distance(
-      ref$geometry,
+      geom,
       marker,
       dist = tol,
       sparse = FALSE
     ), ]
   }
   
-  target
+  if (is.null(target)) {
+    target <- "none"
+  } else {
+    target <- target$name
+  }
+  
+  texts[[target]]
 }
 
-leaflet_text_on_click <- function(id,
-                                  ref,
-                                  texts,
-                                  on = "marker",
-                                  do = "click",
-                                  tol = 1) {
-  input <- get("input", envir = parent.frame())
-  renderUI({
-    target <- leaflet_select_click(
-      id = id,
-      on = on,
-      ref = ref,
-      input = input,
-      tol = tol
-    )
-    
-    if (is.null(target)) {
-      target <- "none"
-    } else {
-      target <- target$name
-    }
-    
-    texts[[target]]
-  })
-}
 
-info_popup <- function(text, title = "Info") {
+send_info <- function(text, title = "Info") {
   shinyWidgets::sendSweetAlert(
     title = title,
     text = text,
