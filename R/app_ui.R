@@ -574,7 +574,6 @@ app_ui <- function() {
         corp_logo("isi"), corp_logo("kaskas")
       ),
       title = HTML(paste(
-        #style = "display: inline-block; vertical-align: middle;",
         img(src = "www/greta_flash.svg", width = 50, height = 50),
         span("GIS tool", class = "brand-text")
       )),
