@@ -1,0 +1,285 @@
+mod_exp_ui <- function(id) {
+  ns <- NS(id)
+  cb <- cb_ext
+  categories <- unique(cb$topic[!is.na(cb$topic)])
+  titles <- categories %>%
+    purrr::map(~dplyr::filter(cb, topic == .x) %>%
+                 dplyr::pull(title) %>% unique() %>%
+                 as.list()) %>%
+    purrr::set_names(categories)
+  
+  bs4Dash::tabItem(
+    "explorer",
+    fluidRow(
+      bs4Dash::column(
+        width = 3,
+        bs4Dash::box(
+          title = "Data selection", 
+          id = ns("databox"),
+          width = 12,
+          solidHeader = FALSE, 
+          collapsible = TRUE,
+          status = "primary",
+          shinyWidgets::pickerInput(
+            ns("title"),
+            "Topic",
+            titles,
+            options = shinyWidgets::pickerOptions(
+              windowPadding = c(30, 0, 0, 0),
+              liveSearch = TRUE
+            )
+          ),
+          htmlOutput(ns("question")),
+          tags$br(),
+          shinyjs::hidden(
+            div(id = "subitem-hide",
+                shinyWidgets::pickerInput(ns("subitem"), "Subitem", character())
+            )
+          ),
+          shinyjs::hidden(
+            div(id = "option-hide",
+                shinyWidgets::pickerInput(ns("option"), "Option", character())
+            )
+          )
+        ),
+        bs4Dash::box(
+          title = "Map configuration",
+          id = ns("config"),
+          width = 12,
+          solidHeader = FALSE,
+          collapsible = TRUE,
+          status = "primary",
+          shinyWidgets::pickerInput(
+            ns("aggr"),
+            "Aggregation level",
+            c("NUTS-0", "NUTS-1", "NUTS-2")
+          ),
+          shinyWidgets::pickerInput(ns("pal"), "Color palette", list_palettes()),
+          shinyjs::disabled(div(
+            id = ns("fixed-hide"),
+            shinyWidgets::prettyRadioButtons(
+              ns("fixed"),
+              "Legend values",
+              choices = c("Full contrast", "Full range"),
+              selected = "Full contrast",
+              inline = TRUE
+            )
+          ))
+        ),
+        bs4Dash::box(
+          title = "Download",
+          id = ns("download"),
+          width = 12,
+          solidHeader = FALSE,
+          collapsible = TRUE,
+          collapsed = TRUE,
+          status = "primary",
+          bs4Dash::actionButton(
+            "download_button",
+            "Download data",
+            icon = icon("download", lib = "font-awesome")
+          )
+        )
+      ),
+      bs4Dash::column(
+        width = 9,
+        bs4Dash::box(
+          id = ns("mapbox"),
+          width = 12,
+          collapsible = FALSE,
+          solidHeader = FALSE,
+          headerBorder = FALSE,
+          status = "primary",
+          leaflet::leafletOutput(ns("explorer"), width = "100%", height = 800)
+        )
+      )
+    )
+  )
+}
+
+
+mod_exp_server <- function(input, output, session) {
+  ns <- session$ns
+  cb <- cb_ext
+  
+  # Show question
+  output$question <- renderUI({
+    if (!is.null(input$title)) {
+      indat <- cb[cb$title %in% input$title, ]
+      
+      if (!all(is.na(indat$subitem))) {
+        indat <- indat[indat$subitem %in% input$subitem, ]
+      }
+      
+      if (!all(is.na(indat$option))) {
+        indat <- indat[indat$option %in% input$option, ]
+      }
+      
+      HTML(sprintf(
+        "<b>Question %s:</b><br>%s",
+        toupper(indat$og_var),
+        indat$label
+      ))
+    } else {
+      ""
+    }
+  })
+  
+  # Hide or show selectors for subitems or options depending on the question
+  observe({
+    varsel <- cb_ext[cb_ext$title %in% input$title, ]$variable
+    items <- unique(cb_ext[cb_ext$variable %in% varsel, ]$subitem)
+    options <- unique(cb_ext[cb_ext$variable %in% varsel, ]$option)
+    show_subitems <- length(varsel) > 1 & !all(is.na(items))
+    show_options <- length(varsel) > 1 & !all(is.na(options))
+    
+    if (show_subitems) {
+      shinyWidgets::updatePickerInput(
+        session,
+        inputId = "subitem",
+        choices = items
+      )
+      shinyjs::show("subitem-hide", anim = TRUE)
+    } else {
+      shinyjs::hide("subitem-hide", anim = TRUE)
+    }
+    
+    if (show_options) {
+      shinyWidgets::updatePickerInput(
+        session,
+        inputId = "option",
+        choices = options
+      )
+      shinyjs::show("option-hide", anim = TRUE)
+    } else {
+      shinyjs::hide("option-hide", anim = TRUE)
+    }
+  }) %>%
+    bindEvent(input$title)
+  
+  
+  # Determine the variable based on combination of topic, subitem and option
+  exp_invar <- reactive({
+    has_title <- cb$title %in% input$title
+    invar <- cb[has_title, ]
+    
+    # case: multiple items exist, look for subitems
+    if (length(invar$variable) > 1) {
+      has_subitem <- invar$subitem %in% input$subitem
+      
+      # only select subitem if any exist
+      if (any(has_subitem)) {
+        invar <- invar[has_subitem, ]
+      }
+    }
+    
+    # case: there's still multiple items, look for options
+    if (length(invar$variable) > 1 || !length(invar$variable)) {
+      has_option <- invar$option %in% input$option
+      
+      # only select option if any exist
+      if (any(has_option)) {
+        invar <- invar[has_option, ]
+      }
+    }
+    
+    # if all strings fail, just select the first one
+    if (length(invar$variable) > 1) {
+      invar <- invar[1, ]
+    }
+    
+    invar$variable
+  }) %>%
+    bindEvent(input$title, input$subitem, input$option)
+  
+  observe({
+    is_metric <- cb[cb$variable %in% exp_invar(), ]$is_metric
+    if (is_metric) {
+      shinyjs::disable("fixed-hide")
+    } else {
+      shinyjs::enable("fixed-hide")
+    }
+  })
+  
+  exp_poly <- reactive({
+    switch(
+      input$aggr,
+      "NUTS-0" = srv_nuts0,
+      "NUTS-1" = srv_nuts1,
+      "NUTS-2" = srv_nuts2
+    )
+  }) %>%
+    bindEvent(input$aggr)
+  
+  output$explorer <- leaflet::renderLeaflet({
+    poly <- isolate(exp_poly())
+    invar <- isolate(exp_invar())
+    all_pals <- list_palettes()
+    
+    isolate({
+      if (input$pal %in% all_pals[["Colorblind palettes"]]) {
+        pal <- viridis::viridis_pal(option = tolower(input$pal))(5)
+      } else {
+        pal <- input$pal
+      }
+    })
+    
+    is_metric <- cb[cb$variable %in% invar, ]$is_metric
+    is_dummy <- cb[cb$variable %in% invar, ]$is_dummy ||
+      cb[cb$variable %in% invar, ]$is_pdummy
+    
+    domain <- NULL
+    pal_values <- as.formula(paste0("~", invar))
+    
+    if (identical(invar, "c1")) {
+      lgd <- "Mean age"
+      unit <- " years"
+    } else if (is_metric) {
+      lgd <- "Mean"
+      unit <- ""
+    } else {
+      if (identical(input$fixed, "Full range")) {
+        domain <- seq(0, 100, 10)
+        pal_values <- domain
+      }
+      lgd <- "Share"
+      unit <- "%"
+      poly[[invar]] <- poly[[invar]] * 100
+    }
+    
+    pal <- leaflet::colorNumeric(pal, domain = domain)
+    
+    label_values <- list(
+      poly[["nuts0"]], poly[["nuts1"]], poly[["nuts2"]],
+      paste0(round(poly[[invar]], 2), unit), ":"
+    )
+    names(label_values) <- c("NUTS-0", "NUTS-1", "NUTS-2", lgd, "sep")
+    labels <- do.call(align_dl, label_values)
+    
+    leaflet::leaflet(sf::st_transform(poly, 4326)) %>%
+      leaflet::addTiles() %>%
+      leaflet::setView(lng = 9, lat = 55, zoom = 4) %>%
+      leaflet::addPolygons(
+        fillColor = as.formula(paste0("~pal(", invar, ")")),
+        fillOpacity = 0.7,
+        weight = 1,
+        color = "black",
+        opacity = 0.5,
+        label = labels,
+        highlightOptions = highlight_opts
+      ) %>%
+      leaflet::addLegend(
+        position = "bottomright",
+        na.label = "No data",
+        pal = pal,
+        values = pal_values,
+        opacity = 0.9,
+        title = lgd,
+        labFormat = leaflet::labelFormat(suffix = unit)
+      )
+  })
+  
+  observe({
+    
+  })
+}

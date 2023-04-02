@@ -18,7 +18,7 @@ locm_colors_abel <- function(locm, df) {
     }
   }
   
-  list(colors, colors1)
+  list(outline = colors, fill = colors1)
 }
 
 make_html_label <- function(..., sep = " ", bold = TRUE) {

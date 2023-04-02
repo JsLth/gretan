@@ -1,0 +1,132 @@
+mod_home_ui <- function(id) {
+  ns <- NS(id)
+  
+  bs4Dash::tabItem(
+    "home",
+    fluidRow(
+      bs4Dash::column(
+        width = 6,
+        bs4Dash::box(
+          title = "Welcome to the GRETA GIS tool",
+          width = 12,
+          status = "primary",
+          p2("Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet."),
+          p2("Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi. Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat."),
+          p2("Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat. Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi."),
+          h2("Subtitle"),
+          p2("Nam liber tempor cum soluta nobis eleifend option congue nihil imperdiet doming id quod mazim placerat facer possim assum. Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat."),
+          p2("Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis."),
+          p2("At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, At accusam aliquyam diam diam dolore dolores duo eirmod eos erat, et nonumy sed tempor et et invidunt justo labore Stet clita ea et gubergren, kasd magna no rebum. sanctus sea sed takimata ut vero voluptua. est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur")
+        )
+      ),
+      bs4Dash::column(
+        width = 6,
+        bs4Dash::box(
+          title = "Geographical overview",
+          width = 12,
+          status = "primary",
+          leaflet::leafletOutput(ns("csmaps"), width = "100%", height = 450)
+        ),
+        bs4Dash::box(
+          title = "Case study descriptions",
+          width = 12,
+          status = "primary",
+          uiOutput(ns("csdesc"))
+        )
+      )
+    )
+  )
+}
+
+
+mod_home_server <- function(input, output, session) {
+  cs_coords <- sf::st_sf(
+    name = c("Italy", "Portugal", "Germany", "The Netherlands", "Spain"),
+    geometry = sf::st_sfc(
+      sf::st_point(c(11.399926, 44.507145)),
+      sf::st_point(c(-9.136693, 38.710479)),
+      sf::st_point(c(8.651177, 49.872775)),
+      sf::st_point(c(5.6343227, 52.2434979)),
+      sf::st_point(c(-1.994286, 43.300075)),
+      crs = 4326
+    )
+  )
+  
+  output$csmaps <- leaflet::renderLeaflet({
+    leaflet::leaflet(cs_coords) %>%
+      leaflet::addTiles() %>%
+      leaflet::setView(lng = 9, lat = 55, zoom = 3) %>%
+      leaflet::addMarkers(
+        icon = leaflet::makeIcon(
+          "https://www.svgrepo.com/download/352253/map-pin.svg",
+          iconWidth = 25,
+          iconHeight = 25,
+          iconAnchorY = 25,
+          iconAnchorX = 12.5
+        )
+      ) %>%
+      leaflet::addPolylines(
+        data = sf::st_transform(srv_nuts0, 4326),
+        fillOpacity = 0,
+        weight = 1,
+        color = "red"
+      ) %>%
+      leaflegend::addLegendImage(
+        images = leaflegend::makeSymbol("line", width = 7, color = "red"),
+        labels = "Surveyed countries",
+        orientation = "vertical",
+        position = "bottomleft",
+        width = 10,
+        height = 10,
+        labelStyle = "font-size: 12px; vertical-align: middle;"
+      )
+  })
+  
+  observe({
+    target <- leaflet_select_click(
+      id = "csmaps",
+      on = "marker",
+      ref = cs_coords,
+      input = input
+    )
+    
+    if (!is.null(target)) {
+      cc <- cs_coords[!cs_coords$name %in% target$name, ]
+      leaflet::leafletProxy("csmaps") %>%
+        leaflet::clearMarkers() %>%
+        leaflet::addMarkers(
+          data = cc,
+          icon = leaflet::makeIcon(
+            "https://www.svgrepo.com/download/352253/map-pin.svg",
+            iconWidth = 25,
+            iconHeight = 25,
+            iconAnchorY = 25,
+            iconAnchorX = 12.5
+          )
+        ) %>%
+        leaflet::addMarkers(
+          data = target,
+          icon = leaflet::makeIcon(
+            "https://www.svgrepo.com/download/352253/map-pin.svg",
+            iconWidth = 37.5,
+            iconHeight = 37.5,
+            iconAnchorY = 37.5,
+            iconAnchorX = 18.75
+          )
+        )
+    }
+  }) %>%
+    bindEvent(input$csmaps_marker_click)
+  
+  # Show case study description based on map clicks
+  output$csdesc <- renderUI({
+    id <- "csmaps"
+    click <- input[[paste(id, "marker", "click", sep = "_")]]
+    leaflet_text_on_click(
+      id = "csmaps",
+      ref = sf::st_geometry(cs_coords),
+      texts = txts$csdesc,
+      click = click
+    )
+  })
+}
