@@ -12,7 +12,7 @@ mod_main_ui <- function(id) {
 }
 
 
-mod_main_server <- function(input, output, session) {
+mod_main <- function(input, output, session) {
   ns <- session$ns
   
   shinyjs::onclick("tab-cs2", send_info(
@@ -38,4 +38,9 @@ mod_main_server <- function(input, output, session) {
   mod_cs_server("cs")
   mod_ind_server("ind")
   mod_sandbox_server("sandbox")
+}
+
+
+mod_main_server <- function(id) {
+  moduleServer(id, mod_main)
 }
