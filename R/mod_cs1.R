@@ -107,9 +107,7 @@ mod_cs1_ui <- function(id) {
 }
 
 
-mod_cs1_server <- function(input, output, session) {
-  ns <- session$ns
-  
+mod_cs1 <- function(input, output, session) {
   output$map <- leaflet::renderLeaflet({
     cs_bounds <- switch(
       input$bounds,
@@ -136,9 +134,19 @@ mod_cs1_server <- function(input, output, session) {
     }
   })
   
-  output$poi <- leaflet_text_on_click(
-    id = "map",
-    ref = cs1coords,
-    texts = txts$cs1poi
-  )
+  
+  output$poi <- renderUI({
+    click <- input$map_marker_click
+    leaflet_text_on_click(
+      id = "map",
+      geom = cs1coords,
+      texts = txts$cs1poi,
+      click = click
+    )
+  })
+}
+
+
+mod_cs1_server <- function(id) {
+  moduleServer(id, mod_cs1)
 }

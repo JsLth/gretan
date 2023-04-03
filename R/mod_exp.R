@@ -31,16 +31,14 @@ mod_exp_ui <- function(id) {
           ),
           htmlOutput(ns("question")),
           tags$br(),
-          shinyjs::hidden(
-            div(id = "subitem-hide",
-                shinyWidgets::pickerInput(ns("subitem"), "Subitem", character())
-            )
-          ),
-          shinyjs::hidden(
-            div(id = "option-hide",
-                shinyWidgets::pickerInput(ns("option"), "Option", character())
-            )
-          )
+          shinyjs::hidden(div(
+            id = ns("subitem-hide"),
+            shinyWidgets::pickerInput(ns("subitem"), "Subitem", character())
+          )),
+          shinyjs::hidden(div(
+            id = ns("option-hide"),
+            shinyWidgets::pickerInput(ns("option"), "Option", character())
+          ))
         ),
         bs4Dash::box(
           title = "Map configuration",
@@ -98,7 +96,7 @@ mod_exp_ui <- function(id) {
 }
 
 
-mod_exp_server <- function(input, output, session) {
+mod_exp <- function(input, output, session) {
   ns <- session$ns
   cb <- cb_ext
   
@@ -127,9 +125,9 @@ mod_exp_server <- function(input, output, session) {
   
   # Hide or show selectors for subitems or options depending on the question
   observe({
-    varsel <- cb_ext[cb_ext$title %in% input$title, ]$variable
-    items <- unique(cb_ext[cb_ext$variable %in% varsel, ]$subitem)
-    options <- unique(cb_ext[cb_ext$variable %in% varsel, ]$option)
+    varsel <- cb[cb$title %in% input$title, ]$variable
+    items <- unique(cb[cb$variable %in% varsel, ]$subitem)
+    options <- unique(cb[cb$variable %in% varsel, ]$option)
     show_subitems <- length(varsel) > 1 & !all(is.na(items))
     show_options <- length(varsel) > 1 & !all(is.na(options))
     
@@ -159,10 +157,10 @@ mod_exp_server <- function(input, output, session) {
   
   
   # Determine the variable based on combination of topic, subitem and option
-  exp_invar <- reactive({
+  invar <- reactive({
     has_title <- cb$title %in% input$title
     invar <- cb[has_title, ]
-    
+
     # case: multiple items exist, look for subitems
     if (length(invar$variable) > 1) {
       has_subitem <- invar$subitem %in% input$subitem
@@ -190,10 +188,10 @@ mod_exp_server <- function(input, output, session) {
     
     invar$variable
   }) %>%
-    bindEvent(input$title, input$subitem, input$option)
+    bindEvent(input$title, input$subitem, input$option, ignoreInit = TRUE)
   
   observe({
-    is_metric <- cb[cb$variable %in% exp_invar(), ]$is_metric
+    is_metric <- cb[cb$variable %in% invar(), ]$is_metric
     if (is_metric) {
       shinyjs::disable("fixed-hide")
     } else {
@@ -201,7 +199,16 @@ mod_exp_server <- function(input, output, session) {
     }
   })
   
-  exp_poly <- reactive({
+  pal <- reactive({
+    palettes <- list_palettes()
+    if (input$pal %in% palettes[["Colorblind palettes"]]) {
+      viridis::viridis_pal(option = tolower(input$pal))(5)
+    } else {
+      input$pal
+    }
+  })
+  
+  poly <- reactive({
     switch(
       input$aggr,
       "NUTS-0" = srv_nuts0,
@@ -211,25 +218,17 @@ mod_exp_server <- function(input, output, session) {
   }) %>%
     bindEvent(input$aggr)
   
-  output$explorer <- leaflet::renderLeaflet({
-    poly <- isolate(exp_poly())
-    invar <- isolate(exp_invar())
-    all_pals <- list_palettes()
-    
-    isolate({
-      if (input$pal %in% all_pals[["Colorblind palettes"]]) {
-        pal <- viridis::viridis_pal(option = tolower(input$pal))(5)
-      } else {
-        pal <- input$pal
-      }
-    })
+  exp_params <- reactive({
+    poly <- poly()
+    invar <- invar()
+    pal <- pal()
     
     is_metric <- cb[cb$variable %in% invar, ]$is_metric
     is_dummy <- cb[cb$variable %in% invar, ]$is_dummy ||
       cb[cb$variable %in% invar, ]$is_pdummy
     
     domain <- NULL
-    pal_values <- as.formula(paste0("~", invar))
+    values <- as.formula(paste0("~", invar))
     
     if (identical(invar, "c1")) {
       lgd <- "Mean age"
@@ -240,7 +239,7 @@ mod_exp_server <- function(input, output, session) {
     } else {
       if (identical(input$fixed, "Full range")) {
         domain <- seq(0, 100, 10)
-        pal_values <- domain
+        values <- domain
       }
       lgd <- "Share"
       unit <- "%"
@@ -256,30 +255,75 @@ mod_exp_server <- function(input, output, session) {
     names(label_values) <- c("NUTS-0", "NUTS-1", "NUTS-2", lgd, "sep")
     labels <- do.call(align_dl, label_values)
     
-    leaflet::leaflet(sf::st_transform(poly, 4326)) %>%
+    poly <- sf::st_transform(poly, 4326)
+    
+    list(
+      poly = poly,
+      invar = invar,
+      pal = pal,
+      values = values,
+      labels = labels,
+      lgd = lgd,
+      unit = unit
+    )
+  })
+  
+  output$explorer <- leaflet::renderLeaflet({
+    params <- isolate(exp_params())
+    trigger("exp")
+    
+    leaflet::leaflet(params$poly) %>%
       leaflet::addTiles() %>%
       leaflet::setView(lng = 9, lat = 55, zoom = 4) %>%
       leaflet::addPolygons(
-        fillColor = as.formula(paste0("~pal(", invar, ")")),
+        fillColor = as.formula(paste0("~params$pal(", params$invar, ")")),
         fillOpacity = 0.7,
         weight = 1,
         color = "black",
         opacity = 0.5,
-        label = labels,
+        label = params$labels,
         highlightOptions = highlight_opts
       ) %>%
       leaflet::addLegend(
         position = "bottomright",
         na.label = "No data",
-        pal = pal,
-        values = pal_values,
+        pal = params$pal,
+        values = params$values,
         opacity = 0.9,
-        title = lgd,
-        labFormat = leaflet::labelFormat(suffix = unit)
+        title = params$lgd,
+        labFormat = leaflet::labelFormat(suffix = params$unit)
       )
   })
   
   observe({
+    req(isTRUE(watch("exp")))
+    params <- exp_params()
     
+    leaflet::leafletProxy("explorer", data = params$poly) %>%
+      leaflet::clearShapes() %>%
+      leaflet::clearControls() %>%
+      leaflet::addPolygons(
+        fillColor = as.formula(paste0("~params$pal(", params$invar, ")")),
+        fillOpacity = 0.7,
+        weight = 1,
+        color = "black",
+        opacity = 0.5,
+        label = params$labels,
+        highlightOptions = highlight_opts
+      ) %>%
+      leaflet::addLegend(
+        position = "bottomright",
+        na.label = "No data",
+        pal = params$pal,
+        values = params$values,
+        opacity = 0.9,
+        title = params$lgd,
+        labFormat = leaflet::labelFormat(suffix = params$unit)
+      )
   })
+}
+
+
+mod_exp_server <- function(id) {
+  moduleServer(id, mod_exp)
 }

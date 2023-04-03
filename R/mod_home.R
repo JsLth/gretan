@@ -25,13 +25,13 @@ mod_home_ui <- function(id) {
           title = "Geographical overview",
           width = 12,
           status = "primary",
-          leaflet::leafletOutput(ns("csmaps"), width = "100%", height = 450)
+          leaflet::leafletOutput(ns("map"), width = "100%", height = 450)
         ),
         bs4Dash::box(
           title = "Case study descriptions",
           width = 12,
           status = "primary",
-          uiOutput(ns("csdesc"))
+          uiOutput(ns("description"))
         )
       )
     )
@@ -39,7 +39,7 @@ mod_home_ui <- function(id) {
 }
 
 
-mod_home_server <- function(input, output, session) {
+mod_home <- function(input, output, session) {
   cs_coords <- sf::st_sf(
     name = c("Italy", "Portugal", "Germany", "The Netherlands", "Spain"),
     geometry = sf::st_sfc(
@@ -52,7 +52,7 @@ mod_home_server <- function(input, output, session) {
     )
   )
   
-  output$csmaps <- leaflet::renderLeaflet({
+  output$map <- leaflet::renderLeaflet({
     leaflet::leaflet(cs_coords) %>%
       leaflet::addTiles() %>%
       leaflet::setView(lng = 9, lat = 55, zoom = 3) %>%
@@ -83,16 +83,16 @@ mod_home_server <- function(input, output, session) {
   })
   
   observe({
-    target <- leaflet_select_click(
-      id = "csmaps",
-      on = "marker",
-      ref = cs_coords,
-      input = input
+    click <- input$map_marker_click
+    target <- leaflet_select(
+      id = "map",
+      geom = cs_coords,
+      action = click
     )
     
     if (!is.null(target)) {
       cc <- cs_coords[!cs_coords$name %in% target$name, ]
-      leaflet::leafletProxy("csmaps") %>%
+      leaflet::leafletProxy("map") %>%
         leaflet::clearMarkers() %>%
         leaflet::addMarkers(
           data = cc,
@@ -116,17 +116,21 @@ mod_home_server <- function(input, output, session) {
         )
     }
   }) %>%
-    bindEvent(input$csmaps_marker_click)
+    bindEvent(input$map_marker_click)
   
   # Show case study description based on map clicks
-  output$csdesc <- renderUI({
-    id <- "csmaps"
-    click <- input[[paste(id, "marker", "click", sep = "_")]]
+  output$description <- renderUI({
+    click <- input$map_marker_click
     leaflet_text_on_click(
-      id = "csmaps",
-      ref = sf::st_geometry(cs_coords),
+      id = "map",
+      geom = cs_coords,
       texts = txts$csdesc,
       click = click
     )
   })
+}
+
+
+mod_home_server <- function(id) {
+  moduleServer(id, mod_home)
 }

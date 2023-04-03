@@ -82,23 +82,27 @@ align_dl_items <- function(x, y, char = " ", bold = TRUE) {
 }
 
 
-leaflet_text_on_click <- function(id, geom, texts, click, tol = 1) {
-  target <- NULL
-  if (!is.null(click)) {
-    marker <- sf::st_sfc(sf::st_point(c(click$lng, click$lat)), crs = 4326)
+leaflet_select <- function(id, geom, action, tol = 1) {
+  if (!is.null(action)) {
+    marker <- sf::st_sfc(sf::st_point(c(action$lng, action$lat)), crs = 4326)
     
-    target <- ref[sf::st_is_within_distance(
+    target <- geom[sf::st_is_within_distance(
       geom,
       marker,
       dist = tol,
       sparse = FALSE
     ), ]
   }
+}
+
+
+leaflet_text_on_click <- function(id, geom, texts, click, col = "name", tol = 1) {
+  target <- leaflet_select(id, geom, click, tol = tol)
   
   if (is.null(target)) {
     target <- "none"
   } else {
-    target <- target$name
+    target <- target[[col]]
   }
   
   texts[[target]]

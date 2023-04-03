@@ -81,7 +81,7 @@ mod_income_ui <- function(id) {
 }
 
 
-mod_income_server <- function(input, output, session) {
+mod_income <- function(input, output, session) {
   ns <- session$ns
   
   output$map <- leaflet::renderLeaflet({
@@ -142,4 +142,9 @@ mod_income_server <- function(input, output, session) {
     
     plotly::config(plotly::ggplotly(p), displayModeBar = FALSE)
   })
+}
+
+
+mod_income_server <- function(id) {
+  moduleServer(id, mod_income)
 }

@@ -16,6 +16,11 @@ mod_simulation_ui <- function(id) {
 }
 
 
-mod_simulation_server <- function(input, output, session) {
+mod_simulation <- function(input, output, session) {
   
+}
+
+
+mod_simulation_server <- function(id) {
+  moduleServer(id, mod_simulation)
 }

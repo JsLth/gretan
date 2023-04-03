@@ -186,7 +186,7 @@ app_ui <- function() {
     ),
     bs4Dash::dashboardBody(
       add_external_resources(),
-      mod_main_ui("main-ui")
+      mod_main_ui("main")
     ),
     freshTheme = greta_theme,
     dark = NULL,

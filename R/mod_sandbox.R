@@ -163,7 +163,7 @@ mod_sandbox_ui <- function(id) {
 }
 
 
-mod_sandbox_server <- function(input, output, session) {
+mod_sandbox <- function(input, output, session) {
   sbtext <- eventReactive(input$sandbox_button, {
     num <- sample(c("a","b","c","d","e"), 1)
     switch(
@@ -219,4 +219,9 @@ mod_sandbox_server <- function(input, output, session) {
       type = "warning"
     )
   })
+}
+
+
+mod_sandbox_server <- function(id) {
+  moduleServer(id, mod_sandbox)
 }

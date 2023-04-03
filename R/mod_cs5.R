@@ -16,6 +16,11 @@ mod_cs5_ui <- function(id) {
 }
 
 
-mod_cs5_server <- function(id) {
+mod_cs5 <- function(input, output, session) {
   
+}
+
+
+mod_cs5_server <- function(id) {
+  moduleServer(id, mod_cs5)
 }

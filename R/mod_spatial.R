@@ -107,7 +107,7 @@ mod_spatial_ui <- function(id) {
           width = 12,
           status = "primary",
           title = "Scatterplot of Moran's I",
-          plotly::plotlyOutput("coopscatter")
+          plotly::plotlyOutput(ns("scatter"))
         ),
         bs4Dash::box(
           title = "References",
@@ -121,13 +121,14 @@ mod_spatial_ui <- function(id) {
 }
 
 
-mod_spatial_server <- function(input, output, session) {
+mod_spatial <- function(input, output, session) {
+  ns <- session$ns
   rct <- reactiveValues()
   
   # Employ waiters
-  w_dist <- do.call(waiter::Waiter$new, c(id = "distribution", waiter_default))
-  w_clusters <- do.call(waiter::Waiter$new, c(id = "clusters", waiter_default))
-  w_scatter <- do.call(waiter::Waiter$new, c(id = "scatter", waiter_default))
+  w_dist <- do.call(waiter::Waiter$new, c(id = ns("distribution"), waiter_default))
+  w_clusters <- do.call(waiter::Waiter$new, c(id = ns("clusters"), waiter_default))
+  w_scatter <- do.call(waiter::Waiter$new, c(id = ns("scatter"), waiter_default))
   
   output$dist <- leaflet::renderLeaflet({
     w_dist$show()
@@ -200,118 +201,162 @@ mod_spatial_server <- function(input, output, session) {
     m
   })
   
-  observe({
-    init <- isTRUE(session$spatial_clusters) || isTRUE(session$spatial_scatter)
-    if (input$clusters_sidebar_apply == 1L || !init) {
-      rct$nb <- spdep::poly2nb(coopernico, queen = TRUE)
-      rct$lw <- spdep::nb2listwdist(
-        rct$nb,
-        sf::st_centroid(sf::st_geometry(coopernico)),
-        type = input$clusters_sidebar_dist,
-        alpha = input$clusters_sidebar_alpha,
-        style = input$clusters_sidebar_scheme,
-        dmax = input$clusters_sidebar_dmax,
-        longlat = TRUE,
-        zero.policy = TRUE
-      )
-      rct$locm <- spdep::localmoran(
-        coopernico$total_amount,
-        listw = rct$lw,
-        zero.policy = TRUE
-      )
-      rct$colors <- locm_colors_abel(rct$locm, coopernico)
-      rct$labels <- do.call(align_dl, list(
-        "Moran's I" = round(rct$locm[, "Ii"], 4),
-        "p-value" = round(rct$locm[, "Pr(z != E(Ii))"], 4)
-      ))
-      
-      if (isTRUE(rct$coopmap2_init)) {
-        leaflet::leafletProxy("clusters") %>%
-          leaflet::clearShapes() %>%
-          leaflet::addPolygons(
-            fillColor = rct$colors$fill,
-            color = rct$colors$outline,
-            fillOpacity = 1,
-            weight = 1,
-            smoothFactor = 0,
-            label = rct$labels,
-            highlightOptions = highlight_opts,
-            data = coopernico
-          )
-      }
-    }
+  lw <- reactive({
+    nb <- spdep::poly2nb(coopernico, queen = TRUE)
+    spdep::nb2listwdist(
+      nb,
+      sf::st_centroid(sf::st_geometry(coopernico)),
+      type = input$clusters_sidebar_dist,
+      alpha = input$clusters_sidebar_alpha,
+      style = input$clusters_sidebar_scheme,
+      dmax = input$clusters_sidebar_dmax,
+      longlat = TRUE,
+      zero.policy = TRUE
+    )
   })
   
-  output$clusters <- leaflet::renderLeaflet({
+  lag <- reactive({
+    spdep::lag.listw(
+      lw(),
+      coopernico$total_amount,
+      zero.policy = TRUE
+    )
+  })
+  
+  locm <- reactive({
+    spdep::localmoran(
+      coopernico$total_amount,
+      listw = lw(),
+      zero.policy = TRUE
+    )
+  })
+  
+  sym <- reactive({
+    locm <- locm()
+    colors <- locm_colors_abel(locm, coopernico)
+    labels <- do.call(align_dl, list(
+      "Moran's I" = round(locm[, "Ii"], 4),
+      "p-value" = round(locm[, "Pr(z != E(Ii))"], 4)
+    ))
+    
+    list(colors = colors, labels = labels)
+  })
+  
+  observe({
     w_clusters$show()
-    locm <- rct$locm
-    colors <- rct$colors
-    rct$coopmap2_init <- TRUE
+    sym <- sym()
+    
+    leaflet::leafletProxy("clusters") %>%
+      leaflet::clearShapes() %>%
+      leaflet::addPolygons(
+        fillColor = sym$colors$fill,
+        color = sym$colors$outline,
+        fillOpacity = 1,
+        weight = 1,
+        smoothFactor = 0,
+        label = sym$labels,
+        highlightOptions = highlight_opts,
+        data = coopernico
+      )
+    w_clusters$hide()
+  }) %>%
+    bindEvent(input$clusters_sidebar_apply)
+  
+  output$clusters <- leaflet::renderLeaflet({
+    params <- isolate(sym())
+    locm <- isolate(locm())
     
     m <- leaflet::leaflet(coopernico) %>%
       leaflet::addTiles() %>%
       leaflet::setView(lng = -7.5, lat = 39.5, zoom = 7) %>%
       leaflet::addPolygons(
-        fillColor = colors$fill,
-        color = colors$outline,
+        fillColor = params$colors$fill,
+        color = params$colors$outline,
         fillOpacity = 1,
         weight = 1,
         smoothFactor = 0,
-        label = rct$labels,
+        label = params$labels,
         highlightOptions = highlight_opts
       ) %>%
       leaflet::addLegend(
         position = "bottomright",
-        colors = c(unique(colors[[1]]), "white"),
+        colors = c(unique(params$colors$outline), "white"),
         labels = c(levels(attributes(locm)$quadr$mean), "Not significant"),
         title = "LISA"
       )
     
-    w_clusters$show()
+    w_clusters$hide()
     m
   })
   
   output$scatter <- plotly::renderPlotly({
     w_scatter$show()
-    coopernico$sponsors_lag <- spdep::lag.listw(
-      rct$lw,
-      coopernico$total_amount,
-      zero.policy = TRUE
-    )
-    trigger("spatial_scatter")
-    
-    coopernico <- coopernico %>%
-      dplyr::rename(
-        "Spatial lag" = "sponsors_lag",
-        "Total amount" = "total_amount",
-        "Municipality" = "name"
-      )
-    
-    p <- ggplot2::ggplot(
-      data = coopernico,
-      ggplot2::aes(x = `Spatial lag`, y = `Total amount`)) +
-      ggplot2::geom_point(
-        ggplot2::aes(group = Municipality),
-        shape = 1,
-        size = 2,
-        color = "black",
-        stroke = 0.3
-      ) +
-      ggplot2::geom_smooth(
-        method = "lm",
-        se = FALSE,
-        linetype = "dashed",
-        color = "darkred"
-      ) +
-      ggplot2::xlab("Spatial lag") + 
-      ggplot2::ylab("Total investment (in \u20ac)") +
-      ggplot2::theme(panel.grid.major = ggplot2::element_line(
-        color = "#CCCCCC",
-        linetype = "dashed", size = 0.5
-      ))
-    
-    p <- plotly::config(plotly::ggplotly(p), displayModeBar = FALSE)
+    lag <- isolate(lag())
+
+    p <- plotly::plot_ly(coopernico, type = "scatter", mode = "markers") %>%
+      plotly::add_trace(
+        x = lag,
+        y = ~fitted(lm(total_amount ~ lag)),
+        line = list(dash = "dash", color = "darkred", width = 4),
+        showlegend = F,
+        mode = "lines"
+      ) %>%
+      plotly::add_trace(
+        x = lag,
+        y = ~total_amount,
+        text = ~sprintf(
+          "Spatial lag: %s m<br>Total amount: %s €<br>Municipality: %s",
+          round(lag), total_amount, name
+        ),
+        marker = list(width = 2, color = "black"),
+        showlegend = F,
+        mode = "markers"
+      ) %>%
+      plotly::layout(
+        xaxis = list(title = "Spatial lag (in m)"),
+        yaxis = list(title = "Total investment (in \u20ac)")
+      ) %>%
+      plotly::config(displayModeBar = FALSE)
     w_scatter$hide()
     p
   })
+  
+  observe({
+    w_scatter$show()
+    lag <- lag()
+    print(lag)
+    plotly::plotlyProxy("scatter") %>%
+      plotly::plotlyProxyInvoke("deleteTraces", list(-1, -2)) %>%
+      plotly::plotlyProxyInvoke(
+        "addTraces",
+        list(
+          list(
+            x = lag,
+            y = fitted(lm(coopernico$total_amount ~ lag)),
+            line = list(dash = "dash", color = "darkred", width = 4),
+            showlegend = F,
+            mode = "lines"
+          ),
+          list(
+            x = lag,
+            y = coopernico$total_amount,
+            text = sprintf(
+              "Spatial lag: %s m<br>Total amount: %s€<br>Municipality: %s",
+              round(lag), coopernico$total_amount, coopernico$name
+            ),
+            marker = list(width = 2, color = "black"),
+            showlegend = F,
+            type = "scatter",
+            mode = "markers"
+          )
+        )
+      )
+    w_scatter$hide()
+  }) %>%
+    bindEvent(input$clusters_sidebar_apply)
+}
+
+
+mod_spatial_server <- function(id) {
+  moduleServer(id, mod_spatial)
 }

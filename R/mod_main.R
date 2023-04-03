@@ -2,11 +2,11 @@ mod_main_ui <- function(id) {
   ns <- NS(id)
 
   shiny::div(
-    mod_home_ui(ns("home-ui")),
-    mod_exp_ui(ns("exp-ui")),
-    mod_ind_ui(ns("ind-ui")),
-    mod_cs_ui(ns("cs-ui")),
-    mod_sandbox_ui(ns("sandbox-ui")),
+    mod_home_ui(ns("home")),
+    mod_exp_ui(ns("exp")),
+    mod_ind_ui(ns("ind")),
+    mod_cs_ui(ns("cs")),
+    mod_sandbox_ui(ns("sandbox")),
     class = "tab-content"
   )
 }
@@ -30,10 +30,12 @@ mod_main_server <- function(input, output, session) {
   shinyjs::onclick("tab-simulation", send_info(
     "This tab has not yet been filled with contents."
   ))
+  
+  init("exp")
 
-  callModule(mod_home_server, "home-ui")
-  callModule(mod_exp_server, "exp-ui")
-  callModule(mod_cs_server, "cs-ui")
-  callModule(mod_ind_server, "ind-ui")
-  callModule(mod_sandbox_server, "sandbox-ui")
+  mod_home_server("home")
+  mod_exp_server("exp")
+  mod_cs_server("cs")
+  mod_ind_server("ind")
+  mod_sandbox_server("sandbox")
 }
