@@ -138,6 +138,22 @@ highlight_opts <- leaflet::highlightOptions(
   sendToBack = TRUE
 )
 
+plotly_config_default <- function(p) {
+  plotly::config(
+    p,
+    modeBarButtonsToRemove = c(
+      "sendDataToCloud", "editInChartStudio", "drawclosedpath", "drawopenpath",
+      "drawline", "drawrect", "drawcircle", "eraseshape", "zoomIn2d", "zoomOut2d",
+      "autoScale2d", "resetScale2d", "hoverClosestCartesian",
+      "hoverCompareCartesian"
+    ),
+    scrollZoom = TRUE,
+    responsive = TRUE,
+    displaylogo = FALSE
+  )
+}
+plotly_default <- 
+
 
 protect_html <- function(x) HTML(as.character(x))
 

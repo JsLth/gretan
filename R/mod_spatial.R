@@ -239,7 +239,7 @@ mod_spatial <- function(input, output, session) {
       "p-value" = round(locm[, "Pr(z != E(Ii))"], 4)
     ))
     
-    list(colors = colors, labels = labels)
+    list(colors = colors, labels = labels, locm = locm)
   })
   
   observe({
@@ -264,7 +264,6 @@ mod_spatial <- function(input, output, session) {
   
   output$clusters <- leaflet::renderLeaflet({
     params <- isolate(sym())
-    locm <- isolate(locm())
     
     m <- leaflet::leaflet(coopernico) %>%
       leaflet::addTiles() %>%
@@ -281,7 +280,7 @@ mod_spatial <- function(input, output, session) {
       leaflet::addLegend(
         position = "bottomright",
         colors = c(unique(params$colors$outline), "white"),
-        labels = c(levels(attributes(locm)$quadr$mean), "Not significant"),
+        labels = c(levels(attributes(params$locm)$quadr$mean), "Not significant"),
         title = "LISA"
       )
     
@@ -316,7 +315,7 @@ mod_spatial <- function(input, output, session) {
         xaxis = list(title = "Spatial lag (in m)"),
         yaxis = list(title = "Total investment (in \u20ac)")
       ) %>%
-      plotly::config(displayModeBar = FALSE)
+      plotly_config_default()
     w_scatter$hide()
     p
   })
