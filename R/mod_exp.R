@@ -100,6 +100,8 @@ mod_exp <- function(input, output, session) {
   ns <- session$ns
   cb <- cb_ext
   
+  updated <- reactiveValues(subitem = FALSE, option = FALSE)
+  
   # Show question
   output$question <- renderUI({
     if (!is.null(input$title)) {
@@ -137,6 +139,7 @@ mod_exp <- function(input, output, session) {
         inputId = "subitem",
         choices = items
       )
+      updated$subitem <- TRUE
       shinyjs::show("subitem-hide", anim = TRUE)
     } else {
       shinyjs::hide("subitem-hide", anim = TRUE)
@@ -148,6 +151,7 @@ mod_exp <- function(input, output, session) {
         inputId = "option",
         choices = options
       )
+      updated$option <- TRUE
       shinyjs::show("option-hide", anim = TRUE)
     } else {
       shinyjs::hide("option-hide", anim = TRUE)
@@ -155,9 +159,19 @@ mod_exp <- function(input, output, session) {
   }) %>%
     bindEvent(input$title)
   
+  observe({
+    updated$subitem <- FALSE
+  }) %>%
+    bindEvent(input$subitem)
+  
+  observe({
+    updated$option <- FALSE
+  }) %>%
+    bindEvent(input$option)
   
   # Determine the variable based on combination of topic, subitem and option
   invar <- reactive({
+    req(isFALSE(updated$subitem) && isFALSE(updated$option))
     has_title <- cb$title %in% input$title
     invar <- cb[has_title, ]
 
