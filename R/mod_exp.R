@@ -100,6 +100,8 @@ mod_exp <- function(input, output, session) {
   ns <- session$ns
   cb <- cb_ext
   
+  # Initialize flag that specifies whether an input comes from the user or an
+  # update function
   updated <- reactiveValues(subitem = FALSE, option = FALSE)
   
   # Show question
@@ -126,6 +128,9 @@ mod_exp <- function(input, output, session) {
   })
   
   # Hide or show selectors for subitems or options depending on the question
+  # This part also triggers events for input$option and input$subitem when their
+  # values are updated. The update flag is therefore set to TRUE to prevent
+  # event binding.
   observe({
     varsel <- cb[cb$title %in% input$title, ]$variable
     items <- unique(cb[cb$variable %in% varsel, ]$subitem)
@@ -137,9 +142,11 @@ mod_exp <- function(input, output, session) {
       shinyWidgets::updatePickerInput(
         session,
         inputId = "subitem",
-        choices = items
+        choices = items,
+        clearOptions = TRUE
       )
       updated$subitem <- TRUE
+      cli::cli_rule("updating options: {updated$subitem}")
       shinyjs::show("subitem-hide", anim = TRUE)
     } else {
       shinyjs::hide("subitem-hide", anim = TRUE)
@@ -149,9 +156,11 @@ mod_exp <- function(input, output, session) {
       shinyWidgets::updatePickerInput(
         session,
         inputId = "option",
-        choices = options
+        choices = options,
+        clearOptions = TRUE
       )
       updated$option <- TRUE
+      cli::cli_rule("updating options: {updated$option}")
       shinyjs::show("option-hide", anim = TRUE)
     } else {
       shinyjs::hide("option-hide", anim = TRUE)
@@ -159,19 +168,26 @@ mod_exp <- function(input, output, session) {
   }) %>%
     bindEvent(input$title)
   
+  # Set update flag to FALSE when input comes directly from user
   observe({
+    cli::cli_rule("observing subitem")
     updated$subitem <- FALSE
-  }) %>%
+  }, priority = 2L) %>%
     bindEvent(input$subitem)
   
   observe({
+    cli::cli_rule("observing option")
     updated$option <- FALSE
-  }) %>%
+  }, priority = 1L) %>%
     bindEvent(input$option)
   
   # Determine the variable based on combination of topic, subitem and option
-  invar <- reactive({
+  invar <- reactiveVal(NULL)
+  observe({
+    cli::cli_rule("trying invar / option: {updated$option}, subitem: {updated$subitem}")
+    # Cancel if subitem and option are not explicitly changed by user
     req(isFALSE(updated$subitem) && isFALSE(updated$option))
+    cli::cli_rule("success :)")
     has_title <- cb$title %in% input$title
     invar <- cb[has_title, ]
 
@@ -184,7 +200,7 @@ mod_exp <- function(input, output, session) {
         invar <- invar[has_subitem, ]
       }
     }
-    
+
     # case: there's still multiple items, look for options
     if (length(invar$variable) > 1 || !length(invar$variable)) {
       has_option <- invar$option %in% input$option
@@ -194,18 +210,19 @@ mod_exp <- function(input, output, session) {
         invar <- invar[has_option, ]
       }
     }
-    
+
     # if all strings fail, just select the first one
     if (length(invar$variable) > 1) {
       invar <- invar[1, ]
     }
-    
-    invar$variable
-  }) %>%
-    bindEvent(input$title, input$subitem, input$option, ignoreInit = TRUE)
+    invar(invar$variable)
+  }, priority = 0L) %>%
+    bindEvent(input$title, input$subitem, input$option)
   
   observe({
-    is_metric <- cb[cb$variable %in% invar(), ]$is_metric
+    invar <- invar()
+    req(!is.null(invar))
+    is_metric <- cb[cb$variable %in% invar, ]$is_metric
     if (is_metric) {
       shinyjs::disable("fixed-hide")
     } else {
