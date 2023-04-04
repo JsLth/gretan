@@ -80,7 +80,7 @@ app_ui <- function() {
       ),
       title = HTML(paste(
         img(src = "www/greta_flash.svg", width = 50, height = 50),
-        span("GIS tool", class = "brand-text")
+        span("GRETA Analytics", class = "brand-text")
       )),
       status = "secondary",
       skin = "light",
