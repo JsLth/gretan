@@ -9,7 +9,7 @@ mod_exp_ui <- function(id) {
     purrr::set_names(categories)
   
   bs4Dash::tabItem(
-    "explorer",
+    "exp",
     fluidRow(
       bs4Dash::column(
         width = 3,

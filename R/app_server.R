@@ -5,23 +5,15 @@ server <- function(input, output, session) {
     isTRUE(nzchar(search_input))
   })
   
-  observe({
-    searchbox_input <- searchbox_input()
-    if (isTRUE(searchbox_input)) {
-      shinyjs::removeClass("listbox", class = "hide-listbox")
-    } else {
-      shinyjs::addClass("listbox", class = "hide-listbox")
-    }
-  })
-  
   # Change tab when search output is clicked
   for (x in names(txts)) {
-    expr <- protect_arg(bs4Dash::updateTabItems(
-      session, # TODO
-      inputId = "sidebar",
-      selected = x
-    ), arg = "selected")
-    shinyjs::onclick(paste0("suggestion-", x), expr = eval(expr))
+    with_eval_args(
+      shinyjs::onclick(paste0("suggestion-", x), expr = bs4Dash::updateTabItems(
+        session,
+        inputId = "sidebar",
+        selected = x
+      ))
+    )
   }
   
   # Fix sidebar when search is triggered (otherwise search bar won't show)
@@ -30,12 +22,10 @@ server <- function(input, output, session) {
       bs4Dash::updateSidebar("sidebarState")
     }
   })
-
+  
   # Search texts and determine which search items to show
-  output$listbox <- renderUI({
-    print("a")
+  search_results <- reactive({
     req(searchbox_input())
-    print("b")
     search_term <- input$textSearch
     idx <- vapply(txts, function(x) {
       x <- tag_to_text(x)
@@ -53,8 +43,27 @@ server <- function(input, output, session) {
       id <- paste0("search_option_", x)
       div(class = "form-suggestion", role = "option", opt)
     })
-    cat("search results!")
     do.call(div, c(options, class = "form-suggestions"))
+  })
+  
+  # If no search term is provided, hide search results UI
+  # If a search term is provided, show it
+  observe({
+    has_input <- searchbox_input()
+    
+    if (has_input) {
+      insertUI(
+        selector = "#textSearch",
+        where = "afterEnd",
+        ui = div(id = "listbox", class = "form-results", search_results())
+      )
+    } else {
+      removeUI(
+        selector = "div:has(> .form-suggestions)",
+        multiple = TRUE,
+        immediate = TRUE
+      )
+    }
   })
   
   mod_main_server("main")

@@ -104,28 +104,14 @@ app_ui <- function() {
           span(
             class = "input-group-btn",
             style = "display:inline-flex; width: 85%;",
-            tags$button(
-              id = "searchButton",
-              type = "button",
-              class = "btn btn-flat action-button",
-              icon("search", lib = "font-awesome")
-            ),
-            div(
-              class = "input-group",
-              style = "position: absolute; margin-left: 4.3em; width: 75%",
-              tags$input(
-                id = "textSearch",
-                type = "text",
-                class = "form-control", 
-                placeholder = "Search...",
-                style = "
-                  margin: 5px;
-                  border-bottom-right-radius: 0.25rem;
-                  border-top-right-radius: 0.25rem
-                "
-              ),
-              shiny::uiOutput("listbox", class = "form-results")
-            )
+            div(class = "search-icon", icon("search", lib = "font-awesome")),
+            div(class = "form-control-container input-group", tags$input(
+              id = "textSearch",
+              type = "text",
+              style = "margin: 5px;",
+              class = "form-control", 
+              placeholder = "Search..."
+            ))
           )
         ),
         bs4Dash::sidebarHeader("Start"),

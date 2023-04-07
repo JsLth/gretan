@@ -162,16 +162,25 @@ plotly_config_default <- function(p) {
   )
 }
 
-protect_arg <- function(expr, arg) {
-  expr <- substitute(expr)
-  var <- expr[[arg]]
-  
-  if (is.name(var)) {
-    value <- get(deparse(var), envir = parent.frame())
-    expr[[arg]] <- value
-  }
+with_eval_args <- function(call, envir = parent.frame()) {
+  call <- substitute(call)
+  call <- eval_args(call, envir = envir)
+  eval(call, envir = envir)
+}
 
-  expr
+eval_args <- function(call, envir) {
+  for (i in seq_along(call)[-1]) {
+    arg <- call[[i]]
+    if (is.name(arg)) {
+      val <- eval(arg, envir = envir)
+      if (!typeof(val) %in% c("environment", "function")) {
+        call[[i]] <- eval(arg, envir = envir)
+      }
+    } else if (is.call(arg)) {
+      call[[i]] <- eval_args(arg, envir = envir)
+    }
+  }
+  call
 }
 
 protect_html <- function(x) HTML(as.character(x))

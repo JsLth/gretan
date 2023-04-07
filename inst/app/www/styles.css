@@ -49,6 +49,12 @@ a.logo {
 }
 
 /* Search list box */
+.form-control-container {
+  position: absolute !important;
+  margin-left: 4.3em;
+  width: 75% !important;
+}
+
 .form-results {
   position: absolute;
   top: 100%;
@@ -97,8 +103,10 @@ a.logo {
   text-align: center;
 }
 
-.hide-listbox {
-  border: 0px;
+.search-icon {
+  margin: 6px 5px 6px 15px;
+  padding: 0.375rem 0.75rem;
+  font-size: 1rem;
 }
 
 /* Slider color */
