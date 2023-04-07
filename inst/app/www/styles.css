@@ -48,6 +48,58 @@ a.logo {
   margin-right: auto;
 }
 
+/* Search list box */
+.form-results {
+  position: absolute;
+  top: 100%;
+  left: 0px;
+  z-index: 100;
+  right: auto;
+  width: min(100%, 15.8rem);
+  background-color: #fff;
+  border: 1px solid var(--gray);
+  border-radius: 0.2rem;
+  margin-top: 2px;
+  margin-left: 0.3em;
+  max-height: 50vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.form-suggestions {
+  display: block;
+}
+
+.form-suggestion {
+  cursor: pointer;
+  padding-top: 5px;
+  padding-right: 4px;
+  padding-bottom: 5px;
+  padding-left: 4px;
+  border-bottom: 1px #DDD solid;
+  font-size: 0.9rem;
+}
+
+.form-suggestion:hover {
+  background-color:#B3DDFE
+}
+
+.form-suggestion-row {
+  display: inline-flex;
+  align-items: center;
+}
+
+.form-suggestion-icon {
+  min-width: 1.5em;
+  margin-left: 0.5em;
+  font-size: 17px;
+  display: flex;
+  text-align: center;
+}
+
+.hide-listbox {
+  border: 0px;
+}
 
 /* Slider color */
 .irs-bar-edge, .irs-bar, .irs-single, .irs-from, .irs-to {
