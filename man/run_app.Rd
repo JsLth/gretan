@@ -5,12 +5,15 @@
 \alias{run_greta}
 \title{Run the "greta" Shiny Application}
 \usage{
-run_app(...)
+run_app(..., log = FALSE)
 
 run_greta(...)
 }
 \arguments{
 \item{...}{Arguments passed on to \code{\link[shiny]{shinyApp}}}
+
+\item{log}{Whether to enable logging using the reactlog package.
+For debugging purposes.}
 }
 \description{
 Run the "greta" Shiny Application
