@@ -32,11 +32,11 @@ mod_exp_ui <- function(id) {
           htmlOutput(ns("question")),
           tags$br(),
           shinyjs::hidden(div(
-            id = ns("subitem-hide"),
+            id = ns("subitemHide"),
             shinyWidgets::pickerInput(ns("subitem"), "Subitem", character())
           )),
           shinyjs::hidden(div(
-            id = ns("option-hide"),
+            id = ns("optionHide"),
             shinyWidgets::pickerInput(ns("option"), "Option", character())
           ))
         ),
@@ -54,7 +54,7 @@ mod_exp_ui <- function(id) {
           ),
           shinyWidgets::pickerInput(ns("pal"), "Color palette", list_palettes()),
           shinyjs::disabled(div(
-            id = ns("fixed-hide"),
+            id = ns("fixedHide"),
             shinyWidgets::prettyRadioButtons(
               ns("fixed"),
               "Legend values",
@@ -147,9 +147,9 @@ mod_exp <- function(input, output, session) {
       )
       updated$subitem <- TRUE
       cli::cli_rule("updating options: {updated$subitem}")
-      shinyjs::show("subitem-hide", anim = TRUE)
+      shinyjs::show("subitemHide", anim = TRUE)
     } else {
-      shinyjs::hide("subitem-hide", anim = TRUE)
+      shinyjs::hide("subitemHide", anim = TRUE)
     }
     
     if (show_options) {
@@ -161,9 +161,9 @@ mod_exp <- function(input, output, session) {
       )
       updated$option <- TRUE
       cli::cli_rule("updating options: {updated$option}")
-      shinyjs::show("option-hide", anim = TRUE)
+      shinyjs::show("optionHide", anim = TRUE)
     } else {
-      shinyjs::hide("option-hide", anim = TRUE)
+      shinyjs::hide("optionHide", anim = TRUE)
     }
   }) %>%
     bindEvent(input$title)
@@ -224,9 +224,9 @@ mod_exp <- function(input, output, session) {
     req(!is.null(invar))
     is_metric <- cb[cb$variable %in% invar, ]$is_metric
     if (is_metric) {
-      shinyjs::disable("fixed-hide")
+      shinyjs::disable("fixedHide")
     } else {
-      shinyjs::enable("fixed-hide")
+      shinyjs::enable("fixedHide")
     }
   })
   

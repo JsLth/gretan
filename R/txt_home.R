@@ -1,4 +1,59 @@
-txts$csdesc <- list(
+txts$home$title <- "Home"
+txts$home$icon <- icon("house")
+txts$home$tags <- c(
+  "home", "welcome", "overview", "introduction", "case", "study", "studies",
+  "map", "marker", "survey", "country", "countries"
+)
+
+txts$home$welcome <- tagList(
+  p2("Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy
+     eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam
+     voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet
+     clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit
+     amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam
+     nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat,
+     sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum.
+     Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor
+     sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam
+     nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed
+     diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum.
+     Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor
+     sit amet."),
+  p2("Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse
+     molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero
+     eros et accumsan et iusto odio dignissim qui blandit praesent luptatum
+     zzril delenit augue duis dolore te feugait nulla facilisi. Lorem ipsum
+     dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod
+     tincidunt ut laoreet dolore magna aliquam erat volutpat."),
+  p2("Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper
+     suscipit lobortis nisl ut aliquip ex ea commodo consequat. Duis autem vel
+     eum iriure dolor in hendrerit in vulputate velit esse molestie consequat,
+     vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et
+     iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis
+     dolore te feugait nulla facilisi."),
+  h2("Subtitle"),
+  p2("Nam liber tempor cum soluta nobis eleifend option congue nihil imperdiet
+     doming id quod mazim placerat facer possim assum. Lorem ipsum dolor sit
+     amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt
+     ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim
+     veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut
+     aliquip ex ea commodo consequat."),
+  p2("Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse
+     molestie consequat, vel illum dolore eu feugiat nulla facilisis."),
+  p2("At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd
+     gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem
+     ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod
+     tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.
+     At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd
+     gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem
+     ipsum dolor sit amet, consetetur sadipscing elitr, At accusam aliquyam diam
+     diam dolore dolores duo eirmod eos erat, et nonumy sed tempor et et
+     invidunt justo labore Stet clita ea et gubergren, kasd magna no rebum.
+     sanctus sea sed takimata ut vero voluptua. est Lorem ipsum dolor sit amet.
+     Lorem ipsum dolor sit amet, consetetur")
+)
+
+txts$home$csdesc <- list(
   Italy = HTML(paste(
     h2("Renewable energy district Pilastro-Roveri"),
     p(HTML(paste(
@@ -77,29 +132,5 @@ txts$csdesc <- list(
   )),
   none = HTML(paste(
     p("Click on a map marker to learn more about the GRETA case studies.")
-  ))
-)
-
-
-
-####################
-# Case study 1 ----
-####################
-
-cs1coords <- sf::st_sf(
-  name = c("a"),
-  geometry = sf::st_sfc(
-    sf::st_point(c(11.399926, 44.507145))
-  ), crs = 4326
-)
-
-txts$cs1poi <- list(
-  a = HTML(paste(
-    p("You selected a marker on the map. This marker could be a point of
-      interest relating to the case study and this text could be a text that
-      explains or is otherwise relevant to that point of interest.")
-  )),
-  none = HTML(paste(
-    p("Click on a map marker to learn more about the places of this case study.")
   ))
 )

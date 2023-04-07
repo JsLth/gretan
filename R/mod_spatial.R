@@ -16,7 +16,7 @@ mod_spatial_ui <- function(id) {
           status = "primary",
           width = 12,
           collapsible = TRUE,
-          p2(shinipsum::random_text(nwords = 200))
+          p2(txts$spatial$introduction)
         )
       ),
       col_6(
@@ -25,7 +25,7 @@ mod_spatial_ui <- function(id) {
           status = "primary",
           width = 12,
           collapsible = TRUE,
-          p2(shinipsum::random_text(nwords = 200))
+          p2(txts$spatial$methodology)
         )
       )
     ),
@@ -99,7 +99,7 @@ mod_spatial_ui <- function(id) {
           status = "primary",
           width = 12,
           collapsible = TRUE,
-          p2(shinipsum::random_text(nwords = 550))
+          p2(txts$spatial$discussion)
         )
       ),
       col_6(
@@ -113,7 +113,7 @@ mod_spatial_ui <- function(id) {
           title = "References",
           status = "primary",
           width = 12,
-          dummy_bibliography()
+          txts$spatial$references
         )
       )
     )
