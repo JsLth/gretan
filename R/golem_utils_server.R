@@ -118,6 +118,15 @@ send_info <- function(text, title = "Info") {
   )
 }
 
+send_error <- function(text, title = "Oops!") {
+  shinyWidgets::sendSweetAlert(
+    title = title,
+    text = text,
+    type = "error",
+    btn_colors = "#BF616A"
+  )
+}
+
 # 4, wobblebar, pulse, throbber, riplle, ring, wave
 waiter_default <- list(
   color = "rgba(179, 221, 254, 0.8)", # greta blue
@@ -152,8 +161,18 @@ plotly_config_default <- function(p) {
     displaylogo = FALSE
   )
 }
-plotly_default <- 
 
+protect_arg <- function(expr, arg) {
+  expr <- substitute(expr)
+  var <- expr[[arg]]
+  
+  if (is.name(var)) {
+    value <- get(deparse(var), envir = parent.frame())
+    expr[[arg]] <- value
+  }
+
+  expr
+}
 
 protect_html <- function(x) HTML(as.character(x))
 

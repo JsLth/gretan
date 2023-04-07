@@ -49,6 +49,32 @@ col_1 <- function(...) {
   bs4Dash::column(1, ...)
 }
 
+#' @export
+tag_to_text <- function(x, ...) {
+  UseMethod("tag_to_text")
+}
+
+#' @export
+tag_to_text.default <- function(x, ...) {
+  as.character(x, ...)
+}
+
+#' @export
+tag_to_text.shiny.tag <- function(x, ...) {
+  paste(x$children, collapse = "\n", ...)
+}
+
+#' @export
+tag_to_text.shiny.tag.list <- function(x, ...) {
+  paste(lapply(x, tag_to_text, ...), collapse = "\n")
+}
+
+#' @export
+tag_to_text.list <- function(x, ...) {
+  tag_to_text(unlist(x), ...)
+}
+
+
 make_header <- function(title,
                         authors,
                         affil = NULL,
@@ -85,6 +111,18 @@ make_header <- function(title,
     h6(HTML(paste(affil, collapse = "; ")), class = "affil"),
     align = "center"
   )
+}
+
+
+# bs4Dash::dashboardHeader, but sidebar toggle has an ID
+dashboardHeader2 <- function(...) {
+  html <- bs4Dash::dashboardHeader(...)
+  html[[1]]$
+    children[[1]]$
+    children[[1]]$
+    children[[1]]$
+    attribs[["id"]] <- "sidebarToggle"
+  html
 }
 
 

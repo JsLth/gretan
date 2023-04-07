@@ -39,31 +39,35 @@ app_ui <- function() {
   
   # UI assembly ----
   ui <- bs4Dash::dashboardPage(
-    bs4Dash::dashboardHeader(
+    dashboardHeader2(
       tags$style("
-        /* color sidebar button in black */
-        .fa-bars {
-          color: #00000;
-        }
-        
-        /* set sidebar header to the same height as navbar (roughly) */
-        .sidebar-header {
-          height: 4.37rem
-        }
-        
-        /* align sidebar logo and title */
-        .brand-text {
-          display: inline-block;
-          vertical-align: middle;
-          font-weight: bold;
-        }
-        
-        /* remove white space from header */
-        .navbar {
-          padding-top: 0em;
-          padding-bottom: 0em;
-          padding-right: 0em
-        }"),
+      /* color sidebar button in black */
+      .fa-bars {
+        color: #00000;
+      }
+      
+      /* set sidebar header to the same height as navbar (roughly) */
+      .sidebar-header {
+        height: 4.37rem;
+      }
+      
+      /* align sidebar logo and title */
+      .brand-link {
+        height: 3.1em;
+        padding: 0.4rem 0.7rem;
+      }
+      .brand-text {
+        display: inline-block;
+        vertical-align: middle;
+        font-weight: bold;
+      }
+      
+      /* remove white space from header */
+      .navbar {
+        padding-top: 0em;
+        padding-bottom: 0em;
+        padding-right: 0em
+      }"),
       div(
         a(
           href = "https://projectgreta.eu/",
@@ -87,12 +91,14 @@ app_ui <- function() {
       sidebarIcon = tags$i(class = "fa fa-bars", style = "color: rgb(0, 0, 0)")
     ),
     bs4Dash::dashboardSidebar(
+      id = "sidebarState",
       tags$style(HTML("
         .layout-fixed .wrapper .sidebar {
           height: calc(95vh - (3.5rem + 1px));
         }" # TODO: quick workaround, maybe reconsider
       )),
       bs4Dash::sidebarMenu( # TODO: implement search bar
+        id = "sidebar",
         tags$form(
           class = "sidebar-form",
           span(
@@ -106,14 +112,19 @@ app_ui <- function() {
             ),
             div(
               class = "input-group",
-              style = "margin-left: 0.5em",
+              style = "position: absolute; margin-left: 4.3em; width: 75%",
               tags$input(
                 id = "textSearch",
                 type = "text",
                 class = "form-control", 
                 placeholder = "Search...",
-                style = "margin: 5px"
-              )
+                style = "
+                  margin: 5px;
+                  border-bottom-right-radius: 0.25rem;
+                  border-top-right-radius: 0.25rem
+                "
+              ),
+              shiny::uiOutput("listbox", class = "form-results")
             )
           )
         ),
@@ -126,7 +137,7 @@ app_ui <- function() {
         bs4Dash::menuItem(
           text = "Multinational survey",
           icon = icon("map", lib = "font-awesome"),
-          tabName = "explorer"
+          tabName = "exp"
         ),
         bs4Dash::sidebarHeader("Case studies"),
         bs4Dash::menuItem(
@@ -176,8 +187,7 @@ app_ui <- function() {
           icon = icon("wand-magic", lib = "font-awesome"),
           tabName = "sandbox"
         ),
-        flat = TRUE,
-        id = "sidebar"
+        flat = TRUE
       ),
       skin = "light",
       minified = TRUE,
