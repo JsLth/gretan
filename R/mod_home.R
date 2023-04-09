@@ -45,7 +45,7 @@ mod_home <- function(input, output, session) {
       crs = 4326
     )
   )
-  
+
   output$map <- leaflet::renderLeaflet({
     leaflet::leaflet(cs_coords) %>%
       leaflet::addTiles() %>%
@@ -115,10 +115,11 @@ mod_home <- function(input, output, session) {
   # Show case study description based on map clicks
   output$description <- renderUI({
     click <- input$map_marker_click
+
     leaflet_text_on_click(
       id = "map",
       geom = cs_coords,
-      texts = txts$csdesc,
+      texts = txts$home$csdesc,
       click = click
     )
   })

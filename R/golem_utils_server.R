@@ -109,23 +109,55 @@ leaflet_text_on_click <- function(id, geom, texts, click, col = "name", tol = 1)
 }
 
 
-send_info <- function(text, title = "Info") {
+send_info <- function(text,
+                      title = "Info",
+                      session = getDefaultReactiveDomain()) {
   shinyWidgets::sendSweetAlert(
     title = title,
     text = text,
     type = "info",
+    html = TRUE,
     btn_colors = "#5E81AC"
   )
 }
 
-send_error <- function(text, title = "Oops!") {
+send_error <- function(text,
+                       title = "Oops!",
+                       session = getDefaultReactiveDomain()) {
   shinyWidgets::sendSweetAlert(
     title = title,
     text = text,
     type = "error",
+    html = TRUE,
     btn_colors = "#BF616A"
   )
 }
+
+
+execute_safely <- function(expr,
+                           title = "Oops!",
+                           message = NULL,
+                           session = getDefaultReactiveDomain()
+  ) {
+  if (is.null(message)) {
+    message <- paste(
+      "Something went wrong! If this keeps happening, consider",
+      "notifying the tool maintainer (jonas.lieth@gesis.org)."
+    )
+  }
+  
+  tryCatch(
+    expr = expr,
+    error = function(e) send_error(div(
+      style = "text-align: left",
+      message,
+      br(), br(),
+      "Error details:", br(),
+      tags$code(as.character(e$message))
+    ), session = session, title = title)
+  )
+}
+
 
 # 4, wobblebar, pulse, throbber, riplle, ring, wave
 waiter_default <- list(
@@ -159,6 +191,15 @@ plotly_config_default <- function(p) {
     scrollZoom = TRUE,
     responsive = TRUE,
     displaylogo = FALSE
+  )
+}
+
+tooltip_opts <- function(text) {
+  list(
+    title = text,
+    placement = "bottom",
+    trigger = "click",
+    container = "body"
   )
 }
 

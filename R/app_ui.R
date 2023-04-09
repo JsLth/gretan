@@ -67,6 +67,11 @@ app_ui <- function() {
         padding-top: 0em;
         padding-bottom: 0em;
         padding-right: 0em
+      }
+      
+      /* Align tooltip text */
+      .tooltip-inner {
+        text-align: left;
       }"),
       div(
         a(
@@ -97,7 +102,7 @@ app_ui <- function() {
           height: calc(95vh - (3.5rem + 1px));
         }" # TODO: quick workaround, maybe reconsider
       )),
-      bs4Dash::sidebarMenu( # TODO: implement search bar
+      bs4Dash::sidebarMenu(
         id = "sidebar",
         tags$form(
           class = "sidebar-form",

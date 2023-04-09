@@ -13,9 +13,10 @@ mod_exp_ui <- function(id) {
     fluidRow(
       bs4Dash::column(
         width = 3,
-        bs4Dash::box(
+        helpBox(
           title = "Data selection", 
           id = ns("databox"),
+          help_id = ns("databoxHelp"),
           width = 12,
           solidHeader = FALSE, 
           collapsible = TRUE,
@@ -104,6 +105,11 @@ mod_exp <- function(input, output, session) {
   # update function
   updated <- reactiveValues(subitem = FALSE, option = FALSE)
   
+  bs4Dash::addTooltip(
+    id = "databoxHelp",
+    options = tooltip_opts(txts$exp$help$databox)
+  )
+  
   # Show question
   output$question <- renderUI({
     if (!is.null(input$title)) {
@@ -146,7 +152,6 @@ mod_exp <- function(input, output, session) {
         clearOptions = TRUE
       )
       updated$subitem <- TRUE
-      cli::cli_rule("updating options: {updated$subitem}")
       shinyjs::show("subitemHide", anim = TRUE)
     } else {
       shinyjs::hide("subitemHide", anim = TRUE)
@@ -160,7 +165,6 @@ mod_exp <- function(input, output, session) {
         clearOptions = TRUE
       )
       updated$option <- TRUE
-      cli::cli_rule("updating options: {updated$option}")
       shinyjs::show("optionHide", anim = TRUE)
     } else {
       shinyjs::hide("optionHide", anim = TRUE)
@@ -168,26 +172,26 @@ mod_exp <- function(input, output, session) {
   }) %>%
     bindEvent(input$title)
   
-  # Set update flag to FALSE when input comes directly from user
+  # If an event is triggered by a user, update reactive values
   observe({
-    cli::cli_rule("observing subitem")
-    updated$subitem <- FALSE
-  }, priority = 2L) %>%
-    bindEvent(input$subitem)
+    if (isTRUE(updated$subitem)) updated$subitem <- FALSE
+  }) %>%
+    bindEvent(input$subitem, updated$subitem)
   
   observe({
-    cli::cli_rule("observing option")
-    updated$option <- FALSE
-  }, priority = 1L) %>%
-    bindEvent(input$option)
+    if (isTRUE(updated$option)) updated$option <- FALSE
+  }) %>%
+    bindEvent(input$option, updated$option)
   
   # Determine the variable based on combination of topic, subitem and option
-  invar <- reactiveVal(NULL)
-  observe({
-    cli::cli_rule("trying invar / option: {updated$option}, subitem: {updated$subitem}")
+  invar <- reactive({
+    has_user_input <- !any(updated$subitem, updated$option)
+    is_init <- !as.logical(watch("exp"))
+
     # Cancel if subitem and option are not explicitly changed by user
-    req(isFALSE(updated$subitem) && isFALSE(updated$option))
-    cli::cli_rule("success :)")
+    req(has_user_input || is_init)
+    init("subitem_updated", "option_updated")
+
     has_title <- cb$title %in% input$title
     invar <- cb[has_title, ]
 
@@ -215,8 +219,9 @@ mod_exp <- function(input, output, session) {
     if (length(invar$variable) > 1) {
       invar <- invar[1, ]
     }
-    invar(invar$variable)
-  }, priority = 0L) %>%
+    
+    invar$variable
+  }) %>%
     bindEvent(input$title, input$subitem, input$option)
   
   observe({
@@ -301,8 +306,8 @@ mod_exp <- function(input, output, session) {
   
   output$explorer <- leaflet::renderLeaflet({
     params <- isolate(exp_params())
-    trigger("exp")
-    
+    isolate(trigger("exp"))
+
     leaflet::leaflet(params$poly) %>%
       leaflet::addTiles() %>%
       leaflet::setView(lng = 9, lat = 55, zoom = 4) %>%
@@ -327,9 +332,9 @@ mod_exp <- function(input, output, session) {
   })
   
   observe({
-    req(isTRUE(watch("exp")))
+    req(watch("exp"))
     params <- exp_params()
-    
+
     leaflet::leafletProxy("explorer", data = params$poly) %>%
       leaflet::clearShapes() %>%
       leaflet::clearControls() %>%
@@ -352,8 +357,18 @@ mod_exp <- function(input, output, session) {
         labFormat = leaflet::labelFormat(suffix = params$unit)
       )
   })
+  
+  shinyjs::onevent("mouseover", "databoxHelp", {
+    bs4Dash::addTooltip(
+      id = "databoxHelp",
+      options = list(
+        title = div(txts$exp$help$databox, style = "text-align: left"),
+        placement = "bottom",
+        html = TRUE
+      )
+    )
+  })
 }
-
 
 mod_exp_server <- function(id) {
   moduleServer(id, mod_exp)

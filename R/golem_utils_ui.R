@@ -1,3 +1,34 @@
+helpBox <- function(..., help_id = NULL) {
+  bx <- bs4Dash::box(...)
+  if (is.null(help_id)) {
+    return(bx)
+  }
+  
+  help <- tags$button(
+    id = help_id,
+    class = "btn btn-tool btn-sm action-button",
+    type = "button",
+    icon("question", lib = "font-awesome")
+  )
+
+  dots <- list(...)
+  if (isFALSE(dots$collapsible) && !c("collapsible", "maximizable" %in% dots)) {
+    bx$children[[1]]$children[[1]]$children[[2]] <- div(
+      class = "card-tools float-right",
+      help
+    )
+  } else {
+    bx$children[[1]]$
+      children[[1]]$
+      children[[2]]$
+      children[[2]] <- c(list(help), bx$children[[1]]$
+                           children[[1]]$
+                           children[[2]]$
+                           children[[2]])
+  }
+  bx
+}
+
 #' Columns wrappers
 #'
 #' These are convenient wrappers around

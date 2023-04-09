@@ -138,7 +138,7 @@ dt.map-labels-item:after {
 }
 
 /* Remove padding from specific leaflet boxes */
-#exp_mapbox .card-header, #exp_mapbox .card-body {
+#main-exp-mapbox .card-header, #main-exp-mapbox .card-body {
   padding: 0em;
 }
 

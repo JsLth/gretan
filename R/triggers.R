@@ -10,8 +10,10 @@ trigger <- function(..., session = getDefaultReactiveDomain()) {
   })
 }
 
-watch <- function(name, session = getDefaultReactiveDomain()) {
-  session$userData[[name]]()
+watch <- function(..., session = getDefaultReactiveDomain()) {
+  vapply(list(...), function(x) {
+    as.integer(session$userData[[x]]())
+  }, FUN.VALUE = integer(1))
 }
 
 on <- function(name, expr, session = getDefaultReactiveDomain()) {

@@ -67,19 +67,4 @@ server <- function(input, output, session) {
   })
   
   mod_main_server("main")
-  withCallingHandlers({
-      mod_main_server("main")
-    },
-    error = function(e) send_error(div(
-      style = "text-align: left",
-      paste(
-        "Something went wrong! If this keeps happening, consider notifying the",
-        "tool maintainer (jonas.lieth@gesis.org).",
-      ),
-      br(), br(),
-      "Error details:", br(),
-      tags$code(as.character(e$message))
-    ))
-  )
-  
 }
