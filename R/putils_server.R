@@ -109,6 +109,31 @@ leaflet_text_on_click <- function(id, geom, texts, click, col = "name", tol = 1)
 }
 
 
+track_coordinates <- function(map, id, session = getDefaultReactiveDomain()) {
+  ns <- session$ns
+  id <- ns(id)
+  map$jsHooks[["render"]] <- c(
+    map$jsHooks[["render"]],
+    list(list(
+      code = sprintf("function(el, x) {
+        this.on('mousemove', function(e) {
+            var lng = e.latlng.lng;
+            var lat = e.latlng.lat;
+            var coord = [lng, lat];
+            Shiny.onInputChange('%s', coord)
+        });
+        this.on('mouseout', function(e) {
+            Shiny.onInputChange('%s', null)
+        })
+      }", id, id),
+      data = NULL
+    ))
+  )
+  
+  map
+}
+
+
 send_info <- function(text,
                       title = "Info",
                       session = getDefaultReactiveDomain()) {

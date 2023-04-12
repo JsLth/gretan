@@ -128,7 +128,9 @@ app_ui <- function() {
         bs4Dash::menuItem(
           text = "Multinational survey",
           icon = icon("map", lib = "font-awesome"),
-          tabName = "exp"
+          tabName = "mns",
+          bs4Dash::menuSubItem(text = "Explore data", tabName = "exp"),
+          bs4Dash::menuSubItem(text = "Compare data", tabName = "cmp")
         ),
         bs4Dash::sidebarHeader("Case studies"),
         bs4Dash::menuItem(

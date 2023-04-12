@@ -1,4 +1,4 @@
-mod_exp_ui <- function(id) {
+mod_exp_ui <- function(id, categories, titles) {
   ns <- NS(id)
   cb <- cb_ext
   categories <- unique(cb$topic[!is.na(cb$topic)])
@@ -86,7 +86,6 @@ mod_exp_ui <- function(id) {
           id = ns("mapbox"),
           width = 12,
           collapsible = FALSE,
-          solidHeader = FALSE,
           headerBorder = FALSE,
           status = "primary",
           leaflet::leafletOutput(ns("explorer"), width = "100%", height = 800)
@@ -190,8 +189,7 @@ mod_exp <- function(input, output, session) {
 
     # Cancel if subitem and option are not explicitly changed by user
     req(has_user_input || is_init)
-    init("subitem_updated", "option_updated")
-
+    req(!is.null(input$title) || !is.null(input$subitem) || !is.null(input$option))
     has_title <- cb$title %in% input$title
     invar <- cb[has_title, ]
 
@@ -356,17 +354,6 @@ mod_exp <- function(input, output, session) {
         title = params$lgd,
         labFormat = leaflet::labelFormat(suffix = params$unit)
       )
-  })
-  
-  shinyjs::onevent("mouseover", "databoxHelp", {
-    bs4Dash::addTooltip(
-      id = "databoxHelp",
-      options = list(
-        title = div(txts$exp$help$databox, style = "text-align: left"),
-        placement = "bottom",
-        html = TRUE
-      )
-    )
   })
 }
 

@@ -1,9 +1,17 @@
 mod_main_ui <- function(id) {
   ns <- NS(id)
 
+  categories <- unique(cb_ext$topic[!is.na(cb_ext$topic)])
+  titles <- categories %>%
+    purrr::map(~dplyr::filter(cb_ext, topic == .x) %>%
+                 dplyr::pull(title) %>% unique() %>%
+                 as.list()) %>%
+    purrr::set_names(categories)
+
   shiny::div(
     mod_home_ui(ns("home")),
-    mod_exp_ui(ns("exp")),
+    mod_exp_ui(ns("exp"), categories, titles),
+    mod_cmp_ui(ns("cmp"), categories, titles),
     mod_ind_ui(ns("ind")),
     mod_cs_ui(ns("cs")),
     mod_sandbox_ui(ns("sandbox")),
@@ -35,6 +43,7 @@ mod_main <- function(input, output, session) {
 
   mod_home_server("home")
   mod_exp_server("exp")
+  mod_cmp_server("cmp")
   mod_cs_server("cs")
   mod_ind_server("ind")
   mod_sandbox_server("sandbox")

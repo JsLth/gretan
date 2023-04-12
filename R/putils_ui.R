@@ -1,4 +1,4 @@
-helpBox <- function(..., help_id = NULL) {
+helpBox <- function(..., help_id = NULL, tabBox = FALSE) {
   bx <- bs4Dash::box(...)
   if (is.null(help_id)) {
     return(bx)
