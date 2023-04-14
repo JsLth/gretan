@@ -117,13 +117,13 @@ track_coordinates <- function(map, id, session = getDefaultReactiveDomain()) {
     list(list(
       code = sprintf("function(el, x) {
         this.on('mousemove', function(e) {
-            var lng = e.latlng.lng;
-            var lat = e.latlng.lat;
-            var coord = [lng, lat];
-            Shiny.onInputChange('%s', coord)
+          var lng = e.latlng.lng;
+          var lat = e.latlng.lat;
+          var coord = [lng, lat];
+          Shiny.onInputChange('%s', coord)
         });
         this.on('mouseout', function(e) {
-            Shiny.onInputChange('%s', null)
+          Shiny.onInputChange('%s', null)
         })
       }", id, id),
       data = NULL

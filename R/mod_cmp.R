@@ -403,62 +403,86 @@ mod_cmp <- function(input, output, session) {
     update_mns_map("explorerRight", exp_params_right())
   })
   
+  null_indicator <- reactiveValues(left = TRUE, right = TRUE)
+  
+  observe({
+    mouse <- unlist(input$explorerRight_shape_mouseout)
+    if (is.null(mouse)) return(TRUE)
+    params <- exp_params_right()
+    mouse <- sf::st_sfc(sf::st_point(mouse[c("lng", "lat")]), crs = 4326)
+    has_mouse <- sf::st_contains(mouse, params$poly, sparse = FALSE)
+    null_indicator$left <- !any(has_mouse)
+  }) %>%
+    bindEvent(input$explorerRight_shape_mouseout)
+  
+  observe({
+    mouse <- unlist(input$explorerLeft_shape_mouseout)
+    if (is.null(mouse)) return(TRUE)
+    params <- exp_params_right()
+    mouse <- sf::st_sfc(sf::st_point(mouse[c("lng", "lat")]), crs = 4326)
+    has_mouse <- sf::st_contains(mouse, params$poly, sparse = FALSE)
+    null_indicator$right <- !any(has_mouse)
+  }) %>%
+    bindEvent(input$explorerLeft_shape_mouseout)
+  
+  indicator_label_left <- reactive({
+    mouse <- unlist(input$explorerRight_shape_mouseover)
+    req(!is.null(mouse))
+    params <- exp_params_left()
+    mouse <- sf::st_sfc(sf::st_point(mouse[c("lng", "lat")]), crs = 4326)
+    country_idx <- sf::st_nearest_feature(mouse, params$poly, longlat = TRUE)
+    null_indicator$left <- FALSE
+    params$labels[[country_idx]]
+  }) %>%
+    bindEvent(input$explorerRight_shape_mouseover)
+  
+  indicator_label_right <- reactive({
+    mouse <- unlist(input$explorerLeft_shape_mouseover)
+    req(!is.null(mouse))
+    params <- exp_params_right()
+    mouse <- sf::st_sfc(sf::st_point(mouse[c("lng", "lat")]), crs = 4326)
+    country_idx <- sf::st_nearest_feature(mouse, params$poly, longlat = TRUE)
+    null_indicator$right <- FALSE
+    params$labels[[country_idx]]
+  }) %>%
+    bindEvent(input$explorerLeft_shape_mouseover)
+  
   observe({
     hover <- input$explorerLeft_mousemove
+    label <- indicator_label_right()
+    outside <- null_indicator$right
 
-    if (is.null(hover))  {
+    if (is.null(hover) || is.null(label) || outside)  {
       leaflet::leafletProxy("explorerRight") %>%
-        leaflet::removeMarker(ns("indicator-right")) %>%
-        leaflet::removePopup(ns("indicator-label-right"))
+        leaflet::removeMarker(ns("indicator-right"))
     } else {
       leaflet::leafletProxy("explorerRight") %>%
-        leaflet::removeMarker(ns("indicator-right")) %>%
-        leaflet::removePopup(ns("indicator-label-right")) %>%
-        leaflet::addCircleMarkers(
+        leaflet::addLabelOnlyMarkers(
           lng = hover[1],
           lat = hover[2],
-          layerId = ns("indicator-right")
-        ) %>%
-        leaflet::addPopups(
-          lng = hover[1],
-          lat = hover[2],
-          layerId = ns("indicator-label-right"),
-          popup = "test",
-          options = leaflet::popupOptions(
-            keepInView = TRUE,
-            closeButton = FALSE,
-            closeOnClick = FALSE,
-            className = "cmp-popup"
-          )
+          layerId = ns("indicator-right"),
+          label = label,
+          labelOptions = leaflet::labelOptions(noHide = TRUE)
         )
     }
   })
   
   observe({
     hover <- input$explorerRight_mousemove
+    label <- indicator_label_left()
+    outside <- null_indicator$left
     
-    if (is.null(hover))  {
+    if (is.null(hover) || is.null(label) || outside)  {
       leaflet::leafletProxy("explorerLeft") %>%
         leaflet::removeMarker(ns("indicator-left"))
     } else {
       leaflet::leafletProxy("explorerLeft") %>%
-        leaflet::removeMarker(ns("indicator")) %>%
-        leaflet::addCircleMarkers(
+        leaflet::addLabelOnlyMarkers(
           lng = hover[1],
           lat = hover[2],
-          layerId = ns("indicator-left")
-        ) %>%
-        leaflet::addPopups(
-          lng = hover[1],
-          lat = hover[2],
-          layerId = ns("indicator-label-left"),
-          popup = "test",
-          options = leaflet::popupOptions(
-            keepInView = TRUE,
-            closeButton = FALSE,
-            closeOnClick = FALSE,
-            className = "cmp-popup"
-          )
+          layerId = ns("indicator-left"),
+          label = label,
+          labelOptions = leaflet::labelOptions(noHide = TRUE)
         )
     }
   })
