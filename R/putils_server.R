@@ -52,34 +52,74 @@ align_dl <- function(..., sep = " ", bold = TRUE) {
   dots <- drop_nulls(list(...))
   lhs <- names(dots)
   labels <- mapply(
-    align_dl_items,
+    align_td,
     x = lhs,
     y = dots,
     char = sep,
     bold = bold,
     SIMPLIFY = FALSE
   )
+
   lapply(
-    do.call(paste, c(labels, sep = "<br>")),
-    function(x) protect_html(tags$dl(HTML(x), class = "map-labels-align"))
+    do.call(paste, labels),
+    function(x) protect_html(tags$table(HTML(x)))
   )
 }
 
-align_dl_items <- function(x, y, char = " ", bold = TRUE) {
+align_td <- function(x, y, char = " ", bold = TRUE) {
   div2 <- noWS(div)
-  dl2 <- noWS(tags$dl)
-  aligned <- mapply(FUN = function(dti, ddi) {
-    dtlst <- unlist(lapply(
-      dti,
-      function(it) as.character(tags$dt(it, class = "map-labels-item"))
+  table2 <- noWS(tags$table)
+  tr2 <- noWS(tags$tr)
+  td2 <- noWS(tags$td)
+  mapply(function(left, right) {
+    if (is.null(right) || is.na(right)) return("")
+    style <- NULL
+    if (identical(left, "Sample")) {
+      right <- paste(right, "respondent(s)")
+      if (right <= 10) style <- "color: red"
+    }
+    if (bold) left <- tags$b(left)
+    protect_html(tr2(
+      td2(left, style = style),
+      td2(char),
+      td2(right, style = style),
+      style = "line-height: 10px;"
     ))
-    ddlst <- unlist(lapply(
-      ddi,
-      function(it) as.character(tags$dd(it, class = "map-labels-item"))
-    ))
-    HTML(riffle(dtlst, ddlst))
-  }, dti = x, ddi = y, SIMPLIFY = FALSE, USE.NAMES = FALSE)
+  }, left = x, right = y, SIMPLIFY = FALSE, USE.NAMES = FALSE)
 }
+
+# align_dl <- function(..., sep = " ", bold = TRUE) {
+#   dots <- drop_nulls(list(...))
+#   lhs <- names(dots)
+#   labels <- mapply(
+#     align_dl_items,
+#     x = lhs,
+#     y = dots,
+#     char = sep,
+#     bold = bold,
+#     SIMPLIFY = FALSE
+#   )
+#   lapply(
+#     do.call(paste, c(labels, sep = "<br>")),
+#     function(x) protect_html(tags$dl(HTML(x), class = "map-labels-align"))
+#   )
+# }
+# 
+# align_dl_items <- function(x, y, char = " ", bold = TRUE) {
+#   div2 <- noWS(div)
+#   dl2 <- noWS(tags$dl)
+#   aligned <- mapply(FUN = function(dti, ddi) {
+#     dtlst <- unlist(lapply(
+#       dti,
+#       function(it) as.character(tags$dt(it, class = "map-labels-item"))
+#     ))
+#     ddlst <- unlist(lapply(
+#       ddi,
+#       function(it) as.character(tags$dd(it, class = "map-labels-item"))
+#     ))
+#     HTML(riffle(dtlst, ddlst))
+#   }, dti = x, ddi = y, SIMPLIFY = FALSE, USE.NAMES = FALSE)
+# }
 
 
 leaflet_select <- function(id, geom, action, tol = 1) {

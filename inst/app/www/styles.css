@@ -120,23 +120,6 @@ a.logo {
   background-color: #FED22B !important;
 }
 
-/* align two spans around character */
-dl.map-labels-align {
-  text-align: center;
-  margin: auto;
-}
-
-dt.map-labels-item, dd.map-labels-item {
-  display: inline-block;
-  text-align: left;
-  margin: 0;
-  padding: 0 5px 0 0;
-}
-
-dt.map-labels-item:after {
-  content: ':';
-}
-
 /* Remove padding from specific leaflet boxes */
 #main-exp-mapbox .card-header, #main-exp-mapbox .card-body {
   padding: 0em;

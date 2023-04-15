@@ -79,12 +79,19 @@ get_mns_params <- function(invar, fixed, palette, poly) {
   }
   
   pal <- leaflet::colorNumeric(palette, domain = domain)
-  
+
   label_values <- list(
     poly[["nuts0"]], poly[["nuts1"]], poly[["nuts2"]],
-    paste0(round(poly[[invar]], 2), unit), ":"
+    paste0(round(poly[[invar]], 2), unit), poly$sample, ":"
   )
-  names(label_values) <- c("NUTS-0", "NUTS-1", "NUTS-2", lgd, "sep")
+  names(label_values) <- c(
+    "NUTS-0",
+    "NUTS-1",
+    "NUTS-2",
+    lgd,
+    "Sample",
+    "sep"
+  )
   labels <- do.call(align_dl, label_values)
   
   poly <- sf::st_transform(poly, 4326)

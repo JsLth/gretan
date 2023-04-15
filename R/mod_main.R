@@ -2,11 +2,9 @@ mod_main_ui <- function(id) {
   ns <- NS(id)
 
   categories <- unique(cb_ext$topic[!is.na(cb_ext$topic)])
-  titles <- categories %>%
-    purrr::map(~dplyr::filter(cb_ext, topic == .x) %>%
-                 dplyr::pull(title) %>% unique() %>%
-                 as.list()) %>%
-    purrr::set_names(categories)
+  titles <- stats::setNames(lapply(categories, function(x) {
+    as.list(unique(cb_ext[cb_ext$topic %in% x, ]$title))
+  }), categories)
 
   shiny::div(
     mod_home_ui(ns("home")),
