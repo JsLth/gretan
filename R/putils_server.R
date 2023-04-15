@@ -88,39 +88,6 @@ align_td <- function(x, y, char = " ", bold = TRUE) {
   }, left = x, right = y, SIMPLIFY = FALSE, USE.NAMES = FALSE)
 }
 
-# align_dl <- function(..., sep = " ", bold = TRUE) {
-#   dots <- drop_nulls(list(...))
-#   lhs <- names(dots)
-#   labels <- mapply(
-#     align_dl_items,
-#     x = lhs,
-#     y = dots,
-#     char = sep,
-#     bold = bold,
-#     SIMPLIFY = FALSE
-#   )
-#   lapply(
-#     do.call(paste, c(labels, sep = "<br>")),
-#     function(x) protect_html(tags$dl(HTML(x), class = "map-labels-align"))
-#   )
-# }
-# 
-# align_dl_items <- function(x, y, char = " ", bold = TRUE) {
-#   div2 <- noWS(div)
-#   dl2 <- noWS(tags$dl)
-#   aligned <- mapply(FUN = function(dti, ddi) {
-#     dtlst <- unlist(lapply(
-#       dti,
-#       function(it) as.character(tags$dt(it, class = "map-labels-item"))
-#     ))
-#     ddlst <- unlist(lapply(
-#       ddi,
-#       function(it) as.character(tags$dd(it, class = "map-labels-item"))
-#     ))
-#     HTML(riffle(dtlst, ddlst))
-#   }, dti = x, ddi = y, SIMPLIFY = FALSE, USE.NAMES = FALSE)
-# }
-
 
 leaflet_select <- function(id, geom, action, tol = 1) {
   if (!is.null(action)) {
