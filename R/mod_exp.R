@@ -24,7 +24,8 @@ mod_exp_ui <- function(id, categories, titles) {
           shinyWidgets::pickerInput(
             ns("title"),
             "Topic",
-            titles,
+            choices = titles,
+            selected = "Energy behavior",
             options = shinyWidgets::pickerOptions(
               windowPadding = c(30, 0, 0, 0),
               liveSearch = TRUE
@@ -51,9 +52,14 @@ mod_exp_ui <- function(id, categories, titles) {
           shinyWidgets::pickerInput(
             ns("aggr"),
             "Aggregation level",
-            c("NUTS-0", "NUTS-1", "NUTS-2")
+            choices = c("NUTS-0", "NUTS-1", "NUTS-2"),
+            selected = "NUTS-0"
           ),
-          shinyWidgets::pickerInput(ns("pal"), "Color palette", list_palettes()),
+          shinyWidgets::pickerInput(
+            ns("pal"),
+            "Color palette",
+            choices = list_palettes()
+          ),
           shinyjs::disabled(div(
             id = ns("fixedHide"),
             shinyWidgets::prettyRadioButtons(
@@ -111,25 +117,7 @@ mod_exp <- function(input, output, session) {
   
   # Show question
   output$question <- renderUI({
-    if (!is.null(input$title)) {
-      indat <- cb[cb$title %in% input$title, ]
-      
-      if (!all(is.na(indat$subitem))) {
-        indat <- indat[indat$subitem %in% input$subitem, ]
-      }
-      
-      if (!all(is.na(indat$option))) {
-        indat <- indat[indat$option %in% input$option, ]
-      }
-      
-      HTML(sprintf(
-        "<b>Question %s:</b><br>%s",
-        toupper(indat$og_var),
-        indat$label
-      ))
-    } else {
-      ""
-    }
+    render_question(input$title, input$subitem, input$option)
   })
   
   # Hide or show selectors for subitems or options depending on the question
@@ -189,36 +177,8 @@ mod_exp <- function(input, output, session) {
 
     # Cancel if subitem and option are not explicitly changed by user
     req(has_user_input || is_init)
-    req(!is.null(input$title) || !is.null(input$subitem) || !is.null(input$option))
-    has_title <- cb$title %in% input$title
-    invar <- cb[has_title, ]
-
-    # case: multiple items exist, look for subitems
-    if (length(invar$variable) > 1) {
-      has_subitem <- invar$subitem %in% input$subitem
-      
-      # only select subitem if any exist
-      if (any(has_subitem)) {
-        invar <- invar[has_subitem, ]
-      }
-    }
-
-    # case: there's still multiple items, look for options
-    if (length(invar$variable) > 1 || !length(invar$variable)) {
-      has_option <- invar$option %in% input$option
-      
-      # only select option if any exist
-      if (any(has_option)) {
-        invar <- invar[has_option, ]
-      }
-    }
-
-    # if all strings fail, just select the first one
-    if (length(invar$variable) > 1) {
-      invar <- invar[1, ]
-    }
     
-    invar$variable
+    get_mns_variable(input$title, input$subitem, input$option)
   }) %>%
     bindEvent(input$title, input$subitem, input$option)
   
@@ -253,80 +213,13 @@ mod_exp <- function(input, output, session) {
     bindEvent(input$aggr)
   
   exp_params <- reactive({
-    poly <- poly()
-    invar <- invar()
-    pal <- pal()
-    
-    is_metric <- cb[cb$variable %in% invar, ]$is_metric
-    is_dummy <- cb[cb$variable %in% invar, ]$is_dummy ||
-      cb[cb$variable %in% invar, ]$is_pdummy
-    
-    domain <- NULL
-    values <- as.formula(paste0("~", invar))
-    
-    if (identical(invar, "c1")) {
-      lgd <- "Mean age"
-      unit <- " years"
-    } else if (is_metric) {
-      lgd <- "Mean"
-      unit <- ""
-    } else {
-      if (identical(input$fixed, "Full range")) {
-        domain <- seq(0, 100, 10)
-        values <- domain
-      }
-      lgd <- "Share"
-      unit <- "%"
-      poly[[invar]] <- poly[[invar]] * 100
-    }
-    
-    pal <- leaflet::colorNumeric(pal, domain = domain)
-    
-    label_values <- list(
-      poly[["nuts0"]], poly[["nuts1"]], poly[["nuts2"]],
-      paste0(round(poly[[invar]], 2), unit), ":"
-    )
-    names(label_values) <- c("NUTS-0", "NUTS-1", "NUTS-2", lgd, "sep")
-    labels <- do.call(align_dl, label_values)
-    
-    poly <- sf::st_transform(poly, 4326)
-    
-    list(
-      poly = poly,
-      invar = invar,
-      pal = pal,
-      values = values,
-      labels = labels,
-      lgd = lgd,
-      unit = unit
-    )
+    get_mns_params(invar(), input$fixed_left, pal(), poly())
   })
   
   output$explorer <- leaflet::renderLeaflet({
     params <- isolate(exp_params())
     isolate(trigger("exp"))
-
-    leaflet::leaflet(params$poly) %>%
-      leaflet::addTiles() %>%
-      leaflet::setView(lng = 9, lat = 55, zoom = 4) %>%
-      leaflet::addPolygons(
-        fillColor = as.formula(paste0("~params$pal(", params$invar, ")")),
-        fillOpacity = 0.7,
-        weight = 1,
-        color = "black",
-        opacity = 0.5,
-        label = params$labels,
-        highlightOptions = highlight_opts
-      ) %>%
-      leaflet::addLegend(
-        position = "bottomright",
-        na.label = "No data",
-        pal = params$pal,
-        values = params$values,
-        opacity = 0.9,
-        title = params$lgd,
-        labFormat = leaflet::labelFormat(suffix = params$unit)
-      )
+    map_mns(params)
   })
   
   observe({

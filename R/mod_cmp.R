@@ -17,7 +17,8 @@ mod_cmp_ui <- function(id, categories, titles) {
             shinyWidgets::pickerInput(
               ns("titleLeft"),
               "Topic",
-              titles,
+              choices = titles,
+              selected = "Heating system usage",
               options = shinyWidgets::pickerOptions(
                 windowPadding = c(30, 0, 0, 0),
                 liveSearch = TRUE
@@ -78,7 +79,8 @@ mod_cmp_ui <- function(id, categories, titles) {
             shinyWidgets::pickerInput(
               ns("titleRight"),
               "Topic",
-              titles,
+              choices = titles,
+              selected = "Cooling system usage",
               options = shinyWidgets::pickerOptions(
                 windowPadding = c(30, 0, 0, 0),
                 liveSearch = TRUE
