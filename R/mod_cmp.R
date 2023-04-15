@@ -8,8 +8,9 @@ mod_cmp_ui <- function(id, categories, titles) {
         6,
         bs4Dash::tabBox(
           id = ns("setupLeft"),
-          status = "info",
+          status = "primary",
           width = 12,
+          type = "tabs",
           tabPanel(
             title = "Data", 
             id = ns("databoxLeft"),
@@ -72,9 +73,11 @@ mod_cmp_ui <- function(id, categories, titles) {
           id = ns("setupRight"),
           status = "primary",
           width = 12,
+          type = "tabs",
           tabPanel(
             title = "Data", 
             id = ns("databoxRight"),
+            class = "box-nav-link",
             icon = icon("filter"),
             shinyWidgets::pickerInput(
               ns("titleRight"),

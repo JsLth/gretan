@@ -67,9 +67,8 @@ app_ui <- function() {
         color: inherit
       }
       
-      .nav-pills .nav-link.active, .nav-pills .show > .nav-link {
-      	color: #000;
-      	background-color: #F4F4F2;
+      a.nav-link {
+        color: #000;
       }
       
       /* remove white space from header */
