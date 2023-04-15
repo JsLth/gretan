@@ -62,6 +62,16 @@ app_ui <- function() {
         font-weight: bold;
       }
       
+      /* remove coloring from some elements */
+      .nav-pills .nav-link:not(.active):hover {
+        color: inherit
+      }
+      
+      .nav-pills .nav-link.active, .nav-pills .show > .nav-link {
+      	color: #000;
+      	background-color: #F4F4F2;
+      }
+      
       /* remove white space from header */
       .navbar {
         padding-top: 0em;
