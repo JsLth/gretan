@@ -210,6 +210,18 @@ codebook <- readxl::read_xlsx(
   mutate(label = stringr::str_remove_all(label, ":$")) %>%
   mutate(label = stringr::str_remove_all(label, stringr::fixed(" - Please answer the following questions"))) %>%
   mutate(label = stringr::str_remove_all(label, "\\s\\[OPEN\\]")) %>%
+  mutate(is_likert = map_lgl(
+    variable,
+    function(x) {
+      lab <- survey[[x]] %>%
+        attr("labels") %>%
+        names() %>%
+        substr(1, 1) %>%
+        strtoi()
+      lab <- lab[!is.na(lab)]
+      length(lab) > 1 && all(abs(diff(lab)) == 1)
+    }
+  )) %>%
   mutate(is_pdummy = map_lgl( # pseudo dummies = Yes/No questions - don't need dummifying
     survey[variable],
     ~is.labelled(.x) & all(names(attr(.x, "labels")) %in% c("Yes", "No")))) %>%
@@ -219,7 +231,8 @@ codebook <- readxl::read_xlsx(
   mutate(needs_dummy = !is_metric &
            !variable == "id" &
            !is_dummy &
-           !is_pdummy) %>%
+           !is_pdummy
+           !is_likert) %>%
   mutate( # split question labels for dummies
     option = dplyr::if_else(is_dummy, stringr::str_split_i(label, " - ", 1), NA),
     label = dplyr::if_else(is_dummy, stringr::str_split_i(label, " - ", 2), label)
@@ -469,8 +482,7 @@ for (x in names(survey_local)) {
 srv_nuts0 <- aggregate(
   survey_local %>% select(-id),
   nuts0,
-  FUN = mean,
-  na.rm = TRUE
+  FUN = mean
 ) %>%
   dplyr::as_tibble() %>%
   sf::st_as_sf()
@@ -513,9 +525,9 @@ count_nuts2 <- aggregate(survey_local["id"], nuts2, FUN = length) %>%
 srv_nuts2 <- srv_nuts2 %>%
   sf::st_join(count_nuts2, sf::st_equals) %>%
   sf::st_join(nuts2["name"], sf::st_equals) %>%
-  sf::st_join(nuts0["name"], sf::st_nearest_feature) %>%
+  sf::st_join(nuts0["name"], sf::st_contains) %>%
   rename(nuts2 = "name.x", nuts0 = "name.y") %>%
-  sf::st_join(nuts1["name"], sf::st_nearest_feature) %>%
+  sf::st_join(nuts1["name"], sf::st_contains) %>%
   rename(nuts1 = "name")
 
 output <- list("cb_ext", "srv_nuts0", "srv_nuts1", "srv_nuts2")
