@@ -137,6 +137,7 @@ mod_cmp_ui <- function(id, categories, titles) {
         6,
         bs4Dash::box(
           id = ns("mapboxLeft"),
+          class = "leaflet-box",
           width = 12,
           collapsible = FALSE,
           headerBorder = FALSE,
@@ -152,6 +153,7 @@ mod_cmp_ui <- function(id, categories, titles) {
         6,
         bs4Dash::box(
           id = ns("mapboxRight"),
+          class = "leaflet-box",
           width = 12,
           collapsible = FALSE,
           headerBorder = FALSE,
@@ -163,10 +165,7 @@ mod_cmp_ui <- function(id, categories, titles) {
           )
         )
       )
-    ),
-    leaflet::leafletOutput(ns("map")),
-    br(),
-    verbatimTextOutput(ns("out"))
+    )
   )
 }
 

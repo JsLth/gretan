@@ -125,6 +125,10 @@ a.logo {
   padding: 0em;
 }
 
+.leaflet-box {
+  padding: 0px !important;
+}
+
 /* If not using map tiles, show a white background */
 .leaflet-container {
   background-color: white !important;
