@@ -1,37 +1,4 @@
-- Add functionality to search bar -> search through tab names
-- Fix inputPicker overlapping with Leaflet UI
-- Create separate R files for each category (cs.R, indan.R, explorer.R, intro.R)
-  to store function files and texts
-- Add texts to global `txts` object
-- reduce dependencies
-- implement SQL workflows and remove data from memory
-
-
-Think about using these functions/packages:
-- shinyWidgets::execute_safely() (show popups instead of failing on error)
-- package:gargoyle (more careful observing)
-- package:R6 (standardized workflow pipelines)
-
-
-Dependencies:
-  Core:
-  - bs4Dash
-  - fresh
-  - leaflegend
-  - leaflet
-  - shiny
-  - shinyWidgets
-  - waiter
-  - pkgload
-  - plotly
-  - ggplot2
-  
-  Replaceable:
-  - sf (sfheaders?)
-  - spdep (sfdep?)
-  
-  Not necessary (replacable with base R):
-  - purrr
-  - viridis
-  - shinipsum
-  - dplyr
+- fix georeferencing
+- add median for likert scale items
+- add mode in data explorer
+- find out how to serialize interactive figures
