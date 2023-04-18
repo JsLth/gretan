@@ -376,11 +376,11 @@ mod_cmp <- function(input, output, session) {
     bindEvent(input$aggrRight)
   
   exp_params_left <- reactive({
-    get_mns_params(invar_left(), input$fixed_left, pal_left(), poly_left())
+    get_mns_params(invar_left(), input$fixedLeft, pal_left(), poly_left())
   })
   
   exp_params_right <- reactive({
-    get_mns_params(invar_right(), input$fixed_right, pal_right(), poly_right())
+    get_mns_params(invar_right(), input$fixedRight, pal_right(), poly_right())
   })
   
   output$explorerLeft <- leaflet::renderLeaflet({

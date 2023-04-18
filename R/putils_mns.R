@@ -55,30 +55,42 @@ get_mns_variable <- function(title, subitem, option) {
 
 
 get_mns_params <- function(invar, fixed, palette, poly) {
-  is_metric <- cb_ext[cb_ext$variable %in% invar, ]$is_metric
-  is_dummy <- cb_ext[cb_ext$variable %in% invar, ]$is_dummy ||
-    cb_ext[cb_ext$variable %in% invar, ]$is_pdummy
+  cb_entry <- cb_ext[cb_ext$variable %in% invar, ]
+  is_metric <- cb_entry$is_metric
+  is_likert <- cb_entry$is_likert
 
+  lgd_labels <- NULL
   domain <- NULL
   values <- as.formula(paste0("~", invar))
-  
+
   if (identical(invar, "c1")) {
     lgd <- "Mean age"
     unit <- " years"
+  } else if (is_likert) {
+    lgd_labels <- cb_entry$labels[[1]]
+    values <- as.formula(paste0("~as_likert(", invar, ")"))
+    domain <- strtoi(lgd_labels)
+    lgd_labels <- domain <- domain[!is.na(domain)]
+    lgd <- "Median"
+    unit <- ""
   } else if (is_metric) {
     lgd <- "Mean"
     unit <- ""
   } else {
     if (identical(fixed, "Full range")) {
-      domain <- seq(0, 100, 10)
-      values <- domain
+      values <- domain <- seq(0, 100, 10)
     }
     lgd <- "Share"
     unit <- "%"
     poly[[invar]] <- poly[[invar]] * 100
   }
-  
-  pal <- leaflet::colorNumeric(palette, domain = domain)
+
+  if (is.null(lgd_labels)) {
+    pal <- leaflet::colorNumeric(palette, domain = domain)
+  } else {
+    pal <- leaflet::colorFactor(palette, domain = domain, levels = domain)
+  }
+
 
   label_values <- list(
     poly[["nuts0"]], poly[["nuts1"]], poly[["nuts2"]],
@@ -103,6 +115,7 @@ get_mns_params <- function(invar, fixed, palette, poly) {
     values = values,
     labels = labels,
     lgd = lgd,
+    lgd_labels = lgd_labels,
     unit = unit
   )
 }
@@ -134,6 +147,7 @@ map_mns <- function(params) {
 
 
 update_mns_map <- function(id, params, session = getDefaultReactiveDomain()) {
+  print(params$values)
   leaflet::leafletProxy(id, data = params$poly, session = session) %>%
     leaflet::clearShapes() %>%
     leaflet::clearControls() %>%

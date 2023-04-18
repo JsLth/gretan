@@ -21,6 +21,15 @@ locm_colors_abel <- function(locm, df) {
   list(outline = colors, fill = colors1)
 }
 
+as_likert <- function(x) {
+  scale <- c(
+    "Strongly disagree", "Disagree", "Somewhat disagree",
+    "Neutral",
+    "Somewhat agree", "Agree", "Strongly agree"
+  )
+  vapply(x, function(i) scale[i], FUN.VALUE = character(1))
+}
+
 make_html_label <- function(..., sep = " ", bold = TRUE) {
   dots <- drop_nulls(list(...))
   lhs <- names(dots)

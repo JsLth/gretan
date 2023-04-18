@@ -213,40 +213,17 @@ mod_exp <- function(input, output, session) {
     bindEvent(input$aggr)
   
   exp_params <- reactive({
-    get_mns_params(invar(), input$fixed_left, pal(), poly())
+    get_mns_params(invar(), input$fixed, pal(), poly())
   })
   
   output$explorer <- leaflet::renderLeaflet({
-    params <- isolate(exp_params())
     isolate(trigger("exp"))
-    map_mns(params)
+    map_mns(isolate(exp_params()))
   })
   
   observe({
     req(watch("exp"))
-    params <- exp_params()
-
-    leaflet::leafletProxy("explorer", data = params$poly) %>%
-      leaflet::clearShapes() %>%
-      leaflet::clearControls() %>%
-      leaflet::addPolygons(
-        fillColor = as.formula(paste0("~params$pal(", params$invar, ")")),
-        fillOpacity = 0.7,
-        weight = 1,
-        color = "black",
-        opacity = 0.5,
-        label = params$labels,
-        highlightOptions = highlight_opts
-      ) %>%
-      leaflet::addLegend(
-        position = "bottomright",
-        na.label = "No data",
-        pal = params$pal,
-        values = params$values,
-        opacity = 0.9,
-        title = params$lgd,
-        labFormat = leaflet::labelFormat(suffix = params$unit)
-      )
+    update_mns_map("explorer", exp_params())
   })
 }
 
