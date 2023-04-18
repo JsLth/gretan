@@ -69,6 +69,16 @@ mod_exp_ui <- function(id, categories, titles) {
               selected = "Full contrast",
               inline = TRUE
             )
+          )),
+          shinyjs::disable(div(
+            id = ns("modeHide"),
+            shinyWidgets::materialSwitch(
+              ns("hide"),
+              label = "Show options as mode",
+              value = FALSE,
+              status = "primary",
+              right = TRUE
+            )
           ))
         ),
         bs4Dash::box(
