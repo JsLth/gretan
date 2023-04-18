@@ -55,6 +55,32 @@ sort_variables <- function(var) {
     })
 }
 
+# Handle survey values during aggregation. If a variable is a likert item,
+# compute median, if it's an interval numeric, compute mean. Otherwise,
+# select by frequency.
+# If a likert item has 
+aggregate_survey <- function(x) {
+  vec <- get0("e", envir = parent.frame(2))
+  if (is.null(vec)) {
+    is_likert <- FALSE
+  } else {
+    is_likert <- isTRUE(attr(vec, "is_likert"))
+  }
+  
+  if (is_likert) {
+    non_response <- is.na(strtoi(attr(vec, "labels")[[1]]))
+    as.integer(median(x[!non_response], na.rm = TRUE))
+  } else if (is.numeric(x) || is.logical(x)) {
+    mean(x, na.rm = TRUE)
+  } else {
+    names(which.max(table(x)))
+  }
+}
+
+st_centroid2 <- function(x, ..., of_largest_polygon = FALSE) {
+  st_set_geometry(x, st_centroid(st_geometry(x), of_largest_polygon = TRUE))
+}
+
 topics <- dplyr::tribble(
   ~category, ~title, ~topic,
   "d1", "Gender", "A",
@@ -210,7 +236,8 @@ codebook <- readxl::read_xlsx(
   mutate(label = stringr::str_remove_all(label, ":$")) %>%
   mutate(label = stringr::str_remove_all(label, stringr::fixed(" - Please answer the following questions"))) %>%
   mutate(label = stringr::str_remove_all(label, "\\s\\[OPEN\\]")) %>%
-  mutate(is_likert = map_lgl(
+  mutate(is_likert = map_lgl( # a likert item is an item whose labels contain
+    # at least 2 sequential numerics as the first character
     variable,
     function(x) {
       lab <- survey[[x]] %>%
@@ -231,7 +258,7 @@ codebook <- readxl::read_xlsx(
   mutate(needs_dummy = !is_metric &
            !variable == "id" &
            !is_dummy &
-           !is_pdummy
+           !is_pdummy &
            !is_likert) %>%
   mutate( # split question labels for dummies
     option = dplyr::if_else(is_dummy, stringr::str_split_i(label, " - ", 1), NA),
@@ -253,7 +280,8 @@ codebook <- readxl::read_xlsx(
     is_dummy | !is.na(subitem) | stringr::str_detect(variable, "_open"),
     stringr::str_remove_all(variable, "_.*$"),
     variable
-  ))
+  )) %>%
+  mutate(labels = map(survey[.$variable], ~names(attr(.x, "labels"))))
 
 
 # Remove nominal coding from geo columns
@@ -337,6 +365,10 @@ survey$code <- countrycode::countrycode(
 # Append NUTS-1 and NUTS-2 because the C2 column includes both
 nuts12 <- dplyr::bind_rows(nuts1, nuts2)
 
+# Filter out non-responses to geo question
+survey <- survey[!tolower(survey$c2) %in% "prefer not to say" &
+                   !tolower(survey$c3) %in% "prefer not to say", ]
+
 # Record linkage for C3 regions
 # The idea is to fuzzy match regions based on the heuristic Jaro Winkler string
 # distance. Every record of a country is matched with every other record of
@@ -355,32 +387,32 @@ reclin2::compare_pairs(
 m <- reclin2::problink_em(~clean_c3, data = pairs)
 
 # Compute predictions for each pair
-pairs <- predict(m, pairs = pairs, add = TRUE)
+pairs <- predict(m, pairs = pairs, add = TRUE, type = "all")
 
 # Select matching regions and link back to survey dataset
 survey_local <- pairs %>%
-  dplyr::group_by(.y) %>%
-  dplyr::slice_max(order_by = weights, with_ties = FALSE) %>%
-  dplyr::ungroup() %>%
-  dplyr::bind_cols(threshold = TRUE) %>%
+  group_by(.y) %>%
+  slice_max(order_by = weight, with_ties = FALSE) %>%
+  ungroup() %>%
+  bind_cols(threshold = TRUE) %>%
   data.table::as.data.table() %>%
   reclin2::link(selection = "threshold", x = lau, y = survey, all_y = TRUE) %>%
-  dplyr::as_tibble() %>%
+  as_tibble() %>%
   mutate(geometry = geometry %>%
            sf::st_sfc() %>% # fix geometries
            sf::st_centroid()) %>% # compute centroids for easier spatial aggregation
   sf::st_as_sf() %>%
   filter(!is.na(.x)) %>%
   select(all_of(codebook$variable)) %>%
-  mutate(dplyr::across(dplyr::everything(), .fns = function(x) { # remove SPSS labels
+  mutate(across(everything(), .fns = function(x) { # remove SPSS labels
     if (haven::is.labelled(x)) {
       haven::as_factor(x, levels = "label", ordered = TRUE)
     } else {
       x
     }
   })) %>%
-  mutate(dplyr::across(
-    dplyr::all_of(codebook$variable[codebook$is_pdummy]),
+  mutate(across(
+    all_of(codebook$variable[codebook$is_pdummy]),
     .fns = function(x) {
       dplyr::case_match(as.character(x),
         "Yes" ~ TRUE,
@@ -388,6 +420,10 @@ survey_local <- pairs %>%
         .default = NA
       )
     }
+  )) %>%
+  mutate(across(
+    all_of(codebook$variable[codebook$is_likert]),
+    .fns = as.numeric
   ))
 
 # Select categorical columns that have no dummies yet
@@ -471,7 +507,6 @@ survey_local <- survey_local %>%
     TRUE ~ c50
   ))
 
-
 # link codebook to survey dataset
 for (x in names(survey_local)) {
   if (x %in% cb_ext$variable) {
@@ -479,62 +514,54 @@ for (x in names(survey_local)) {
   }
 }
 
+survey_local <- survey_local %>%
+  st_join(select(nuts0, nuts0 = "name"), st_nearest_feature) %>%
+  st_join(select(nuts1, nuts1 = "name"), st_nearest_feature) %>%
+  st_join(select(nuts2, nuts2 = "name"), st_nearest_feature)
+
 srv_nuts0 <- aggregate(
-  survey_local %>% select(-id),
+  survey_local %>% select(-id, -nuts1, -nuts2),
   nuts0,
-  FUN = mean
+  FUN = aggregate_survey
 ) %>%
   dplyr::as_tibble() %>%
   sf::st_as_sf()
 
 count_nuts0 <- aggregate(survey_local["id"], nuts0, FUN = length) %>%
   dplyr::rename(sample = "id")
-srv_nuts0 <- srv_nuts0 %>%
-  sf::st_join(count_nuts0, sf::st_equals) %>%
-  sf::st_join(nuts0["name"], sf::st_equals) %>%
-  rename(nuts0 = "name")
+srv_nuts0 <- st_join(srv_nuts0, count_nuts0, st_equals)
 
 srv_nuts1 <- aggregate(
-  survey_local %>% select(-id),
+  survey_local %>% select(-id, -nuts2),
   nuts1,
-  FUN = mean,
-  na.rm = TRUE
+  FUN = aggregate_survey
 ) %>%
   dplyr::as_tibble() %>%
-  sf::st_as_sf()
+  sf::st_as_sf() %>%
+  filter(!is.na(nuts0))
 
 count_nuts1 <- aggregate(survey_local["id"], nuts1, FUN = length) %>%
   dplyr::rename(sample = "id")
-srv_nuts1 <- srv_nuts1 %>%
-  sf::st_join(count_nuts1, sf::st_equals) %>%
-  sf::st_join(nuts1["name"], sf::st_equals) %>%
-  sf::st_join(nuts0["name"], sf::st_within) %>%
-  rename(nuts1 = "name.x", nuts0 = "name.y")
+srv_nuts1 <- st_join(srv_nuts1, count_nuts1, st_equals)
 
 srv_nuts2 <- aggregate(
   survey_local %>% select(-id),
   nuts2,
-  FUN = mean,
-  na.rm = TRUE
+  FUN = aggregate_survey
 ) %>%
   dplyr::as_tibble() %>%
-  sf::st_as_sf()
+  sf::st_as_sf() %>%
+  filter(!is.na(nuts0))
 
 count_nuts2 <- aggregate(survey_local["id"], nuts2, FUN = length) %>%
   dplyr::rename(sample = "id")
-srv_nuts2 <- srv_nuts2 %>%
-  sf::st_join(count_nuts2, sf::st_equals) %>%
-  sf::st_join(nuts2["name"], sf::st_equals) %>%
-  sf::st_join(nuts0["name"], sf::st_contains) %>%
-  rename(nuts2 = "name.x", nuts0 = "name.y") %>%
-  sf::st_join(nuts1["name"], sf::st_contains) %>%
-  rename(nuts1 = "name")
+srv_nuts2 <- st_join(srv_nuts2, count_nuts2, st_equals)
 
 output <- list("cb_ext", "srv_nuts0", "srv_nuts1", "srv_nuts2")
 
-tidyr::pivot_longer(srv_nuts0, cols = !c(nuts0, geometry)) %>%
-  st_write("srv.sqlite", layer = "srv_nuts0")
-tidyr::pivot_longer(srv_nuts1, cols = !c(nuts0, nuts1, geometry)) %>%
-  st_write("srv.sqlite", layer = "srv_nuts1")
-tidyr::pivot_longer(srv_nuts2, cols = !c(nuts0, nuts1, nuts2, geometry)) %>%
-  st_write("srv.sqlite", layer = "srv_nuts2")
+# tidyr::pivot_longer(srv_nuts0, cols = !c(nuts0, geometry)) %>%
+#   st_write("srv.sqlite", layer = "srv_nuts0")
+# tidyr::pivot_longer(srv_nuts1, cols = !c(nuts0, nuts1, geometry)) %>%
+#   st_write("srv.sqlite", layer = "srv_nuts1")
+# tidyr::pivot_longer(srv_nuts2, cols = !c(nuts0, nuts1, nuts2, geometry)) %>%
+#   st_write("srv.sqlite", layer = "srv_nuts2")

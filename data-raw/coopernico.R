@@ -83,4 +83,4 @@ coopernico <- aggregate(
 
 output <- list("coopernico")
 
-st_write(coopernico, "inst/sql/ind_analyses.sqlite", layer = "coopernico")
+#st_write(coopernico, "inst/sql/ind_analyses.sqlite", layer = "coopernico")
