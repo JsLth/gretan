@@ -21,13 +21,21 @@ locm_colors_abel <- function(locm, df) {
   list(outline = colors, fill = colors1)
 }
 
-as_likert <- function(x) {
-  scale <- c(
-    "Strongly disagree", "Disagree", "Somewhat disagree",
-    "Neutral",
-    "Somewhat agree", "Agree", "Strongly agree"
-  )
-  vapply(x, function(i) scale[i], FUN.VALUE = character(1))
+as_likert <- function(x, scale = NULL) {
+  if (length(scale) > 7) {
+    stop(sprintf("Likert scale is too long (%s items)", length(x)))
+  }
+  
+  if (is.null(scale)) {
+    scale <- c(
+      "Strongly disagree", "Disagree", "Somewhat disagree",
+      "Neutral",
+      "Somewhat agree", "Agree", "Strongly agree"
+    )
+  }
+
+  values <- vapply(x, function(i) scale[i], FUN.VALUE = character(1))
+  ordered(values, levels = scale)
 }
 
 make_html_label <- function(..., sep = " ", bold = TRUE) {

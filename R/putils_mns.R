@@ -59,7 +59,6 @@ get_mns_params <- function(invar, fixed, palette, poly) {
   is_metric <- cb_entry$is_metric
   is_likert <- cb_entry$is_likert
 
-  lgd_labels <- NULL
   domain <- NULL
   values <- as.formula(paste0("~", invar))
 
@@ -67,10 +66,17 @@ get_mns_params <- function(invar, fixed, palette, poly) {
     lgd <- "Mean age"
     unit <- " years"
   } else if (is_likert) {
-    lgd_labels <- cb_entry$labels[[1]]
-    values <- as.formula(paste0("~as_likert(", invar, ")"))
-    domain <- strtoi(lgd_labels)
-    lgd_labels <- domain <- domain[!is.na(domain)]
+    lgd_labels <- NULL
+    labs <- cb_entry$labels[[1]]
+    if (is_non_default_likert(labs)) {
+      scale <- labs
+    } else {
+      scale <- NULL
+    }
+    lgd_labels <- strtoi(substr(cb_entry$labels[[1]], 1, 1))
+    lgd_labels <- lgd_labels[!is.na(lgd_labels)]
+    values <- domain <- as_likert(seq(1, length(lgd_labels)), scale = scale)
+    print(domain)
     lgd <- "Median"
     unit <- ""
   } else if (is_metric) {
@@ -85,16 +91,20 @@ get_mns_params <- function(invar, fixed, palette, poly) {
     poly[[invar]] <- poly[[invar]] * 100
   }
 
-  if (is.null(lgd_labels)) {
+  if (!is_likert) {
     pal <- leaflet::colorNumeric(palette, domain = domain)
   } else {
-    pal <- leaflet::colorFactor(palette, domain = domain, levels = domain)
+    poly <- num_to_likert(poly, cb_entry)
+    pal <- leaflet::colorFactor(palette, domain = NULL, levels = domain)
   }
 
-
+  lval <- poly[[invar]]
+  if (!is_likert) {
+    lval <- round(lval, 2)
+  }
   label_values <- list(
     poly[["nuts0"]], poly[["nuts1"]], poly[["nuts2"]],
-    paste0(round(poly[[invar]], 2), unit), poly$sample, ":"
+    paste0(lval, unit), poly$sample, ":"
   )
   names(label_values) <- c(
     "NUTS-0",
@@ -115,7 +125,6 @@ get_mns_params <- function(invar, fixed, palette, poly) {
     values = values,
     labels = labels,
     lgd = lgd,
-    lgd_labels = lgd_labels,
     unit = unit
   )
 }
@@ -147,7 +156,6 @@ map_mns <- function(params) {
 
 
 update_mns_map <- function(id, params, session = getDefaultReactiveDomain()) {
-  print(params$values)
   leaflet::leafletProxy(id, data = params$poly, session = session) %>%
     leaflet::clearShapes() %>%
     leaflet::clearControls() %>%
@@ -169,4 +177,16 @@ update_mns_map <- function(id, params, session = getDefaultReactiveDomain()) {
       title = params$lgd,
       labFormat = leaflet::labelFormat(suffix = params$unit)
     )
+}
+
+is_non_default_likert <- function(x) {
+  any(grepl("accurate|favour|willing|unfair", x))
+}
+
+num_to_likert <- function(df, cb) {
+  var <- cb$variable
+  labs <- cb$labels[[1]]
+  if (!is_non_default_likert(labs)) labs <- NULL
+  df[[var]] <- as_likert(df[[var]], scale = labs)
+  df
 }
