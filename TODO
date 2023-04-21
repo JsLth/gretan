@@ -1,4 +1,3 @@
-- fix georeferencing
 - add median for likert scale items
 - add mode in data explorer
 - find out how to serialize interactive figures
