@@ -1,4 +1,6 @@
 server <- function(input, output, session) {
+  log_it("Starting app")
+  
   # Capture search term
   searchbox_input <- reactive({
     search_input <- input$textSearch

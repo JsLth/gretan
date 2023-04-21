@@ -273,6 +273,45 @@ eval_args <- function(call, envir) {
   call
 }
 
+srcloc <- function(idx = 1) {
+  x <- .traceback(x = 1)
+  srcref <- attr(x[[idx]], "srcref")
+  if (!is.null(srcref)) {
+    srcfile <- attr(srcref, "srcfile")
+    sprintf(
+      "Calling %s at %s#%s",
+      x[[idx + 1]],
+      basename(srcfile$filename),
+      srcref[1]
+    )
+  }
+}
+
+cat2 <- function(...) {
+  cat(..., "\n")
+}
+
+log_it <- function(log = NULL, type = c("info", "warn", "error", "success")) {
+  out <- getOption("greta_log", "")
+  type <- match.arg(type)
+  time <- format(Sys.time(), "%F %T")
+  if (!nzchar(out)) {
+    col <- switch(type,
+      info = "\033[32m[%s]\033[39m",
+      warn = "\033[33m[%s]\033[39m",
+      error = "\033[31m[%s]\033[39m",
+      success = "\033[34m[%s]\033[39m"
+    )
+  } else {
+    col <- "[%s]"
+  }
+  type <- sprintf(col, toupper(type))
+  if (is.null(log)) {
+    log <- srcloc(idx = 2L)
+  }
+  cat2(sprintf("%s %s %s", time, type, log), file = out, append = TRUE)
+}
+
 protect_html <- function(x) HTML(as.character(x))
 
 #' Riffle-merges two vectors, possibly of different lengths
