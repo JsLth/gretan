@@ -218,24 +218,25 @@ codebook <- readxl::read_xlsx(
 ) %>%
   janitor::clean_names() %>%
   mutate(
+    question = label,
     variable = janitor::make_clean_names(variable),
     is_metric = purrr::map_lgl(
       survey[variable],
       ~!haven::is.labelled(.x) & is.numeric(.x)
     )
   ) %>%
-  select(variable, label, is_metric) %>%
+  select(variable, question, is_metric) %>%
   filter(!(stringr::str_ends(variable, "_open") & !is_metric)) %>% # filter useless open questions
-  filter(!stringr::str_detect(label, "if applicable|<none>|all that apply")) %>% # filter weird optional questions with no proper label
+  filter(!stringr::str_detect(question, "if applicable|<none>|all that apply")) %>% # filter weird optional questions with no proper label
   filter(!stringr::str_starts(variable, stringr::regex("p|b[0-9]"))) %>% # only citizen
   filter(variable %in% c("id", "d1", "d2", # filter technical columns
                          stringr::str_match_all(variable, "^c[0-9]{1,2}.*"))) %>%
   filter(!variable %in% c("c2", "c3")) %>% # filter geo questions
   filter(!variable %in% "c8_13") %>% # this subitem is not suitable for mapping
-  mutate(label = stringr::str_remove_all(label, stringr::fixed(", please specify"))) %>% # remove label appendices that don't look good in the app
-  mutate(label = stringr::str_remove_all(label, ":$")) %>%
-  mutate(label = stringr::str_remove_all(label, stringr::fixed(" - Please answer the following questions"))) %>%
-  mutate(label = stringr::str_remove_all(label, "\\s\\[OPEN\\]")) %>%
+  mutate(question = stringr::str_remove_all(question, stringr::fixed(", please specify"))) %>% # remove label appendices that don't look good in the app
+  mutate(question = stringr::str_remove_all(question, ":$")) %>%
+  mutate(question = stringr::str_remove_all(question, stringr::fixed(" - Please answer the following questions"))) %>%
+  mutate(question = stringr::str_remove_all(question, "\\s\\[OPEN\\]")) %>%
   mutate(is_likert = map_lgl( # a likert item is an item whose labels contain
     # at least 2 sequential numerics as the first character
     variable,
@@ -261,19 +262,19 @@ codebook <- readxl::read_xlsx(
            !is_pdummy &
            !is_likert) %>%
   mutate( # split question labels for dummies
-    option = dplyr::if_else(is_dummy, stringr::str_split_i(label, " - ", 1), NA),
-    label = dplyr::if_else(is_dummy, stringr::str_split_i(label, " - ", 2), label)
+    option = dplyr::if_else(is_dummy, stringr::str_split_i(question, " - ", 1), NA),
+    question = dplyr::if_else(is_dummy, stringr::str_split_i(question, " - ", 2), question)
   ) %>%
   mutate( # split question labels for multi-item questions
     subitem = dplyr::if_else(
-      stringr::str_detect(label, " - "),
-      stringr::str_split_i(label, " - ", 1),
+      stringr::str_detect(question, " - "),
+      stringr::str_split_i(question, " - ", 1),
       NA
     ),
-    label = dplyr::if_else(
-      stringr::str_detect(label, " - "),
-      stringr::str_split_i(label, " - ", 2),
-      label
+    question = dplyr::if_else(
+      stringr::str_detect(question, " - "),
+      stringr::str_split_i(question, " - ", 2),
+      question
     )
   ) %>%
   mutate(category = if_else(
@@ -281,7 +282,19 @@ codebook <- readxl::read_xlsx(
     stringr::str_remove_all(variable, "_.*$"),
     variable
   )) %>%
-  mutate(labels = map(survey[.$variable], ~names(attr(.x, "labels"))))
+  mutate(labels = map(variable, function(x) {
+    lab <- names(attr(survey[[x]], "labels"))
+    if (length(lab) == 1) {
+      i <- 1
+      lab <- NULL
+      x <- substr(x, 1, nchar(x) - 1)
+      while (!is.null(survey[[paste0(x, i)]])) {
+        lab <- c(lab, names(attr(survey[[paste0(x, i)]], "labels")))
+        i <- i + 1
+      }
+    }
+    stringr::str_remove_all(lab, ", please specify:")
+  }))
 
 
 # Remove nominal coding from geo columns
