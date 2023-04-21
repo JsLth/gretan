@@ -21,7 +21,7 @@ render_question <- function(title, subitem, option) {
 }
 
 
-get_mns_variable <- function(title, subitem, option) {
+get_mns_variable <- function(title, subitem, option, mode) {
   has_title <- cb_ext$title %in% title
   invar <- cb_ext[has_title, ]
 
@@ -34,9 +34,9 @@ get_mns_variable <- function(title, subitem, option) {
       invar <- invar[has_subitem, ]
     }
   }
-  
+
   # case: there's still multiple items, look for options
-  if (length(invar$variable) > 1 || !length(invar$variable)) {
+  if ((length(invar$variable) > 1 || !length(invar$variable)) && isFALSE(mode)) {
     has_option <- invar$option %in% option
     
     # only select option if any exist
@@ -44,17 +44,23 @@ get_mns_variable <- function(title, subitem, option) {
       invar <- invar[has_option, ]
     }
   }
-  
+
   # if all strings fail, just select the first one
-  if (length(invar$variable) > 1) {
+  if (length(invar$variable) > 1 && isFALSE(mode)) {
     invar <- invar[1, ]
   }
-  
+
   invar$variable
 }
 
 
 get_mns_params <- function(invar, fixed, palette, poly) {
+  if (length(invar) > 1) {
+    poly <- get_mns_mode(poly, cb_ext, invar)
+    invar <- invar[1]
+  } else {
+    poly <- subset_mns(poly, invar)
+  }
   cb_entry <- cb_ext[cb_ext$variable %in% invar, ]
   is_metric <- cb_entry$is_metric
   is_likert <- cb_entry$is_likert
@@ -65,18 +71,22 @@ get_mns_params <- function(invar, fixed, palette, poly) {
   if (identical(invar, "c1")) {
     lgd <- "Mean age"
     unit <- " years"
+  } else if (is.character(poly[[invar]])) {
+    if (identical(fixed, "Full range")) {
+      values <- domain <- cb_entry$labels[[1]]
+    }
+    lgd <- "Mode"
+    unit = ""
   } else if (is_likert) {
-    lgd_labels <- NULL
     labs <- cb_entry$labels[[1]]
     if (is_non_default_likert(labs)) {
       scale <- labs
     } else {
       scale <- NULL
     }
-    lgd_labels <- strtoi(substr(cb_entry$labels[[1]], 1, 1))
-    lgd_labels <- lgd_labels[!is.na(lgd_labels)]
-    values <- domain <- as_likert(seq(1, length(lgd_labels)), scale = scale)
-    print(domain)
+    labs <- strtoi(substr(cb_entry$labels[[1]], 1, 1))
+    labs <- labs[!is.na(labs)]
+    values <- domain <- as_likert(seq(1, length(labs)), scale = scale)
     lgd <- "Median"
     unit <- ""
   } else if (is_metric) {
@@ -91,17 +101,15 @@ get_mns_params <- function(invar, fixed, palette, poly) {
     poly[[invar]] <- poly[[invar]] * 100
   }
 
-  if (!is_likert) {
+  lval <- poly[[invar]]
+  if (!is_likert && !is.character(poly[[invar]])) {
     pal <- leaflet::colorNumeric(palette, domain = domain)
+    lval <- round(lval, 2)
   } else {
-    poly <- num_to_likert(poly, cb_entry)
+    if (is_likert) poly <- num_to_likert(poly, cb_entry)
     pal <- leaflet::colorFactor(palette, domain = NULL, levels = domain)
   }
 
-  lval <- poly[[invar]]
-  if (!is_likert) {
-    lval <- round(lval, 2)
-  }
   label_values <- list(
     poly[["nuts0"]], poly[["nuts1"]], poly[["nuts2"]],
     paste0(lval, unit), poly$sample, ":"
@@ -117,7 +125,7 @@ get_mns_params <- function(invar, fixed, palette, poly) {
   labels <- do.call(align_dl, label_values)
   
   poly <- sf::st_transform(poly, 4326)
-  
+
   list(
     poly = poly,
     invar = invar,
@@ -189,4 +197,34 @@ num_to_likert <- function(df, cb) {
   if (!is_non_default_likert(labs)) labs <- NULL
   df[[var]] <- as_likert(df[[var]], scale = labs)
   df
+}
+
+
+get_mns_mode <- function(df, cb, var) {
+  entry <- cb_ext[cb_ext$variable %in% var, ]
+  var <- entry$variable
+  options <- entry$option
+  dummies <- as.data.frame(df)[var]
+  mode <- vapply(seq_len(nrow(dummies)), function(i) {
+    options[which.max(dummies[i, ])]
+  }, FUN.VALUE = character(1))
+  var <- var[1]
+  df[var] <- mode
+  subset_mns(df, var)
+}
+
+subset_mns <- function(df, var = NULL) {
+  incl <- c("sample", "nuts0")
+  if ("nuts1" %in% names(df)) incl <- c(incl, "nuts1")
+  if ("nuts2" %in% names(df)) incl <- c(incl, "nuts2")
+  df[c(incl, var)]
+}
+
+update_palettes <- function(type = c("seq", "div", "qual")) {
+  type <- match.arg(type)
+  shinyWidgets::updatePickerInput(
+    getDefaultReactiveDomain(),
+    "pal",
+    choices = list_palettes(type = type)
+  )
 }

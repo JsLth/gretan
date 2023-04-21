@@ -9,7 +9,7 @@ Depends:
     R (>= 4.2.0)
 Imports: 
     bs4Dash,
-    dplyr,
+    magrittr,
     fresh,
     leaflegend,
     leaflet,

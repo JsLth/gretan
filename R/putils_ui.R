@@ -209,16 +209,28 @@ p2 <- function(...) p(..., class = "running-text")
 
 noWS <- function(.f) function(...) .f(..., .noWS = c("inside", "outside")) 
 
-list_palettes <- function() {
-  list(
-    "Common palettes" = list(
-      "Blues", "BuGn", "BuPu", "GnBu", "Greens", "Greys", "Oranges", "OrRd",
-      "PuBu", "PuBuGn", "PuRd", "Purples", "RdPu", "Reds", "YlGn", "YlGnBu",
-      "YlOrBr", "YlOrRd"
+list_palettes <- function(type = c("seq", "div", "qual")) {
+  type <- match.arg(type)
+  
+  switch(type,
+    seq =   list(
+      "Common palettes" = list(
+        "Blues", "BuGn", "BuPu", "GnBu", "Greens", "Greys", "Oranges", "OrRd",
+        "PuBu", "PuBuGn", "PuRd", "Purples", "RdPu", "Reds", "YlGn", "YlGnBu",
+        "YlOrBr", "YlOrRd"
+      ),
+      "Colorblind palettes" = list(
+        "Magma", "Inferno", "Plasma", "Viridis",
+        "Cividis", "Rocket", "Mako", "Turbo"
+      )
     ),
-    "Colorblind palettes" = list(
-      "Magma", "Inferno", "Plasma", "Viridis",
-      "Cividis", "Rocket", "Mako", "Turbo"
+    div = c(
+      "BrBG", "PiYG", "PRGn", "PuOr", "RdBu", "RdGy", "RdYlBu", "RdYlGn", 
+      "Spectral"
+    ),
+    qual = c(
+      "Accent", "Dark2", "Paired", "Pastel1", "Pastel2", "Set1", 
+      "Set2", "Set3"
     )
   )
 }

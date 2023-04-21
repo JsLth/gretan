@@ -1,12 +1,6 @@
 mod_exp_ui <- function(id, categories, titles) {
   ns <- NS(id)
   cb <- cb_ext
-  categories <- unique(cb$topic[!is.na(cb$topic)])
-  titles <- categories %>%
-    purrr::map(~dplyr::filter(cb, topic == .x) %>%
-                 dplyr::pull(title) %>% unique() %>%
-                 as.list()) %>%
-    purrr::set_names(categories)
   
   bs4Dash::tabItem(
     "exp",
@@ -52,7 +46,11 @@ mod_exp_ui <- function(id, categories, titles) {
           shinyWidgets::pickerInput(
             ns("aggr"),
             "Aggregation level",
-            choices = c("NUTS-0", "NUTS-1", "NUTS-2"),
+            choices = c(
+              "Countries" = "NUTS-0",
+              "Major regions" = "NUTS-1",
+              "Minor regions" = "NUTS-2"
+            ),
             selected = "NUTS-0"
           ),
           shinyWidgets::pickerInput(
@@ -70,16 +68,13 @@ mod_exp_ui <- function(id, categories, titles) {
               inline = TRUE
             )
           )),
-          shinyjs::disable(div(
-            id = ns("modeHide"),
-            shinyWidgets::materialSwitch(
-              ns("hide"),
-              label = "Show options as mode",
-              value = FALSE,
-              status = "primary",
-              right = TRUE
-            )
-          ))
+          shinyWidgets::materialSwitch(
+            ns("mode"),
+            label = "Show options as mode",
+            value = FALSE,
+            status = "primary",
+            right = TRUE
+          )
         ),
         bs4Dash::box(
           title = "Download",
@@ -118,7 +113,14 @@ mod_exp <- function(input, output, session) {
   
   # Initialize flag that specifies whether an input comes from the user or an
   # update function
-  updated <- reactiveValues(subitem = FALSE, option = FALSE)
+  updated <- reactiveValues(
+    subitem = FALSE,
+    option = FALSE,
+    palette = FALSE
+  )
+  init <- reactiveVal(FALSE, label = "is initialized?")
+  last_title <- reactiveVal(label = "last title")
+  last_pal <- reactiveVal("Blues", label = "last palette")
   
   bs4Dash::addTooltip(
     id = "databoxHelp",
@@ -149,11 +151,12 @@ mod_exp <- function(input, output, session) {
         clearOptions = TRUE
       )
       updated$subitem <- TRUE
+      log_it("Changed subitems from server side", "warn")
       shinyjs::show("subitemHide", anim = TRUE)
     } else {
       shinyjs::hide("subitemHide", anim = TRUE)
     }
-    
+
     if (show_options) {
       shinyWidgets::updatePickerInput(
         session,
@@ -162,55 +165,92 @@ mod_exp <- function(input, output, session) {
         clearOptions = TRUE
       )
       updated$option <- TRUE
+      log_it("Changed options from server side", "warn")
       shinyjs::show("optionHide", anim = TRUE)
     } else {
       shinyjs::hide("optionHide", anim = TRUE)
     }
-  }) %>%
+  }, label = "show or hide options/subitems") %>%
     bindEvent(input$title)
   
   # If an event is triggered by a user, update reactive values
   observe({
     if (isTRUE(updated$subitem)) updated$subitem <- FALSE
-  }) %>%
-    bindEvent(input$subitem, updated$subitem)
+  }, label = "indicate subitem user input") %>%
+    bindEvent(input$subitem)
   
   observe({
     if (isTRUE(updated$option)) updated$option <- FALSE
-  }) %>%
-    bindEvent(input$option, updated$option)
+  }, label = "indicate option user input") %>%
+    bindEvent(input$option)
   
   # Determine the variable based on combination of topic, subitem and option
   invar <- reactive({
     has_user_input <- !any(updated$subitem, updated$option)
-    is_init <- !as.logical(watch("exp"))
+    has_new_title <- !identical(input$title, last_title())
+    is_init_run <- isFALSE(init())
+    mode_switched <- is.logical(input$mode)
+    can_change <- any(has_user_input, has_new_title, is_init_run, mode_switched)
+    
+    if (can_change) {
+      log_it("Permitted to change input variable", "success")
+    } else {
+      log_it("Suspended from changing input variable", "warn")
+      cat2("\tsubitem input:", !updated$subitem)
+      cat2("\toption input:", !updated$option)
+      cat2("\tnew title:", has_new_title)
+      cat2("\tmode switch:", is.logical(input$mode))
+    }
 
     # Cancel if subitem and option are not explicitly changed by user
-    req(has_user_input || is_init)
-    
-    get_mns_variable(input$title, input$subitem, input$option)
-  }) %>%
-    bindEvent(input$title, input$subitem, input$option)
+    req(has_user_input || has_new_title || isFALSE(init()) || is.logical(input$mode))
+    last_title(input$title)
+
+    get_mns_variable(input$title, input$subitem, input$option, input$mode)
+  }, label = "select input variable") %>%
+    bindEvent(input$title, input$subitem, input$option, input$mode)
+  
+  observe({
+    has_option <- all(!is.na(cb[cb$variable %in% invar(), ]$option))
+
+    if (!has_option) {
+      print("hide and seq")
+      shinyjs::hide("optionHide")
+      #palettes <- list_palettes("seq")
+      #shinyWidgets::updatePickerInput(session, "pal", choices = palettes)
+    } else if (isTRUE(input$mode) && has_option) {
+      print("hide and qual")
+      shinyjs::hide("optionHide")
+      #palettes <- list_palettes("qual")
+      #shinyWidgets::updatePickerInput(session, "pal", choices = palettes)
+    } else {
+      print("show and seq")
+      shinyjs::show("optionHide")
+      #palettes <- list_palettes("seq")
+      #shinyWidgets::updatePickerInput(session, "pal", choices = palettes)
+    }
+  }, label = "show or hide mode switch") %>%
+    bindEvent(input$mode, invar())
   
   observe({
     invar <- invar()
     req(!is.null(invar))
     is_metric <- cb[cb$variable %in% invar, ]$is_metric
-    if (is_metric) {
+    if (all(is_metric)) {
       shinyjs::disable("fixedHide")
     } else {
       shinyjs::enable("fixedHide")
     }
-  })
+  }, label = "disable or enable fixed")
   
   pal <- reactive({
+    pal <- input$pal
     palettes <- list_palettes()
-    if (input$pal %in% palettes[["Colorblind palettes"]]) {
-      viridis::viridis_pal(option = tolower(input$pal))(5)
-    } else {
-      input$pal
+    if (pal %in% palettes[["Colorblind palettes"]]) {
+      pal <- viridis::viridis_pal(option = tolower(pal))(5)
     }
-  })
+    pal
+  }, label = "select input palette")
   
   poly <- reactive({
     switch(
@@ -219,22 +259,33 @@ mod_exp <- function(input, output, session) {
       "NUTS-1" = srv_nuts1,
       "NUTS-2" = srv_nuts2
     )
-  }) %>%
+  }, label = "select input polygons") %>%
     bindEvent(input$aggr)
-  
+
   exp_params <- reactive({
-    get_mns_params(invar(), input$fixed, pal(), poly())
-  })
+    invar <- invar()
+    cat2("invar ready")
+    fixed <- input$fixed
+    pal <- pal()
+    cat2("pal ready")
+    poly <- poly()
+    cat2("poly ready")
+    get_mns_params(invar, fixed, pal, poly)
+  }, label = "compile parameters")
   
   output$explorer <- leaflet::renderLeaflet({
-    isolate(trigger("exp"))
-    map_mns(isolate(exp_params()))
+    params <- isolate(exp_params())
+    isolate(init(TRUE))
+    log_it("Initializing explorer")
+    map_mns(params)
   })
   
   observe({
-    req(watch("exp"))
-    update_mns_map("explorer", exp_params())
-  })
+    req(isTRUE(init()))
+    params <- exp_params()
+    log_it("Updating explorer")
+    update_mns_map("explorer", params)
+  }, label = "update explorer")
 }
 
 mod_exp_server <- function(id) {

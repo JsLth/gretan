@@ -13,7 +13,7 @@
 #'
 #' @export
 #' @import shiny
-#' @importFrom dplyr %>% filter mutate select
+#' @importFrom magrittr %>%
 run_app <- function(..., log = FALSE) {
   if (log) {
     if (!requireNamespace("reactlog")) {

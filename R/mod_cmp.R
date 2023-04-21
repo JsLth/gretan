@@ -44,9 +44,9 @@ mod_cmp_ui <- function(id, categories, titles) {
               ns("aggrLeft"),
               "Aggregation level",
               list(
-                "NUTS-0 (nations)" = "NUTS-0",
-                "NUTS-1 (major regions)" = "NUTS-1",
-                "NUTS-2 (minor regions)" = "NUTS-2"
+                "Countries" = "NUTS-0",
+                "Major regions" = "NUTS-1",
+                "Minor regions" = "NUTS-2"
               )
             ),
             shinyWidgets::pickerInput(
@@ -62,6 +62,16 @@ mod_cmp_ui <- function(id, categories, titles) {
                 choices = c("Full contrast", "Full range"),
                 selected = "Full contrast",
                 inline = TRUE
+              )
+            )),
+            shinyjs::disabled(div(
+              id = ns("modeHideLeft"),
+              shinyWidgets::materialSwitch(
+                ns("hideLeft"),
+                label = "Show options as mode",
+                value = FALSE,
+                status = "primary",
+                right = TRUE
               )
             ))
           )
@@ -108,9 +118,9 @@ mod_cmp_ui <- function(id, categories, titles) {
               ns("aggrRight"),
               "Aggregation level",
               list(
-                "NUTS-0 (nations)" = "NUTS-0",
-                "NUTS-1 (major regions)" = "NUTS-1",
-                "NUTS-2 (minor regions)" = "NUTS-2"
+                "Countries" = "NUTS-0",
+                "Major regions" = "NUTS-1",
+                "Minor regions" = "NUTS-2"
               )
             ),
             shinyWidgets::pickerInput(
@@ -126,6 +136,16 @@ mod_cmp_ui <- function(id, categories, titles) {
                 choices = c("Full contrast", "Full range"),
                 selected = "Full contrast",
                 inline = TRUE
+              )
+            )),
+            shinyjs::disabled(div(
+              id = ns("modeHideRight"),
+              shinyWidgets::materialSwitch(
+                ns("hideRight"),
+                label = "Show options as mode",
+                value = FALSE,
+                status = "primary",
+                right = TRUE
               )
             ))
           )
@@ -182,6 +202,8 @@ mod_cmp <- function(input, output, session) {
     optionLeft = FALSE,
     optionRight = FALSE,
   )
+  
+  mode_changed <- reactiveValues(left = TRUE, right = TRUE)
   
   map_init <- reactiveValues(left = FALSE, right = FALSE)
   
@@ -290,37 +312,65 @@ mod_cmp <- function(input, output, session) {
   }) %>%
     bindEvent(input$optionRight, updated$optionRight)
   
+  observe({
+    mode_changed$left <- TRUE
+  }) %>%
+    bindEvent(input$modeLeft)
+  
+  observe({
+    mode_changed$right <- TRUE
+  }) %>%
+    bindEvent(input$modeRight)
+  
   # Determine the variable based on combination of topic, subitem and option
   invar_left <- reactive({
     has_user_input <- !any(updated$subitemLeft, updated$optionLeft)
     is_init <- map_init$left
     
     # Cancel if subitem and option are not explicitly changed by user
-    req(has_user_input || is_init)
+    req(has_user_input || is_init || mode_changed$left)
+    mode_changed$left <- FALSE
 
-    get_mns_variable(input$titleLeft, input$subitemLeft, input$optionLeft)
+    get_mns_variable(
+      input$titleLeft,
+      input$subitemLeft,
+      input$optionLeft,
+      input$modeLeft
+    )
   }) %>%
-    bindEvent(input$titleLeft, input$subitemLeft, input$optionLeft)
+    bindEvent(input$titleLeft, input$subitemLeft, input$optionLeft, input$modeLeft)
 
   invar_right <- reactive({
     has_user_input <- !any(updated$subitemRight, updated$optionRight)
     is_init <- map_init$right
 
     # Cancel if subitem and option are not explicitly changed by user
-    req(has_user_input || is_init)
+    req(has_user_input || is_init || mode_changed$right)
+    mode_changed$right <- FALSE
     
-    get_mns_variable(input$titleRight, input$subitemRight, input$optionRight)
+    get_mns_variable(
+      input$titleRight,
+      input$subitemRight,
+      input$optionRight,
+      input$modeRight
+    )
   }) %>%
-    bindEvent(input$titleRight, input$subitemRight, input$optionRight)
+    bindEvent(input$titleRight, input$subitemRight, input$optionRight, input$modeRight)
   
   observe({
     invar_left <- invar_left()
     req(!is.null(invar_left))
     is_metric_left <- cb[cb$variable %in% invar_left, ]$is_metric
-    if (is_metric_left) {
+    has_option <- !is.na(cb[cb$variable %in% invar_left, ]$option)
+    if (all(is_metric_left)) {
       shinyjs::disable("fixedHideLeft")
     } else {
       shinyjs::enable("fixedHideLeft")
+    }
+    if (all(has_option)) {
+      shinyjs::enable("modeHideLeft")
+    } else {
+      shinyjs::disable("modeHideLeft")
     }
   })
   
@@ -328,10 +378,17 @@ mod_cmp <- function(input, output, session) {
     invar_right <- invar_right()
     req(!is.null(invar_right))
     is_metric_right <- cb[cb$variable %in% invar_right, ]$is_metric
-    if (is_metric_right) {
+    has_option <- !is.na(cb[cb$variable %in% invar_right, ]$option)
+
+    if (all(is_metric_right)) {
       shinyjs::disable("fixedHideRight")
     } else {
       shinyjs::enable("fixedHideRight")
+    }
+    if (all(has_option)) {
+      shinyjs::enable("modeHideRight")
+    } else {
+      shinyjs::disable("modeHideRight")
     }
   })
   
