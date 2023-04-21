@@ -13,7 +13,7 @@ render_question <- function(title, subitem, option) {
     HTML(sprintf(
       "<b>Question %s:</b><br>%s",
       toupper(indat$og_var),
-      indat$label
+      indat$question
     ))
   } else {
     ""
@@ -54,7 +54,12 @@ get_mns_variable <- function(title, subitem, option, mode) {
 }
 
 
-get_mns_params <- function(invar, fixed, palette, poly) {
+get_mns_params <- function(invar, fixed, palette, aggr) {
+  poly <- switch(aggr,
+    "NUTS-0" = srv_nuts0,
+    "NUTS-1" = srv_nuts1,
+    "NUTS-2" = srv_nuts2
+  )
   if (length(invar) > 1) {
     poly <- get_mns_mode(poly, cb_ext, invar)
     invar <- invar[1]
@@ -65,16 +70,20 @@ get_mns_params <- function(invar, fixed, palette, poly) {
   is_metric <- cb_entry$is_metric
   is_likert <- cb_entry$is_likert
 
+  palettes <- list_palettes()
+  if (palette %in% palettes[["Colorblind palettes"]]) {
+    palette <- viridis::viridis_pal(option = tolower(palette))(5)
+  }
+  
   domain <- NULL
   values <- as.formula(paste0("~", invar))
-
+  
   if (identical(invar, "c1")) {
     lgd <- "Mean age"
     unit <- " years"
   } else if (is.character(poly[[invar]])) {
-    if (identical(fixed, "Full range")) {
-      values <- domain <- cb_entry$labels[[1]]
-    }
+    labs <- cb_entry$labels[[1]]
+    values <- domain <- factor(labs, levels = labs)
     lgd <- "Mode"
     unit = ""
   } else if (is_likert) {
@@ -205,8 +214,14 @@ get_mns_mode <- function(df, cb, var) {
   var <- entry$variable
   options <- entry$option
   dummies <- as.data.frame(df)[var]
+  if (nrow(dummies) > 100) browser()
   mode <- vapply(seq_len(nrow(dummies)), function(i) {
-    options[which.max(dummies[i, ])]
+    row <- dummies[i, ]
+    if (!all(is.na(row))) {
+      options[which.max(row)]
+    } else {
+      NA_character_
+    }
   }, FUN.VALUE = character(1))
   var <- var[1]
   df[var] <- mode
