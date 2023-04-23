@@ -21,6 +21,72 @@ locm_colors_abel <- function(locm, df) {
   list(outline = colors, fill = colors1)
 }
 
+list_to_css <- function(x) {
+  paste(paste0(names(x), ": ", x, ";"), collapse = " ")
+}
+
+make_taxonomy <- function(id) {
+  ns <- NS(id)
+
+  greta_levels <- list(
+    background = "#1A1A1A",
+    color = "white",
+    height = "200px",
+    width = "100%",
+    margin = "auto"
+  )
+  
+  virtual <- list(
+    transform = "rotate(-90deg) translate(-100%, 0)",
+    `transform-origin` = "left top",
+    `background-color` = "#F26553",
+    color = "white",
+    width = "675px",
+    height = "150px"
+  )
+  
+  lrns <- list(
+    color = "white",
+    height = "150px",
+    width = "60%",
+    `margin-left` = "180px"
+  )
+  
+  div(
+    id = "taxonomy-container",
+    style = "width:80%; display:block; margin-left:auto; margin-right: auto",
+    div("GRETA levels", style = list_to_css(greta_levels), class = "tax-elem"),
+    div(
+      id = "levels-container",
+      style = "margin-top: 40px; width: 50%;",
+      div("Virtual", class = "tax-elem", style = list_to_css(virtual)),
+      div("Local", class = "tax-elem", style = list_to_css(c(
+        lrns,
+        `background-color` = "#EE3727",
+        `margin-top` = "-150px"
+      ))),
+      div("Regional", class = "tax-elem", style = list_to_css(c(
+        lrns,
+        `background-color` = "#E73E27",
+        `margin-top` = "25px"
+      ))),
+      div("National", class = "tax-elem", style = list_to_css(c(
+        lrns,
+        `background-color` = "#C33728",
+        `margin-top` = "25px"
+      ))),
+      div("Supranational", class = "tax-elem", style = list_to_css(c(
+        lrns,
+        `background-color` = "#972C24",
+        `margin-top` = "25px"
+      )))
+    ),
+    div("proximity domains"),
+    div("spatial"),
+    div("policy")
+  )
+}
+
 as_likert <- function(x, scale = NULL) {
   if (length(scale) > 7) {
     stop(sprintf("Likert scale is too long (%s items)", length(x)))
@@ -134,8 +200,6 @@ leaflet_text_on_click <- function(id, geom, texts, click, col = "name", tol = 1)
 
 
 track_coordinates <- function(map, id, session = getDefaultReactiveDomain()) {
-  ns <- session$ns
-  id <- ns(id)
   map$jsHooks[["render"]] <- c(
     map$jsHooks[["render"]],
     list(list(

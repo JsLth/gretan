@@ -133,3 +133,16 @@ a.logo {
 .leaflet-container {
   background-color: white !important;
 }
+
+.tax-elem {
+  border-radius: 35px;
+  font-size: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.tax-elem:hover {
+  box-shadow: inset 0 0 0 1000px rgba(0, 0, 0, 0.2);
+}

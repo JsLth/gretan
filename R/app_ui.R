@@ -130,57 +130,62 @@ app_ui <- function() {
         ),
         bs4Dash::sidebarHeader("Start"),
         bs4Dash::menuItem(
-          text = "Home",
-          icon = icon("house", lib = "font-awesome"),
+          text = txts$home$title,
+          icon = txts$home$icon,
           tabName = "home"
         ),
         bs4Dash::menuItem(
-          text = "Multinational survey",
-          icon = icon("map", lib = "font-awesome"),
+          text = txts$exp$title,
+          icon = txts$exp$icon,
           tabName = "mns",
           bs4Dash::menuSubItem(text = "Explore data", tabName = "exp"),
           bs4Dash::menuSubItem(text = "Compare data", tabName = "cmp")
         ),
         bs4Dash::sidebarHeader("Case studies"),
         bs4Dash::menuItem(
-          text = "Pilastro-Roveri, Italy",
-          tabName = "cs1",
-          icon = icon("map-pin", lib = "font-awesome")
+          text = txts$cs1$title,
+          icon = txts$cs1$icon,
+          tabName = "cs1"
         ),
         bs4Dash::menuItem(
-          text = "Coopernico, Portugal",
-          tabName = "cs2",
-          icon = icon("map-pin", lib = "font-awesome")
+          text = txts$cs2$title,
+          icon = txts$cs2$icon,
+          tabName = "cs2"
         ),
         bs4Dash::menuItem(
-          text = "The Earnest App, Germany",
-          tabName = "cs3",
-          icon = icon("map-pin", lib = "font-awesome")
+          text = txts$cs3$title,
+          icon = txts$cs3$icon,
+          tabName = "cs3"
         ),
         bs4Dash::menuItem(
-          text = "Gas-free neighborhoods, Netherlands",
-          tabName = "cs4",
-          icon = icon("map-pin", lib = "font-awesome")
+          text = txts$cs4$title,
+          icon = txts$cs4$icon,
+          tabName = "cs4"
         ),
         bs4Dash::menuItem(
-          text = "UR Beroa, Spain",
-          tabName = "cs5",
-          icon = icon("map-pin", lib = "font-awesome")
+          text = txts$cs5$title,
+          icon = txts$cs5$icon,
+          tabName = "cs5"
         ),
         bs4Dash::sidebarHeader("Individual analyses"),
         bs4Dash::menuItem(
-          text = "Simulation study",
-          icon = icon("users", lib = "font-awesome"),
+          text = txts$taxonomy$title,
+          icon = txts$taxonomy$icon,
+          tabName = "taxonomy"
+        ),
+        bs4Dash::menuItem(
+          text = txts$simulation$title,
+          icon = txts$simulation$icon,
           tabName = "simulation"
         ),
         bs4Dash::menuItem(
-          text = "Spatial analysis",
-          icon = icon("layer-group", lib = "font-awesome"),
+          text = txts$spatial$title,
+          icon = txts$spatial$icon,
           tabName = "spatial"
         ),
         bs4Dash::menuItem(
-          text = "Income stability",
-          icon = icon("money-bill-trend-up", lib = "font-awesome"),
+          text = txts$income$title,
+          icon = txts$income$icon,
           tabName = "income"
         ),
         bs4Dash::sidebarHeader("Other"),
