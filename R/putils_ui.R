@@ -209,30 +209,42 @@ p2 <- function(...) p(..., class = "running-text")
 
 noWS <- function(.f) function(...) .f(..., .noWS = c("inside", "outside")) 
 
-list_palettes <- function(type = c("seq", "div", "qual")) {
-  type <- match.arg(type)
+list_palettes <- function(type = NULL) {
+  if (missing(type)) {
+    type <- c("seq", "viridis")
+  }
   
-  switch(type,
-    seq =   list(
-      "Common palettes" = list(
-        "Blues", "BuGn", "BuPu", "GnBu", "Greens", "Greys", "Oranges", "OrRd",
-        "PuBu", "PuBuGn", "PuRd", "Purples", "RdPu", "Reds", "YlGn", "YlGnBu",
-        "YlOrBr", "YlOrRd"
-      ),
-      "Colorblind palettes" = list(
-        "Magma", "Inferno", "Plasma", "Viridis",
-        "Cividis", "Rocket", "Mako", "Turbo"
-      )
+  type <- vapply(
+    type,
+    switch,
+    seq = "Sequential",
+    div = "Diverging",
+    qual = "Qualitative",
+    viridis = "Colorblind",
+    FUN.VALUE = character(1)
+  )
+  
+  pal <- list(
+    Sequential = c(
+      "Blues", "BuGn", "BuPu", "GnBu", "Greens", "Greys", "Oranges", "OrRd",
+      "PuBu", "PuBuGn", "PuRd", "Purples", "RdPu", "Reds", "YlGn", "YlGnBu",
+      "YlOrBr", "YlOrRd"
     ),
-    div = c(
+    Diverging = c(
       "BrBG", "PiYG", "PRGn", "PuOr", "RdBu", "RdGy", "RdYlBu", "RdYlGn", 
       "Spectral"
     ),
-    qual = c(
+    Qualitative = c(
       "Accent", "Dark2", "Paired", "Pastel1", "Pastel2", "Set1", 
       "Set2", "Set3"
+    ),
+    Colorblind = c(
+      "Magma", "Inferno", "Plasma", "Viridis", "Cividis", "Rocket", "Mako",
+      "Turbo"
     )
   )
+  
+  pal[type]
 }
 
 
