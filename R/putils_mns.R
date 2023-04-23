@@ -1,23 +1,20 @@
 render_question <- function(title, subitem, option) {
-  if (!is.null(title)) {
-    indat <- cb_ext[cb_ext$title %in% title, ]
-    
-    if (!all(is.na(indat$subitem))) {
-      indat <- indat[indat$subitem %in% subitem, ]
-    }
-    
-    if (!all(is.na(indat$option))) {
-      indat <- indat[indat$option %in% option, ]
-    }
-    
-    HTML(sprintf(
-      "<b>Question %s:</b><br>%s",
-      toupper(indat$og_var),
-      indat$question
-    ))
-  } else {
-    ""
+  if (is.null(title)) return("")
+  indat <- cb_ext[cb_ext$title %in% title, ]
+  
+  if (!all(is.na(indat$subitem))) {
+    indat <- indat[indat$subitem %in% subitem, ]
   }
+  
+  if (!all(is.na(indat$option))) {
+    indat <- indat[indat$option %in% option, ]
+  }
+  
+  HTML(sprintf(
+    "<b>Question %s:</b><br>%s",
+    toupper(indat$og_var),
+    indat$question
+  ))
 }
 
 
@@ -36,17 +33,16 @@ get_mns_variable <- function(title, subitem, option, mode) {
   }
 
   # case: there's still multiple items, look for options
-  if ((length(invar$variable) > 1 || !length(invar$variable)) && isFALSE(mode)) {
+  if ((length(invar$variable) > 1 || !length(invar$variable))) {
     has_option <- invar$option %in% option
-    
     # only select option if any exist
-    if (any(has_option)) {
+    if (any(has_option) && !isTRUE(mode)) {
       invar <- invar[has_option, ]
     }
   }
 
   # if all strings fail, just select the first one
-  if (length(invar$variable) > 1 && isFALSE(mode)) {
+  if (length(invar$variable) > 1 && !isTRUE(mode)) {
     invar <- invar[1, ]
   }
 
@@ -69,11 +65,6 @@ get_mns_params <- function(invar, fixed, palette, aggr) {
   cb_entry <- cb_ext[cb_ext$variable %in% invar, ]
   is_metric <- cb_entry$is_metric
   is_likert <- cb_entry$is_likert
-
-  palettes <- list_palettes()
-  if (palette %in% palettes[["Colorblind palettes"]]) {
-    palette <- viridis::viridis_pal(option = tolower(palette))(5)
-  }
   
   domain <- NULL
   values <- as.formula(paste0("~", invar))
@@ -147,8 +138,8 @@ get_mns_params <- function(invar, fixed, palette, aggr) {
 }
 
 
-map_mns <- function(params) {
-  leaflet::leaflet(params$poly) %>%
+map_mns <- function(params, track = FALSE) {
+  m <- leaflet::leaflet(params$poly) %>%
     leaflet::addTiles() %>%
     leaflet::setView(lng = 9, lat = 55, zoom = 4) %>%
     leaflet::addPolygons(
@@ -169,6 +160,13 @@ map_mns <- function(params) {
       title = params$lgd,
       labFormat = leaflet::labelFormat(suffix = params$unit)
     )
+  
+  if (track) {
+    id <- paste0(getCurrentOutputInfo()$name, "_mousemove")
+    m <- track_coordinates(m, id = id)
+  }
+  
+  m
 }
 
 
@@ -214,7 +212,6 @@ get_mns_mode <- function(df, cb, var) {
   var <- entry$variable
   options <- entry$option
   dummies <- as.data.frame(df)[var]
-  if (nrow(dummies) > 100) browser()
   mode <- vapply(seq_len(nrow(dummies)), function(i) {
     row <- dummies[i, ]
     if (!all(is.na(row))) {
@@ -233,13 +230,4 @@ subset_mns <- function(df, var = NULL) {
   if ("nuts1" %in% names(df)) incl <- c(incl, "nuts1")
   if ("nuts2" %in% names(df)) incl <- c(incl, "nuts2")
   df[c(incl, var)]
-}
-
-update_palettes <- function(type = c("seq", "div", "qual")) {
-  type <- match.arg(type)
-  shinyWidgets::updatePickerInput(
-    getDefaultReactiveDomain(),
-    "pal",
-    choices = list_palettes(type = type)
-  )
 }
