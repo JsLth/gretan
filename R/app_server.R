@@ -1,6 +1,14 @@
 server <- function(input, output, session) {
   log_it("Starting app")
   
+  onFlush(once = FALSE, fun = function() {
+    log_it("Flushing reactive system")
+  })
+  
+  onSessionEnded(fun = function() {
+    log_it("Shutting down app")
+  })
+  
   # Capture search term
   searchbox_input <- reactive({
     search_input <- input$textSearch
