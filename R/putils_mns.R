@@ -51,11 +51,7 @@ get_mns_variable <- function(title, subitem, option, mode) {
 
 
 get_mns_params <- function(invar, fixed, palette, aggr) {
-  poly <- switch(aggr,
-    "NUTS-0" = srv_nuts0,
-    "NUTS-1" = srv_nuts1,
-    "NUTS-2" = srv_nuts2
-  )
+  poly <- get(paste0("srv_", aggr))
   if (length(invar) > 1) {
     poly <- get_mns_mode(poly, cb_ext, invar)
     invar <- invar[1]
@@ -128,6 +124,7 @@ get_mns_params <- function(invar, fixed, palette, aggr) {
 
   list(
     poly = poly,
+    aggr = aggr,
     invar = invar,
     pal = pal,
     values = values,
