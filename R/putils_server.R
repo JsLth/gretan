@@ -28,26 +28,46 @@ list_to_css <- function(x) {
 make_taxonomy <- function(id) {
   ns <- NS(id)
 
+  container <- list(
+    display = "block",
+    `margin-left` = "auto",
+    `margin-right` = "auto",
+    position = "relative",
+    width = "80%"
+  )
+  
   greta_levels <- list(
     background = "#1A1A1A",
     color = "white",
-    height = "200px",
+    height = "4.15em",
     width = "100%",
     margin = "auto"
   )
   
+  levels_container = list(
+    position = "relative",
+    height = "700px",
+    width = "50%",
+    `margin-top` = "2.5%"
+  )
+  
+  virtual_container <- list(
+    width = "20%",
+    height = "100%"
+  )
+  
   virtual <- list(
-    transform = "rotate(-90deg) translate(-100%, 0)",
+    transform = "rotate(-90deg)",
     `transform-origin` = "left top",
-    `background-color` = "#F26553",
     color = "white",
-    width = "675px",
-    height = "150px"
+    `background-color` = "#F26553",
+    display = "absolute",
+    top = "100%"
   )
   
   lrns <- list(
     color = "white",
-    height = "150px",
+    height = "3.13em",
     width = "60%",
     `margin-left` = "180px"
   )
@@ -56,30 +76,32 @@ make_taxonomy <- function(id) {
     id = "taxonomy-container",
     style = "width:80%; display:block; margin-left:auto; margin-right: auto",
     div("GRETA levels", style = list_to_css(greta_levels), class = "tax-elem"),
+    div(style = "display: block; height: 2.5%"),
     div(
       id = "levels-container",
-      style = "margin-top: 40px; width: 50%;",
-      div("Virtual", class = "tax-elem", style = list_to_css(virtual)),
-      div("Local", class = "tax-elem", style = list_to_css(c(
-        lrns,
-        `background-color` = "#EE3727",
-        `margin-top` = "-150px"
-      ))),
-      div("Regional", class = "tax-elem", style = list_to_css(c(
-        lrns,
-        `background-color` = "#E73E27",
-        `margin-top` = "25px"
-      ))),
-      div("National", class = "tax-elem", style = list_to_css(c(
-        lrns,
-        `background-color` = "#C33728",
-        `margin-top` = "25px"
-      ))),
-      div("Supranational", class = "tax-elem", style = list_to_css(c(
-        lrns,
-        `background-color` = "#972C24",
-        `margin-top` = "25px"
-      )))
+      style = list_to_css(levels_container),
+      div("Virtual", class = "tax-elem", style = list_to_css(virtual))
+      
+    #   div("Local", class = "tax-elem", style = list_to_css(c(
+    #     lrns,
+    #     `background-color` = "#EE3727",
+    #     `margin-top` = "-150px"
+    #   ))),
+    #   div("Regional", class = "tax-elem", style = list_to_css(c(
+    #     lrns,
+    #     `background-color` = "#E73E27",
+    #     `margin-top` = "25px"
+    #   ))),
+    #   div("National", class = "tax-elem", style = list_to_css(c(
+    #     lrns,
+    #     `background-color` = "#C33728",
+    #     `margin-top` = "25px"
+    #   ))),
+    #   div("Supranational", class = "tax-elem", style = list_to_css(c(
+    #     lrns,
+    #     `background-color` = "#972C24",
+    #     `margin-top` = "25px"
+    #   )))
     ),
     div("proximity domains"),
     div("spatial"),
@@ -357,6 +379,7 @@ cat2 <- function(...) {
 
 log_it <- function(log = NULL, type = c("info", "warn", "error", "success")) {
   out <- getOption("greta_log", "")
+  if (isFALSE(getOption("greta_log"))) return(invisible(NULL))
   type <- match.arg(type)
   time <- format(Sys.time(), "%F %T")
   if (!nzchar(out)) {
@@ -374,6 +397,16 @@ log_it <- function(log = NULL, type = c("info", "warn", "error", "success")) {
     log <- srcloc(idx = 2L)
   }
   cat2(sprintf("%s %s %s", time, type, log), file = out, append = TRUE)
+}
+
+log_details <- function(log) {
+  cat2(paste0("\t", log))
+}
+
+with_logging <- function(code, value) {
+  old <- options(greta_log = value)
+  on.exit(options(old))
+  force(code)
 }
 
 protect_html <- function(x) HTML(as.character(x))
