@@ -35,9 +35,9 @@ mod_cmp_side_ui <- function(id, categories, titles) {
           ns("aggr"),
           "Aggregation level",
           list(
-            "Countries" = "NUTS-0",
-            "Major regions" = "NUTS-1",
-            "Minor regions" = "NUTS-2"
+            "Countries" = "nuts0",
+            "Major regions" = "nuts1",
+            "Minor regions" = "nuts2"
           )
         ),
         shinyWidgets::pickerInput(
@@ -53,8 +53,8 @@ mod_cmp_side_ui <- function(id, categories, titles) {
           inline = TRUE
         ),
         shinyWidgets::materialSwitch(
-          ns("hide"),
-          label = "Show options as mode",
+          ns("mode"),
+          label = "Options as mode",
           value = FALSE,
           status = "primary",
           right = TRUE
@@ -128,7 +128,7 @@ mod_cmp <- function(input, output, session) {
     null_indicator$left <- FALSE
     indicator_label$left <- params$labels[[country_idx]]
   }) %>%
-    bindEvent(input[["right-explorer_shape_mouseout"]])
+    bindEvent(input[["right-explorer_shape_mouseover"]])
   
   observe({
     mouse <- unlist(input[["left-explorer_shape_mouseover"]])
@@ -139,7 +139,7 @@ mod_cmp <- function(input, output, session) {
     null_indicator$right <- FALSE
     indicator_label$right <- params$labels[[country_idx]]
   }) %>%
-    bindEvent(input[["left-explorer_shape_mouseout"]])
+    bindEvent(input[["left-explorer_shape_mouseover"]])
   
   observe({
     hover <- input[["left-explorer_mousemove"]]

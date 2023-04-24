@@ -41,11 +41,11 @@ mod_exp_ui <- function(id, categories, titles) {
             ns("aggr"),
             "Aggregation level",
             choices = c(
-              "Countries" = "NUTS-0",
-              "Major regions" = "NUTS-1",
-              "Minor regions" = "NUTS-2"
+              "Countries" = "nuts0",
+              "Major regions" = "nuts1",
+              "Minor regions" = "nuts2"
             ),
-            selected = "NUTS-0"
+            selected = "nuts0"
           ),
           shinyWidgets::pickerInput(
             ns("pal"),
@@ -69,17 +69,12 @@ mod_exp_ui <- function(id, categories, titles) {
         ),
         bs4Dash::box(
           title = "Download",
-          id = ns("download"),
           width = 12,
           solidHeader = FALSE,
           collapsible = TRUE,
           collapsed = TRUE,
           status = "primary",
-          bs4Dash::actionButton(
-            "download_button",
-            "Download data",
-            icon = icon("download", lib = "font-awesome")
-          )
+          downloadButton(ns("download"), "Download")
         )
       ),
       bs4Dash::column(
@@ -153,7 +148,6 @@ mod_exp_server <- function(id, track = FALSE) {
           choices = items,
           clearOptions = TRUE
         )
-        cat2("set updater to server")
         updated$subitem <- "server"
         shinyjs::show("subitem", anim = TRUE)
       } else {
@@ -206,28 +200,31 @@ mod_exp_server <- function(id, track = FALSE) {
       can_change <- any(!was_updated, has_new_title, is_init_run, mode_switched)
       
       if (can_change) {
-        log_it("Permitted to change input variable; details:")
+        log_it(
+          sprintf("{%s} - Permitted to change input variable; details:", id)
+        )
       } else {
-        log_it("Suspended from changing input variable; details:")
+        log_it(
+          sprintf("{%s} - Suspended from changing input variable; details:", id)
+        )
       }
-      cat2(sprintf(
-        "\tupdate: subitem - %s, option - %s (%s)",
+      log_details(sprintf(
+        "update: subitem - %s, option - %s (%s)",
         subitem_server, option_server, ifelse(was_updated, "not passed", "passed")
       ))
-      cat2(sprintf(
-        "\tnew title: %s (%s)",
+      log_details(sprintf(
+        "new title: %s (%s)",
         has_new_title, ifelse(has_new_title, "passed", "not passed")
       ))
-      cat2(sprintf(
-        "\tmode switch: %s (%s)",
+      log_details(sprintf(
+        "mode switch: %s (%s)",
         mode_switched, ifelse(mode_switched, "passed", "not passed")
       ))
-      cat2(sprintf(
-        "\tis init run: %s (%s)",
+      log_details(sprintf(
+        "is init run: %s (%s)",
         is_init_run, ifelse(is_init_run, "passed", "not passed")
       ))
-      
-      cat2("set updater to FALSE")
+
       updated$subitem <- FALSE
       updated$option <- FALSE
       
@@ -268,27 +265,23 @@ mod_exp_server <- function(id, track = FALSE) {
     # observer updating the explorer map. Technically, there is no downside to
     # this as all maps are updated as designed, but visually and performance-wise
     # this is undesirable and not very appealing.
-    # observe({
-    #   has_option <- all(!is.na(cb[cb$variable %in% last_var(), ]$option))
-    #   updated$pal <- "server"
-    #   if (!has_option) {
-    #     shinyjs::hide("optionHide")
-    #     palettes <- list_palettes("seq")
-    #     shinyWidgets::updatePickerInput(session, "pal", choices = palettes)
-    #     log_it("Changed palette selection to seq")
-    #   } else if (isTRUE(input$mode) && has_option) {
-    #     shinyjs::hide("optionHide")
-    #     palettes <- list_palettes("qual")
-    #     shinyWidgets::updatePickerInput(session, "pal", choices = palettes)
-    #     log_it("Changed palette selection to qual")
-    #   } else {
-    #     shinyjs::show("optionHide")
-    #     palettes <- list_palettes("seq")
-    #     shinyWidgets::updatePickerInput(session, "pal", choices = palettes)
-    #     log_it("Changed palette selection to seq")
-    #   }
-    # }, label = "show or hide mode switch") %>%
-    #   bindEvent(input$mode)
+    observe({
+      has_option <- all(!is.na(cb[cb$variable %in% invar(), ]$option))
+      if (!has_option) {
+        shinyjs::hide("optionHide")
+        #palettes <- list_palettes("seq")
+        #shinyWidgets::updatePickerInput(session, "pal", choices = palettes)
+      } else if (isTRUE(input$mode) && has_option) {
+        shinyjs::hide("optionHide")
+        #palettes <- list_palettes("qual")
+        #shinyWidgets::updatePickerInput(session, "pal", choices = palettes)
+      } else {
+        shinyjs::show("optionHide")
+        #palettes <- list_palettes("seq")
+        #shinyWidgets::updatePickerInput(session, "pal", choices = palettes)
+      }
+    }, label = "show or hide mode switch") %>%
+      bindEvent(input$mode, invar())
     
     # Disable options to fix legend values when input variable is anything else
     # than percentages. If they are metric values (e.g. age), then we can't fix

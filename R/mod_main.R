@@ -12,7 +12,6 @@ mod_main_ui <- function(id) {
     mod_cmp_ui(ns("cmp"), categories, titles),
     mod_ind_ui(ns("ind")),
     mod_cs_ui(ns("cs")),
-    mod_sandbox_ui(ns("sandbox")),
     class = "tab-content"
   )
 }
@@ -40,11 +39,47 @@ mod_main <- function(input, output, session) {
   init("exp")
 
   mod_home_server("home")
-  mod_exp_server("exp")
+  exp_params <- mod_exp_server("exp")
   mod_cmp_server("cmp")
+  mod_cmp_server("insp")
   mod_cs_server("cs")
   mod_ind_server("ind")
-  mod_sandbox_server("sandbox")
+  
+  output[["exp-download"]] <- downloadHandler(
+    filename = function() {
+      params <- exp_params()
+      var <- params$invar
+      aggr <- params$aggr
+      if (is.factor(params$values)) {
+        var <- gsub("_([^_]*)$", "", var)
+      }
+      filename <- sprintf("greta_mns_%s_%s.geojson", var, aggr)
+    },
+    content = function(file) {
+      params <- exp_params()
+      poly <- params$poly
+      var <- params$invar
+      values <- params$values
+      is_mode <- is.factor(values)
+      cb_entry <- cb_ext[cb_ext$variable %in% var, ]
+
+      question <- cb_entry$question
+      subitem <- cb_entry$subitem
+      option <- cb_entry$option
+      if (is_mode) {
+        option <- paste(levels(values), collapse = ", ")
+      }
+
+      desc <- sprintf(
+        "DESCRIPTION=Question: %s - Subitem: %s - Option%s: %s",
+        question, subitem, ifelse(is_mode, "s", ""), option
+      )
+      
+      names(poly)[ncol(poly) - 1] <- "value"
+      
+      sf::st_write(poly, file, layer_options = c(desc, "WRITE_NAME=NO"))
+    }
+  )
 }
 
 
