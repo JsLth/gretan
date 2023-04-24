@@ -27,7 +27,10 @@ app_ui <- function() {
       blue = "#002562",
       teal = "#00767E"
     ),
-    fresh::bs4dash_font(family_sans_serif = "Arial")
+    fresh::bs4dash_font(
+      family_sans_serif = "Tablet Gothic",
+      family_base = "Tablet Gothic"
+    )
   )
   
   # Configure loading screen
@@ -135,11 +138,12 @@ app_ui <- function() {
           tabName = "home"
         ),
         bs4Dash::menuItem(
-          text = txts$exp$title,
+          text = "Multinational survey",
           icon = txts$exp$icon,
           tabName = "mns",
           bs4Dash::menuSubItem(text = "Explore data", tabName = "exp"),
-          bs4Dash::menuSubItem(text = "Compare data", tabName = "cmp")
+          bs4Dash::menuSubItem(text = "Compare data", tabName = "cmp"),
+          bs4Dash::menuSubItem(text = "Inspect data", tabName = "insp")
         ),
         bs4Dash::sidebarHeader("Case studies"),
         bs4Dash::menuItem(
@@ -187,12 +191,6 @@ app_ui <- function() {
           text = txts$income$title,
           icon = txts$income$icon,
           tabName = "income"
-        ),
-        bs4Dash::sidebarHeader("Other"),
-        bs4Dash::menuItem(
-          text = "Sandbox",
-          icon = icon("wand-magic", lib = "font-awesome"),
-          tabName = "sandbox"
         ),
         flat = TRUE
       ),
