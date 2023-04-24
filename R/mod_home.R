@@ -7,7 +7,7 @@ mod_home_ui <- function(id) {
       bs4Dash::column(
         width = 6,
         bs4Dash::box(
-          title = "Welcome to the GRETA GIS tool",
+          title = box_title("Welcome to GRETA Analytics!"),
           width = 12,
           status = "primary",
           txts$home$welcome
@@ -16,13 +16,13 @@ mod_home_ui <- function(id) {
       bs4Dash::column(
         width = 6,
         bs4Dash::box(
-          title = "Geographical overview",
+          title = box_title("Geographical overview"),
           width = 12,
           status = "primary",
           leaflet::leafletOutput(ns("map"), width = "100%", height = 450)
         ),
         bs4Dash::box(
-          title = "Case study descriptions",
+          title = box_title("Case study descriptions"),
           width = 12,
           status = "primary",
           uiOutput(ns("description"))

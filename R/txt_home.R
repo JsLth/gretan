@@ -6,51 +6,71 @@ txts$home$tags <- c(
 )
 
 txts$home$welcome <- tagList(
-  p2("Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy
-     eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam
-     voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet
-     clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit
-     amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam
-     nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat,
-     sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum.
-     Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor
-     sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam
-     nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed
-     diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum.
-     Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor
-     sit amet."),
-  p2("Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse
-     molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero
-     eros et accumsan et iusto odio dignissim qui blandit praesent luptatum
-     zzril delenit augue duis dolore te feugait nulla facilisi. Lorem ipsum
-     dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod
-     tincidunt ut laoreet dolore magna aliquam erat volutpat."),
-  p2("Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper
-     suscipit lobortis nisl ut aliquip ex ea commodo consequat. Duis autem vel
-     eum iriure dolor in hendrerit in vulputate velit esse molestie consequat,
-     vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et
-     iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis
-     dolore te feugait nulla facilisi."),
-  h2("Subtitle"),
-  p2("Nam liber tempor cum soluta nobis eleifend option congue nihil imperdiet
-     doming id quod mazim placerat facer possim assum. Lorem ipsum dolor sit
-     amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt
-     ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim
-     veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut
-     aliquip ex ea commodo consequat."),
-  p2("Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse
-     molestie consequat, vel illum dolore eu feugiat nulla facilisis."),
-  p2("At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd
-     gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem
-     ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod
-     tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.
-     At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd
-     gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem
-     ipsum dolor sit amet, consetetur sadipscing elitr, At accusam aliquyam diam
-     diam dolore dolores duo eirmod eos erat, et nonumy sed tempor et et
-     invidunt justo labore Stet clita ea et gubergren, kasd magna no rebum.
-     sanctus sea sed takimata ut vero voluptua. est Lorem ipsum dolor sit amet.
-     Lorem ipsum dolor sit amet, consetetur")
+  p2("This website is part of the",
+     a("GRETA project", href = "https://projectgreta.eu/", class = "intext"),
+     "(GReen Energy Transition Actions). GRETA studies solutions and provides
+     recommendations on how to achieve civic energy empowerment through energy
+     citizenship. The project has five objectives:"),
+  tags$ol(
+    tags$li("To understand who energy citizens are"),
+    tags$li("To understand how energy citizens act and interact."),
+    tags$li("To develop and test behavioural strategies, approaches and models
+            for facilitating energy citizenship."),
+    tags$li("To realize impact by scaling approaches from local to regional,
+            national, and supranational levels."),
+    tags$li("To improve the policymaking process.")
+  ),
+  p2(HTML("The project creates roadmaps for decarbonisation that enhance energy
+     citizenship. The findings will help policymakers encourage active citizen
+     participation in the energy transition. From 2021 to 2023, GRETA partners
+     <b>worked with energy communities</b> in Germany, Italy, the Netherlands,
+     Portugal, and Spain. Citizens in these communities will adopt renewable
+     energy, use electric vehicles, monitor their energy consumption and
+     participate in the sustainable planning of mobility both within their
+     cities and internationally. You can consult the case studies by clicking
+     on one of the pins on the map to the left.")),
+  p2(HTML("GRETA also launched a first-of-its kind <b>EU-wide empirical citizen
+     consultation</b>. The survey was sent to energy customers, suppliers,
+     intermediaries, retailers and policymakers in 25 countries, driving
+     unique insights about the emergence of energy citizenship. On the
+     map to the left you can examine which countries were included in the
+     multinational citizen survey.")),
+  p2("For more insights into the research conducted in the GRETA project,
+     you can consult the",
+     a(
+       "deliverables",
+       href = "https://projectgreta.eu/resources/",
+       class = "intext"
+      ),
+     "published on the official website."),
+  h2(box_title("GRETA Analytics", style = "font-size: 2rem;")),
+  p2(HTML("... is a <b>GIS-based analytical tool</b> to study the emergence of
+     energy citizenship. The tool allows you to freely and interactively explore
+     the output produced by the GRETA project with a geospatial focus. It
+     answers the the need to create a bridge between data collected from case
+     studies, their re-use in scenario predictions, and their framing for the 
+     purpose of Community Transition Pathways (CTPs). GRETA Analytics accounts
+     for variations within and between geographical levels by georeferencing and
+     spatializing the data from the GRETA multinational survey and by studying
+     their spillover, crossover, and cross-level interaction effects on the
+     local, regional, national, and supranational levels. The tool facilitates
+     the geographic assessment of energy citizenship emergence."),
+  p2("GRETA Analytics is structured into three parts:")),
+  tags$ul(
+    tags$li(HTML("The first part provides a way to quickly and comfortably
+                 <b>explore, compare, inspect</b> and download the data produced
+                 in GRETA's multinational survey.")),
+    tags$li(HTML("The second part expands on <b>GRETA's case studies</b> by
+                 showcasing the results of place-based qualitative or
+                 mixed-methods work.")),
+    tags$li(HTML("The third part introduces the work done by GRETA partners
+                 by presenting all types of <b>data analyses</b> conducted in
+                 the context of the project."))
+  ),
+  p2("You can explore the contents by clicking on the triple-bar",
+     icon("bars", style = "margin-left: -1.2em; vertical-align: center"),
+     "and browsing through the data explorer or one of the many studies done by
+     GRETA partners.")
 )
 
 txts$home$csdesc <- list(
