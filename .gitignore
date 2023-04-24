@@ -1,6 +1,7 @@
 # Data paths
 greta_survey/
 coopernico_data/
+rsconnect/
 
 # History files
 .Rhistory
@@ -42,3 +43,6 @@ vignettes/*.pdf
 
 # R Environment Variables
 .Renviron
+
+# External
+*.jar
