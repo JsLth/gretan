@@ -1,4 +1,4 @@
-txts$exp$title <- "Multinational survey - explore data"
+txts$exp$title <- "Explore data"
 txts$exp$icon <- icon("map")
 txts$exp$tags <- c(
   "explore", "data", "multinational", "survey", "map"
@@ -10,7 +10,7 @@ txts$exp$help <- list(
     subitems and options."
 )
 
-txts$cmp$title <- "Multinational survey - compare data"
+txts$cmp$title <- "Compare data"
 txts$cmp$icon <- icon("map")
 txts$cmp$tags <- c(
   "compare", "data", "multinational", "survey", "map"
