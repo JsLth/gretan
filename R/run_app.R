@@ -14,14 +14,17 @@
 #' @export
 #' @import shiny
 #' @importFrom magrittr %>%
-run_app <- function(..., log = FALSE) {
-  if (log) {
+run_app <- function(..., log = NULL, reactlog = FALSE) {
+  if (reactlog) {
     if (!requireNamespace("reactlog")) {
       stop("The package reactlog is required to enable logging.")
     }
     reactlog::reactlog_enable()
   }
-  shiny::shinyApp(ui = app_ui, server = server, ...)
+  
+  with_logging({
+    runApp(shinyApp(ui = app_ui, server = server))
+  }, value = log)
 }
 
 
