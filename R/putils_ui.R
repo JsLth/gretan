@@ -29,6 +29,10 @@ helpBox <- function(..., help_id = NULL, tabBox = FALSE) {
   bx
 }
 
+with_literata <- function(x, ...) {
+  p(x, style = "font-family: Literata; margin-bottom: 0px;", ...)
+}
+
 #' Columns wrappers
 #'
 #' These are convenient wrappers around

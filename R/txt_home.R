@@ -43,7 +43,7 @@ txts$home$welcome <- tagList(
        class = "intext"
       ),
      "published on the official website."),
-  h2(box_title("GRETA Analytics", style = "font-size: 2rem;")),
+  h2(with_literata("GRETA Analytics", style = "font-size: 2rem;")),
   p2(HTML("... is a <b>GIS-based analytical tool</b> to study the emergence of
      energy citizenship. The tool allows you to freely and interactively explore
      the output produced by the GRETA project with a geospatial focus. It
