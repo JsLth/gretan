@@ -1,3 +1,4 @@
-- add median for likert scale items
-- add mode in data explorer
 - find out how to serialize interactive figures
+- implement a data inspector (basically just a table)
+- add possibility to download transposed dataset
+- add all the contributions that are to come
