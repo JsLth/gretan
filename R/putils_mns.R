@@ -228,3 +228,31 @@ subset_mns <- function(df, var = NULL) {
   if ("nuts2" %in% names(df)) incl <- c(incl, "nuts2")
   df[c(incl, var)]
 }
+
+mns_pivot_longer <- function(df) {
+  df <- sf::st_drop_geometry(df)
+  do_stack <- intersect(names(df), cb_ext$variable[-1])
+  dont_stack <- setdiff(names(df), do_stack)
+  pivot <- stack(df, select = do_stack)[2:1]
+  entries <- merge(
+    pivot,
+    cb_ext[c("variable", "og_var", "question", "subitem", "option",
+             "is_metric", "is_likert")],
+    by.x = "ind",
+    by.y = "variable",
+    sort = FALSE
+  )
+  type <- rep("%", nrow(entries))
+  type[entries$is_metric] <- "mean"
+  type[entries$is_likert] <- "median"
+  
+  data.frame(
+    variable = entries$og_var,
+    question = entries$question,
+    subitem = entries$subitem,
+    option = entries$option,
+    df[dont_stack],
+    value = pivot$value,
+    type = type
+  )
+}

@@ -145,6 +145,15 @@ a.logo {
   background-color: white !important;
 }
 
+.dt-button-2 {
+  background: white !important;
+  border-radius: 10px !important;
+}
+
+.dt-button-2:hover {
+  background: rgba(0, 0, 0, 0.1) !important;
+}
+
 .tax-elem {
   border-radius: 35px;
   font-size: 3rem;

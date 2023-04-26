@@ -10,6 +10,7 @@ mod_main_ui <- function(id) {
     mod_home_ui(ns("home")),
     mod_exp_ui(ns("exp"), categories, titles),
     mod_cmp_ui(ns("cmp"), categories, titles),
+    mod_insp_ui(ns("insp")),
     mod_ind_ui(ns("ind")),
     mod_cs_ui(ns("cs")),
     class = "tab-content"
@@ -42,6 +43,7 @@ mod_main <- function(input, output, session) {
   exp_params <- mod_exp_server("exp")
   mod_cmp_server("cmp")
   mod_cmp_server("insp")
+  mod_insp_server("insp")
   mod_cs_server("cs")
   mod_ind_server("ind")
   
