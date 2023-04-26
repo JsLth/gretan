@@ -1,4 +1,4 @@
-mod_cmp_side_ui <- function(id, categories, titles) {
+mod_cmp_side_ui <- function(id, titles) {
   ns <- NS(id)
 
   bs4Dash::column(
@@ -77,14 +77,14 @@ mod_cmp_side_ui <- function(id, categories, titles) {
   )
 }
 
-mod_cmp_ui <- function(id, categories, titles) {
+mod_cmp_ui <- function(id, titles) {
   ns <- NS(id)
   
   bs4Dash::tabItem(
     "cmp",
     fluidRow(
-      mod_cmp_side_ui(ns("left"), categories, titles),
-      mod_cmp_side_ui(ns("right"), categories, titles)
+      mod_cmp_side_ui(ns("left"), titles),
+      mod_cmp_side_ui(ns("right"), titles)
     )
   )
 }

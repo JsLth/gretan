@@ -1,4 +1,4 @@
-mod_exp_ui <- function(id, categories, titles) {
+mod_exp_ui <- function(id, titles) {
   ns <- NS(id)
   cb <- cb_ext
   
@@ -61,7 +61,7 @@ mod_exp_ui <- function(id, categories, titles) {
           ),
           shinyWidgets::materialSwitch(
             ns("mode"),
-            label = "Options as mode",
+            label = "Aggregate options",
             value = FALSE,
             status = "primary",
             right = TRUE

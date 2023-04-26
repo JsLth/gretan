@@ -8,9 +8,9 @@ mod_main_ui <- function(id) {
 
   shiny::div(
     mod_home_ui(ns("home")),
-    mod_exp_ui(ns("exp"), categories, titles),
-    mod_cmp_ui(ns("cmp"), categories, titles),
-    mod_insp_ui(ns("insp")),
+    mod_exp_ui(ns("exp"), titles),
+    mod_cmp_ui(ns("cmp"), titles),
+    mod_insp_ui(ns("insp"), titles),
     mod_ind_ui(ns("ind")),
     mod_cs_ui(ns("cs")),
     class = "tab-content"

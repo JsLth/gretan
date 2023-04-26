@@ -1,8 +1,35 @@
-mod_insp_ui <- function(id) {
+mod_insp_ui <- function(id, titles) {
   ns <- NS(id)
   
   bs4Dash::tabItem(
     "insp",
+    shinyWidgets::pickerInput(
+      ns("title"),
+      "Topics",
+      choices = titles,
+      selected = NULL,
+      multiple = TRUE,
+      options = shinyWidgets::pickerOptions(
+        windowPadding = c(30, 0, 0, 0),
+        liveSearch = TRUE
+      ),
+      inline = TRUE
+    ),
+    shinyWidgets::pickerInput(
+      ns("subitem"),
+      "Subitems",
+      choices = character(),
+      multiple = TRUE,
+      inline = TRUE
+    ),
+    shinyWidgets::pickerInput(
+      ns("option"),
+      "Options",
+      choices = character(),
+      multiple = TRUE,
+      inline = TRUE
+    ),
+    hr(),
     shinyWidgets::pickerInput(
       ns("aggr"),
       label = "Aggregation level",
@@ -19,6 +46,7 @@ mod_insp_ui <- function(id) {
       value = FALSE,
       inline = TRUE
     ),
+    hr(),
     DT::dataTableOutput(ns("table"))
   )
 }
@@ -34,29 +62,37 @@ mod_insp_server <- function(id) {
     output$table <- DT::renderDataTable(
       table(),
       server = TRUE,
+      class = c("compact", "hover", "stripe", "order-column"),
       extensions = c("Buttons", "Scroller", "KeyTable", "RowGroup"),
       selection = "none",
       filter = list(position = "top", clear = FALSE),
+      style = "bootstrap4",
+      rownames = FALSE,
       options = list(
+        dom = "Bfrtip",
         pageLength = 50,
         scroller = TRUE,
         scrollY = 600,
         deferRender = TRUE,
         keys = TRUE,
         rowGroup = list(
-          dataSrc = c(2, 3, 4),
+          dataSrc = 1:3,
           emptyDataGroup = NULL,
           startRender = DT::JS("function (rows, group, level) {
+            if (group == null) {
+              return null
+            }
             if (level == 0) {
-              return group +' ('+rows.count()+' rows)';
+              return 'Question: ' + group + ' (' + rows.count() + ' rows)';
+            } else if (level == 1) {
+              return 'Subitem: ' + group;
             } else {
-              return group
+              return 'Option: ' + group
             }
           }")
         ),
-        columnDefs = list(list(targets = c(2, 3, 4), visible = FALSE)),
-        lengthMenu = list(list(100)
-        ),
+        columnDefs = list(list(targets = 1:3, visible = FALSE)),
+        pageLength = 100,
         buttons = list(
           list(
             extend = "copyHtml5",
@@ -93,6 +129,11 @@ mod_insp_server <- function(id) {
           )
         ),
         autoWidth = TRUE
+        # ajax = list(
+        #   url = "https://datatables.net/examples/server_side/scripts/jsonp.php",
+        #   dataType = "jsonp",
+        #   processing = TRUE
+        # )
       )
     )
   })
