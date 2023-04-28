@@ -493,6 +493,7 @@ cb_ext <- dplyr::tibble(variable = setdiff(names(survey_local), "geometry")) %>%
   )) %>%
   filter(!variable %in% to_be_deleted) %>%
   mutate(variable = janitor::make_clean_names(variable)) %>%
+  mutate(option = if_else(nzchar(option), option, NA_character_)) %>%
   slice(sort_variables(og_var))
 
 survey_local <- survey_local %>%

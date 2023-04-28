@@ -23,6 +23,6 @@ sysdata <- append(sysdata, output)
 sysdata <- lapply(sysdata, as.name)
 sysdata$internal <- TRUE
 sysdata$overwrite <- TRUE
-sysdata$compress <- "xz"
+sysdata$compress <- "bzip2"
 
 do.call(use_data, sysdata)
