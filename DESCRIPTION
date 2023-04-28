@@ -9,11 +9,10 @@ Depends:
     R (>= 4.2.0)
 Imports: 
     bs4Dash,
-    magrittr,
     fresh,
     leaflegend,
     leaflet,
-    purrr,
+    jsonlite,
     sf,
     shiny (>= 1.7.4),
     shinyjs,

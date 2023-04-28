@@ -116,7 +116,8 @@ make_header <- function(title,
                         date = Sys.Date()) {
   if (!is.null(affil)) {
     if (length(affil) == 1) {
-      affil <- purrr::set_names(as.list(rep(affil, length(authors))), authors)
+      affil <- as.list(rep(affil, length(authors)))
+      names(affil) <- authors
     }
     aff_df <- data.frame(
       author = rep(authors, lengths(affil)),
