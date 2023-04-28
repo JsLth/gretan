@@ -323,30 +323,28 @@ countries <- data.frame(
 )
 
 # Prepare lau
-lau <- dplyr::bind_rows(lau, com[!com$name %in% lau$name, ])
+lau <- bind_rows(lau, com[!com$name %in% lau$name, ])
 
 # Remove country specifications after place names because these are very
 # inconsistent
-nuts1$place <- stringr::str_remove_all(nuts1$name, "\\([A-Z]{2}\\)") %>% trimws()
-nuts2$place <- stringr::str_remove_all(nuts2$name, "\\([A-Z]{2}\\)") %>% trimws()
-survey$c2   <- stringr::str_remove_all(survey$c2,   "\\([A-Z]{2}\\)") %>% trimws()
+nuts1$place <- str_remove_all(nuts1$name, "\\([A-Z]{2}\\)") %>% trimws()
+nuts2$place <- str_remove_all(nuts2$name, "\\([A-Z]{2}\\)") %>% trimws()
+survey$c2   <- str_remove_all(survey$c2,   "\\([A-Z]{2}\\)") %>% trimws()
 
 # Manually revise some place names
 survey$c3 <- survey$c3 %>%
-  stringr::str_remove_all("União das freguesias") %>%
-  stringr::str_replace_all("St.", "Sankt") %>%
-  stringr::str_remove_all(stringr::regex(", .*stadt.*", ignore_case = TRUE)) %>%
-  stringr::str_replace_all("Sligo Strandhill", "Sligo-Sanktandhill") %>%
-  stringr::str_replace_all("Stillorgan", "Sanktllorgan") %>%
-  stringr::str_replace_all("Siegen", "Siegen, Universitätsstadt")
+  str_remove_all("União das freguesias") %>%
+  str_replace_all(fixed("St."), "Sankt") %>%
+  str_remove_all(regex(", .*stadt.*", ignore_case = TRUE)) %>%
+  str_replace_all("Siegen", "Siegen, Universitätsstadt")
 
 # Standardize spelling of places
 replace <- c(`'` = "", "\u03bc" = "u", "´" = "")
-survey$clean_c2 <- janitor::make_clean_names(survey$c2, allow_dupes = TRUE, replace = replace)
-survey$clean_c3 <- janitor::make_clean_names(survey$c3, allow_dupes = TRUE, replace = replace)
-nuts1$clean_c2  <- janitor::make_clean_names(nuts1$place, allow_dupes = TRUE, replace = replace)
-nuts2$clean_c2  <- janitor::make_clean_names(nuts2$place, allow_dupes = TRUE, replace = replace)
-lau$clean_c3    <- janitor::make_clean_names(lau$name, allow_dupes = TRUE, replace = replace)
+survey$clean_c2 <- make_clean_names(survey$c2, allow_dupes = TRUE, replace = replace)
+survey$clean_c3 <- make_clean_names(survey$c3, allow_dupes = TRUE, replace = replace)
+nuts1$clean_c2  <- make_clean_names(nuts1$place, allow_dupes = TRUE, replace = replace)
+nuts2$clean_c2  <- make_clean_names(nuts2$place, allow_dupes = TRUE, replace = replace)
+lau$clean_c3    <- make_clean_names(lau$name, allow_dupes = TRUE, replace = replace)
 
 # Survey country labels are standardized while nuts country labels are
 # localized. Recode to match survey labelling.
