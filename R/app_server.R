@@ -1,7 +1,7 @@
 server <- function(input, output, session) {
   log_it("Starting app")
   
-  onFlush(once = FALSE, fun = function() {
+  onFlush(fun = function() {
     log_it("Flushing reactive system")
   })
   

@@ -148,6 +148,14 @@ a.logo {
 .dt-button-2 {
   background: white !important;
   border-radius: 10px !important;
+  border-color: #ddd !important;
+  margin-left: 5px !important;
+  margin-bottom: -40px !important;
+}
+
+.dwn-wrapper {
+  display: inline-flex;
+  vertical-align: middle;
 }
 
 .dt-button-2:hover {

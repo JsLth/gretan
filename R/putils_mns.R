@@ -252,7 +252,7 @@ mns_pivot_longer <- function(df) {
     subitem = entries$subitem,
     option = entries$option,
     df[dont_stack],
-    value = pivot$value,
+    value = round(pivot$value, 4),
     type = type
   )
 }
