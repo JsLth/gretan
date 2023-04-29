@@ -25,3 +25,10 @@ txts$cmp$help <- list(
     question to update the right map. If applicable, you can also specify
     subitems and options."
 )
+
+txts$cmp$title <- "Inspect data"
+txts$cmp$icon <- icon("map")
+txts$cmp$tags <- c(
+  "inspect", "data", "multinational", "survey", "table", "transpose",
+  "download"
+)
