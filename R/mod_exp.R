@@ -311,11 +311,13 @@ mod_exp_server <- function(id, track = FALSE) {
     # Compile all parameters into a list
     exp_params <- reactive({
       log_it("Attempting to change map parameters")
-      invar <- invar()
-      fixed <- input$fixed
-      pal <- pal()
-      aggr <- input$aggr
-      get_mns_params(invar, fixed, pal, aggr)
+      execute_safely({
+        invar <- invar()
+        fixed <- input$fixed
+        pal <- pal()
+        aggr <- input$aggr
+        get_mns_params(invar, fixed, pal, aggr)
+      })
     }, label = "compile parameters")
     
     # Render initial leaflet map. Isolate reactives so they are only called once.

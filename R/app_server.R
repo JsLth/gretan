@@ -68,7 +68,11 @@ server <- function(input, output, session) {
       insertUI(
         selector = "#textSearch",
         where = "afterEnd",
-        ui = div(id = "listbox", class = "form-results", search_results())
+        ui = div(
+          id = "listbox",
+          class = "form-results",
+          execute_safely(search_results())
+        )
       )
     } else {
       removeUI(
