@@ -68,8 +68,10 @@ aggregate_survey <- function(x) {
   }
   
   if (is_likert) {
-    non_response <- is.na(strtoi(attr(vec, "labels")[[1]]))
-    as.integer(median(x[!non_response], na.rm = TRUE))
+    nr <- strtoi(attr(vec, "labels")[[1]])
+    nr <- nr[!is.na(nr)]
+    nr <- x[x %in% nr]
+    as.integer(median(nr))
   } else if (is.numeric(x) || is.logical(x)) {
     mean(x, na.rm = TRUE)
   } else {
@@ -243,11 +245,16 @@ codebook <- readxl::read_xlsx(
     function(x) {
       lab <- survey[[x]] %>%
         attr("labels") %>%
-        names() %>%
-        substr(1, 1) %>%
-        strtoi()
-      lab <- lab[!is.na(lab)]
-      length(lab) > 1 && all(abs(diff(lab)) == 1)
+        names()
+      if (is.character(lab) && all(nzchar(lab))) {
+        lab <- strtoi(substr(lab, 1, 1))
+        lab <- lab[!is.na(lab)]
+        return(length(lab) > 1 && all(abs(diff(lab)) == 1))
+      } else if (is.character(lab)) {
+        return(TRUE)
+      } else {
+        return(FALSE)
+      }
     }
   )) %>%
   mutate(is_pdummy = map_lgl( # pseudo dummies = Yes/No questions - don't need dummifying
@@ -284,6 +291,9 @@ codebook <- readxl::read_xlsx(
   )) %>%
   mutate(labels = map(variable, function(x) {
     lab <- names(attr(survey[[x]], "labels"))
+    if (!any(nzchar(lab))) {
+      lab <- as.character(seq(1, length(lab)))
+    }
     if (length(lab) == 1) {
       i <- 1
       lab <- NULL
@@ -416,7 +426,8 @@ survey_local <- pairs %>%
   filter(!is.na(.x)) %>%
   select(all_of(codebook$variable)) %>%
   mutate(across(everything(), .fns = function(x) { # remove SPSS labels
-    if (haven::is.labelled(x)) {
+    labs <- names(attr(x, "labels"))
+    if (haven::is.labelled(x) && all(nzchar(labs))) {
       haven::as_factor(x, levels = "label", ordered = TRUE)
     } else {
       x
