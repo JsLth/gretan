@@ -124,7 +124,7 @@ app_ui <- function() {
             div(class = "search-icon", icon("search", lib = "font-awesome")),
             div(class = "form-control-container input-group", tags$input(
               id = "textSearch",
-              type = "text",
+              type = "search",
               style = "margin: 5px;",
               class = "form-control", 
               placeholder = "Search..."
