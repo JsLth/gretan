@@ -61,8 +61,8 @@ mod_insp_ui <- function(id, titles) {
       inline = TRUE
     ),
     hr(),
-    downloadButton(ns("csv"), "Save as CSV", class = "dt-button-2", icon = NULL),
-    downloadButton(ns("json"), "Save as JSON", class = "dt-button-2", icon = NULL),
+    downloadButton(ns("csv"), "", class = "dt-button-2", icon = NULL),
+    downloadButton(ns("json"), "", class = "dt-button-2", icon = NULL),
     DT::dataTableOutput(ns("table"))
   )
 }
@@ -91,7 +91,7 @@ mod_insp_server <- function(id) {
 
       if (length(subitems) > 0 || !any(is.na(subitems))) {
         headers <- paste("Topic:", titles)
-        headers <- factor(headers, levels = headers)
+        headers <- factor(headers, levels = unique(headers))
         choices <- drop_nulls(tapply(subitems, INDEX = headers, FUN = unique))
         choices <- choices[!is.na(choices)]
         shinyWidgets::updatePickerInput(
@@ -121,8 +121,9 @@ mod_insp_server <- function(id) {
         } else {
           paste("Topic:", titles)
         }
-        headers <- factor(headers, levels = headers)
+        headers <- factor(headers, levels = unique(headers))
         choices <- tapply(options, INDEX = headers, FUN = unique)
+        choices <- choices[!is.na(choices)]
         shinyWidgets::updatePickerInput(
           session = session,
           inputId = "option",
@@ -157,10 +158,27 @@ mod_insp_server <- function(id) {
         filter = list(position = "top", clear = FALSE),
         style = "bootstrap4",
         rownames = FALSE,
-        callback = DT::JS(sprintf("
-          $('div.dwn-wrapper').append($('#%s'));
-          $('div.dwn-wrapper').append($('#%s'));
-        ", session$ns("csv"), session$ns("json"))),
+        # Callback that appends shiny download buttons to DT download buttons
+        # This is needed because server-side processing prevents DT buttons
+        # from downloading the entire dataset
+        callback = DT::JS("
+          var dwn1 = document.createElement('a');
+          var dwn2 = document.createElement('a');
+          $(dwn1).addClass($('a.dt-button-2')[0].className);
+          $(dwn2).addClass($('a.dt-button-2')[0].className);
+          dwn1.href = document.getElementById('main-insp-csv').getAttribute('href');
+          dwn2.href = document.getElementById('main-insp-json').getAttribute('href');
+          dwn1.download = '';
+          dwn2.download = '';
+          $(dwn1).attr('target', '_blank');
+          $(dwn2).attr('target', '_blank');
+          $(dwn1).text('Save as CSV');
+          $(dwn2).text('Save as JSON');
+          $('div.dwn-wrapper').append(dwn1);
+          $('div.dwn-wrapper').append(dwn2);
+          $('#main-insp-csv').hide();
+          $('#main-insp-json').hide();
+        "),
         options = list(
           dom = "B<'dwn-wrapper'>frtip",
           pageLength = 50,
@@ -171,6 +189,7 @@ mod_insp_server <- function(id) {
           rowGroup = list(
             dataSrc = 1:3,
             emptyDataGroup = NULL,
+            # Add context info to row groups
             startRender = DT::JS("function (rows, group, level) {
               if (group == null) {
                 return null
@@ -184,6 +203,7 @@ mod_insp_server <- function(id) {
               }
             }")
           ),
+          # Hide columns that are shown as row groups
           columnDefs = list(list(targets = 1:3, visible = FALSE)),
           pageLength = 100,
           buttons = list(
@@ -206,7 +226,7 @@ mod_insp_server <- function(id) {
       )
     })
 
-    output$table <- DT::renderDataTable(dt(), server = TRUE)
+    output$table <- DT::renderDataTable(execute_safely(dt()), server = TRUE)
     
     output$csv <- downloadHandler(
       filename = function() {
