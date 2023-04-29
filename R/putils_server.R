@@ -121,6 +121,10 @@ as_likert <- function(x, scale = NULL) {
       "Somewhat agree", "Agree", "Strongly agree"
     )
   }
+  
+  if (is.factor(scale)) {
+    scale <- as.character(scale)
+  }
 
   values <- vapply(x, function(i) scale[i], FUN.VALUE = character(1))
   ordered(values, levels = scale)
@@ -252,7 +256,8 @@ send_info <- function(text,
     text = text,
     type = "info",
     html = TRUE,
-    btn_colors = "#5E81AC"
+    btn_colors = "#5E81AC",
+    btn_labels = "Got it!"
   )
 }
 
@@ -264,7 +269,8 @@ send_error <- function(text,
     text = text,
     type = "error",
     html = TRUE,
-    btn_colors = "#BF616A"
+    btn_colors = "#BF616A",
+    btn_labels = "Got it!"
   )
 }
 
@@ -272,6 +278,7 @@ send_error <- function(text,
 execute_safely <- function(expr,
                            title = "Oops!",
                            message = NULL,
+                           stopOperation = TRUE,
                            session = getDefaultReactiveDomain()
   ) {
   if (is.null(message)) {
@@ -283,13 +290,16 @@ execute_safely <- function(expr,
   
   tryCatch(
     expr = expr,
-    error = function(e) send_error(div(
-      style = "text-align: left",
-      message,
-      br(), br(),
-      "Error details:", br(),
-      tags$code(as.character(e$message))
-    ), session = session, title = title)
+    error = function(e) {
+      send_error(div(
+        style = "text-align: left",
+        message,
+        br(), br(),
+        "Error details:", br(),
+        tags$code(as.character(e))
+      ), session = session, title = title)
+      if (stopOperation) req(FALSE)
+    }
   )
 }
 
