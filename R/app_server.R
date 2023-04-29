@@ -1,10 +1,6 @@
 server <- function(input, output, session) {
   log_it("Starting app")
   
-  onFlush(fun = function() {
-    log_it("Flushing reactive system")
-  })
-  
   onSessionEnded(fun = function() {
     log_it("Shutting down app")
   })
@@ -53,6 +49,13 @@ server <- function(input, output, session) {
       id <- paste0("search_option_", x)
       div(class = "form-suggestion", role = "option", opt)
     })
+    if (!length(options)) {
+      options <- list(div(
+        class = "form-suggestion",
+        role = "option",
+        "No results"
+      ))
+    }
     do.call(div, c(options, class = "form-suggestions"))
   })
   
