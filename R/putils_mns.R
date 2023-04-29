@@ -83,6 +83,7 @@ get_mns_params <- function(invar, fixed, palette, aggr) {
     labs <- strtoi(substr(cb_entry$labels[[1]], 1, 1))
     labs <- labs[!is.na(labs)]
     values <- domain <- as_likert(seq(1, length(labs)), scale = scale)
+    poly[[invar]] <- as_likert(poly[[invar]], scale = values)
     lgd <- "Median"
     unit <- ""
   } else if (is_metric) {
