@@ -25,7 +25,7 @@ mod_home_ui <- function(id) {
           title = with_literata("Case study descriptions"),
           width = 12,
           status = "primary",
-          uiOutput(ns("description"))
+          uiOutput(ns("desc"))
         )
       )
     )
@@ -113,7 +113,7 @@ mod_home <- function(input, output, session) {
     bindEvent(input$map_marker_click)
   
   # Show case study description based on map clicks
-  output$description <- renderUI({
+  output$desc <- renderUI({
     click <- input$map_marker_click
 
     leaflet_text_on_click(
