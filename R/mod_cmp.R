@@ -16,7 +16,7 @@ mod_cmp_side_ui <- function(id, titles, selected = NULL) {
           ns("title"),
           "Topic",
           choices = titles,
-          selected = "Heating system usage",
+          selected = selected,
           options = shinyWidgets::pickerOptions(
             windowPadding = c(30, 0, 0, 0),
             liveSearch = TRUE
