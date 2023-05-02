@@ -1,4 +1,4 @@
-mod_cmp_side_ui <- function(id, titles) {
+mod_cmp_side_ui <- function(id, titles, selected = NULL) {
   ns <- NS(id)
 
   bs4Dash::column(
@@ -83,8 +83,8 @@ mod_cmp_ui <- function(id, titles) {
   bs4Dash::tabItem(
     "cmp",
     fluidRow(
-      mod_cmp_side_ui(ns("left"), titles),
-      mod_cmp_side_ui(ns("right"), titles)
+      mod_cmp_side_ui(ns("left"), titles, selected = "Heating system usage"),
+      mod_cmp_side_ui(ns("right"), titles, selected = "Cooling system usage")
     )
   )
 }
