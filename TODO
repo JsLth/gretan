@@ -1,4 +1,6 @@
-- find out how to serialize interactive figures
-- implement a data inspector (basically just a table)
-- add possibility to download transposed dataset
 - add all the contributions that are to come
+- fix sample size warning
+- fix options not hiding in aggregation mode
+- fix some weird NAs in georeferencing
+- develop first prototype of "persona identification form"
+- develop first prototype of interactive taxonomy
