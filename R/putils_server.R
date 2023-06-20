@@ -182,6 +182,9 @@ align_td <- function(x, y, char = " ", bold = TRUE) {
   td2 <- noWS(tags$td)
   mapply(function(left, right) {
     if (is.null(right) || is.na(right)) return("")
+    if (is.character(right) && startsWith(as.character(right), "NA")) {
+      right <- "N/A"
+    }
     style <- NULL
     if (identical(left, "Sample")) {
       if (right <= 10) style <- "color: red"
@@ -248,6 +251,11 @@ track_coordinates <- function(map, id, session = getDefaultReactiveDomain()) {
   map
 }
 
+rlang_error_to_html <- function(x) {
+  x <- fansi::sgr_to_html(x)
+  gsub("\n", "<br>", x)
+}
+
 
 send_info <- function(text,
                       title = "Info",
@@ -297,7 +305,7 @@ execute_safely <- function(expr,
         message,
         br(), br(),
         "Error details:", br(),
-        tags$code(as.character(e))
+        tags$code(HTML(rlang_error_to_html(as.character(e))))
       ), session = session, title = title)
       if (stopOperation) req(FALSE)
     }
