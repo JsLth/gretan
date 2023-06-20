@@ -276,15 +276,16 @@ mod_exp_server <- function(id, track = FALSE) {
     observe({
       has_option <- all(!is.na(cb[cb$variable %in% invar(), ]$option))
       if (!has_option) {
-        shinyjs::hide("optionHide")
+        shinyjs::hide("option", anim = TRUE)
         #palettes <- list_palettes("seq")
         #shinyWidgets::updatePickerInput(session, "pal", choices = palettes)
       } else if (isTRUE(input$mode) && has_option) {
-        shinyjs::hide("optionHide")
+        shinyjs::hide("option", anim = TRUE)
         #palettes <- list_palettes("qual")
         #shinyWidgets::updatePickerInput(session, "pal", choices = palettes)
       } else {
-        shinyjs::show("optionHide")
+        print("im here")
+        shinyjs::show("option", anim = TRUE)
         #palettes <- list_palettes("seq")
         #shinyWidgets::updatePickerInput(session, "pal", choices = palettes)
       }
