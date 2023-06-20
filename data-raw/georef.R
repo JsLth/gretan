@@ -332,6 +332,14 @@ countries <- data.frame(
   )
 )
 
+if (!exists("nuts0") && dir.exists("bounds")) {
+  nuts0 <- readRDS("bounds/nuts0.rds")
+  nuts1 <- readRDS("bounds/nuts1.rds")
+  nuts2 <- readRDS("bounds/nuts2.rds")
+  lau <- readRDS("bounds/lau.rds")
+  com <- readRDS("bounds/com.rds")
+}
+
 # Prepare lau
 lau <- bind_rows(lau, com[!com$name %in% lau$name, ])
 
@@ -541,6 +549,8 @@ survey_local <- survey_local %>%
   st_join(select(nuts0, nuts0 = "name"), st_nearest_feature) %>%
   st_join(select(nuts1, nuts1 = "name"), st_nearest_feature) %>%
   st_join(select(nuts2, nuts2 = "name"), st_nearest_feature)
+
+saveRDS(survey_local, "survey_local.rds")
 
 srv_nuts0 <- aggregate(
   survey_local %>% select(-id, -nuts1, -nuts2),
