@@ -14,6 +14,7 @@ add_external_resources <- function() {
   addResourcePath("www", app_sys("app/www"))
   tags$head(
     waiter::useWaiter(),
+    cicerone::use_cicerone(),
     shinyWidgets::useSweetAlert(theme = "bootstrap-4"),
     shinyjs::useShinyjs(),
     tags$script(HTML("$('html').on('click', function(e) {
