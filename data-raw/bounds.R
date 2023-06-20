@@ -25,28 +25,44 @@ countries <- c(
 # NUTS, LAU and COM
 
 # Retrieve NUTS boundaries from GISCO
-nuts0 <- gisco_nuts %>%
-  filter(LEVL_CODE %in% 0) %>%
+nuts0 <- giscoR::gisco_get_nuts(
+  year = "2021",
+  nuts_level = "0",
+  country = countries,
+  epsg = "3035",
+  resolution = "10",
+  spatialtype = "RG",
+  cache = TRUE
+) %>%
   select(nid = NUTS_ID, name = NUTS_NAME) %>%
-  filter(nid %in% countries) %>%
   st_transform(3035)
 
-nuts1 <- gisco_nuts %>%
-  filter(LEVL_CODE %in% 1) %>%
+nuts1 <- giscoR::gisco_get_nuts(
+  year = "2021",
+  nuts_level = "1",
+  country = countries,
+  epsg = "3035",
+  resolution = "10",
+  spatialtype = "RG",
+  cache = TRUE
+) %>%
   select(nid = NUTS_ID, name = NUTS_NAME, code = CNTR_CODE) %>%
-  filter(code %in% countries) %>%
   st_transform(3035)
 
-nuts2 <- gisco_nuts %>%
-  filter(LEVL_CODE %in% 2) %>%
+nuts2 <- giscoR::gisco_get_nuts(
+  year = "2021",
+  nuts_level = "2",
+  country = countries,
+  epsg = "3035",
+  resolution = "03",
+  spatialtype = "RG",
+  cache = TRUE
+) %>%
   select(nid = NUTS_ID, name = NUTS_NAME, code = CNTR_CODE) %>%
-  filter(code %in% countries) %>%
   st_transform(3035)
 
-nuts3 <- gisco_nuts %>%
-  filter(LEVL_CODE %in% 3) %>%
-  select(nid = NUTS_ID, name = NUTS_NAME, code = CNTR_CODE) %>%
-  filter(code %in% countries) %>%
+grid <- giscoR::gisco_get_grid(resolution = "100") %>%
+  select(gid = GRD_ID) %>%
   st_transform(3035)
 
 # Retrieve local regions corresponding to C3 level
@@ -67,7 +83,7 @@ com <- sf::read_sf(
   st_transform(3035)
 
 
-output <- list("nuts0", "nuts1", "nuts2")
+output <- list("nuts0", "nuts1", "nuts2", "grid")
 
 for (x in c(output, "nuts3", "lau", "com")) {
   saveRDS(eval(as.symbol(x)), paste0("bounds/", x, ".rds"))

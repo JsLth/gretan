@@ -548,7 +548,8 @@ for (x in names(survey_local)) {
 survey_local <- survey_local %>%
   st_join(select(nuts0, nuts0 = "name"), st_nearest_feature) %>%
   st_join(select(nuts1, nuts1 = "name"), st_nearest_feature) %>%
-  st_join(select(nuts2, nuts2 = "name"), st_nearest_feature)
+  st_join(select(nuts2, nuts2 = "name"), st_nearest_feature) %>%
+  st_join(grid, st_nearest_feature)
 
 saveRDS(survey_local, "survey_local.rds")
 
@@ -590,7 +591,19 @@ count_nuts2 <- aggregate(survey_local["id"], nuts2, FUN = length) %>%
   dplyr::rename(sample = "id")
 srv_nuts2 <- st_join(srv_nuts2, count_nuts2, st_equals)
 
-output <- list("cb_ext", "srv_nuts0", "srv_nuts1", "srv_nuts2")
+srv_grid <- aggregate(
+  survey_local %>% select(-id),
+  grid,
+  FUN = aggregate_survey
+) %>%
+  as_tibble() %>%
+  st_as_sf()
+
+count_grid <- aggregate(survey_local["id"], grid, FUN = length) %>%
+  rename(sample = "id")
+srv_grid <- st_join(srv_grid, count_grid, st_equals)
+
+output <- list("cb_ext", "srv_nuts0", "srv_nuts1", "srv_nuts2", "srv_grid")
 
 # tidyr::pivot_longer(srv_nuts0, cols = !c(nuts0, geometry)) %>%
 #   st_write("srv.sqlite", layer = "srv_nuts0")

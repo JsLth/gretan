@@ -224,9 +224,11 @@ get_mns_mode <- function(df, cb, var) {
 }
 
 subset_mns <- function(df, var = NULL) {
-  incl <- c("sample", "nuts0")
+  incl <- "sample"
+  if ("nuts0" %in% names(df)) incl <- c(incl, "nuts0")
   if ("nuts1" %in% names(df)) incl <- c(incl, "nuts1")
   if ("nuts2" %in% names(df)) incl <- c(incl, "nuts2")
+  if ("grid" %in% names(df)) incl <- c(incl, "grid")
   df[c(incl, var)]
 }
 

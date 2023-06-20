@@ -44,7 +44,8 @@ mod_exp_ui <- function(id, titles) {
             choices = c(
               "Countries" = "nuts0",
               "Major regions" = "nuts1",
-              "Minor regions" = "nuts2"
+              "Minor regions" = "nuts2",
+              "100 km grid" = "grid"
             ),
             selected = "nuts0"
           ),
@@ -284,7 +285,6 @@ mod_exp_server <- function(id, track = FALSE) {
         #palettes <- list_palettes("qual")
         #shinyWidgets::updatePickerInput(session, "pal", choices = palettes)
       } else {
-        print("im here")
         shinyjs::show("option", anim = TRUE)
         #palettes <- list_palettes("seq")
         #shinyWidgets::updatePickerInput(session, "pal", choices = palettes)
