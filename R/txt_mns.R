@@ -5,9 +5,27 @@ txts$exp$tags <- c(
 )
 txts$exp$help <- list(
   databox = "This box helps you to select a variable from the GRETA
-    multinational survey. Choose one of the topics corresponding to a survey
-    question to update the map on the right. If applicable, you can also specify
-    subitems and options."
+    multinational survey.
+    <br>
+    <b>Topic:</b> Choose a topic to display in the
+    explorer. Each topic corresponds to a question in the multinational survey.
+    <br>
+    <b>Subitem:</b> If applicable, choose a subgroup of the selected topic.
+    <br>
+    <b>Option:</b> In case of categorical questions, choose a response option.",
+  confbox = "This box helps you to configure the data explorer.
+    <br>
+    <b>Aggregation level:</b> Allows you to switch between geographical levels,
+    i.e. local, regional and national.
+    <br>
+    <b>Color palette:</b> Changes the appearance of the data explorer.
+    <br>
+    <b>Legend values:</b> Changes the calibration of the legend. To compare
+    variables, choose “Full range”, to compare regions, choose
+    “Full contrast”.
+    <br>
+    <b>Aggregate options:</b> Whether to show options seperately as percentages
+    or show the most common response option for a topic."
 )
 
 txts$cmp$title <- "Compare data"

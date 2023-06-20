@@ -339,12 +339,28 @@ plotly_config_default <- function(p) {
   )
 }
 
-tooltip_opts <- function(text) {
-  list(
-    title = text,
-    placement = "bottom",
-    trigger = "click",
-    container = "body"
+popover2 <- function(id,
+                     title = NULL,
+                     content,
+                     trigger = "focus",
+                     placement = "right",
+                     fallbackPlacement = "flip",
+                     offset = 0,
+                     boundary = "scrollParent",
+                     selector = NULL) {
+  bs4Dash::addPopover(
+    id = id,
+    selector = selector,
+    options = list(
+      title = title,
+      content = content,
+      placement = placement,
+      fallbackPlacement = fallbackPlacement,
+      offset = offset,
+      boundary = boundary,
+      trigger = trigger,
+      html = TRUE
+    )
   )
 }
 

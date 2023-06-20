@@ -30,9 +30,10 @@ mod_exp_ui <- function(id, titles) {
           shinyWidgets::pickerInput(ns("subitem"), "Subitem", character()),
           shinyWidgets::pickerInput(ns("option"), "Option", character())
         ),
-        bs4Dash::box(
+        helpBox(
           title = "Map configuration",
           id = ns("config"),
+          help_id = ns("configHelp"),
           width = 12,
           solidHeader = FALSE,
           collapsible = TRUE,
@@ -117,9 +118,16 @@ mod_exp_server <- function(id, track = FALSE) {
     last_title <- reactiveVal(label = "last title")
     last_var <- reactiveVal(label = "last variable")
     
-    bs4Dash::addTooltip(
-      id = "databoxHelp",
-      options = tooltip_opts(txts$exp$help$databox)
+    popover2(
+      "databoxHelp",
+      title = "Select a topic",
+      content = txts$exp$help$databox
+    )
+    popover2(
+      "configHelp",
+      title = "Configure the map",
+      content = txts$exp$help$confbox,
+      boundary = "viewport"
     )
     
     # Show question
