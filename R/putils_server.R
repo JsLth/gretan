@@ -184,13 +184,14 @@ align_td <- function(x, y, char = " ", bold = TRUE) {
     if (is.null(right) || is.na(right)) return("")
     style <- NULL
     if (identical(left, "Sample")) {
-      right <- paste(right, "respondent(s)")
       if (right <= 10) style <- "color: red"
+      pl <- ifelse(right == 1, "", "s")
+      right <- paste0(right, " respondent", pl)
     }
     if (bold) left <- tags$b(left)
     protect_html(tr2(
       td2(left, style = style),
-      td2(char),
+      td2(char, style = style),
       td2(right, style = style),
       style = "line-height: 10px;"
     ))
