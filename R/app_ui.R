@@ -172,11 +172,11 @@ app_ui <- function() {
           tabName = "cs5"
         ),
         bs4Dash::sidebarHeader("Individual analyses"),
-        # bs4Dash::menuItem(
-        #   text = txts$taxonomy$title,
-        #   icon = txts$taxonomy$icon,
-        #   tabName = "taxonomy"
-        # ),
+        bs4Dash::menuItem(
+          text = txts$taxonomy$title,
+          icon = txts$taxonomy$icon,
+          tabName = "taxonomy"
+        ),
         bs4Dash::menuItem(
           text = txts$simulation$title,
           icon = txts$simulation$icon,

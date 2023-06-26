@@ -127,8 +127,7 @@ mod_exp_server <- function(id, track = FALSE) {
     popover2(
       "configHelp",
       title = "Configure the map",
-      content = txts$exp$help$confbox,
-      boundary = "viewport"
+      content = txts$exp$help$confbox
     )
     
     # Show question

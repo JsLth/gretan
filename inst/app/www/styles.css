@@ -145,6 +145,7 @@ a.logo {
   background-color: white !important;
 }
 
+/* DT custom download buttons */
 .dt-button-2 {
   background: white !important;
   border-radius: 10px !important;
@@ -160,6 +161,49 @@ a.logo {
 
 .dt-button-2:hover {
   background: rgba(0, 0, 0, 0.1) !important;
+}
+
+
+/* geo taxonomy */
+.tax-container {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  position: relative;
+  width: 80%;
+}
+
+.tax-header {
+  background: #1A1A1A;
+  color: white;
+  height: 4.15em;
+  width: 100%;
+  margin: auto;
+}
+    
+.tax-levels-container {
+  position: relative;
+  height: 700px;
+  width: 50%;
+  margin-top: 2.5%;
+}
+
+.tax-virtual {
+  transform: rotate(-90deg);
+  transform-origin: left top;
+  color: white;
+  background-color: #F26553;
+  position: absolute;
+  top: 100%;
+  width: 100%;
+  height: 15%;
+}
+
+.tax-levels {
+  color: white;
+  height: 3.13em;
+  width: 60%;
+  margin-left: 180px;
 }
 
 .tax-elem {
