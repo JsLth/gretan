@@ -86,6 +86,7 @@ app_ui <- function() {
         text-align: left;
       }"),
       div(
+        id = "greta-logo",
         a(
           href = "https://projectgreta.eu/",
           tags$img(src = "www/greta_logo.svg", height = "37em"),
@@ -93,6 +94,16 @@ app_ui <- function() {
         ), class = "logo"
       ),
       span(style = "display:inline-block; width: 100%"), # logos at the end of header
+      bs4Dash::tooltip(
+        actionButton(
+          "tour",
+          label = "",
+          icon = icon("question"),
+          width = "50px",
+          style = "margin-right: 20px;"
+        ),
+        title = "Start a guided tour"
+      ),
       div( # insert logos in a grid
         class = "container-logo",
         corp_logo("gesis"), corp_logo("lut"), corp_logo("unibo"),
@@ -137,67 +148,73 @@ app_ui <- function() {
           icon = txts$home$icon,
           tabName = "home"
         ),
-        bs4Dash::menuItem(
+        div(id = "mnsHighlight", bs4Dash::menuItem(
           text = "Multinational survey",
           icon = txts$exp$icon,
           tabName = "mns",
           bs4Dash::menuSubItem(text = "Explore data", tabName = "exp"),
           bs4Dash::menuSubItem(text = "Compare data", tabName = "cmp"),
           bs4Dash::menuSubItem(text = "Inspect data", tabName = "insp")
+        )),
+        div(
+          bs4Dash::sidebarHeader("Case studies"),
+          id = "csHighlight",
+          bs4Dash::menuItem(
+            text = txts$cs1$title,
+            icon = txts$cs1$icon,
+            tabName = "cs1"
+          ),
+          bs4Dash::menuItem(
+            text = txts$cs2$title,
+            icon = txts$cs2$icon,
+            tabName = "cs2"
+          ),
+          bs4Dash::menuItem(
+            text = txts$cs3$title,
+            icon = txts$cs3$icon,
+            tabName = "cs3"
+          ),
+          bs4Dash::menuItem(
+            text = txts$cs4$title,
+            icon = txts$cs4$icon,
+            tabName = "cs4"
+          ),
+          bs4Dash::menuItem(
+            text = txts$cs5$title,
+            icon = txts$cs5$icon,
+            tabName = "cs5"
+          )
         ),
-        bs4Dash::sidebarHeader("Case studies"),
-        bs4Dash::menuItem(
-          text = txts$cs1$title,
-          icon = txts$cs1$icon,
-          tabName = "cs1"
-        ),
-        bs4Dash::menuItem(
-          text = txts$cs2$title,
-          icon = txts$cs2$icon,
-          tabName = "cs2"
-        ),
-        bs4Dash::menuItem(
-          text = txts$cs3$title,
-          icon = txts$cs3$icon,
-          tabName = "cs3"
-        ),
-        bs4Dash::menuItem(
-          text = txts$cs4$title,
-          icon = txts$cs4$icon,
-          tabName = "cs4"
-        ),
-        bs4Dash::menuItem(
-          text = txts$cs5$title,
-          icon = txts$cs5$icon,
-          tabName = "cs5"
-        ),
-        bs4Dash::sidebarHeader("Individual analyses"),
-        bs4Dash::menuItem(
-          text = txts$taxonomy$title,
-          icon = txts$taxonomy$icon,
-          tabName = "taxonomy"
-        ),
-        bs4Dash::menuItem(
-          text = txts$simulation$title,
-          icon = txts$simulation$icon,
-          tabName = "simulation"
-        ),
-        bs4Dash::menuItem(
-          text = txts$spatial$title,
-          icon = txts$spatial$icon,
-          tabName = "spatial"
-        ),
-        bs4Dash::menuItem(
-          text = txts$income$title,
-          icon = txts$income$icon,
-          tabName = "income"
+        div(
+          id = "indHighlight",
+          bs4Dash::sidebarHeader("Individual analyses"),
+          bs4Dash::menuItem(
+            text = txts$taxonomy$title,
+            icon = txts$taxonomy$icon,
+            tabName = "taxonomy"
+          ),
+          bs4Dash::menuItem(
+            text = txts$simulation$title,
+            icon = txts$simulation$icon,
+            tabName = "simulation"
+          ),
+          bs4Dash::menuItem(
+            text = txts$spatial$title,
+            icon = txts$spatial$icon,
+            tabName = "spatial"
+          ),
+          bs4Dash::menuItem(
+            text = txts$income$title,
+            icon = txts$income$icon,
+            tabName = "income"
+          )
         ),
         flat = TRUE
       ),
       skin = "light",
       minified = TRUE,
       collapsed = TRUE,
-      fixed = TRUE
+      fixed = FALSE
     ),
     bs4Dash::dashboardBody(
       add_external_resources(),

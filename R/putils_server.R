@@ -169,8 +169,11 @@ track_coordinates <- function(map, id, session = getDefaultReactiveDomain()) {
 }
 
 rlang_error_to_html <- function(x) {
-  x <- fansi::sgr_to_html(x)
-  gsub("\n", "<br>", x)
+  x <- as.character(x)
+  if (requireNamespace("fansi", quietly = TRUE)) {
+    x <- fansi::sgr_to_html(x)
+  }
+  HTML(gsub("\n", "<br>", x))
 }
 
 
@@ -222,7 +225,7 @@ execute_safely <- function(expr,
         message,
         br(), br(),
         "Error details:", br(),
-        tags$code(HTML(rlang_error_to_html(as.character(e))))
+        tags$code(rlang_error_to_html(e))
       ), session = session, title = title)
       if (stopOperation) req(FALSE)
     }
