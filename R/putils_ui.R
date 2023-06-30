@@ -421,7 +421,7 @@ make_action_button <- function(tag, inputId = NULL) {
   # some obvious checks
   if (!inherits(tag, "shiny.tag")) stop("Must provide a shiny tag.")
   if (!is.null(tag$attribs$class)) {
-    if (grepl("action-button", tag$attribs$class)) {
+    if (any(grepl("action-button", tag$attribs$class))) {
       stop("tag is already an action button")
     }
   }
