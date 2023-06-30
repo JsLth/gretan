@@ -1,5 +1,8 @@
-tax <- function(...) {
-  make_action_button(div(..., class = "tax-elem"))
+tax <- function(..., type = NULL) {
+  if (!is.null(type)) {
+    type <- paste0("tax-", type)
+  }
+  tags$button(..., type = "button", class = c("tax-elem", type))
 }
 
 mod_taxonomy_ui <- function(id) {
@@ -31,47 +34,35 @@ mod_taxonomy_ui <- function(id) {
         )
       )
     ),
-    bs4Dash::box(
+    helpBox(
       title = "Taxonomy",
+      help_id = ns("taxHelp"),
       status = "primary",
       width = 12,
       div(
-        id = "taxonomy-container",
+        id = ns("taxonomy-container"),
         class = "tax-container",
-        tax("GRETA levels", class = "tax-header", id = "gretaLevels"),
-        div(style = "display: block; height: 2.5%"),
+        tax("GRETA levels", id = ns("greta-header"), type = "header"),
         div(
-          id = "levels-container",
+          id = ns("levels-container"),
           class = "tax-levels-container",
-          tax("Virtual", class = "tax-virtual", id = "gretaVirtual"),
-          tax(
-            "Local",
-            id = "gretaLocal",
-            class = "tax-levels",
-            style = "background-color: #EE3727; margin-top: -150px;"
-          ),
-          tax(
-            "Regional",
-            id = "gretaRegional",
-            class = "tax-levels",
-            style = "background-color: #E73E27; margin-top: 25px;"
-          ),
-          tax(
-            "National",
-            id = "gretaNational",
-            class = "tax-levels",
-            style = "background-color: #C33728; margin-top: 25px"
-          ),
-          tax(
-            "Supranational",
-            id = "gretaSupranational",
-            class = "tax-levels", 
-            style = "background-color: #972C24; margin-top: 25px"
-          )
+          tax("Virtual", class = "tax-virtual", id = ns("greta-virtual"), type = "level"),
+          tax("Local", class = "tax-local", id = ns("greta-local"), type = "level"),
+          tax("Regional", class = "tax-regional", id = ns("greta-regional"), type = "level"),
+          tax("National", class = "tax-national", id = ns("greta-national"), type = "level"),
+          tax("Supranational", class = "tax-supranational", id = ns("greta-supranational"), type = "level")
         ),
-        div("proximity domains"),
-        div("spatial"),
-        div("policy")
+        div(
+          id = ns("domains-container"),
+          class = "tax-domains-container",
+          tax("proximity domains", class = "tax-prox", id = ns("greta-prox"), type = "domain-sidebar"),
+          tax("spatial", class = "tax-spatial", id = ns("greta-spatial"), type = "domain"),
+          tax("policy", class = "tax-policy", id = ns("greta-policy"), type = "domain"),
+          tax("social", class = "tax-social", id = ns("greta-social"), type = "domain"),
+          tax("technological", class = "tax-tech", id = ns("greta-tech"), type = "domain"),
+          tax("economic", class = "tax-econ", id = ns("greta-econ"), type = "domain"),
+          tax("dimensions & indicators", class = "tax-dims", id = ns("greta-dims"), type = "domain-sidebar")
+        )
       )
     )
   )
@@ -81,46 +72,19 @@ mod_taxonomy_ui <- function(id) {
 mod_taxonomy_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     popover2(
-      "gretaLevels",
-      title = "GRETA levels",
-      content = "Content here"
+      id = "taxHelp",
+      title = "Explore GRETAs geo-taxonomy",
+      content = txts$taxonomy$help$scheme
     )
     
-    popover2(
-      "gretaVirtual",
-      title = "Virtual level",
-      content = "Content here"
-    )
-
-    popover2(
-      "gretaLocal",
-      title = "Local level",
-      content = "Content here"
-    )
-    
-    popover2(
-      "gretaRegional",
-      title = "Regional level",
-      content = "Content here"
-    )
-    
-    popover2(
-      "gretaNational",
-      title = "National level",
-      content = "Content here"
-    )
-    
-    popover2(
-      "gretaSupranational",
-      title = "Supranational level",
-      content = "Content here"
-    )
-    
-    bs4Dash::addTooltip(
-      "gretaLevels",
-      options = list(
-        title = "Click to learn more"
+    for (name in names(txts$taxonomy$scheme)) {
+      id <- paste0("greta-", name)
+      bs4Dash::addTooltip(id, options = list(title = "Click to learn more"))
+      popover2(
+        id = id,
+        title = txts$taxonomy$scheme[[name]]$title,
+        content = txts$taxonomy$scheme[[name]]$content
       )
-    )
+    }
   })
 }

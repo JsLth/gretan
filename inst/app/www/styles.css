@@ -163,58 +163,124 @@ a.logo {
   background: rgba(0, 0, 0, 0.1) !important;
 }
 
-
 /* geo taxonomy */
 .tax-container {
-  display: block;
+  display: grid;
+  grid-template-columns: 45% 5% 45%;
+  grid-template-rows: 20% 80%;
+  grid-template-areas: 
+    "header header header"
+    "levels . domains";
+  row-gap: 5%;
   margin-left: auto;
   margin-right: auto;
   position: relative;
   width: 80%;
-}
-
-.tax-header {
-  background: #1A1A1A;
-  color: white;
-  height: 4.15em;
-  width: 100%;
-  margin: auto;
-}
-    
-.tax-levels-container {
-  position: relative;
-  height: 700px;
-  width: 50%;
-  margin-top: 2.5%;
-}
-
-.tax-virtual {
-  transform: rotate(-90deg);
-  transform-origin: left top;
-  color: white;
-  background-color: #F26553;
-  position: absolute;
-  top: 100%;
-  width: 100%;
-  height: 15%;
-}
-
-.tax-levels {
-  color: white;
-  height: 3.13em;
-  width: 60%;
-  margin-left: 180px;
+  height: 100vh;
 }
 
 .tax-elem {
-  border-radius: 35px;
-  font-size: 3rem;
   display: flex;
   justify-content: center;
   align-items: center;
-  cursor: pointer;
+  border-style: none;
 }
 
 .tax-elem:hover {
   box-shadow: inset 0 0 0 1000px rgba(0, 0, 0, 0.2);
 }
+
+.tax-elem:focus {
+  outline: #FED22B;
+}
+
+.tax-header {
+  grid-area: header;
+  background: #1A1A1A;
+  color: white;
+  border-radius: 3vh;
+  font-size: 5vmin;
+}
+    
+.tax-levels-container {
+  grid-area: levels;
+  display: grid;
+  grid-template-columns: 25% 5% 70%;
+  grid-template-areas: 
+    "virtual . local"
+    "virtual . regio"
+    "virtual . natio"
+    "virtual . supra";
+  row-gap: 2%;
+  height: 70vh;
+}
+
+.tax-level {
+  color: white;
+  border-radius: 3vh;
+  font-size: 4vmin;
+}
+
+.tax-virtual {
+  grid-area: virtual;
+  transform: rotate(180deg);
+  writing-mode: vertical-lr;
+  background-color: #F26553;
+}
+
+.tax-local {
+  grid-area: local;
+  background-color: #EE3727;
+}
+
+.tax-regional {
+  grid-area: regio;
+  background-color: #E73E27;
+}
+
+.tax-national {
+  grid-area: natio;
+  background-color: #C33728;
+}
+
+.tax-supranational {
+  grid-area: supra;
+  background-color: #972C24;
+}
+
+.tax-domains-container {
+  grid-area: domains;
+  display: grid;
+  grid-template-columns: 15% 70% 15%;
+  grid-template-areas: 
+    "prox spat dims"
+    "prox poli dims"
+    "prox soci dims"
+    "prox tech dims"
+    "prox econ dims";
+  row-gap: 4%;
+  column-gap: 0%;
+  height: 70vh;
+}
+
+.tax-domain {
+  color: black;
+  background-color: #EEE4E5;
+  font-size: 2.5vmin;
+}
+
+.tax-domain-sidebar {
+  color: black;
+  background-color: #C8A1A2;
+  transform: rotate(180deg);
+  writing-mode: vertical-lr;
+  font-size: 3vmin;
+}
+
+.tax-prox    { grid-area: prox; }
+.tax-spatial { grid-area: spat; }
+.tax-policy  { grid-area: poli; }
+.tax-social  { grid-area: soci; }
+.tax-tech    { grid-area: tech; }
+.tax-econ    { grid-area: econ; }
+.tax-dims    { grid-area: dims; }
