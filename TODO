@@ -2,3 +2,15 @@
 - implement a data inspector (basically just a table)
 - add possibility to download transposed dataset
 - add all the contributions that are to come
+
+
+Packages to try:
+- shiny.worker: for large computations make Shiny more responsive
+
+
+
+Tabs to implement:
+- spain data
+- italy data
+- environmental attitudes
+- computational lit. review
