@@ -15,12 +15,8 @@ mod_cs4_ui <- function(id) {
   )
 }
 
-
-mod_cs4 <- function(input, output, session) {
-  
-}
-
-
-mod_cs4_server <- function(id) {
-  moduleServer(id, mod_cs4)
+mod_cs4_server <- function(id, tab) {
+  moduleServer(id, function(input, output, session) {
+    
+  })
 }

@@ -15,12 +15,8 @@ mod_cs3_ui <- function(id) {
   )
 }
 
-
-mod_cs3 <- function(input, output, session) {
-  
-}
-
-
-mod_cs3_server <- function(id) {
-  moduleServer(id, mod_cs3)
+mod_cs3_server <- function(id, tab) {
+  moduleServer(id, function(input, output, session) {
+    
+  })
 }

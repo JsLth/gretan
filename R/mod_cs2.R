@@ -16,11 +16,8 @@ mod_cs2_ui <- function(id) {
 }
 
 
-mod_cs2 <- function(input, output, session) {
-  
-}
-
-
-mod_cs2_server <- function(id) {
-  moduleServer(id, mod_cs2)
+mod_cs2_server <- function(id, tab) {
+  moduleServer(id, function(input, output, session) {
+    
+  })
 }
