@@ -136,6 +136,18 @@ a.logo {
   padding: 0em;
 }
 
+#main-cmp-right-explorer .card-header, #main-cmp-right-explorer .card-body {
+  padding: 0em;
+}
+
+#main-cmp-left-explorer .card-header, #main-cmp-left-explorer .card-body {
+  padding: 0em;
+}
+
+.tight-map-box {
+  padding: 0em !important;
+}
+
 .leaflet-box {
   padding: 0px !important;
 }
