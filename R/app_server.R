@@ -5,6 +5,8 @@ server <- function(input, output, session) {
     log_it("Shutting down app")
   })
   
+  tabsel <- reactive(input$sidebar)
+  
   # Capture search term
   searchbox_input <- reactive({
     search_input <- input$textSearch
@@ -116,5 +118,5 @@ server <- function(input, output, session) {
   }, priority = 0) %>%
     bindEvent(input$tour)
   
-  mod_main_server("main")
+  mod_main_server("main", tab = tabsel)
 }

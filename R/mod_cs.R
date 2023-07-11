@@ -9,15 +9,12 @@ mod_cs_ui <- function(id) {
   )
 }
 
-mod_cs <- function(input, output, session) {
-  mod_cs1_server("cs1")
-  mod_cs2_server("cs2")
-  mod_cs3_server("cs3")
-  mod_cs4_server("cs4")
-  mod_cs5_server("cs5")
-}
-
-
-mod_cs_server <- function(id) {
-  moduleServer(id, mod_cs)
+mod_cs_server <- function(id, tab) {
+  moduleServer(id, function(input, output, session) {
+    mod_cs1_server("cs1", tab = tab)
+    mod_cs2_server("cs2", tab = tab)
+    mod_cs3_server("cs3", tab = tab)
+    mod_cs4_server("cs4", tab = tab)
+    mod_cs5_server("cs5", tab = tab)
+  })
 }

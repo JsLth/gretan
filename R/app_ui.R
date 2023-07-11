@@ -162,27 +162,27 @@ app_ui <- function() {
           bs4Dash::menuItem(
             text = txts$cs1$title,
             icon = txts$cs1$icon,
-            tabName = "cs1"
+            tabName = "cs1italy"
           ),
           bs4Dash::menuItem(
             text = txts$cs2$title,
             icon = txts$cs2$icon,
-            tabName = "cs2"
+            tabName = "cs2portugal"
           ),
           bs4Dash::menuItem(
             text = txts$cs3$title,
             icon = txts$cs3$icon,
-            tabName = "cs3"
+            tabName = "cs3germany"
           ),
           bs4Dash::menuItem(
             text = txts$cs4$title,
             icon = txts$cs4$icon,
-            tabName = "cs4"
+            tabName = "cs4netherlands"
           ),
           bs4Dash::menuItem(
             text = txts$cs5$title,
             icon = txts$cs5$icon,
-            tabName = "cs5"
+            tabName = "cs5spain"
           )
         ),
         div(
