@@ -15,54 +15,54 @@ txts$taxonomy$help <- list(
 txts$taxonomy$scheme <- list(
   header = list(
     title = "GRETA levels",
-    content = "Content here"
+    content = shinipsum::random_text(nwords = 100)
   ),
   virtual = list(
     title = "Virtual level",
-    content = "Content here"
+    content = shinipsum::random_text(nwords = 100)
   ),
   local = list(
     title = "Local level",
-    content = "Content here"
+    content = shinipsum::random_text(nwords = 100)
   ),
   regional = list(
     title = "Regional level",
-    content = "Content here"
+    content = shinipsum::random_text(nwords = 100)
   ),
   national = list(
     title = "National level",
-    content = "Content here"
+    content = shinipsum::random_text(nwords = 100)
   ),
   supranational = list(
     title = "Supranational level",
-    content = "Content here"
+    content = shinipsum::random_text(nwords = 100)
   ),
   prox = list(
     title = "Proximity domains",
-    content = "Content here"
+    content = shinipsum::random_text(nwords = 100)
   ),
   spatial = list(
     title = "Spatial domain",
-    content = "Content here"
+    content = shinipsum::random_text(nwords = 100)
   ),
   policy = list(
     title = "Policy domain",
-    content = "Content here"
+    content = shinipsum::random_text(nwords = 100)
   ),
   social = list(
     title = "Social domain",
-    content = "Content here"
+    content = shinipsum::random_text(nwords = 100)
   ),
   tech = list(
     title = "Technological domain",
-    content = "Content here"
+    content = shinipsum::random_text(nwords = 100)
   ),
   econ = list(
     title = "Economic domain",
-    content = "Content here"
+    content = shinipsum::random_text(nwords = 100)
   ),
   dims = list(
     title = "Dimensions & indicators",
-    content = "Content here"
+    content = shinipsum::random_text(nwords = 100)
   )
 )
