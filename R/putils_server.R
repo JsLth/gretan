@@ -47,33 +47,6 @@ as_likert <- function(x, scale = NULL) {
   ordered(values, levels = scale)
 }
 
-make_html_label <- function(..., sep = " ", bold = TRUE) {
-  dots <- drop_nulls(list(...))
-  lhs <- names(dots)
-  labels <- mapply(
-    align_dl,
-    x = lhs,
-    y = dots,
-    char = sep,
-    bold = bold,
-    SIMPLIFY = FALSE
-  )
-  lapply(do.call(paste, labels), HTML)
-}
-
-html_align_at_char <- function(x, y, char = " ", bold = TRUE) {
-  div2 <- noWS(div)
-  span2 <- noWS(span)
-  mapply(FUN = function(x, y) {
-    if (bold) x <- tags$b(paste(x, ":"))
-    as.character(div(
-      class = "progress-ww",
-      div2(span2(x), char, span2(y))
-    ))
-  }, x = x, y = y, SIMPLIFY = FALSE, USE.NAMES = FALSE) %>%
-  unlist()
-}
-
 align_dl <- function(..., sep = " ", bold = TRUE) {
   dots <- drop_nulls(list(...))
   lhs <- names(dots)
