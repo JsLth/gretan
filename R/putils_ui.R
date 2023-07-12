@@ -36,6 +36,7 @@ leafletPanel <- function(inputId,
                          position = c("topleft", "topright", "bottomleft", "bottomright"),
                          width = 350,
                          collapsible = TRUE,
+                         draggable = TRUE,
                          top = NULL,
                          bottom = NULL,
                          right = NULL,
@@ -60,7 +61,7 @@ leafletPanel <- function(inputId,
     absolutePanel(
       width = width,
       class = "leaflet-info",
-      draggable = TRUE,
+      draggable = draggable,
       div(
         span(
           h5(title, style = "display: inline-block; margin: 0.2rem;"),
@@ -69,10 +70,15 @@ leafletPanel <- function(inputId,
               class = "card-tools float-right",
               tags$button(
                 class = "btn btn-tool btn-sm",
+                style = "margin-bottom: 0px;",
                 `data-toggle` = "collapse",
                 `data-target` = paste0("#", inputId),
                 type = "button",
-                tags$i(class = "fas fa-minus", role = "presentation", `aria-label` = "minus icon")
+                tags$i(
+                  class = "fas fa-minus",
+                  role = "presentation",
+                  `aria-label` = "minus icon"
+                )
               )
             )
         ),
@@ -90,6 +96,43 @@ leafletPanel <- function(inputId,
       bottom = gaps$bottom
     )
   )
+}
+
+
+groupRadioButtons <- function(widget,
+                                index,
+                                groups,
+                                type = c("default", "pretty", "awesome"),
+                                style = "margin-bottom: 10px; font-size: 16px; font-weight: bold;") {
+  if (length(style) != length(groups)) style <- rep(style, length(groups))
+  type <- match.arg(type)
+  if (type %in% c("default", "awesome")) {
+    for (i in seq_along(index)) {
+      idx <- index[i]
+      grp <- groups[i]
+      fidx <- ifelse(type %in% "default", 2, 3)
+      widget$children[[fidx]]$children[[1]][[idx]]$children <- append(
+        widget$children[[fidx]]$children[[1]][[idx]]$children,
+        tagList(div(grp, style = style[i])),
+        after = 0
+      )
+    }
+  } else if (type %in% "pretty") {
+    for (i in seq_along(index)) {
+      idx <- index[i]
+      grp <- groups[i]
+      sty <- style[i]
+      if (idx == 1) {
+        widget$children[[2]]$children[[1]]$children <- grp
+        widget$children[[2]]$children[[1]]$attribs$style <- sty
+      } else {
+        widget$children[[2]]$children[[2]][[idx - 1]][[2]]$children <- grp
+        widget$children[[2]]$children[[2]][[idx - 1]][[2]]$attribs$style <- sty
+      }
+    }
+  }
+  
+  widget
 }
 
 
@@ -262,6 +305,10 @@ corp_logo <- function(inst) {
     href = web[[inst]],
     img(src = sprintf("www/%s_logo.png", inst), style = "height: 1.3em")
   ))
+}
+
+invert <- function(x) {
+  setNames(names(x), unname(x))
 }
 
 pbib <- function(...) p(..., class = "bib")
