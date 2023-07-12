@@ -3,6 +3,7 @@ mod_cs1_ui <- function(id) {
   
   bs4Dash::tabItem(
     "cs1italy",
+    # Header ----
     make_header(
       title = "Case study 1: Reneweable energy district Pilastro-Roveri",
       authors = c("Prepared by: Author A", "Author B"),
@@ -15,6 +16,7 @@ mod_cs1_ui <- function(id) {
     fluidRow(
       bs4Dash::column(
         width = 6,
+        # Box 1 ----
         bs4Dash::box(
           title = "Renewable energy district",
           width = 12,
@@ -27,6 +29,7 @@ mod_cs1_ui <- function(id) {
           p2("Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis."),
           p2("At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, At accusam aliquyam diam diam dolore dolores duo eirmod eos erat, et nonumy sed tempor et et invidunt justo labore Stet clita ea et gubergren, kasd magna no rebum. sanctus sea sed takimata ut vero voluptua. est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur")
         ),
+        # Box 2 ----
         bs4Dash::box(
           title = "Text with a figure",
           width = 12,
@@ -41,6 +44,7 @@ mod_cs1_ui <- function(id) {
       ),
       bs4Dash::column(
         width = 6,
+        # Box 3 ----
         bs4Dash::box(
           title = "Another text",
           width = 12,
@@ -52,6 +56,7 @@ mod_cs1_ui <- function(id) {
     fluidRow(
       bs4Dash::column(
         width = 12,
+        # Buildings ----
         bs4Dash::tabBox(
           id = ns("map"),
           width = 12,
@@ -61,6 +66,7 @@ mod_cs1_ui <- function(id) {
           tabPanel(
             title = "Buildings",
             leaflet::leafletOutput(ns("buildings"), width = "100%", height = 800),
+            ## Info panel ----
             leafletPanel(
               ns("buildings-info"),
               title = with_literata("Buildings in Pilastro-Roveri"),
@@ -75,35 +81,100 @@ mod_cs1_ui <- function(id) {
               hr(),
               shiny::helpText(with_gothic("Data source: UNIBO, Tecnalia"))
             ),
+            ## Control panel ----
             leafletPanel(
               inputId = ns("buildings-control"),
               title = with_literata("Map control"),
               position = "topright",
+              top = 80,
+              right = 10,
               width = 200,
-              shinyWidgets::awesomeRadio(
-                inputId = ns("basemap"),
+              shinyWidgets::prettyRadioButtons(
+                inputId = ns("buildings_basemap"),
                 label = "Basemap",
                 choices = c("OpenStreetMap", "Satellite"),
                 selected = "OpenStreetMap"
               ),
-              shinyWidgets::awesomeRadio(
-                inputId = ns("blayer"),
+              shinyWidgets::prettyRadioButtons(
+                inputId = ns("buildings_layer"),
                 label = "Select layer",
-                choices = c(
-                  "Use" = "use",
-                  "Construction year" = "year_constr",
-                  "Property" = "property",
-                  "Electr. demand" = "electricity_demand_m2",
-                  "Heating demand" = "heating_demand_m2",
-                  "PV capacity" = "installed_pv_capacity_k_w"
-                ),
+                choices = invert(lapply(txts$cs1$dict$buildings, "[[", "title")),
                 selected = "use"
+              )
+            ),
+            ## Description panel ----
+            leafletPanel(
+              inputId = ns("buildings-desc"),
+              title = with_literata("Description"),
+              position = "bottomright",
+              width = 350,
+              top = 420,
+              right = 10,
+              with_gothic(
+                "This panel could be used as a means to showcase descriptions",
+                "of individual buildings or groups of buildings. Specifically,",
+                "the idea is to click on a building and then have a description",
+                "about either the building, the estate, the neighborhood",
+                "or similar pop up in this panel to give further context about",
+                "the role of it within the case study area.",
+                hr(),
+                tags$b("Example", style = "font-size: 13px;"),
+                "This building is located next to the Parco Pier Paolo Pasolini.",
+                "In 2019, residents have gathered in the park to lead a public",
+                "discussion about the decision of the municipality of Bologna",
+                "to extend PV coverage in the Pilastro area."
               )
             )
           ),
+          # Fragility ----
           tabPanel(
             title = "Fragility",
-            leaflet::leafletOutput(ns("fragility"), width = "100%", height = 800)
+            leaflet::leafletOutput(ns("fragility"), width = "100%", height = 800),
+            ## Info panel ----
+            leafletPanel(
+              inputId = ns("fragility-info"),
+              title = with_literata("Fragility in Pilastro-Roveri"),
+              position = "topleft",
+              with_gothic(
+                "This map depicts the fragility index in Pilastro-Roveri",
+                "consisting of a demographic, social and economic dimension.",
+                "On the right you can also select additional",
+                "indicators to learn more about the socio-economic divide",
+                "between the Pilastro and Roveri neighborhoods of Bologna."
+              ),
+              hr(),
+              shiny::helpText(with_gothic("Data source: UNIBO, Tecnalia"))
+            ),
+            ## Control panel ----
+            leafletPanel(
+              inputId = ns("fragility-control"),
+              title = with_literata("Map control"),
+              position = "topright",
+              top = 80,
+              right = 10,
+              width = 300,
+              groupRadioButtons(
+                shinyWidgets::prettyRadioButtons(
+                  inputId = ns("fragility_layer"),
+                  label = "",
+                  choices = invert(lapply(txts$cs1$dict$fragility, "[[", "title")),
+                  selected = "frag_compl"
+                ),
+                index = c(1, 16),
+                groups = list(
+                  tagList(
+                    tags$b("Social indicators"),
+                    br()
+                  ),
+                  tagList(
+                    hr(),
+                    tags$b("Fragility indices"),
+                    br()
+                  )
+                ),
+                type = "pretty"
+              )
+            )
           )
         )
       )
@@ -114,52 +185,50 @@ mod_cs1_ui <- function(id) {
 
 mod_cs1_server <- function(id, tab) {
   moduleServer(id, function(input, output, session) {
-    dict <- list(
-      use = list(title = "Use", lab = ""),
-      year_constr = list(title = "Construction year", lab = ""),
-      property = list(title = "Property", lab = ""),
-      electricity_demand_m2 = list(title = "Electricity demand", lab = " kWh/m\u00b2"),
-      heating_demand_m2 = list(title = "Heating demand", lab = " kWh/m\u00b2"),
-      installed_pv_capacity_k_w = list(title = "Installed PV capacity", lab = " kW")
-    )
-    
-    w_cs1 <- waiter::Waiter$new(
+    # Waiter setup ----
+    bwaiter <- waiter::Waiter$new(
       id = session$ns("buildings"),
       html = tagList(waiter::spin_pulse(), h4("Loading figure...")),
-      color = "rgba(179, 221, 254, 0.8)"
+      color = "rgba(179, 221, 254, 1)"
     )
+    fwaiter <- waiter::Waiter$new(
+      id = session$ns("fragility"),
+      html = tagList(waiter::spin_pulse(), h4("Loading figure...")),
+      color = "rgba(179, 221, 254, 1)"
+    )
+    
+    # Data reading ----
     buildings <- reactive({
-      if (identical(tab(), "cs1italy"))
-        sf::read_sf(app_sys("db/cs1italy.gpkg"), layer = "buildings")
-      
+      sf::read_sf(app_sys("db/cs1italy.gpkg"), layer = "buildings")
     })
     
     fragility <- reactive({
-      if (identical(tab(), "cs1italy")) {
-        sf::read_sf(app_sys("db/cs1italy.gpkg"), layer = "fragility")
-      }
+      sf::read_sf(app_sys("db/cs1italy.gpkg"), layer = "fragility")
     })
 
-    blabels <- reactiveVal()
-    
-    bparams <- reactive({
-      dt <- isolate(buildings())
-      labels <- isolate(blabels())
-      layer <- input$blayer
+    # Buildings ----
+    blabels <- NULL
 
-      if (is.null(blabels())) {
-        lab_values <- as.list(sf::st_drop_geometry(dt[c(
-          "use", "year_constr", "property", "electricity_demand_m2",
-          "heating_demand", "installed_pv_capacity_k_w"
-        )])) %>%
-          setNames(sapply(dict, "[[", "title")) %>%
+    ## Parameters ----
+    bparams <- reactive({
+      req(identical(tab(), "cs1italy"))
+      dt <- isolate(buildings())
+      layer <- input$buildings_layer
+
+      # Only create labels once and then save them to the server module for
+      # re-use
+      if (is.null(blabels)) {
+        lab_values <- dt[names(txts$cs1$dict$buildings)] %>%
+          sf::st_drop_geometry() %>%
+          as.list() %>%
+          setNames(sapply(txts$cs1$dict$buildings, "[[", "title")) %>%
           lapply(\(x) if (is.numeric(x)) round(x, 2) else x)
         lab_values$`Electricity demand` <- paste(lab_values$`Electricity demand`, "kWh/m\u00b2")
         lab_values$`Heating demand` <- paste(lab_values$`Heating demand`, "kWh/m\u00b2")
         lab_values$`Installed PV capacity` <- paste(lab_values$`Installed PV capacity`, "kW")
-        blabels(do.call(align_dl, lab_values))
+        blabels <<- do.call(align_dl, lab_values)
       }
-      
+
       pal <- switch(layer,
         use = leaflet::colorFactor(
           palette = c(
@@ -190,17 +259,16 @@ mod_cs1_server <- function(id, tab) {
         )
       )
       
-      list(data = dt, layer = layer, palette = pal, labels = isolate(blabels()))
+      list(data = dt, layer = layer, pal = pal, labels = blabels)
     })
     
+    ## Render ----
     output$buildings <- leaflet::renderLeaflet({
-      w_cs1$show()
+      params <- isolate(bparams())
       
-      params <- bparams()
-      
-      m <- leaflet::leaflet() %>%
+      leaflet::leaflet() %>%
         leaflet::setView(lng = 11.399926, lat = 44.507145, zoom = 15) %>%
-        leaflet::addTiles() %>%
+        leaflet::addProviderTiles(leaflet::providers$OpenStreetMap) %>%
         leaflet::addPolygons(
           data = sf::st_transform(params$data, 4326),
           fillColor = as.formula(paste0("~params$pal(", params$layer, ")")),
@@ -220,13 +288,172 @@ mod_cs1_server <- function(id, tab) {
         ) %>%
         leaflet::addLegend(
           position = "bottomleft",
-          pal = params$palette,
-          title = dict[[params$layer]]$title,
+          pal = params$pal,
+          title = txts$cs1$dict$buildings[[params$layer]]$title,
           values = params$data[[params$layer]],
-          labFormat = leaflet::labelFormat(suffix = dict[[params$layer]]$lab)
+          labFormat = leaflet::labelFormat(
+            suffix = txts$cs1$dict$buildings[[params$layer]]$lab
+          )
         )
-      w_cs1$hide()
-      m
     })
+    
+    ## Select layer ----
+    updates <- 0
+    
+    observe({
+      # Only show loading screen on first two updates
+      # First one on startup
+      # Second one when loading the tab item
+      if (updates < 2) {
+        bwaiter$show()
+        updates <<- updates + 1
+        on.exit(bwaiter$hide())
+      }
+
+      params <- bparams()
+      
+      leaflet::leafletProxy("buildings") %>%
+        leaflet::clearShapes() %>%
+        leaflet::clearControls() %>%
+        leaflet::addPolygons(
+          data = sf::st_transform(params$data, 4326),
+          fillColor = as.formula(paste0("~params$pal(", params$layer, ")")),
+          fillOpacity = 1,
+          color = "black",
+          opacity = 1,
+          weight = 1,
+          highlightOptions = leaflet::highlightOptions(
+            weight = 2,
+            stroke = TRUE,
+            opacity = 1,
+            bringToFront = TRUE,
+            sendToBack = TRUE,
+            fillOpacity = 1
+          ),
+          label = params$labels
+        ) %>%
+        leaflet::addLegend(
+          position = "bottomleft",
+          pal = params$pal,
+          title = txts$cs1$dict$buildings[[params$layer]]$title,
+          values = params$data[[params$layer]],
+          labFormat = leaflet::labelFormat(
+            suffix = txts$cs1$dict$buildings[[params$layer]]$lab
+          )
+        )
+    })
+    
+    ## Basemap ----
+    observe({
+      basemap <- switch(input$buildings_basemap,
+        "OpenStreetMap" = leaflet::providers$OpenStreetMap,
+        "Satellite" = leaflet::providers$Esri.WorldImagery
+      )
+      
+      leaflet::leafletProxy("buildings") %>%
+        leaflet::clearTiles() %>%
+        leaflet::addProviderTiles(basemap)
+    })
+    
+    
+    # Fragility ----
+    flabels <- NULL
+    
+    ## Parameters ----
+    fparams <- reactive({
+      req(identical(tab(), "cs1italy"))
+      dt <- isolate(fragility())
+      layer <- input$fragility_layer
+      
+      pal <- leaflet::colorBin(
+        palette = viridis::viridis(5),
+        domain = dt[[layer]],
+        na.color = NA
+      )
+      
+      list(data = dt, layer = layer, palette = pal)
+    })
+    
+    ## Render ----
+    output$fragility <- leaflet::renderLeaflet({
+      params <- isolate(fparams())
+
+      leaflet::leaflet() %>%
+        leaflet::setView(lng = 11.399926, lat = 44.507145, zoom = 15) %>%
+        leaflet::addProviderTiles(leaflet::providers$OpenStreetMap) %>%
+        leaflet::addPolygons(
+          data = sf::st_transform(params$data, 4326),
+          fillColor = as.formula(paste0("~params$pal(", params$layer, ")")),
+          fillOpacity = 0.7,
+          color = "black",
+          opacity = 1,
+          weight = 1,
+          highlightOptions = leaflet::highlightOptions(
+            weight = 2,
+            stroke = TRUE,
+            opacity = 1,
+            bringToFront = TRUE,
+            sendToBack = TRUE,
+            fillOpacity = 1
+          ),
+          label = params$labels
+        ) %>%
+        leaflet::addLegend(
+          position = "bottomleft",
+          pal = params$pal,
+          title = txts$cs1$dict$fragility[[params$layer]]$title,
+          values = params$data[[params$layer]],
+          labFormat = leaflet::labelFormat(
+            suffix = txts$cs1$dict$fragility[[params$layer]]$lab
+          )
+        )
+      })
+      
+      ## Select layer ----
+      fupdates <- 0
+      
+      observe({
+        # Only show loading screen on first two updates
+        # First one on startup
+        # Second one when loading the tab item
+        if (fupdates < 2) {
+          fwaiter$show()
+          fupdates <<- fupdates + 1
+          on.exit(fwaiter$hide())
+        }
+        
+        params <- fparams()
+        
+        leaflet::leafletProxy("fragility") %>%
+          leaflet::clearShapes() %>%
+          leaflet::clearControls() %>%
+          leaflet::addPolygons(
+            data = sf::st_transform(params$data, 4326),
+            fillColor = as.formula(paste0("~params$pal(", params$layer, ")")),
+            fillOpacity = 0.7,
+            color = "black",
+            opacity = 1,
+            weight = 1,
+            highlightOptions = leaflet::highlightOptions(
+              weight = 2,
+              stroke = TRUE,
+              opacity = 1,
+              bringToFront = TRUE,
+              sendToBack = TRUE,
+              fillOpacity = 1
+            ),
+            label = params$labels
+          ) %>%
+          leaflet::addLegend(
+            position = "bottomleft",
+            na.label = "N/A",
+            pal = params$palette,
+            title = txts$cs1$dict$buildings[[params$layer]]$title,
+            values = params$data[[params$layer]],
+            labFormat = leaflet::labelFormat(
+              suffix = txts$cs1$dict$buildings[[params$layer]]$lab
+            )
+          )
+      })
   })
 }
