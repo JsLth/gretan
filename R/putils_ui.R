@@ -29,8 +29,76 @@ helpBox <- function(..., help_id = NULL, tabBox = FALSE) {
   bx
 }
 
+
+leafletPanel <- function(inputId,
+                         ...,
+                         title = NULL,
+                         position = c("topleft", "topright", "bottomleft", "bottomright"),
+                         width = 350,
+                         collapsible = TRUE,
+                         top = NULL,
+                         bottom = NULL,
+                         right = NULL,
+                         left = NULL) {
+  if (any(!vapply(list(top, bottom, right, left), is.null, logical(1)))) {
+    gaps <- list(left = left, right = right, top = top, bottom = bottom)
+  } else {
+    if (position %in% "topleft") {
+      gaps <- list(left = 10, right = NULL, top = 150, bottom = NULL)
+    } else if (position %in% "topright") {
+      gaps <- list(left = NULL, right = 10, top = 150, bottom = NULL)
+    } else if (position %in% "bottomleft") {
+      gaps <- list(left = 10, right = NULL, top = NULL, bottom = 150)
+    } else {
+      gaps <- list(left = NULL, right = 10, top = NULL, bottom = 150)
+    }
+  }
+
+  
+  div(
+    class = paste0("leaflet-", position),
+    absolutePanel(
+      width = width,
+      class = "leaflet-info",
+      draggable = TRUE,
+      div(
+        span(
+          h5(title, style = "display: inline-block; margin: 0.2rem;"),
+          if (collapsible)
+            div(
+              class = "card-tools float-right",
+              tags$button(
+                class = "btn btn-tool btn-sm",
+                `data-toggle` = "collapse",
+                `data-target` = paste0("#", inputId),
+                type = "button",
+                tags$i(class = "fas fa-minus", role = "presentation", `aria-label` = "minus icon")
+              )
+            )
+        ),
+        class = "leaflet-info-header"
+      ),
+      div(
+        id = inputId,
+        class = if (collapsible) "collapse show",
+        ...,
+        class = "leaflet-info-body"
+      ),
+      left = gaps$left,
+      top = gaps$top,
+      right = gaps$right,
+      bottom = gaps$bottom
+    )
+  )
+}
+
+
 with_literata <- function(x, ...) {
   p(x, style = "font-family: Literata; margin-bottom: 0px;", ...)
+}
+
+with_gothic <- function(x, ...) {
+  p(x, style = "font-family: Tablet Gothic", ...)
 }
 
 #' Columns wrappers
@@ -147,18 +215,6 @@ make_header <- function(title,
     h6(HTML(paste(affil, collapse = "; ")), class = "affil"),
     align = "center"
   )
-}
-
-
-# bs4Dash::dashboardHeader, but sidebar toggle has an ID
-dashboardHeader2 <- function(...) {
-  html <- bs4Dash::dashboardHeader(...)
-  html[[1]]$
-    children[[1]]$
-    children[[1]]$
-    children[[1]]$
-    attribs[["id"]] <- "sidebarToggle"
-  html
 }
 
 
