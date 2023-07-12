@@ -42,26 +42,69 @@ mod_cs1_ui <- function(id) {
       bs4Dash::column(
         width = 6,
         bs4Dash::box(
-          title = "Case study map",
-          width = 12,
-          status = "primary",
-          class = "tight-map-box",
-          leaflet::leafletOutput(ns("map"), width = "100%", height = 450)
-        ),
-        bs4Dash::box(
-          title = "",
-          width = 12,
-          status = "primary",
-          solidHeader = FALSE,
-          headerBorder = FALSE,
-          collapsible = FALSE,
-          uiOutput(ns("poi"), style = "padding-bottom: -10px; padding-top: -20px;")
-        ),
-        bs4Dash::box(
           title = "Another text",
           width = 12,
           status = "primary",
           p2(shinipsum::random_text(nwords = 700))
+        )
+      )
+    ),
+    fluidRow(
+      bs4Dash::column(
+        width = 12,
+        bs4Dash::tabBox(
+          id = ns("map"),
+          width = 12,
+          status = "primary",
+          type = "tabs",
+          maximizable = TRUE,
+          tabPanel(
+            title = "Buildings",
+            leaflet::leafletOutput(ns("buildings"), width = "100%", height = 800),
+            leafletPanel(
+              ns("buildings-info"),
+              title = with_literata("Buildings in Pilastro-Roveri"),
+              position = "topleft",
+              with_gothic(
+                "This map is an overview of the buildings in the Pilastro-Roveri",
+                "area of Bologna. Hover over individual buildings to learn more",
+                "about their energy-related properties. Using the controls on",
+                "right side of the map you can also change the basemap and select",
+                "an energy-related layer."
+              ),
+              hr(),
+              shiny::helpText(with_gothic("Data source: UNIBO, Tecnalia"))
+            ),
+            leafletPanel(
+              inputId = ns("buildings-control"),
+              title = with_literata("Map control"),
+              position = "topright",
+              width = 200,
+              shinyWidgets::awesomeRadio(
+                inputId = ns("basemap"),
+                label = "Basemap",
+                choices = c("OpenStreetMap", "Satellite"),
+                selected = "OpenStreetMap"
+              ),
+              shinyWidgets::awesomeRadio(
+                inputId = ns("blayer"),
+                label = "Select layer",
+                choices = c(
+                  "Use" = "use",
+                  "Construction year" = "year_constr",
+                  "Property" = "property",
+                  "Electr. demand" = "electricity_demand_m2",
+                  "Heating demand" = "heating_demand_m2",
+                  "PV capacity" = "installed_pv_capacity_k_w"
+                ),
+                selected = "use"
+              )
+            )
+          ),
+          tabPanel(
+            title = "Fragility",
+            leaflet::leafletOutput(ns("fragility"), width = "100%", height = 800)
+          )
         )
       )
     )
@@ -71,199 +114,117 @@ mod_cs1_ui <- function(id) {
 
 mod_cs1_server <- function(id, tab) {
   moduleServer(id, function(input, output, session) {
+    dict <- list(
+      use = list(title = "Use", lab = ""),
+      year_constr = list(title = "Construction year", lab = ""),
+      property = list(title = "Property", lab = ""),
+      electricity_demand_m2 = list(title = "Electricity demand", lab = " kWh/m\u00b2"),
+      heating_demand_m2 = list(title = "Heating demand", lab = " kWh/m\u00b2"),
+      installed_pv_capacity_k_w = list(title = "Installed PV capacity", lab = " kW")
+    )
+    
     w_cs1 <- waiter::Waiter$new(
-      id = session$ns("map"),
+      id = session$ns("buildings"),
       html = tagList(waiter::spin_pulse(), h4("Loading figure...")),
       color = "rgba(179, 221, 254, 0.8)"
     )
-    cs1_data <- reactive({
+    buildings <- reactive({
       if (identical(tab(), "cs1italy"))
-        list(
-          buildings = sf::read_sf(app_sys("db/cs1italy.gpkg"), layer = "buildings"),
-          quarters = sf::read_sf(app_sys("db/cs1italy.gpkg"), layer = "quarters"),
-          zones = sf::read_sf(app_sys("db/cs1italy.gpkg"), layer = "zones"),
-          areas = sf::read_sf(app_sys("db/cs1italy.gpkg"), layer = "areas")
-        )
+        sf::read_sf(app_sys("db/cs1italy.gpkg"), layer = "buildings")
       
     })
     
-    output$map <- leaflet::renderLeaflet({
+    fragility <- reactive({
+      if (identical(tab(), "cs1italy")) {
+        sf::read_sf(app_sys("db/cs1italy.gpkg"), layer = "fragility")
+      }
+    })
+
+    blabels <- reactiveVal()
+    
+    bparams <- reactive({
+      dt <- isolate(buildings())
+      labels <- isolate(blabels())
+      layer <- input$blayer
+
+      if (is.null(blabels())) {
+        lab_values <- as.list(sf::st_drop_geometry(dt[c(
+          "use", "year_constr", "property", "electricity_demand_m2",
+          "heating_demand", "installed_pv_capacity_k_w"
+        )])) %>%
+          setNames(sapply(dict, "[[", "title")) %>%
+          lapply(\(x) if (is.numeric(x)) round(x, 2) else x)
+        lab_values$`Electricity demand` <- paste(lab_values$`Electricity demand`, "kWh/m\u00b2")
+        lab_values$`Heating demand` <- paste(lab_values$`Heating demand`, "kWh/m\u00b2")
+        lab_values$`Installed PV capacity` <- paste(lab_values$`Installed PV capacity`, "kW")
+        blabels(do.call(align_dl, lab_values))
+      }
+      
+      pal <- switch(layer,
+        use = leaflet::colorFactor(
+          palette = c(
+            "#AA0DFE", "#3283FE", "#85660D", "#782AB6", "#565656", "#1C8356", 
+            "#16FF32", "#F7E1A0", "#E2E2E2", "#1CBE4F", "#C4451C", "#DEA0FD", 
+            "#FE00FA", "#325A9B", "#FEAF16", "#F8A19F", "#90AD1C"),
+          domain = dt$use
+        ),
+        year_constr = leaflet::colorBin(
+          palette = "Greens",
+          domain = dt$year_constr
+        ),
+        property = leaflet::colorFactor(
+          palette = c("#ECECEC", "#e627c6", "#1E24CE", "#DB9A77"),
+          domain = dt$property
+        ),
+        electricity_demand_m2 = leaflet::colorNumeric(
+          palette = "Reds",
+          domain = dt$electricity_demand_m2
+        ),
+        heating_demand_m2 = leaflet::colorNumeric(
+          palette = "Blues",
+          domain = dt$heating_demand_m2
+        ),
+        installed_pv_capacity_k_w = leaflet::colorNumeric(
+          palette = "Purples",
+          domain = dt$installed_pv_capacity_k_w
+        )
+      )
+      
+      list(data = dt, layer = layer, palette = pal, labels = isolate(blabels()))
+    })
+    
+    output$buildings <- leaflet::renderLeaflet({
       w_cs1$show()
       
-      dt <- cs1_data()
-      dt$buildings$property <- ifelse(
-        is.na(dt$buildings$property),
-        "Private",
-        dt$buildings$property
-      )
-      pal_use <- leaflet::colorFactor(
-        palette = c(
-          "#AA0DFE", "#3283FE", "#85660D", "#782AB6", "#565656", "#1C8356", 
-          "#16FF32", "#F7E1A0", "#E2E2E2", "#1CBE4F", "#C4451C", "#DEA0FD", 
-          "#FE00FA", "#325A9B", "#FEAF16", "#F8A19F", "#90AD1C"),
-        domain = dt$buildings$use
-      )
-      pal_year <- leaflet::colorBin(
-        palette = "RdYlBu",
-        domain = dt$buildings$year_constr
-      )
-      pal_property <- leaflet::colorFactor(
-        palette = c("#ECECEC", "#e627c6", "#1E24CE", "#DB9A77"),
-        domain = dt$buildings$property
-      )
-      pal_elec <- leaflet::colorNumeric(
-        palette = c("#FCFCFC", "#99EB1D", "#FFF315", "#FC7D14", "#E01114"),
-        domain = dt$buildings$electricity_demand_m2
-      )
-      pal_heat <- leaflet::colorNumeric(
-        palette = c("#FCFCFC", "#99EB1D", "#FFF315", "#FC7D14", "#E01114"),
-        domain = dt$buildings$heating_demand
-      )
-      pal_pv <- leaflet::colorNumeric(
-        palette = "RdYlBu",
-        domain = dt$buildings$installed_pv_capacity_k_w
-      )
+      params <- bparams()
       
-      lab_values <- as.list(sf::st_drop_geometry(dt$buildings[c(
-        "use", "year_constr", "property", "electricity_demand_m2",
-        "heating_demand", "installed_pv_capacity_k_w"
-      )])) %>%
-        setNames(c(
-          "Use", "Construction year", "Property", "Electricity demand",
-          "Heating demand", "Installed PV capacity"
-        )) %>%
-        lapply(\(x) if (is.numeric(x)) round(x, 2))
-      lab_values$electricity_demand_kw <- paste(lab_values$electricity_demand_kw, "kWh/m\u00b2")
-      lab_values$heating_demand_kw <- paste(lab_values$heating_demand_kw, "kWh/m\u00b2")
-      lab_values$installed_pv_capacity_k_w <- paste(lab_values$installed_pv_capacity_k_w, "kW")
-      labels <- do.call(align_dl, lab_values)
-
       m <- leaflet::leaflet() %>%
-        leaflet::setView(lng = 11.399926, lat = 44.507145, zoom = 13) %>%
-        leaflet::addProviderTiles("HERE.satelliteDay", group = "Satellite") %>%
-        leaflet::addProviderTiles("CartoDB.PositronOnlyLabels", group = "Satellite") %>%
-        leaflet::addProviderTiles("OpenStreetMap", group = "OpenStreetMap") %>%
+        leaflet::setView(lng = 11.399926, lat = 44.507145, zoom = 15) %>%
+        leaflet::addTiles() %>%
         leaflet::addPolygons(
-          data = sf::st_transform(dt$buildings, 4326),
-          fillColor = ~pal_use(use),
+          data = sf::st_transform(params$data, 4326),
+          fillColor = as.formula(paste0("~params$pal(", params$layer, ")")),
           fillOpacity = 1,
           color = "black",
           opacity = 1,
           weight = 1,
-          highlightOptions = highlight_opts,
-          label = labels,
-          group = "Use"
+          highlightOptions = leaflet::highlightOptions(
+            weight = 2,
+            stroke = TRUE,
+            opacity = 1,
+            bringToFront = TRUE,
+            sendToBack = TRUE,
+            fillOpacity = 1
+          ),
+          label = params$labels
         ) %>%
         leaflet::addLegend(
           position = "bottomleft",
-          pal = pal_use,
-          title = "Use",
-          values = dt$buildings$use,
-          group = "Use"
-        ) %>%
-        leaflet::addPolygons(
-          data = sf::st_transform(dt$buildings, 4326),
-          fillColor = ~pal_year(year_constr),
-          fillOpacity = 1,
-          color = "black",
-          opacity = 1,
-          weight = 1,
-          highlightOptions = highlight_opts,
-          label = labels,
-          group = "Construction year"
-        ) %>%
-        leaflet::addLegend(
-          position = "bottomleft",
-          pal = pal_year,
-          values = dt$buildings$year_constr,
-          title = "Construction year",
-          group = "Construction year"
-        ) %>%
-        leaflet::addPolygons(
-          data = sf::st_transform(dt$buildings, 4326),
-          fillColor = ~pal_property(property),
-          fillOpacity = 1,
-          color = "black",
-          opacity = 1,
-          weight = 1,
-          highlightOptions = highlight_opts,
-          label = labels,
-          group = "Property"
-        ) %>%
-        leaflet::addLegend(
-          position = "bottomleft",
-          pal = pal_property,
-          values = dt$buildings$property,
-          title = "Property",
-          group = "Property"
-        ) %>%
-        leaflet::addPolygons(
-          data = sf::st_transform(dt$buildings, 4326),
-          fillColor = ~pal_elec(electricity_demand_m2),
-          fillOpacity = 1,
-          color = "black",
-          opacity = 1,
-          weight = 1,
-          highlightOptions = highlight_opts,
-          label = labels,
-          group = "Electricity demand"
-        ) %>%
-        leaflet::addLegend(
-          position = "bottomleft",
-          pal = pal_elec,
-          values = dt$buildings$electricity_demand_m2,
-          labFormat = leaflet::labelFormat(suffix = "kWh / m\u00b2"),
-          title = "Electricity demand",
-          group = "Electricity demand"
-        ) %>%
-        leaflet::addPolygons(
-          data = sf::st_transform(dt$buildings, 4326),
-          fillColor = ~pal_heat(heating_demand_m2),
-          fillOpacity = 1,
-          color = "black",
-          opacity = 1,
-          weight = 1,
-          highlightOptions = highlight_opts,
-          label = labels,
-          group = "Heating demand"
-        ) %>%
-        leaflet::addLegend(
-          position = "bottomleft",
-          pal = pal_heat,
-          values = dt$buildings$heating_demand_m2,
-          labFormat = leaflet::labelFormat(suffix = "kWh / m\u00b2"),
-          title = "Heating demand",
-          group = "Heating demand"
-        ) %>%
-        leaflet::addPolygons(
-          data = sf::st_transform(dt$buildings, 4326),
-          fillColor = ~pal_pv(installed_pv_capacity_k_w),
-          fillOpacity = 1,
-          color = "black",
-          opacity = 1,
-          weight = 1,
-          highlightOptions = highlight_opts,
-          label = labels,
-          group = "PV capacity"
-        ) %>%
-        leaflet::addLegend(
-          position = "bottomleft",
-          pal = pal_pv,
-          values = dt$buildings$installed_pv_capacity_k_w,
-          labFormat = leaflet::labelFormat(suffix = "kW"),
-          title = "Installed PV capacity",
-          group = "PV capacity"
-        ) %>%
-        leaflet::addLayersControl(
-          baseGroups = c("OpenStreetMap", "Satellite", "<hr>", "Use", "Construction year", "Property",
-                         "Electricity demand", "Heating demand",
-                         "PV capacity"),
-          options = leaflet::layersControlOptions(collapsed = FALSE, sortLayers = FALSE)
-        ) %>%
-        leaflet::hideGroup(c("Construction year", "Property",
-                             "Electricity demand", "Heating demand",
-                             "PV capacity"))
-      
+          pal = params$palette,
+          title = dict[[params$layer]]$title,
+          values = params$data[[params$layer]],
+          labFormat = leaflet::labelFormat(suffix = dict[[params$layer]]$lab)
+        )
       w_cs1$hide()
       m
     })

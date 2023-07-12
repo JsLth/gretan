@@ -144,6 +144,10 @@ a.logo {
   padding: 0em;
 }
 
+#main-cs-cs1-map_box .card-header, #main-cs-cs1-map_box .card-body {
+  padding: 0em;
+}
+
 .tight-map-box {
   padding: 0em !important;
 }
@@ -155,6 +159,88 @@ a.logo {
 /* If not using map tiles, show a white background */
 .leaflet-container {
   background-color: white !important;
+}
+
+.leaflet-control-proxy {
+  border: 2px solid rgba(0, 0, 0, 0.2);
+  background-clip: padding-box !important;
+  box-shadow: none;
+  padding: 6px 10px 6px 6px;
+  color: #333;
+  background: #FFF;
+  border-radius: 5px;
+  cursor: auto;
+  clear: both;
+  position: relative;
+  z-index: 800;
+  pointer-events: auto;
+  font: 12px/1.5 "Helvetica Neue", Arial, Helvetica, sans-serif;
+}
+
+.leaflet-topright {
+  margin-right: 10px;
+  margin-top: 10px;
+  float: right;
+}
+
+.leaflet-topleft {
+  margin-left: 10px;
+  margin-top: 10px;
+  float: left;
+}
+
+.leaflet-bottomright {
+  margin-right: 10px;
+  margin-bottom: 10px;
+  float: right;
+}
+
+.leaflet-bottomleft {
+  margin-left: 10px;
+  margin-bottom: 10px;
+  float: left;
+}
+
+.leaflet-info {
+  position: absolute;
+  z-index: 2000 !important;
+  display: block;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1.5;
+  text-align: left;
+  text-align: start;
+  text-decoration: none;
+  text-shadow: none;
+  text-transform: none;
+  letter-spacing: normal;
+  word-break: normal;
+  word-spacing: normal;
+  white-space: normal;
+  line-break: auto;
+  font-size: .875rem;
+  word-wrap: break-word;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 1px solid rgba(0,0,0,.2);
+  border-radius: .3rem;
+  box-shadow: 0 .25rem .5rem rgba(0,0,0,.2);
+}
+
+.leaflet-info-body {
+  padding: .5rem .75rem;
+  background-color: #fff;
+}
+
+.leaflet-info-header {
+  padding: .5rem .75rem;
+  margin-bottom: 0;
+  font-size: 1rem;
+  color: inherit;
+  background-color: #f7f7f7;
+  border-bottom: 1px solid #ebebeb;
+  border-top-left-radius: calc(.3rem - 1px);
+  border-top-right-radius: calc(.3rem - 1px)
 }
 
 /* DT custom download buttons */
