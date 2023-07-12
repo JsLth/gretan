@@ -19,6 +19,7 @@ mod_home_ui <- function(id) {
           title = with_literata("Geographical overview"),
           width = 12,
           status = "primary",
+          class = "tight-map-box",
           leaflet::leafletOutput(ns("map"), width = "100%", height = 450)
         ),
         bs4Dash::box(
