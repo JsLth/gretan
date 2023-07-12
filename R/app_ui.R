@@ -42,7 +42,7 @@ app_ui <- function() {
   
   # UI assembly ----
   ui <- bs4Dash::dashboardPage(
-    dashboardHeader2(
+    bs4Dash::dashboardHeader(
       tags$style("
       /* color sidebar button in black */
       .fa-bars {
@@ -223,6 +223,7 @@ app_ui <- function() {
     freshTheme = greta_theme,
     dark = NULL,
     preloader = preloader,
+    help = NULL,
     options = list(sidebarSlimScroll = TRUE)
   )
 }
