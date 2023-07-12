@@ -24,7 +24,8 @@ Imports:
     plotly,
     shinipsum,
     spdep,
-    cicerone
+    cicerone,
+    handlr
 Suggests: 
     spelling,
     testthat (>= 3.0.0),
