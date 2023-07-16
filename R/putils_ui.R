@@ -62,6 +62,7 @@ leafletPanel <- function(inputId,
       width = width,
       class = "leaflet-info",
       draggable = draggable,
+      id = inputId,
       div(
         span(
           h5(title, style = "display: inline-block; margin: 0.2rem;"),
@@ -85,7 +86,6 @@ leafletPanel <- function(inputId,
         class = "leaflet-info-header"
       ),
       div(
-        id = inputId,
         class = if (collapsible) "collapse show",
         ...,
         class = "leaflet-info-body"
@@ -100,28 +100,24 @@ leafletPanel <- function(inputId,
 
 
 groupRadioButtons <- function(widget,
-                                index,
-                                groups,
-                                type = c("default", "pretty", "awesome"),
-                                style = "margin-bottom: 10px; font-size: 16px; font-weight: bold;") {
-  if (length(style) != length(groups)) style <- rep(style, length(groups))
+                              index,
+                              groups,
+                              type = c("default", "pretty", "awesome"),
+                              style = "margin-bottom: 10px; font-size: 16px; font-weight: bold;") {
+  stopifnot("shiny.tag" %in% class(widget))
+  stopifnot(is.numeric(index))
   type <- match.arg(type)
-  if (type %in% c("default", "awesome")) {
-    for (i in seq_along(index)) {
-      idx <- index[i]
-      grp <- groups[i]
-      fidx <- ifelse(type %in% "default", 2, 3)
-      widget$children[[fidx]]$children[[1]][[idx]]$children <- append(
-        widget$children[[fidx]]$children[[1]][[idx]]$children,
-        tagList(div(grp, style = style[i])),
-        after = 0
-      )
-    }
-  } else if (type %in% "pretty") {
-    for (i in seq_along(index)) {
-      idx <- index[i]
-      grp <- groups[i]
-      sty <- style[i]
+  if (length(style) != length(groups)) style <- rep(style, length(groups))
+  is_awesome <- type %in% "awesome"
+  is_pretty <- type %in% "pretty"
+
+  for (i in seq_along(index)) {
+    idx <- index[i]
+    grp <- groups[i]
+    sty <- style[i]
+    fidx <- ifelse(is_awesome, 3, 2)
+    
+    if (is_pretty) {
       if (idx == 1) {
         widget$children[[2]]$children[[1]]$children <- grp
         widget$children[[2]]$children[[1]]$attribs$style <- sty
@@ -129,6 +125,12 @@ groupRadioButtons <- function(widget,
         widget$children[[2]]$children[[2]][[idx - 1]][[2]]$children <- grp
         widget$children[[2]]$children[[2]][[idx - 1]][[2]]$attribs$style <- sty
       }
+    } else {
+      widget$children[[fidx]]$children[[1]][[idx]]$children <- append(
+        widget$children[[fidx]]$children[[1]][[idx]]$children,
+        tagList(div(grp, style = style[i])),
+        after = 0
+      )
     }
   }
   

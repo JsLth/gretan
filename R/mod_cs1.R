@@ -124,7 +124,12 @@ mod_cs1_ui <- function(id) {
                 "discussion about the decision of the municipality of Bologna",
                 "to extend PV coverage in the Pilastro area."
               )
-            )
+            ),
+            # bring leaflet panels to front when selected
+            tags$script(HTML("$('.leaflet-info').on('mousedown', function() {
+              $('.leaflet-info-front').removeClass('leaflet-info-front');
+              $(this).addClass('leaflet-info-front');
+            });"))
           ),
           # Fragility ----
           tabPanel(
@@ -357,7 +362,6 @@ mod_cs1_server <- function(id, tab) {
     
     
     # Fragility ----
-    flabels <- NULL
     
     ## Parameters ----
     fparams <- reactive({
@@ -365,13 +369,23 @@ mod_cs1_server <- function(id, tab) {
       dt <- isolate(fragility())
       layer <- input$fragility_layer
       
+      lab_values <- dt[c("area_stati", "nomezona", layer)] %>%
+        sf::st_drop_geometry() %>%
+        as.list() %>%
+        setNames(c("Area", "Zone", txts$cs1$dict$fragility[[layer]]$title)) %>%
+        {
+          .[[3]] <- paste(round(.[[3]], 2), txts$cs1$dict$fragility[[layer]]$lab)
+          .
+        }
+      labels <- do.call(align_dl, lab_values)
+      
       pal <- leaflet::colorBin(
         palette = viridis::viridis(5),
         domain = dt[[layer]],
         na.color = NA
       )
       
-      list(data = dt, layer = layer, palette = pal)
+      list(data = dt, layer = layer, palette = pal, labels = labels)
     })
     
     ## Render ----
@@ -388,6 +402,7 @@ mod_cs1_server <- function(id, tab) {
           color = "black",
           opacity = 1,
           weight = 1,
+          label = params$labels,
           highlightOptions = leaflet::highlightOptions(
             weight = 2,
             stroke = TRUE,
@@ -395,8 +410,7 @@ mod_cs1_server <- function(id, tab) {
             bringToFront = TRUE,
             sendToBack = TRUE,
             fillOpacity = 1
-          ),
-          label = params$labels
+          )
         ) %>%
         leaflet::addLegend(
           position = "bottomleft",
@@ -434,6 +448,7 @@ mod_cs1_server <- function(id, tab) {
             color = "black",
             opacity = 1,
             weight = 1,
+            label = params$labels,
             highlightOptions = leaflet::highlightOptions(
               weight = 2,
               stroke = TRUE,
@@ -441,8 +456,7 @@ mod_cs1_server <- function(id, tab) {
               bringToFront = TRUE,
               sendToBack = TRUE,
               fillOpacity = 1
-            ),
-            label = params$labels
+            )
           ) %>%
           leaflet::addLegend(
             position = "bottomleft",

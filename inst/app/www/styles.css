@@ -203,7 +203,6 @@ a.logo {
 
 .leaflet-info {
   position: absolute;
-  z-index: 2000 !important;
   display: block;
   font-style: normal;
   font-weight: 400;
@@ -241,6 +240,10 @@ a.logo {
   border-bottom: 1px solid #ebebeb;
   border-top-left-radius: calc(.3rem - 1px);
   border-top-right-radius: calc(.3rem - 1px)
+}
+
+.leaflet-info-front {
+  z-index: 100;
 }
 
 /* DT custom download buttons */
