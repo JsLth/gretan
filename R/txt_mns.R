@@ -21,8 +21,8 @@ txts$exp$help <- list(
     <b>Color palette:</b> Changes the appearance of the data explorer.
     <br>
     <b>Legend values:</b> Changes the calibration of the legend. To compare
-    variables, choose “Full range”, to compare regions, choose
-    “Full contrast”.
+    variables, choose \u201cFull range\u201d, to compare regions, choose
+    \u201cFull contrast\u201d.
     <br>
     <b>Aggregate options:</b> Whether to show options seperately as percentages
     or show the most common response option for a topic."

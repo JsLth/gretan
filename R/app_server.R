@@ -102,7 +102,7 @@ server <- function(input, output, session) {
     )$step(
       el = "mnsHighlight",
       title = "Multinational survey",
-      description = "The subsection “Multinational survey” allows you to explore the results of GRETA's survey conducted among citizens in 16 EU countries.",
+      description = "The subsection \u201cMultinational survey\u201d allows you to explore the results of GRETA's survey conducted among citizens in 16 EU countries.",
       position = "right"
     )$step(
       el = "csHighlight",

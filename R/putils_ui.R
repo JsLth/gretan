@@ -197,6 +197,11 @@ col_1 <- function(...) {
   bs4Dash::column(1, ...)
 }
 
+
+#' Converts a shiny.tag object to unformatted raw text
+#' 
+#' @param x A shiny.tag, shiny.tag.list or list
+#' @param ... Passed to or from other methods
 #' @export
 tag_to_text <- function(x, ...) {
   UseMethod("tag_to_text")
@@ -204,22 +209,31 @@ tag_to_text <- function(x, ...) {
 
 #' @export
 tag_to_text.default <- function(x, ...) {
-  as.character(x, ...)
+  if (!is.null(x) && !length(intersect(class(x), c("html_dependency")))) {
+    as.character(x, ...)
+  } else {
+    ""
+  }
 }
 
 #' @export
 tag_to_text.shiny.tag <- function(x, ...) {
-  paste(x$children, collapse = "\n", ...)
-}
-
-#' @export
-tag_to_text.shiny.tag.list <- function(x, ...) {
-  paste(lapply(x, tag_to_text, ...), collapse = "\n")
+  if (identical(class(x), "html_dependency")) return("")
+  if (x$name %in% c("script", "head", "meta", "style")) return("")
+  x <- x$children
+  
+  if (!length(x)) {
+    ""
+  } else {
+    text <- lapply(x, tag_to_text)
+    text <- text[!vapply(text, is.null, logical(1))]
+    trimws(paste(text, collapse = "\n"))
+  }
 }
 
 #' @export
 tag_to_text.list <- function(x, ...) {
-  tag_to_text(unlist(x), ...)
+  trimws(paste(lapply(x, tag_to_text, ...), collapse = "\n"))
 }
 
 

@@ -8,12 +8,15 @@
 #' }
 #' 
 #' @param ... Arguments passed on to \code{\link[shiny]{shinyApp}}
-#' @param log Whether to enable logging using the reactlog package.
+#' @param log Whether to activate print logging.
+#' @param reactlog Whether to enable logging using the reactlog package.
 #' For debugging purposes.
 #'
 #' @export
 #' @import shiny
-#' @importFrom magrittr %>%
+#' @importFrom leaflet %>%
+#' @importFrom stats lm fitted setNames
+#' @importFrom utils stack write.csv
 run_app <- function(..., log = NULL, reactlog = FALSE) {
   if (reactlog) {
     if (!requireNamespace("reactlog")) {
@@ -22,8 +25,12 @@ run_app <- function(..., log = NULL, reactlog = FALSE) {
     reactlog::reactlog_enable()
   }
   
+  oldopt <- getOption("shiny.autoload.r")
+  options(shiny.autoload.r = FALSE)
+  on.exit(options(shiny.autoload.r = oldopt))
+  
   with_logging({
-    shinyApp(ui = app_ui, server = server)
+    shinyApp(ui = app_ui, server = server, ...)
   }, value = log)
 }
 

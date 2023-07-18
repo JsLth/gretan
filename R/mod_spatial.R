@@ -304,7 +304,7 @@ mod_spatial <- function(input, output, session) {
         x = lag,
         y = ~total_amount,
         text = ~sprintf(
-          "Spatial lag: %s m<br>Total amount: %s €<br>Municipality: %s",
+          "Spatial lag: %s m<br>Total amount: %s \u20ac<br>Municipality: %s",
           round(lag), total_amount, name
         ),
         marker = list(width = 2, color = "black"),
@@ -340,7 +340,7 @@ mod_spatial <- function(input, output, session) {
             x = lag,
             y = coopernico$total_amount,
             text = sprintf(
-              "Spatial lag: %s m<br>Total amount: %s€<br>Municipality: %s",
+              "Spatial lag: %s m<br>Total amount: %s\u20ac<br>Municipality: %s",
               round(lag), coopernico$total_amount, coopernico$name
             ),
             marker = list(width = 2, color = "black"),
