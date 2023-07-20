@@ -108,7 +108,7 @@ txts$cs1$case_study <- tagList(
 )
 
 txts$cs1$desc <- list(
-  use = HTML("The <b>Use</b>layer shows the main use of each building. 17 uses are displayed
+  use = HTML("The <b>Use</b> layer shows the main use of each building. 17 uses are displayed
     on the map, but only 10 of them are considered in the energy demand model:
     residential and commercial areas, education, hospital, hotel, single family
     house, office, public admin, restaurant, and sport. The rest of the uses are
@@ -116,14 +116,14 @@ txts$cs1$desc <- list(
   year_constr = HTML("The <b>construction year</b> layer shows the construction year of each building. In
     this way it is possible to see the development of the city by zones in the
     different periods."),
-  property = HTML("The <>property</b> layer shows the ownership type of the buildings."),
+  property = HTML("The <b>property</b> layer shows the ownership type of the buildings."),
   electricity_demand_m2 = HTML("The <b>electricity demand</b> layer shows the electricity demand of the
-    buildings calculated in the Enerkad Tool simulation. Some of the building
+    buildings calculated in the ENERKAD\u00ae Tool simulation. Some of the building
     uses (See \u201cUse\u201d layer description) are excluded from the
     simulation and show a 0 value."),
   heat_demand_m2 = HTML("The <b>heating demand</b> layer shows the heat demand of the buildings, which
     includes the needs for heating and domestic hot water, calculated in the
-    Enerkad Tool simulation. Some of the building uses (See \u201cUse\u201d
+    ENERKAD\u00ae Tool simulation. Some of the building uses (See \u201cUse\u201d
     layer description) are excluded from the simulation and show a 0 value."),
   installed_pv_capacity_k_w = HTML("The <b>PV capacity</b> layer shows the installed PV capacity in
     each building if existing. Most of the existing installations are located
