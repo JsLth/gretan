@@ -125,7 +125,7 @@ mod_income <- function(input, output, session) {
     
     if (isTRUE(input$tempref)) {
       p <- p +
-        ggplot2::geom_function(fun = dnorm, args = list(mean = 0, sd = 1), color = "green")
+        ggplot2::geom_function(fun = stats::dnorm, args = list(mean = 0, sd = 1), color = "green")
     }
     
     plotly::config(plotly::ggplotly(p), displayModeBar = FALSE)

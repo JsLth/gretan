@@ -152,47 +152,38 @@ with_gothic <- function(x, ...) {
 #' `column(12, ...)`, `column(6, ...)`, `column(4, ...)`...
 #'
 #' @noRd
-#'
-#' @importFrom shiny column
 col_12 <- function(...) {
   bs4Dash::column(12, ...)
 }
 
-#' @importFrom shiny column
 col_10 <- function(...) {
   bs4Dash::column(10, ...)
 }
 
-#' @importFrom shiny column
 col_8 <- function(...) {
   bs4Dash::column(8, ...)
 }
 
-#' @importFrom shiny column
 col_6 <- function(...) {
   bs4Dash::column(6, ...)
 }
 
 
-#' @importFrom shiny column
 col_4 <- function(...) {
   bs4Dash::column(4, ...)
 }
 
 
-#' @importFrom shiny column
 col_3 <- function(...) {
   bs4Dash::column(3, ...)
 }
 
 
-#' @importFrom shiny column
 col_2 <- function(...) {
   bs4Dash::column(2, ...)
 }
 
 
-#' @importFrom shiny column
 col_1 <- function(...) {
   bs4Dash::column(1, ...)
 }
@@ -324,7 +315,7 @@ corp_logo <- function(inst) {
 }
 
 invert <- function(x) {
-  setNames(names(x), unname(x))
+  stats::setNames(names(x), unname(x))
 }
 
 pbib <- function(...) p(..., class = "bib")
@@ -383,7 +374,6 @@ list_palettes <- function(type = NULL) {
 #'
 #' @examples
 #' list_to_li(c("a", "b"))
-#' @importFrom shiny tags tagAppendAttributes tagList
 list_to_li <- function(list, class = NULL) {
   if (is.null(class)) {
     tagList(
@@ -419,8 +409,6 @@ list_to_li <- function(list, class = NULL) {
 #'
 #' @examples
 #' list_to_p(c("This is the first paragraph", "this is the second paragraph"))
-#' @importFrom shiny tags tagAppendAttributes tagList
-#'
 list_to_p <- function(list, class = NULL) {
   if (is.null(class)) {
     tagList(
@@ -447,7 +435,6 @@ list_to_p <- function(list, class = NULL) {
   }
 }
 
-#' @importFrom shiny tags tagAppendAttributes tagList
 named_to_li <- function(list, class = NULL) {
   if (is.null(class)) {
     res <- mapply(
@@ -500,7 +487,6 @@ named_to_li <- function(list, class = NULL) {
 #'
 #' @examples
 #' rep_br(5)
-#' @importFrom shiny HTML
 rep_br <- function(times = 1) {
   HTML(rep("<br/>", times = times))
 }
@@ -573,40 +559,3 @@ make_action_button <- function(tag, inputId = NULL) {
   # return tag
   tag
 }
-
-
-# UNCOMMENT AND USE
-#
-# attachment::att_amend_desc()
-#
-# To use this part of the UI
-#
-#' #' Include Content From a File
-#' #'
-#' #' Load rendered RMarkdown from a file and turn into HTML.
-#' #'
-#' #' @rdname includeRMarkdown
-#' #' @export
-#' #'
-#' #' @importFrom rmarkdown render
-#' #' @importFrom markdown markdownToHTML
-#' #' @importFrom shiny HTML
-#' includeRMarkdown <- function(path){
-#'
-#'   md <- tempfile(fileext = '.md')
-#'
-#'   on.exit(unlink(md),add = TRUE)
-#'
-#'   rmarkdown::render(
-#'     path,
-#'     output_format = 'md_document',
-#'     output_dir = tempdir(),
-#'     output_file = md,quiet = TRUE
-#'     )
-#'
-#'   html <- markdown::markdownToHTML(md, fragment.only = TRUE)
-#'
-#'   Encoding(html) <- "UTF-8"
-#'
-#'   return(HTML(html))
-#' }

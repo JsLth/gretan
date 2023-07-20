@@ -63,7 +63,7 @@ get_mns_params <- function(invar, fixed, palette, aggr) {
   is_likert <- cb_entry$is_likert
   
   domain <- NULL
-  values <- as.formula(paste0("~", invar))
+  values <- stats::as.formula(paste0("~", invar))
   
   if (identical(invar, "c1")) {
     lgd <- "Mean age"
@@ -141,7 +141,7 @@ map_mns <- function(params, track = FALSE) {
     leaflet::addTiles() %>%
     leaflet::setView(lng = 9, lat = 55, zoom = 4) %>%
     leaflet::addPolygons(
-      fillColor = as.formula(paste0("~params$pal(", params$invar, ")")),
+      fillColor = stats::as.formula(paste0("~params$pal(", params$invar, ")")),
       fillOpacity = 0.7,
       weight = 1,
       color = "black",
@@ -173,7 +173,7 @@ update_mns_map <- function(id, params, session = getDefaultReactiveDomain()) {
     leaflet::clearShapes() %>%
     leaflet::clearControls() %>%
     leaflet::addPolygons(
-      fillColor = as.formula(paste0("~params$pal(", params$invar, ")")),
+      fillColor = stats::as.formula(paste0("~params$pal(", params$invar, ")")),
       fillOpacity = 0.7,
       weight = 1,
       color = "black",
@@ -236,7 +236,7 @@ mns_pivot_longer <- function(df) {
   df <- sf::st_drop_geometry(df)
   do_stack <- intersect(names(df), cb_ext$variable[-1])
   dont_stack <- setdiff(names(df), do_stack)
-  pivot <- stack(df, select = do_stack)[2:1]
+  pivot <- utils::stack(df, select = do_stack)[2:1]
   entries <- merge(
     pivot,
     cb_ext[c("variable", "og_var", "question", "subitem", "option",

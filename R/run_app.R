@@ -15,8 +15,6 @@
 #' @export
 #' @import shiny
 #' @importFrom leaflet %>%
-#' @importFrom stats lm fitted setNames
-#' @importFrom utils stack write.csv
 run_app <- function(..., log = NULL, reactlog = FALSE) {
   if (reactlog) {
     if (!requireNamespace("reactlog")) {

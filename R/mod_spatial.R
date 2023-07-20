@@ -295,7 +295,7 @@ mod_spatial <- function(input, output, session) {
     p <- plotly::plot_ly(coopernico, type = "scatter", mode = "markers") %>%
       plotly::add_trace(
         x = lag,
-        y = ~fitted(lm(total_amount ~ lag)),
+        y = ~stats::fitted(stats::lm(total_amount ~ lag)),
         line = list(dash = "dash", color = "darkred", width = 4),
         showlegend = F,
         mode = "lines"
@@ -331,7 +331,7 @@ mod_spatial <- function(input, output, session) {
         list(
           list(
             x = lag,
-            y = fitted(lm(coopernico$total_amount ~ lag)),
+            y = stats::fitted(stats::lm(coopernico$total_amount ~ lag)),
             line = list(dash = "dash", color = "darkred", width = 4),
             showlegend = F,
             mode = "lines"
