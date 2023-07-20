@@ -5,7 +5,7 @@
 \alias{run_greta}
 \title{Run the "greta" Shiny Application}
 \usage{
-run_app(..., log = FALSE)
+run_app(..., log = NULL, reactlog = FALSE)
 
 run_greta(...)
 }
