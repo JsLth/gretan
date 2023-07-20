@@ -1,4 +1,7 @@
-server <- function(input, output, session) {
+#' @export
+#' @keywords internal
+#' @rdname mod_base
+app_server <- function(input, output, session) {
   log_it("Starting app")
   
   onSessionEnded(fun = function() {

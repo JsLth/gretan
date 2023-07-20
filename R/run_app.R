@@ -23,7 +23,7 @@ run_app <- function(..., log = NULL, reactlog = FALSE) {
   }
   
   with_logging({
-    shinyApp(ui = app_ui, server = server)
+    shinyApp(ui = app_ui, server = app_server)
   }, value = log)
 }
 
