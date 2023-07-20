@@ -30,7 +30,7 @@ run_app <- function(..., log = NULL, reactlog = FALSE) {
   on.exit(options(shiny.autoload.r = oldopt))
   
   with_logging({
-    shinyApp(ui = app_ui, server = server, ...)
+    shinyApp(ui = app_ui, server = app_server, ...)
   }, value = log)
 }
 

@@ -18,38 +18,20 @@ mod_cs1_ui <- function(id) {
         width = 6,
         # Box 1 ----
         bs4Dash::box(
-          title = "Renewable energy district",
+          title = "Energy modelling",
           width = 12,
           status = "primary",
-          p2("Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet."),
-          p2("Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi. Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat."),
-          p2("Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat. Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi."),
-          h2("Subtitle"),
-          p2("Nam liber tempor cum soluta nobis eleifend option congue nihil imperdiet doming id quod mazim placerat facer possim assum. Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat."),
-          p2("Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis."),
-          p2("At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, At accusam aliquyam diam diam dolore dolores duo eirmod eos erat, et nonumy sed tempor et et invidunt justo labore Stet clita ea et gubergren, kasd magna no rebum. sanctus sea sed takimata ut vero voluptua. est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur")
-        ),
-        # Box 2 ----
-        bs4Dash::box(
-          title = "Text with a figure",
-          width = 12,
-          status = "primary",
-          p2(shinipsum::random_text(nwords = 150)),
-          img(
-            src = "https://projectgreta.eu/wp-content/uploads/2021/08/GRETA_3_KUVITUS_Valkotausta-1024x724.png",
-            style = "width: 100%;"
-          ),
-          p(HTML("<b>Fig. 1:</b> An example figure"))
+          txts$cs1$energy_model
         )
       ),
       bs4Dash::column(
         width = 6,
-        # Box 3 ----
+        # Box 2 ----
         bs4Dash::box(
-          title = "Another text",
+          title = "Case study",
           width = 12,
           status = "primary",
-          p2(shinipsum::random_text(nwords = 700))
+          txts$cs1$case_study
         )
       )
     ),
@@ -71,13 +53,14 @@ mod_cs1_ui <- function(id) {
               ns("buildings-info"),
               title = with_literata("Buildings in Pilastro-Roveri"),
               position = "topleft",
-              with_gothic(
-                "This map is an overview of the buildings in the Pilastro-Roveri",
-                "area of Bologna. Hover over individual buildings to learn more",
+              p(
+                "This map presents the energy models for buildings in",
+                "Pilastro-Roveri. Hover over individual buildings to learn more",
                 "about their energy-related properties. Using the controls on",
-                "right side of the map you can also change the basemap and select",
-                "an energy-related layer."
+                "the right side of the map you can also switch between layers"
               ),
+              hr(),
+              htmlOutput(ns("buildings-info-layer-desc")),
               hr(),
               shiny::helpText(with_gothic("Data source: UNIBO, Tecnalia"))
             ),
@@ -212,6 +195,14 @@ mod_cs1_server <- function(id, tab) {
     })
 
     # Buildings ----
+    output[["buildings-info-layer-desc"]] <- renderUI({
+      layer <- input$buildings_layer
+      tagList(
+        p(tags$b("Selected layer:"), txts$cs1$dict$buildings[[layer]]$title),
+        p(txts$cs1$desc[[layer]])
+      )
+    })
+    
     blabels <- NULL
 
     ## Parameters ----

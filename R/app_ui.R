@@ -1,47 +1,77 @@
 # Create global list to store UI texts to prevent spamming code files
 txts <- list()
 
-app_ui <- function() {
+app_ui <- function(theme = NULL,
+                   preloader = NULL,
+                   options = NULL,
+                   sidebar_fixed = FALSE,
+                   header_fixed = FALSE,
+                   minified = TRUE,
+                   controlbar = NULL,
+                   footer = NULL) {
   all_pals <- list_palettes()
   
-  # source: agendahelsinki.tailored.css
-  greta_theme <- fresh::create_theme(
-    fresh::bs4dash_status(
-      primary = "#FED22B",
-      secondary = "#F4F4F2",
-      info = "#B3DDFE",
-      danger = "#BF616A",
-      dark = "#F4F4F2"
-    ),
-    fresh::bs4dash_layout(main_bg = "#FDFDFD", sidebar_width = "350px"),
-    fresh::bs4dash_sidebar_light(bg = "#F4F4F2", color = "#000"),
-    fresh::bs4dash_color(
-      white = "#FDFDFD",
-      black = "#000",
-      gray_600 = "#CFCFCF",
-      gray_800 = "#B4B4B4",
-      gray_900 = "#000",
-      red = "#C1120E",
-      purple = "#3F1354",
-      yellow = "#FFFD37",
-      blue = "#002562",
-      teal = "#00767E"
-    ),
-    fresh::bs4dash_font(
-      family_sans_serif = "Tablet Gothic",
-      family_base = "Tablet Gothic"
+  if (!is.null(theme)) {
+    # source: agendahelsinki.tailored.css
+    theme <- fresh::create_theme(
+      fresh::bs4dash_status(
+        primary = "#FED22B",
+        secondary = "#F4F4F2",
+        info = "#B3DDFE",
+        danger = "#BF616A",
+        dark = "#F4F4F2"
+      ),
+      fresh::bs4dash_layout(main_bg = "#FDFDFD", sidebar_width = "350px"),
+      fresh::bs4dash_sidebar_light(bg = "#F4F4F2", color = "#000"),
+      fresh::bs4dash_color(
+        white = "#FDFDFD",
+        black = "#000",
+        gray_600 = "#CFCFCF",
+        gray_800 = "#B4B4B4",
+        gray_900 = "#000",
+        red = "#C1120E",
+        purple = "#3F1354",
+        yellow = "#FFFD37",
+        blue = "#002562",
+        teal = "#00767E"
+      ),
+      fresh::bs4dash_font(
+        family_sans_serif = "Tablet Gothic",
+        family_base = "Tablet Gothic"
+      )
     )
-  )
+  }
+
   
   # Configure loading screen
-  preloader <- list(
-    html = tagList(waiter::spin_6(), "Loading ..."),
-    color = "#B3DDFE"
-  )
+  if (is.null(preloader)) {
+    preloader <- list(
+      html = tagList(waiter::spin_6(), "Loading ..."),
+      color = "#B3DDFE"
+    )
+  }
   
   
   # UI assembly ----
-  ui <- bs4Dash::dashboardPage(
+  #' @title GRETA Shiny base module
+  #' @description Create the UI and server function of the GRETA Shiny app.
+  #' 
+  #' @param theme Fresh theme to apply to the UI
+  #' @param preloader Preloader to run when the UI is loading
+  #' @param options Further AdminLTE options, see \code{\link[bs4Dash]{dashboardPage}}
+  #' @param sidebar_fixed Whether to fix the sidebar to the screen
+  #' @param header_fixed Whether to fix the header to the screen
+  #' @param minifed Whether to minify the sidebar when collapsed
+  #' @param controlbar UI to add to the controlbar, see \code{\link[bs4Dash]{dashboardControlbar}}
+  #' @param footer UI to add to the footer, see \code{\link[bs4Dash]{dashboardFooter}}
+  #' @param input internal
+  #' @param output internal
+  #' @param session internal
+  #' 
+  #' @keywords internal
+  #' @rdname mod_base
+  #' @export
+  bs4Dash::dashboardPage(
     bs4Dash::dashboardHeader(
       tags$style("
       /* color sidebar button in black */
@@ -220,10 +250,10 @@ app_ui <- function() {
       add_external_resources(),
       mod_main_ui("main")
     ),
-    freshTheme = greta_theme,
+    freshTheme = theme,
     dark = NULL,
     preloader = preloader,
-    help = NULL,
+    help = FALSE,
     options = list(sidebarSlimScroll = TRUE)
   )
 }

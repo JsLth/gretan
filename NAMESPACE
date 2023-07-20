@@ -3,6 +3,8 @@
 S3method(tag_to_text,default)
 S3method(tag_to_text,list)
 S3method(tag_to_text,shiny.tag)
+export(app_server)
+export(app_ui)
 export(run_app)
 export(run_greta)
 export(tag_to_text)
