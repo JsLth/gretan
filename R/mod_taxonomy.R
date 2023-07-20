@@ -46,22 +46,83 @@ mod_taxonomy_ui <- function(id) {
         div(
           id = ns("levels-container"),
           class = "tax-levels-container",
-          tax(p("Virtual", style = "writing-mode: vertical-lr;"), class = "tax-virtual", id = ns("greta-virtual"), type = "level"),
-          tax("Local", class = "tax-local", id = ns("greta-local"), type = "level"),
-          tax("Regional", class = "tax-regional", id = ns("greta-regional"), type = "level"),
-          tax("National", class = "tax-national", id = ns("greta-national"), type = "level"),
-          tax("Supranational", class = "tax-supranational", id = ns("greta-supranational"), type = "level")
+          tax(
+            p("Virtual", style = "writing-mode: vertical-lr;"),
+            class = "tax-virtual",
+            id = ns("greta-virtual"),
+            type = "level"
+          ),
+          tax(
+            "Local",
+            class = "tax-local",
+            id = ns("greta-local"),
+            type = "level"
+          ),
+          tax(
+            "Regional",
+            class = "tax-regional",
+            id = ns("greta-regional"),
+            type = "level"
+          ),
+          tax(
+            "National",
+            class = "tax-national",
+            id = ns("greta-national"),
+            type = "level"
+          ),
+          tax(
+            "Supranational",
+            class = "tax-supranational",
+            id = ns("greta-supranational"),
+            type = "level"
+          )
         ),
         div(
           id = ns("domains-container"),
           class = "tax-domains-container",
-          tax(p("proximity domains", style = "writing-mode: vertical-lr;"), class = "tax-prox", id = ns("greta-prox"), type = "domain-sidebar"),
-          tax("spatial", class = "tax-spatial", id = ns("greta-spatial"), type = "domain"),
-          tax("policy", class = "tax-policy", id = ns("greta-policy"), type = "domain"),
-          tax("social", class = "tax-social", id = ns("greta-social"), type = "domain"),
-          tax("technological", class = "tax-tech", id = ns("greta-tech"), type = "domain"),
-          tax("economic", class = "tax-econ", id = ns("greta-econ"), type = "domain"),
-          tax(p("dimensions & indicators", style = "writing-mode: vertical-lr;"), class = "tax-dims", id = ns("greta-dims"), type = "domain-sidebar")
+          tax(
+            p("proximity domains",
+              style = "writing-mode: vertical-lr;"),
+            class = "tax-prox",
+            id = ns("greta-prox"),
+            type = "domain-sidebar"
+          ),
+          tax(
+            "spatial",
+            class = "tax-spatial",
+            id = ns("greta-spatial"),
+            type = "domain"
+          ),
+          tax(
+            "policy",
+            class = "tax-policy",
+            id = ns("greta-policy"),
+            type = "domain"
+          ),
+          tax(
+            "social",
+            class = "tax-social",
+            id = ns("greta-social"),
+            type = "domain"
+          ),
+          tax(
+            "technological",
+            class = "tax-tech",
+            id = ns("greta-tech"),
+            type = "domain"
+          ),
+          tax(
+            "economic",
+            class = "tax-econ",
+            id = ns("greta-econ"),
+            type = "domain"
+          ),
+          tax(
+            p("dimensions & indicators", style = "writing-mode: vertical-lr;"),
+            class = "tax-dims",
+            id = ns("greta-dims"),
+            type = "domain-sidebar"
+          )
         )
       )
     )
