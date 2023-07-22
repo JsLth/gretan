@@ -135,16 +135,9 @@ txts$cs1$desc <- list(
 txts$cs1$bibliography <- read_ris(app_sys("app/bib/cs1.ris"))
 
 txts$cs1 <- reference(txts$cs1, txts$cs1$bibliography)
-txts$cs1$bibliography <- do.call(
-  with_html(tags$ul),
-  c(
-    unname(lapply(
-      as_bib(txts$cs1$bibliography[attr(txts$cs1, "ref")]),
-      with_html(pbib)
-    )),
-    class = "list-style: none",
-    style = "margin-left: -30px;"
-  )
+txts$cs1$bibliography <- format(
+  as_bib(txts$cs1$bibliography[attr(txts$cs1, "ref")]),
+  html = TRUE
 )
 
 

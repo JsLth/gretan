@@ -398,6 +398,9 @@ dummy_bibliography <- function() {
 }
 
 
+pbib <- function(...) p(..., class = "bib")
+
+
 ris_fields <- list(
   TY = "type",
   ID = "id",
