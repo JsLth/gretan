@@ -189,6 +189,11 @@ col_1 <- function(...) {
 }
 
 
+match_regex <- function(string, pattern, perl = FALSE, fixed = FALSE) {
+  regmatches(string, regexec(pattern, string, perl = perl, fixed = fixed))
+}
+
+
 #' Converts a shiny.tag object to unformatted raw text
 #' 
 #' @param x A shiny.tag, shiny.tag.list or list
@@ -268,33 +273,6 @@ make_header <- function(title,
 }
 
 
-dummy_bibliography <- function() {
-  tags$ul(
-    class = "list-style: none",
-    style = "margin-left: -30px",
-    pbib("Bollinger, B., & Gillingham, K. (2012). Peer Effects in the Diffusion of
-      Solar Photovoltaic Panels. Marketing Science, 31(6), 900\u2013912.
-      https://doi.org/10.1287/mksc.1120.0727"),
-    pbib("Boschma, R. (2005). Proximity and Innovation: A Critical Assessment.
-      Regional Studies, 39(1), 61\u201374.
-      https://doi.org/10.1080/0034340052000320887"),
-    pbib("Bouzarovski, S., & Simcock, N. (2017). Spatializing energy justice.
-      Energy Policy, 107, 640\u2013648.
-      https://doi.org/10.1016/j.enpol.2017.03.064"),
-    pbib("Bridge, G., Bouzarovski, S., Bradshaw, M., & Eyre, N. (2013). Geographies
-      of energy transition: Space, place and the low-carbon economy. Energy
-      Policy, 53, 331\u2013340. https://doi.org/10.1016/j.enpol.2012.10.066"),
-    pbib("Graziano, M., & Gillingham, K. (2015). Spatial patterns of solar
-      photovoltaic system adoption: The influence of neighbors and the built
-      environment. Journal of Economic Geography, 15(4), 815\u2013839.
-      https://doi.org/10.1093/jeg/lbu036"),
-    pbib("Irwin, N. B. (2021). Sunny days: Spatial spillovers in photovoltaic
-      system adoptions. Energy Policy, 151, 112192.
-      https://doi.org/10.1016/j.enpol.2021.112192")
-  )
-}
-
-
 corp_logo <- function(inst) {
   web <- list(
     gesis = "https://www.gesis.org/",
@@ -317,8 +295,6 @@ corp_logo <- function(inst) {
 invert <- function(x) {
   stats::setNames(names(x), unname(x))
 }
-
-pbib <- function(...) p(..., class = "bib")
 
 p2 <- function(...) p(..., class = "running-text")
 

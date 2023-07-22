@@ -166,6 +166,17 @@ mod_cs1_ui <- function(id) {
           )
         )
       )
+    ),
+    fluidRow(
+      bs4Dash::column(
+        width = 6,
+        bs4Dash::box(
+          title = with_literata("References"),
+          width = 12,
+          status = "primary",
+          txts$cs1$bibliography
+        )
+      )
     )
   )
 }

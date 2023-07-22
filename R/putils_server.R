@@ -338,6 +338,7 @@ with_logging <- function(code, value) {
 }
 
 protect_html <- function(x) HTML(as.character(x))
+with_html <- function(.f) function(...) protect_html(.f(...))
 
 #' Riffle-merges two vectors, possibly of different lengths
 #'

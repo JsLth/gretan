@@ -51,7 +51,8 @@ txts$cs1$energy_model <- tagList(
   be made or may be more favourable to implement certain actions or strategies.
   In this way, energy modelling can also be used to identify the suitability of
   implementing energy policies and planning decisions in different locations."),
-  p2("In the GRETA project, the ENERKAD\u00ae[1] tool has been used to generate the models.
+  p2("In the GRETA project, the ENERKAD\u00ae{@tecnaliaresearchinnovation2019}
+  tool has been used to generate the models.
   ENERKAD\u00ae is a plugin for QGIS which evaluates urban energy scenarios at
   building, district and city scale and calculates the thermal energy demand
   and consumption per hour for each building in a district, using cadastral
@@ -129,6 +130,23 @@ txts$cs1$desc <- list(
     each building if existing. Most of the existing installations are located
     in tertiary buildings")
 )
+
+
+txts$cs1$bibliography <- read_ris(app_sys("app/bib/cs1.ris"))
+
+txts$cs1 <- reference(txts$cs1, txts$cs1$bibliography)
+txts$cs1$bibliography <- do.call(
+  with_html(tags$ul),
+  c(
+    unname(lapply(
+      as_bib(txts$cs1$bibliography[attr(txts$cs1, "ref")]),
+      with_html(pbib)
+    )),
+    class = "list-style: none",
+    style = "margin-left: -30px;"
+  )
+)
+
 
 cs1coords <- sf::st_sf(
   name = c("a"),
