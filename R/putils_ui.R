@@ -242,10 +242,11 @@ make_header <- function(title,
       affil <- as.list(rep(affil, length(authors)))
       names(affil) <- authors
     }
+
     aff_df <- data.frame(
       author = rep(authors, lengths(affil)),
       affil = unlist(affil),
-      num = as.numeric(as.factor(unlist(affil))),
+      num = cumsum(!duplicated(unlist(affil))),
       row.names = NULL
     )
     authors <- lapply(authors, function(x) {
@@ -265,7 +266,10 @@ make_header <- function(title,
   div(
     id = "header",
     h2(HTML(title), class = "title toc-ignore"),
-    h5(HTML(paste(authors, collapse = ", ")), class = "author"),
+    h5(HTML(paste(
+      "Prepared by:",
+      paste(authors, collapse = ", ")
+    )), class = "author"),
     h5(date, class = "date"),
     h6(HTML(paste(affil, collapse = "; ")), class = "affil"),
     align = "center"

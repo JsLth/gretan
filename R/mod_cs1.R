@@ -5,11 +5,12 @@ mod_cs1_ui <- function(id) {
     "cs1italy",
     # Header ----
     make_header(
-      title = "Case study 1: Reneweable energy district Pilastro-Roveri",
-      authors = c("Prepared by: Author A", "Author B"),
+      title = "Case study: Reneweable energy district Pilastro-Roveri",
+      authors = c("Martina Massari", "Saveria Boulanger", "Nekane Hermoso"),
       affil = list(
-        "Author A" = "University of Bologna, Department of Architecture",
-        "Author B" = "University of Bologna, Department of Architecture"
+        "Martina Massari" = "University of Bologna, Department of Architecture",
+        "Saveria Boulanger" = "University of Bologna, Department of Architecture",
+        "Nekane Hermoso" = "Tecnalia Research & Innovation"
       ),
       date = "2023-mm-dd"
     ),
@@ -166,17 +167,6 @@ mod_cs1_ui <- function(id) {
           )
         )
       )
-    ),
-    fluidRow(
-      bs4Dash::column(
-        width = 6,
-        bs4Dash::box(
-          title = with_literata("References"),
-          width = 12,
-          status = "primary",
-          txts$cs1$bibliography
-        )
-      )
     )
   )
 }
@@ -208,10 +198,7 @@ mod_cs1_server <- function(id, tab) {
     # Buildings ----
     output[["buildings-info-layer-desc"]] <- renderUI({
       layer <- input$buildings_layer
-      tagList(
-        p(tags$b("Selected layer:"), txts$cs1$dict$buildings[[layer]]$title),
-        p(txts$cs1$desc[[layer]])
-      )
+      p(txts$cs1$desc[[layer]])
     })
     
     blabels <- NULL

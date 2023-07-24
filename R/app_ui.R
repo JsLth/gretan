@@ -178,66 +178,24 @@ app_ui <- function(theme = NULL,
           icon = txts$home$icon,
           tabName = "home"
         ),
-        div(id = "mnsHighlight", bs4Dash::menuItem(
+        bs4Dash::menuItem(
           text = "Multinational survey",
           icon = txts$exp$icon,
           tabName = "mns",
           bs4Dash::menuSubItem(text = "Explore data", tabName = "exp"),
           bs4Dash::menuSubItem(text = "Compare data", tabName = "cmp"),
           bs4Dash::menuSubItem(text = "Inspect data", tabName = "insp")
-        )),
-        div(
-          bs4Dash::sidebarHeader("Case studies"),
-          id = "csHighlight",
-          bs4Dash::menuItem(
-            text = txts$cs1$title,
-            icon = txts$cs1$icon,
-            tabName = "cs1italy"
-          ),
-          bs4Dash::menuItem(
-            text = txts$cs2$title,
-            icon = txts$cs2$icon,
-            tabName = "cs2portugal"
-          ),
-          bs4Dash::menuItem(
-            text = txts$cs3$title,
-            icon = txts$cs3$icon,
-            tabName = "cs3germany"
-          ),
-          bs4Dash::menuItem(
-            text = txts$cs4$title,
-            icon = txts$cs4$icon,
-            tabName = "cs4netherlands"
-          ),
-          bs4Dash::menuItem(
-            text = txts$cs5$title,
-            icon = txts$cs5$icon,
-            tabName = "cs5spain"
-          )
         ),
-        div(
-          id = "indHighlight",
-          bs4Dash::sidebarHeader("Individual analyses"),
-          bs4Dash::menuItem(
-            text = txts$taxonomy$title,
-            icon = txts$taxonomy$icon,
-            tabName = "taxonomy"
-          ),
-          bs4Dash::menuItem(
-            text = txts$simulation$title,
-            icon = txts$simulation$icon,
-            tabName = "simulation"
-          ),
-          bs4Dash::menuItem(
-            text = txts$spatial$title,
-            icon = txts$spatial$icon,
-            tabName = "spatial"
-          ),
-          bs4Dash::menuItem(
-            text = txts$income$title,
-            icon = txts$income$icon,
-            tabName = "income"
-          )
+        bs4Dash::sidebarHeader("GRETA output"),
+        bs4Dash::menuItem(
+          text = txts$cs1$title,
+          icon = txts$cs1$icon,
+          tabName = "cs1italy"
+        ),
+        bs4Dash::menuItem(
+          text = txts$taxonomy$title,
+          icon = txts$taxonomy$icon,
+          tabName = "taxonomy"
         ),
         flat = TRUE
       ),
@@ -253,7 +211,7 @@ app_ui <- function(theme = NULL,
     freshTheme = theme,
     dark = NULL,
     preloader = preloader,
-    help = FALSE,
+    help = TRUE,
     options = list(sidebarSlimScroll = TRUE)
   )
 }

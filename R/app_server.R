@@ -10,6 +10,9 @@ app_server <- function(input, output, session) {
   
   tabsel <- reactive(input$sidebar)
   
+  # Hide help switch
+  shinyjs::hideElement(selector = "ul.navbar-right")
+  
   # Capture search term
   searchbox_input <- reactive({
     search_input <- input$textSearch

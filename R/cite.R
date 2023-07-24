@@ -6,7 +6,7 @@
 #' citation.
 #' The keyword strings are then replaced with properly formatted citations.
 #' @noRd
-reference <- function(lst, bib) {
+reference <- function(lst, bib, ns) {
   ref <- NULL
   idx <- seq_along(lst)
   for (i in idx) {
@@ -14,20 +14,18 @@ reference <- function(lst, bib) {
       lst[[i]] <- reference(lst[[i]], bib)
       ref <- c(ref, attr(lst[[i]], "ref"))
     } else if (is.character(lst[[i]])) {
-      cit <- match_regex(lst[[i]], "\\{@(.+[0-9]{4}),?([a-z]+)?,?(.*)\\}")
+      cit <- match_regex(lst[[i]], "\\{@(.+[0-9]{4})\\}")
 
       for (x in cit) {
         if (length(x)) {
           x <- x[-1]
           id <- x[1]
-          narr <- ifelse(x[2] %in% "true", TRUE, FALSE)
-          pages <- if (nzchar(x[3])) x[3] else NULL
           ref <- c(ref, id)
-          lst[[i]] <- gsub(
+          lst[[i]] <- HTML(gsub(
             sprintf("\\{@%s.*\\}", id),
-            paste0(" ", as_ref(bib[[id]], narr = narr, pages = pages), " "),
+            paste0(" ", as_ref(bib[[id]], id, which(id %in% names(bib))), " "),
             lst[[i]]
-          )
+          ))
         }
       }
     }
@@ -38,8 +36,11 @@ reference <- function(lst, bib) {
 
 
 #' Converts a RIS entry to an in-text reference
+#' @param x Object of type `ris`
+#' @param id Bibliography entry ID within `x`
+#' @param index Position of `id` within x
 #' @noRd
-as_ref <- function(x, narr = FALSE, pages = NULL) {
+as_ref <- function(x, id, index) {
   author <- lapply(x$author, function(x) strsplit(x, ", ")[[1]][1])
   
   if (length(author) == 1) {
@@ -50,24 +51,36 @@ as_ref <- function(x, narr = FALSE, pages = NULL) {
     author <- paste(author[[1]], "et al. ")
   }
   
-  if (narr) {
-    paste0(
-      author,
-      " (",
-      x$year,
-      if (!is.null(pages)) paste0(": ", pages),
-      ")"
+  pop <- paste0(
+    author,
+    " (",
+    x$year,
+    paste0(": ", x$title),
+    ")"
+  )
+  
+  id <- paste0("biblink-", id)
+  
+  tagList(
+    singleton(tags$head(tags$script(sprintf(
+      "$(function () {
+        $('#%s').popover('toggleEnabled');
+      });", id
+    )))),
+    tags$sup(
+      actionLink(
+        id,
+        label = index,
+        style = "border-bottom: none;",
+        class = "intext",
+        `data-container` = "body",
+        `data-toggle` = "popover",
+        `data-placement` = "top",
+        `data-content` = pop,
+        `data-trigger` = "hover"
+      )
     )
-  } else {
-    paste0(
-      "(",
-      author,
-      " ",
-      x$year,
-      if (!is.null(pages)) paste0(": ", pages),
-      ")"
-    )
-  }
+  )
 }
 
 
@@ -289,12 +302,12 @@ bib_gen <- function(...) {
 
 
 #' @export
-format.bib <- function(x, html = FALSE, ...) {
+format.bib <- function(x, id = NULL, html = FALSE, ...) {
   if (html) {
     do.call(
       tags$ul,
       c(
-        unname(lapply(x, pbib)),
+        unname(mapply(FUN = pbib, x, id = id)),
         class = "list-style: none",
         style = "margin-left: -30px;"
       )

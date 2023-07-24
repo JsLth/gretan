@@ -109,7 +109,7 @@ txts$cs1$case_study <- tagList(
 )
 
 txts$cs1$desc <- list(
-  use = HTML("The <b>Use</b>layer shows the main use of each building. 17 uses are displayed
+  use = HTML("The <b>Use</b> layer shows the main use of each building. 17 uses are displayed
     on the map, but only 10 of them are considered in the energy demand model:
     residential and commercial areas, education, hospital, hotel, single family
     house, office, public admin, restaurant, and sport. The rest of the uses are
@@ -117,7 +117,7 @@ txts$cs1$desc <- list(
   year_constr = HTML("The <b>construction year</b> layer shows the construction year of each building. In
     this way it is possible to see the development of the city by zones in the
     different periods."),
-  property = HTML("The <>property</b> layer shows the ownership type of the buildings."),
+  property = HTML("The <b>property</b> layer shows the ownership type of the buildings."),
   electricity_demand_m2 = HTML("The <b>electricity demand</b> layer shows the electricity demand of the
     buildings calculated in the Enerkad Tool simulation. Some of the building
     uses (See \u201cUse\u201d layer description) are excluded from the
@@ -135,10 +135,7 @@ txts$cs1$desc <- list(
 txts$cs1$bibliography <- read_ris(app_sys("app/bib/cs1.ris"))
 
 txts$cs1 <- reference(txts$cs1, txts$cs1$bibliography)
-txts$cs1$bibliography <- format(
-  as_bib(txts$cs1$bibliography[attr(txts$cs1, "ref")]),
-  html = TRUE
-)
+txts$cs1$bibliography <- as_bib(txts$cs1$bibliography[attr(txts$cs1, "ref")])
 
 
 cs1coords <- sf::st_sf(
