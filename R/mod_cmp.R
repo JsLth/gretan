@@ -63,7 +63,6 @@ mod_cmp_side_ui <- function(id, titles, selected = NULL) {
     ),
     bs4Dash::box(
       id = ns("mapbox"),
-      class = "leaflet-box",
       width = 12,
       collapsible = FALSE,
       headerBorder = FALSE,

@@ -136,15 +136,11 @@ a.logo {
   padding: 0em;
 }
 
-#main-cmp-right-explorer .card-header, #main-cmp-right-explorer .card-body {
+#main-cmp-right-mapbox .card-header, #main-cmp-right-mapbox .card-body {
   padding: 0em;
 }
 
-#main-cmp-left-explorer .card-header, #main-cmp-left-explorer .card-body {
-  padding: 0em;
-}
-
-#main-cs-cs1-map_box .card-header, #main-cs-cs1-map_box .card-body {
+#main-cmp-left-mapbox .card-header, #main-cmp-left-mapbox .card-body {
   padding: 0em;
 }
 
@@ -152,9 +148,6 @@ a.logo {
   padding: 0em !important;
 }
 
-.leaflet-box {
-  padding: 0px !important;
-}
 
 /* If not using map tiles, show a white background */
 .leaflet-container {
