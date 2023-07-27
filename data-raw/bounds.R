@@ -25,6 +25,7 @@ countries <- c(
 # NUTS, LAU and COM
 
 # Retrieve NUTS boundaries from GISCO
+cat("Downloading NUTS0...\n")
 nuts0 <- giscoR::gisco_get_nuts(
   year = "2021",
   nuts_level = "0",
@@ -37,6 +38,7 @@ nuts0 <- giscoR::gisco_get_nuts(
   select(nid = NUTS_ID, name = NUTS_NAME) %>%
   st_transform(3035)
 
+cat("Downloading NUTS1...\n")
 nuts1 <- giscoR::gisco_get_nuts(
   year = "2021",
   nuts_level = "1",
@@ -49,6 +51,7 @@ nuts1 <- giscoR::gisco_get_nuts(
   select(nid = NUTS_ID, name = NUTS_NAME, code = CNTR_CODE) %>%
   st_transform(3035)
 
+cat("Downloading NUTS2...\n")
 nuts2 <- giscoR::gisco_get_nuts(
   year = "2021",
   nuts_level = "2",
@@ -61,21 +64,26 @@ nuts2 <- giscoR::gisco_get_nuts(
   select(nid = NUTS_ID, name = NUTS_NAME, code = CNTR_CODE) %>%
   st_transform(3035)
 
+cat("Downloading INSPIRE grid...\n")
 grid <- giscoR::gisco_get_grid(resolution = "100") %>%
   select(gid = GRD_ID) %>%
   st_transform(3035)
 
 # Retrieve local regions corresponding to C3 level
+cat("Downloading LAU...\n")
 lau <- sf::read_sf(
   "https://gisco-services.ec.europa.eu/distribution/v2/lau/geojson/LAU_RG_01M_2021_3035.geojson",
+  cache = TRUE,
   quiet = TRUE
 ) %>%
   select(nid = LAU_ID, name = LAU_NAME, code = CNTR_CODE) %>%
   filter(code %in% countries) %>%
   st_transform(3035)
 
+cat("Downloading communes...\n")
 com <- sf::read_sf(
   "https://gisco-services.ec.europa.eu/distribution/v2/communes/geojson/COMM_RG_01M_2016_3035.geojson",
+  cache = TRUE,
   quiet = TRUE
 ) %>%
   select(nid = COMM_ID, name = COMM_NAME, code = CNTR_CODE) %>%
@@ -85,13 +93,11 @@ com <- sf::read_sf(
 
 output <- list("nuts0", "nuts1", "nuts2", "grid")
 
-for (x in c(output, "nuts3", "lau", "com")) {
-  saveRDS(eval(as.symbol(x)), paste0("bounds/", x, ".rds"))
+if (!dir.exists("data-ext/bounds")) {
+  dir.create("data-ext/bounds")
 }
 
-# st_write(nuts0, dsn = "bounds.sqlite", layer = "nuts0", append = FALSE)
-# st_write(nuts1, dsn = "bounds.sqlite", layer = "nuts1", append = FALSE)
-# st_write(nuts2, dsn = "bounds.sqlite", layer = "nuts2", append = FALSE)
-# st_write(bgn_1, dsn = "bounds.sqlite", layer = "bgn_1", append = FALSE)
-# st_write(bgn_2, dsn = "bounds.sqlite", layer = "bgn_2", append = FALSE)
-# st_write(bgn_3, dsn = "bounds.sqlite", layer = "bgn_3", append = FALSE)
+cat("Saving output...\n")
+for (x in c(output, "lau", "com")) {
+  saveRDS(eval(as.symbol(x)), paste0("data-ext/bounds/", x, ".rds"))
+}
