@@ -233,7 +233,7 @@ mod_insp_server <- function(id) {
         paste0("greta-mns-", input$aggr, ".csv")
       },
       content = function(file) {
-        write.csv(table(), file, row.names = FALSE)
+        utils::write.csv(table(), file, row.names = FALSE)
       }
     )
     

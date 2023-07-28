@@ -12,7 +12,9 @@ run_greta(...)
 \arguments{
 \item{...}{Arguments passed on to \code{\link[shiny]{shinyApp}}}
 
-\item{log}{Whether to enable logging using the reactlog package.
+\item{log}{Whether to activate print logging.}
+
+\item{reactlog}{Whether to enable logging using the reactlog package.
 For debugging purposes.}
 }
 \description{

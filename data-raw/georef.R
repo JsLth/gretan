@@ -23,11 +23,12 @@ library(haven)
 library(sf)
 library(dplyr)
 library(janitor)
-#library(reclin2) do not attach for compatibility reasons
+library(reclin2)
 library(stringr)
 library(fastDummies)
 library(readxl)
 library(purrr)
+library(usethis)
 
 # Variables are hard to sort because they're not just numerics, but combine
 # a 'version-like' structure (i.e. 2.1.1) with letters and words. This function
@@ -206,7 +207,7 @@ topics <- dplyr::tribble(
 
 # Read survey data
 survey <- haven::read_sav(
-  "greta_survey/final_dataset.sav",
+  "data-ext/greta_survey/final_dataset.sav",
   encoding = "utf-8"
 ) %>%
   janitor::clean_names()
@@ -214,7 +215,7 @@ survey <- haven::read_sav(
 # Read in the provided codebook, filter out some stuff that's not needed and
 # add columns that help with cleaning
 codebook <- readxl::read_xlsx(
-  "greta_survey/codebook.xlsx",
+  "data-ext/greta_survey/codebook.xlsx",
   skip = 1,
   sheet = "Variables"
 ) %>%
@@ -332,13 +333,11 @@ countries <- data.frame(
   )
 )
 
-if (!exists("nuts0") && dir.exists("bounds")) {
-  nuts0 <- readRDS("bounds/nuts0.rds")
-  nuts1 <- readRDS("bounds/nuts1.rds")
-  nuts2 <- readRDS("bounds/nuts2.rds")
-  lau <- readRDS("bounds/lau.rds")
-  com <- readRDS("bounds/com.rds")
-}
+nuts0 <- readRDS("data-ext/bounds/nuts0.rds")
+nuts1 <- readRDS("data-ext/bounds/nuts1.rds")
+nuts2 <- readRDS("data-ext/bounds/nuts2.rds")
+lau <- readRDS("data-ext/bounds/lau.rds")
+com <- readRDS("data-ext/bounds/com.rds")
 
 # Prepare lau
 lau <- bind_rows(lau, com[!com$name %in% lau$name, ])
@@ -402,18 +401,18 @@ survey <- survey[!tolower(survey$c2) %in% "prefer not to say" &
 # The idea is to fuzzy match regions based on the heuristic Jaro Winkler string
 # distance. Every record of a country is matched with every other record of
 # the same country and a score is calculated based on how well they match.
-pairs <- reclin2::pair_blocking(lau, survey, on = "code")
+pairs <- pair_blocking(lau, survey, on = "code")
 
 # Compute string distances
-reclin2::compare_pairs(
+compare_pairs(
   pairs,
   on = "clean_c3",
-  default_comparator = reclin2::jaro_winkler(threshold = 0.9),
+  default_comparator = cmp_jarowinkler(threshold = 0.9),
   inplace = TRUE
 )
 
 # Fit model
-m <- reclin2::problink_em(~clean_c3, data = pairs)
+m <- problink_em(~clean_c3, data = pairs)
 
 # Compute predictions for each pair
 pairs <- predict(m, pairs = pairs, add = TRUE, type = "all")
@@ -605,9 +604,9 @@ srv_grid <- st_join(srv_grid, count_grid, st_equals)
 
 output <- list("cb_ext", "srv_nuts0", "srv_nuts1", "srv_nuts2", "srv_grid")
 
-# tidyr::pivot_longer(srv_nuts0, cols = !c(nuts0, geometry)) %>%
-#   st_write("srv.sqlite", layer = "srv_nuts0")
-# tidyr::pivot_longer(srv_nuts1, cols = !c(nuts0, nuts1, geometry)) %>%
-#   st_write("srv.sqlite", layer = "srv_nuts1")
-# tidyr::pivot_longer(srv_nuts2, cols = !c(nuts0, nuts1, nuts2, geometry)) %>%
-#   st_write("srv.sqlite", layer = "srv_nuts2")
+output <- lapply(output, as.name)
+output$internal <- TRUE
+output$overwrite <- TRUE
+output$compress <- "bzip2"
+
+do.call(use_data, output)

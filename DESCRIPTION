@@ -6,7 +6,9 @@ Authors@R:
 Description: PKG_DESC.
 License: GPL (>= 3)
 Depends: 
-    R (>= 4.2.0)
+    R (>= 4.2.0),
+    stats,
+    utils
 Imports: 
     bs4Dash,
     fresh,
@@ -33,7 +35,8 @@ Suggests:
     reactlog,
     shinyloadtest,
     profvis,
-    fansi
+    fansi,
+    rstudioapi
 Config/testthat/edition: 3
 Encoding: UTF-8
 Language: en-US

@@ -20,16 +20,16 @@ txts$cs1$dict <- list(
     saldonat = list(title = "\u00d8 Population growth", lab = " %"),
     ultra80 = list(title = "% over 80", lab = " %"),
     soli_65 = list(title = "% over 65 living alone", lab = " %"),
-    imem_itali = list(title = "% Italian 20 – 64", lab = " %"),
-    imem_stra = list(title = "% foreign 20 – 64", lab = " %"),
-    stra_0_19 = list(title = "% foreign 0 – 19", lab = " %"),
+    imem_itali = list(title = "% Italian 20 \u2013 64", lab = " %"),
+    imem_stra = list(title = "% foreign 20 \u2013 64", lab = " %"),
+    stra_0_19 = list(title = "% foreign 0 \u2013 19", lab = " %"),
     minori1gen = list(title = "% minors in single-parent families", lab = " %"),
-    perc_laur = list(title = "% graduates 25 – 44", lab = " %"),
+    perc_laur = list(title = "% graduates 25 \u2013 44", lab = " %"),
     perc_ab_no = list(title = "% unoccupied dwellings", lab = " %"),
     perfragsan = list(title = "% elderly in high health fragility", lab = " %"),
     peraffit = list(title = "% rented occupied dwellings", lab = " %"),
-    rmpe_fam = list(title = "Median household income per capita", lab = " €"),
-    perfam_r60 = list(title = "% family members with income <13k €/yr", lab = " %"),
+    rmpe_fam = list(title = "Median household income per capita", lab = " \u20ac"),
+    perfam_r60 = list(title = "% family members with income <13k \u20ac/yr", lab = " %"),
     frag_demo = list(title = "Potential demographic fragility", lab = ""),
     frag_soc = list(title = "Potential social fragility", lab = ""),
     frag_econ = list(title = "Potential economic fragility", lab = ""),
@@ -51,7 +51,8 @@ txts$cs1$energy_model <- tagList(
   be made or may be more favourable to implement certain actions or strategies.
   In this way, energy modelling can also be used to identify the suitability of
   implementing energy policies and planning decisions in different locations."),
-  p2("In the GRETA project, the ENERKAD\u00ae[1] tool has been used to generate the models.
+  p2("In the GRETA project, the ENERKAD\u00ae{@tecnaliaresearchinnovation2019}
+  tool has been used to generate the models.
   ENERKAD\u00ae is a plugin for QGIS which evaluates urban energy scenarios at
   building, district and city scale and calculates the thermal energy demand
   and consumption per hour for each building in a district, using cadastral
@@ -129,6 +130,13 @@ txts$cs1$desc <- list(
     each building if existing. Most of the existing installations are located
     in tertiary buildings")
 )
+
+
+txts$cs1$bibliography <- read_ris(app_sys("app/bib/cs1.ris"))
+
+txts$cs1 <- reference(txts$cs1, txts$cs1$bibliography)
+txts$cs1$bibliography <- as_bib(txts$cs1$bibliography[attr(txts$cs1, "ref")])
+
 
 cs1coords <- sf::st_sf(
   name = c("a"),

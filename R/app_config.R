@@ -27,6 +27,13 @@ add_external_resources <- function() {
         $('#listbox').show()
       }
     })")),
+    singleton(tags$script(HTML("function scroll_to(id, block) {
+      document.querySelector('#' + id).scrollIntoView({block: block, behavior: 'smooth'});
+    }
+    
+    Shiny.addCustomMessageHandler('scroll', function(opts) {
+      scroll_to(opts.id, opts.block);
+    });"))),
     includeCSS(app_sys("app/www/styles.css")),
     tags$link(rel = "shortcut icon", href = app_sys("app/www/favicon.ico"))
   )

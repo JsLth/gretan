@@ -5,11 +5,12 @@ mod_cs1_ui <- function(id) {
     "cs1italy",
     # Header ----
     make_header(
-      title = "Case study 1: Reneweable energy district Pilastro-Roveri",
-      authors = c("Prepared by: Author A", "Author B"),
+      title = "Case study: Reneweable energy district Pilastro-Roveri",
+      authors = c("Martina Massari", "Saveria Boulanger", "Nekane Hermoso"),
       affil = list(
-        "Author A" = "University of Bologna, Department of Architecture",
-        "Author B" = "University of Bologna, Department of Architecture"
+        "Martina Massari" = "University of Bologna, Department of Architecture",
+        "Saveria Boulanger" = "University of Bologna, Department of Architecture",
+        "Nekane Hermoso" = "Tecnalia Research & Innovation"
       ),
       date = "2023-mm-dd"
     ),
@@ -197,10 +198,7 @@ mod_cs1_server <- function(id, tab) {
     # Buildings ----
     output[["buildings-info-layer-desc"]] <- renderUI({
       layer <- input$buildings_layer
-      tagList(
-        p(tags$b("Selected layer:"), txts$cs1$dict$buildings[[layer]]$title),
-        p(txts$cs1$desc[[layer]])
-      )
+      p(txts$cs1$desc[[layer]])
     })
     
     blabels <- NULL
@@ -217,7 +215,7 @@ mod_cs1_server <- function(id, tab) {
         lab_values <- dt[names(txts$cs1$dict$buildings)] %>%
           sf::st_drop_geometry() %>%
           as.list() %>%
-          setNames(sapply(txts$cs1$dict$buildings, "[[", "title")) %>%
+          stats::setNames(sapply(txts$cs1$dict$buildings, "[[", "title")) %>%
           lapply(\(x) if (is.numeric(x)) round(x, 2) else x)
         lab_values$`Electricity demand` <- paste(lab_values$`Electricity demand`, "kWh/m\u00b2")
         lab_values$`Heating demand` <- paste(lab_values$`Heating demand`, "kWh/m\u00b2")
@@ -267,7 +265,7 @@ mod_cs1_server <- function(id, tab) {
         leaflet::addProviderTiles(leaflet::providers$OpenStreetMap) %>%
         leaflet::addPolygons(
           data = sf::st_transform(params$data, 4326),
-          fillColor = as.formula(paste0("~params$pal(", params$layer, ")")),
+          fillColor = stats::as.formula(paste0("~params$pal(", params$layer, ")")),
           fillOpacity = 1,
           color = "black",
           opacity = 1,
@@ -313,7 +311,7 @@ mod_cs1_server <- function(id, tab) {
         leaflet::clearControls() %>%
         leaflet::addPolygons(
           data = sf::st_transform(params$data, 4326),
-          fillColor = as.formula(paste0("~params$pal(", params$layer, ")")),
+          fillColor = stats::as.formula(paste0("~params$pal(", params$layer, ")")),
           fillOpacity = 1,
           color = "black",
           opacity = 1,
@@ -363,7 +361,7 @@ mod_cs1_server <- function(id, tab) {
       lab_values <- dt[c("area_stati", "nomezona", layer)] %>%
         sf::st_drop_geometry() %>%
         as.list() %>%
-        setNames(c("Area", "Zone", txts$cs1$dict$fragility[[layer]]$title)) %>%
+        stats::setNames(c("Area", "Zone", txts$cs1$dict$fragility[[layer]]$title)) %>%
         {
           .[[3]] <- paste(round(.[[3]], 2), txts$cs1$dict$fragility[[layer]]$lab)
           .
@@ -388,7 +386,7 @@ mod_cs1_server <- function(id, tab) {
         leaflet::addProviderTiles(leaflet::providers$OpenStreetMap) %>%
         leaflet::addPolygons(
           data = sf::st_transform(params$data, 4326),
-          fillColor = as.formula(paste0("~params$pal(", params$layer, ")")),
+          fillColor = stats::as.formula(paste0("~params$pal(", params$layer, ")")),
           fillOpacity = 0.7,
           color = "black",
           opacity = 1,
@@ -434,7 +432,7 @@ mod_cs1_server <- function(id, tab) {
           leaflet::clearControls() %>%
           leaflet::addPolygons(
             data = sf::st_transform(params$data, 4326),
-            fillColor = as.formula(paste0("~params$pal(", params$layer, ")")),
+            fillColor = stats::as.formula(paste0("~params$pal(", params$layer, ")")),
             fillOpacity = 0.7,
             color = "black",
             opacity = 1,

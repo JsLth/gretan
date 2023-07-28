@@ -22,7 +22,7 @@ on <- function(name, expr, session = getDefaultReactiveDomain()) {
   }
   
   observe({
-    subsitute(expr)
+    substitute(expr)
   }) %>%
     bindEvent(substitute(watch(name)), ignoreInit = TRUE, env = parent.frame())
 }

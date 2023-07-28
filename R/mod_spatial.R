@@ -295,7 +295,7 @@ mod_spatial <- function(input, output, session) {
     p <- plotly::plot_ly(coopernico, type = "scatter", mode = "markers") %>%
       plotly::add_trace(
         x = lag,
-        y = ~fitted(lm(total_amount ~ lag)),
+        y = ~stats::fitted(stats::lm(total_amount ~ lag)),
         line = list(dash = "dash", color = "darkred", width = 4),
         showlegend = F,
         mode = "lines"
@@ -304,7 +304,7 @@ mod_spatial <- function(input, output, session) {
         x = lag,
         y = ~total_amount,
         text = ~sprintf(
-          "Spatial lag: %s m<br>Total amount: %s €<br>Municipality: %s",
+          "Spatial lag: %s m<br>Total amount: %s \u20ac<br>Municipality: %s",
           round(lag), total_amount, name
         ),
         marker = list(width = 2, color = "black"),
@@ -331,7 +331,7 @@ mod_spatial <- function(input, output, session) {
         list(
           list(
             x = lag,
-            y = fitted(lm(coopernico$total_amount ~ lag)),
+            y = stats::fitted(stats::lm(coopernico$total_amount ~ lag)),
             line = list(dash = "dash", color = "darkred", width = 4),
             showlegend = F,
             mode = "lines"
@@ -340,7 +340,7 @@ mod_spatial <- function(input, output, session) {
             x = lag,
             y = coopernico$total_amount,
             text = sprintf(
-              "Spatial lag: %s m<br>Total amount: %s€<br>Municipality: %s",
+              "Spatial lag: %s m<br>Total amount: %s\u20ac<br>Municipality: %s",
               round(lag), coopernico$total_amount, coopernico$name
             ),
             marker = list(width = 2, color = "black"),

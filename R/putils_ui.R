@@ -152,51 +152,52 @@ with_gothic <- function(x, ...) {
 #' `column(12, ...)`, `column(6, ...)`, `column(4, ...)`...
 #'
 #' @noRd
-#'
-#' @importFrom shiny column
 col_12 <- function(...) {
   bs4Dash::column(12, ...)
 }
 
-#' @importFrom shiny column
 col_10 <- function(...) {
   bs4Dash::column(10, ...)
 }
 
-#' @importFrom shiny column
 col_8 <- function(...) {
   bs4Dash::column(8, ...)
 }
 
-#' @importFrom shiny column
 col_6 <- function(...) {
   bs4Dash::column(6, ...)
 }
 
 
-#' @importFrom shiny column
 col_4 <- function(...) {
   bs4Dash::column(4, ...)
 }
 
 
-#' @importFrom shiny column
 col_3 <- function(...) {
   bs4Dash::column(3, ...)
 }
 
 
-#' @importFrom shiny column
 col_2 <- function(...) {
   bs4Dash::column(2, ...)
 }
 
 
-#' @importFrom shiny column
 col_1 <- function(...) {
   bs4Dash::column(1, ...)
 }
 
+
+match_regex <- function(string, pattern, perl = FALSE, fixed = FALSE) {
+  regmatches(string, regexec(pattern, string, perl = perl, fixed = fixed))
+}
+
+
+#' Converts a shiny.tag object to unformatted raw text
+#' 
+#' @param x A shiny.tag, shiny.tag.list or list
+#' @param ... Passed to or from other methods
 #' @export
 tag_to_text <- function(x, ...) {
   UseMethod("tag_to_text")
@@ -204,22 +205,31 @@ tag_to_text <- function(x, ...) {
 
 #' @export
 tag_to_text.default <- function(x, ...) {
-  as.character(x, ...)
+  if (!is.null(x) && !length(intersect(class(x), c("html_dependency")))) {
+    as.character(x, ...)
+  } else {
+    ""
+  }
 }
 
 #' @export
 tag_to_text.shiny.tag <- function(x, ...) {
-  paste(x$children, collapse = "\n", ...)
-}
-
-#' @export
-tag_to_text.shiny.tag.list <- function(x, ...) {
-  paste(lapply(x, tag_to_text, ...), collapse = "\n")
+  if (identical(class(x), "html_dependency")) return("")
+  if (x$name %in% c("script", "head", "meta", "style")) return("")
+  x <- x$children
+  
+  if (!length(x)) {
+    ""
+  } else {
+    text <- lapply(x, tag_to_text)
+    text <- text[!vapply(text, is.null, logical(1))]
+    trimws(paste(text, collapse = "\n"))
+  }
 }
 
 #' @export
 tag_to_text.list <- function(x, ...) {
-  tag_to_text(unlist(x), ...)
+  trimws(paste(lapply(x, tag_to_text, ...), collapse = "\n"))
 }
 
 
@@ -232,10 +242,11 @@ make_header <- function(title,
       affil <- as.list(rep(affil, length(authors)))
       names(affil) <- authors
     }
+
     aff_df <- data.frame(
       author = rep(authors, lengths(affil)),
       affil = unlist(affil),
-      num = as.numeric(as.factor(unlist(affil))),
+      num = cumsum(!duplicated(unlist(affil))),
       row.names = NULL
     )
     authors <- lapply(authors, function(x) {
@@ -255,37 +266,13 @@ make_header <- function(title,
   div(
     id = "header",
     h2(HTML(title), class = "title toc-ignore"),
-    h5(HTML(paste(authors, collapse = ", ")), class = "author"),
+    h5(HTML(paste(
+      "Prepared by:",
+      paste(authors, collapse = ", ")
+    )), class = "author"),
     h5(date, class = "date"),
     h6(HTML(paste(affil, collapse = "; ")), class = "affil"),
     align = "center"
-  )
-}
-
-
-dummy_bibliography <- function() {
-  tags$ul(
-    class = "list-style: none",
-    style = "margin-left: -30px",
-    pbib("Bollinger, B., & Gillingham, K. (2012). Peer Effects in the Diffusion of
-      Solar Photovoltaic Panels. Marketing Science, 31(6), 900\u2013912.
-      https://doi.org/10.1287/mksc.1120.0727"),
-    pbib("Boschma, R. (2005). Proximity and Innovation: A Critical Assessment.
-      Regional Studies, 39(1), 61\u201374.
-      https://doi.org/10.1080/0034340052000320887"),
-    pbib("Bouzarovski, S., & Simcock, N. (2017). Spatializing energy justice.
-      Energy Policy, 107, 640\u2013648.
-      https://doi.org/10.1016/j.enpol.2017.03.064"),
-    pbib("Bridge, G., Bouzarovski, S., Bradshaw, M., & Eyre, N. (2013). Geographies
-      of energy transition: Space, place and the low-carbon economy. Energy
-      Policy, 53, 331\u2013340. https://doi.org/10.1016/j.enpol.2012.10.066"),
-    pbib("Graziano, M., & Gillingham, K. (2015). Spatial patterns of solar
-      photovoltaic system adoption: The influence of neighbors and the built
-      environment. Journal of Economic Geography, 15(4), 815\u2013839.
-      https://doi.org/10.1093/jeg/lbu036"),
-    pbib("Irwin, N. B. (2021). Sunny days: Spatial spillovers in photovoltaic
-      system adoptions. Energy Policy, 151, 112192.
-      https://doi.org/10.1016/j.enpol.2021.112192")
   )
 }
 
@@ -310,10 +297,8 @@ corp_logo <- function(inst) {
 }
 
 invert <- function(x) {
-  setNames(names(x), unname(x))
+  stats::setNames(names(x), unname(x))
 }
-
-pbib <- function(...) p(..., class = "bib")
 
 p2 <- function(...) p(..., class = "running-text")
 
@@ -369,7 +354,6 @@ list_palettes <- function(type = NULL) {
 #'
 #' @examples
 #' list_to_li(c("a", "b"))
-#' @importFrom shiny tags tagAppendAttributes tagList
 list_to_li <- function(list, class = NULL) {
   if (is.null(class)) {
     tagList(
@@ -405,8 +389,6 @@ list_to_li <- function(list, class = NULL) {
 #'
 #' @examples
 #' list_to_p(c("This is the first paragraph", "this is the second paragraph"))
-#' @importFrom shiny tags tagAppendAttributes tagList
-#'
 list_to_p <- function(list, class = NULL) {
   if (is.null(class)) {
     tagList(
@@ -433,7 +415,6 @@ list_to_p <- function(list, class = NULL) {
   }
 }
 
-#' @importFrom shiny tags tagAppendAttributes tagList
 named_to_li <- function(list, class = NULL) {
   if (is.null(class)) {
     res <- mapply(
@@ -486,7 +467,6 @@ named_to_li <- function(list, class = NULL) {
 #'
 #' @examples
 #' rep_br(5)
-#' @importFrom shiny HTML
 rep_br <- function(times = 1) {
   HTML(rep("<br/>", times = times))
 }
@@ -559,40 +539,3 @@ make_action_button <- function(tag, inputId = NULL) {
   # return tag
   tag
 }
-
-
-# UNCOMMENT AND USE
-#
-# attachment::att_amend_desc()
-#
-# To use this part of the UI
-#
-#' #' Include Content From a File
-#' #'
-#' #' Load rendered RMarkdown from a file and turn into HTML.
-#' #'
-#' #' @rdname includeRMarkdown
-#' #' @export
-#' #'
-#' #' @importFrom rmarkdown render
-#' #' @importFrom markdown markdownToHTML
-#' #' @importFrom shiny HTML
-#' includeRMarkdown <- function(path){
-#'
-#'   md <- tempfile(fileext = '.md')
-#'
-#'   on.exit(unlink(md),add = TRUE)
-#'
-#'   rmarkdown::render(
-#'     path,
-#'     output_format = 'md_document',
-#'     output_dir = tempdir(),
-#'     output_file = md,quiet = TRUE
-#'     )
-#'
-#'   html <- markdown::markdownToHTML(md, fragment.only = TRUE)
-#'
-#'   Encoding(html) <- "UTF-8"
-#'
-#'   return(HTML(html))
-#' }

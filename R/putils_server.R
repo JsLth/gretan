@@ -141,6 +141,17 @@ track_coordinates <- function(map, id, session = getDefaultReactiveDomain()) {
   map
 }
 
+scroll <- function(id, block = c("start", "center", "end", "nearest")){
+  if (missing(id))
+    stop("Missing `id`", call. = FALSE)
+  
+  blk <- match.arg(block)
+  
+  session <- getDefaultReactiveDomain()
+  session$sendCustomMessage("scroll", list(id = id, block = blk))
+  invisible()
+}
+
 rlang_error_to_html <- function(x) {
   x <- as.character(x)
   if (requireNamespace("fansi", quietly = TRUE)) {
@@ -338,6 +349,7 @@ with_logging <- function(code, value) {
 }
 
 protect_html <- function(x) HTML(as.character(x))
+with_html <- function(.f) function(...) protect_html(.f(...))
 
 #' Riffle-merges two vectors, possibly of different lengths
 #'
