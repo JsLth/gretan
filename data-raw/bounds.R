@@ -2,9 +2,6 @@
 # Author:      Jonas Lieth
 # R version:   R version 4.2.1 (2022-06-23 ucrt)
 # OS:          Windows 10 x64 (build 22621)
-# Requirements: 
-#   - GRETA multinational survey results in ~/Datasets delivery
-#   - Boundary data created by bounds.R
 # Packages:
 #   - giscoR 0.3.3
 #   - sf 1.0-9
@@ -71,30 +68,28 @@ grid <- giscoR::gisco_get_grid(resolution = "100") %>%
 
 # Retrieve local regions corresponding to C3 level
 cat("Downloading LAU...\n")
-lau <- sf::read_sf(
-  "https://gisco-services.ec.europa.eu/distribution/v2/lau/geojson/LAU_RG_01M_2021_3035.geojson",
+lau <- giscoR::gisco_get_lau(
+  year = "2020",
+  epsg = "3035",
   cache = TRUE,
-  quiet = TRUE
+  country = countries
 ) %>%
-  select(nid = LAU_ID, name = LAU_NAME, code = CNTR_CODE) %>%
-  filter(code %in% countries) %>%
-  st_transform(3035)
+  select(lid = LAU_ID, name = LAU_NAME, code = CNTR_CODE, geometry = `_ogr_geometry_`)
 
 cat("Downloading communes...\n")
-com <- sf::read_sf(
-  "https://gisco-services.ec.europa.eu/distribution/v2/communes/geojson/COMM_RG_01M_2016_3035.geojson",
+com <- giscoR::gisco_get_communes(
+  year = "2016",
+  epsg = "3035",
   cache = TRUE,
-  quiet = TRUE
+  country = countries
 ) %>%
-  select(nid = COMM_ID, name = COMM_NAME, code = CNTR_CODE) %>%
-  filter(code %in% countries) %>%
-  st_transform(3035)
+  select(cid = COMM_ID, name = COMM_NAME, code = CNTR_CODE, geometry = `_ogr_geometry_`)
 
 
 output <- list("nuts0", "nuts1", "nuts2", "grid")
 
 if (!dir.exists("data-ext/bounds")) {
-  dir.create("data-ext/bounds")
+  dir.create("data-ext/bounds", recursive = TRUE)
 }
 
 cat("Saving output...\n")
