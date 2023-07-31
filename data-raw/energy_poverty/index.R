@@ -78,11 +78,10 @@ faulty_lids <- NULL
 survey_sampled <- survey_local %>%
   group_by(lid) %>%
   group_map(function(by_lau, group) {
-    cli_progress_update(.envir = cenv)
+    try(cli_progress_update(.envir = cenv))
     lau_id <- group$lid
     geom <- lau[lau$LAU_ID %in% lau_id, ]
     poprast <- crop(popgrid, geom, mask = TRUE)
-    if (length(unique(by_lau$place_type)) == 4) browser()
     by_place <- by_lau %>%
       group_by(place_type) %>%
       group_map(function(by_size, group) {
@@ -109,20 +108,17 @@ survey_sampled <- survey_local %>%
           faulty_lids <<- c(faulty_lids, lau_id)
           threshold <- 0
         }
-        probrast <- ifel(poprast >= threshold, yes = 1, no = 0)
-        samp <- spatSample(
-          probrast,
-          size = nrow(by_size),
-          method = "weights",
-          as.points = TRUE
-        )
-        samp <- st_geometry(st_as_sf(samp))
-        e <- try(st_geometry(by_size) <- samp)
-        if (inherits(e, "try-error")) browser()
+        popgrid <- st_as_sf(as.polygons(poprast))
+        popgrid <- popgrid[popgrid$mean >= threshold, ]
+        samp <- st_sample(popgrid, size = nrow(by_size), type = "random")
+        st_geometry(by_size) <- samp
         by_size
-      })
-  })
+      }) %>%
+      bind_rows()
+  }) %>%
+  bind_rows()
 
+saveRDS(survey_sampled, file = "data-ext/survey_resampled.rds")
 
 # Questions:
 # - Population density raster or human settlement data? (perhaps with voronoi
