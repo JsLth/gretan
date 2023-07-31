@@ -550,7 +550,7 @@ survey_local <- survey_local %>%
   st_join(select(nuts2, nuts2 = "name"), st_nearest_feature) %>%
   st_join(grid, st_nearest_feature)
 
-saveRDS(survey_local, "survey_local.rds")
+saveRDS(survey_local, "data-ext/survey_local.rds")
 
 srv_nuts0 <- aggregate(
   survey_local %>% select(-id, -nuts1, -nuts2),
