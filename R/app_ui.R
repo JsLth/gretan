@@ -124,16 +124,16 @@ app_ui <- function(theme = NULL,
         ), class = "logo"
       ),
       span(style = "display:inline-block; width: 100%"), # logos at the end of header
-      bs4Dash::tooltip(
-        actionButton(
-          "tour",
-          label = "",
-          icon = icon("question"),
-          width = "50px",
-          style = "margin-right: 20px;"
-        ),
-        title = "Start a guided tour"
-      ),
+      # bs4Dash::tooltip(
+      #   actionButton(
+      #     "tour",
+      #     label = "",
+      #     icon = icon("question"),
+      #     width = "50px",
+      #     style = "margin-right: 20px;"
+      #   ),
+      #   title = "Start a guided tour"
+      # ),
       div( # insert logos in a grid
         class = "container-logo",
         corp_logo("gesis"), corp_logo("lut"), corp_logo("unibo"),

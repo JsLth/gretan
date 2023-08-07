@@ -91,38 +91,38 @@ app_server <- function(input, output, session) {
     }
   })
   
-  observe({
-    guide <- cicerone::Cicerone$new(
-      allow_close = FALSE,
-      stage_background = "transparent"
-    )$step(
-      el = "greta-logo",
-      title = "What is GRETA Analytics?",
-      description = "GRETA Analytics is a tool dedicated to interactively explore the results of the GRETA project on energy citizenship. The tool is filled with info material, figures, diagrams, plots, and tables \u2013 all of which can be interactively explored.",
-      position = "bottom"
-    )$step(
-      el = "sidebarItemExpanded",
-      title = "Select a subsection",
-      description = "GRETA Analytics features several tools, frameworks and analyses. The sidebar allows you to switch between them.",
-      position = "right"
-    )$step(
-      el = "mnsHighlight",
-      title = "Multinational survey",
-      description = "The subsection \u201cMultinational survey\u201d allows you to explore the results of GRETA's survey conducted among citizens in 16 EU countries.",
-      position = "right"
-    )$step(
-      el = "csHighlight",
-      title = "Case studies",
-      description = "In the context of GRETA, six case studies have been conducted. Here, you can explore the results of a selection of case studies.",
-      position = "right"
-    )$step(
-      el = "indHighlight",
-      title = "Individual analyses",
-      description = "Besides, the multinational survey and case studies, many more analyses have been performed in the context of GRETA tasks. Some of them are included in GRETA Analytics to explore.",
-      position = "right"
-    )$init()$start()
-  }, priority = 0) %>%
-    bindEvent(input$tour)
+  # observe({
+  #   guide <- cicerone::Cicerone$new(
+  #     allow_close = FALSE,
+  #     stage_background = "transparent"
+  #   )$step(
+  #     el = "greta-logo",
+  #     title = "What is GRETA Analytics?",
+  #     description = "GRETA Analytics is a tool dedicated to interactively explore the results of the GRETA project on energy citizenship. The tool is filled with info material, figures, diagrams, plots, and tables \u2013 all of which can be interactively explored.",
+  #     position = "bottom"
+  #   )$step(
+  #     el = "sidebarItemExpanded",
+  #     title = "Select a subsection",
+  #     description = "GRETA Analytics features several tools, frameworks and analyses. The sidebar allows you to switch between them.",
+  #     position = "right"
+  #   )$step(
+  #     el = "mnsHighlight",
+  #     title = "Multinational survey",
+  #     description = "The subsection \u201cMultinational survey\u201d allows you to explore the results of GRETA's survey conducted among citizens in 16 EU countries.",
+  #     position = "right"
+  #   )$step(
+  #     el = "csHighlight",
+  #     title = "Case studies",
+  #     description = "In the context of GRETA, six case studies have been conducted. Here, you can explore the results of a selection of case studies.",
+  #     position = "right"
+  #   )$step(
+  #     el = "indHighlight",
+  #     title = "Individual analyses",
+  #     description = "Besides, the multinational survey and case studies, many more analyses have been performed in the context of GRETA tasks. Some of them are included in GRETA Analytics to explore.",
+  #     position = "right"
+  #   )$init()$start()
+  # }, priority = 0) %>%
+  #   bindEvent(input$tour)
   
   mod_main_server("main", tab = tabsel)
 }

@@ -5,17 +5,22 @@
 \alias{run_greta}
 \title{Run the "greta" Shiny Application}
 \usage{
-run_app(..., log = NULL, reactlog = FALSE)
+run_app(..., log = NULL, reactlog = FALSE, options = list())
 
 run_greta(...)
 }
 \arguments{
 \item{...}{Arguments passed on to \code{\link[shiny]{shinyApp}}}
 
-\item{log}{Whether to activate print logging.}
+\item{log}{Where to output app logs. Accepts a directory path where a log
+file is created. If `""`, prints directly to the console. If `FALSE`,
+disables logging.}
 
 \item{reactlog}{Whether to enable logging using the reactlog package.
 For debugging purposes.}
+
+\item{options}{Options for \code{\link[shiny]{shinyApp}}. Included for use
+in `electricShine`.}
 }
 \description{
 Run the "greta" Shiny Application

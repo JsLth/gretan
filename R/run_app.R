@@ -8,14 +8,18 @@
 #' }
 #' 
 #' @param ... Arguments passed on to \code{\link[shiny]{shinyApp}}
-#' @param log Whether to activate print logging.
+#' @param log Where to output app logs. Accepts a directory path where a log
+#' file is created. If `""`, prints directly to the console. If `FALSE`,
+#' disables logging.
 #' @param reactlog Whether to enable logging using the reactlog package.
 #' For debugging purposes.
+#' @param options Options for \code{\link[shiny]{shinyApp}}. Included for use
+#' in `electricShine`.
 #'
 #' @export
 #' @import shiny
 #' @importFrom leaflet %>%
-run_app <- function(..., log = NULL, reactlog = FALSE) {
+run_app <- function(..., log = NULL, reactlog = FALSE, options = list()) {
   if (reactlog) {
     if (!requireNamespace("reactlog")) {
       stop("The package reactlog is required to enable logging.")
@@ -28,7 +32,7 @@ run_app <- function(..., log = NULL, reactlog = FALSE) {
   on.exit(options(shiny.autoload.r = oldopt))
   
   with_logging({
-    shinyApp(ui = app_ui, server = app_server, ...)
+    shinyApp(ui = app_ui, server = app_server, options = options, ...)
   }, value = log)
 }
 
