@@ -5,9 +5,11 @@ pacman::p_load(
 )
 
 # Get admin boundaries
+cli_alert_info("Downloading LAU")
 lau <- giscoR::gisco_get_lau(year = "2020", epsg = "3035", cache = TRUE)
 
 # Get survey data
+cli_alert_info("Loading survey data")
 survey_local <- readRDS("data-ext/survey_local.rds")
 
 # Get population data
@@ -85,15 +87,15 @@ survey_sampled <- survey_local %>%
     by_place <- by_lau %>%
       group_by(place_type) %>%
       group_map(function(by_size, group) {
-        threshold <- switch(
-          group$place_type,
+        th_dict <- list(
           "Village" = 0,
           "Town" = 100,
           "City" = 300,
           "Large city" = 1500
         )
-        # If there are less cells above the selected threshold, remove the
-        # threshold and allow points to be sampled over the entire area
+        threshold <- th_dict[[group$place_type]]
+        # If there are less cells above the selected threshold, go down one
+        # level (e.g. large city to city) until sampling is possible.
         # There are five reasons this might be happening:
         # - Survey error: Respondents gave the wrong answer
         # - Sleaziness error: Respondents say they live in a city when they
@@ -104,9 +106,11 @@ survey_sampled <- survey_local %>%
         # respondents' perception
         # - Resolution error: Resolution is too coarse to uncover the place type
         # respondents refer to
-        if (length(c(poprast[poprast > threshold])) < nrow(by_size)) {
+        while (!length(c(poprast[poprast > threshold]))) {
           faulty_lids <<- c(faulty_lids, lau_id)
-          threshold <- 0
+          new_index <- which(th_dict == threshold) - 1
+          if (new_index == 0) stop("No grid cells to sample in.")
+          threshold <- th_dict[[new_index]]
         }
         popgrid <- st_as_sf(as.polygons(poprast))
         popgrid <- popgrid[popgrid$mean >= threshold, ]
@@ -143,3 +147,36 @@ saveRDS(survey_sampled, file = "data-ext/survey_resampled.rds")
 # - What if urban-rural typologies don't match respondents answers? In some
 # cases respondents say they live in a large city when in reality they live
 # in a rural area.
+
+# plot differences
+facet_points <- bind_rows(Original = survey_local,
+                          Geoimputed = survey_sampled, .id = "stage") %>%
+  mutate(stage = factor(stage, levels = c("Original", "Geoimputed")))
+
+facet_bounds <- lau %>%
+  mutate(nuts0 = countrycode::countrycode(CNTR_CODE, "eurostat", "country.name")) %>%
+  filter(nuts0 %in% unique(facet_points$nuts0)) %>%
+  group_by(nuts0) %>%
+  summarise(geometry = st_union(geometry)) %>%
+  bind_rows(Original = ., Geoimputed = ., .id = "stage") %>%
+  mutate(stage = factor(stage, levels = c("Original", "Geoimputed")))
+
+ps <- list()
+for (stage in unique(facet_bounds$stage)) {
+  for (country in unique(facet_bounds[facet_bounds$stage %in% stage, ]$nuts0)) {
+    ps[[paste0(stage, "_", country)]] <- ggplot() +
+      geom_sf(data = facet_bounds[facet_bounds$stage %in% stage & facet_bounds$nuts0 %in% country, ]) +
+      geom_sf(data = facet_points[facet_points$stage %in% stage & facet_points$nuts0 %in% country, ]) +
+      coord_sf(crs = st_crs(3035)) +
+      theme_bw()
+  }
+}
+
+p <- GGally::ggmatrix(
+  ps, nrow = 2,
+  ncol = 16,
+  xAxisLabels = unique(facet_bounds$nuts0),
+  yAxisLabels = c("Original", "Geoimputed")
+)
+
+ggsave("geoimp_test.png", plot = p, width = 40, height = 10)
