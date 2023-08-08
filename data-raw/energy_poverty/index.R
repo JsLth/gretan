@@ -39,8 +39,8 @@ cohesion <- survey_local %>%
 trust <- survey_local %>%
   select(starts_with("c47"))
 
-lid <- lau$LAU_ID[st_nearest_feature(survey_local, lau)]
-survey_local <- bind_cols(survey_local, lid = lid)
+clid <- lau$GISCO_ID[st_nearest_feature(survey_local, lau)]
+survey_local <- bind_cols(survey_local, clid = clid)
 
 survey_local <- survey_local %>%
   mutate(place_type = case_when(
@@ -72,17 +72,17 @@ survey_local <- survey_local %>%
 # Two-stage stratified spatial sampling
 cli_progress_bar(
   name = "Sampling by LAU",
-  total = length(unique(survey_local$lid))
+  total = length(unique(survey_local$clid))
 )
 cenv <- environment()
 
 faulty_lids <- NULL
 survey_sampled <- survey_local %>%
-  group_by(lid) %>%
+  group_by(clid) %>%
   group_map(function(by_lau, group) {
     try(cli_progress_update(.envir = cenv))
-    lau_id <- group$lid
-    geom <- lau[lau$LAU_ID %in% lau_id, ]
+    lau_id <- group$clid
+    geom <- lau[lau$GISCO_ID %in% lau_id, ]
     poprast <- crop(popgrid, geom, mask = TRUE)
     by_place <- by_lau %>%
       group_by(place_type) %>%
@@ -103,18 +103,20 @@ survey_sampled <- survey_local %>%
         # - Perception error: Mismatch between typology thresholds and
         # respondents perception. Respondents say their town is a city.
         # - Georeferencing error: Mismatch between LAU boundaries and
-        # respondents' perception
+        # intended response options
         # - Resolution error: Resolution is too coarse to uncover the place type
         # respondents refer to
-        while (!length(c(poprast[poprast > threshold]))) {
+        while (!length(c(poprast[poprast >= threshold]))) {
           faulty_lids <<- c(faulty_lids, lau_id)
           new_index <- which(th_dict == threshold) - 1
-          if (new_index == 0) stop("No grid cells to sample in.")
+          if (new_index == 0) browser()
           threshold <- th_dict[[new_index]]
         }
         popgrid <- st_as_sf(as.polygons(poprast))
-        popgrid <- popgrid[popgrid$mean >= threshold, ]
+        popgrid <- popgrid[popgrid[[1]] >= threshold, ]
+        popgrid <- suppressWarnings(st_intersection(popgrid, geom))
         samp <- st_sample(popgrid, size = nrow(by_size), type = "random")
+        if (any(!st_contains(geom, samp, sparse = FALSE))) browser()
         st_geometry(by_size) <- samp
         by_size
       }) %>%
@@ -179,4 +181,45 @@ p <- GGally::ggmatrix(
   yAxisLabels = c("Original", "Geoimputed")
 )
 
-ggsave("geoimp_test.png", plot = p, width = 40, height = 10)
+ggsave("geoimp_test2.png", plot = p, width = 40, height = 10)
+
+
+facet_points_dkat <- facet_points[facet_points$nuts0 %in% c("Austria", "Denmark"), ]
+facet_bounds_dkat <- facet_bounds[facet_bounds$nuts0 %in% c("Austria", "Denmark"), ]
+
+dkat_ps <- list()
+for (stage in c("Original", "Geoimputed")) {
+  for (country in c("Austria", "Denmark")) {
+    dkat_ps[[paste0(stage, "_", country)]] <- ggplot() +
+      geom_sf(data = facet_bounds_ieat[
+        facet_bounds_ieat$stage %in% stage &
+          facet_bounds_ieat$nuts0 %in% country, ]) +
+      geom_sf(data = facet_points_ieat[
+        facet_points_ieat$stage %in% stage &
+          facet_points_ieat$nuts0 %in% country, ],
+        size = 0.3) +
+      coord_sf(crs = st_crs(3035)) +
+      theme_bw()
+  }
+}
+
+dkat_ps$Bounds_Austria <- ggplot() +
+  geom_sf(data = lau[lau$CNTR_CODE %in% "AT", ]) +
+  coord_sf(crs = st_crs(3035)) +
+  theme_bw()
+
+dkat_ps$Bounds_Denmark <- ggplot() +
+  geom_sf(data = lau[lau$CNTR_CODE %in% "DK", ]) +
+  coord_sf(crs = st_crs(3035)) +
+  theme_bw()
+
+dkat_p <- GGally::ggmatrix(
+  dkat_ps,
+  nrow = 3,
+  ncol = 2,
+  xAxisLabels = c("Austria", "Denmark"),
+  yAxisLabels = c("Original", "Geoimputed", "LAU units"),
+  showAxisPlotLabels = FALSE
+)
+
+ggsave("data-raw/energy_poverty/geoimp_compare.png", plot = dkat_p)
