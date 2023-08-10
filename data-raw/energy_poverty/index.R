@@ -6,7 +6,7 @@ pacman::p_load(
 
 # Get admin boundaries
 cli_alert_info("Downloading LAU")
-lau <- giscoR::gisco_get_lau(year = "2020", epsg = "3035", cache = TRUE)
+lau <- giscoR::gisco_get_lau(year = "2020", epsg = "3035")
 
 # Get survey data
 cli_alert_info("Loading survey data")
@@ -76,24 +76,23 @@ cli_progress_bar(
 )
 cenv <- environment()
 
-faulty_lids <- NULL
 survey_sampled <- survey_local %>%
   group_by(clid) %>%
-  group_map(function(by_lau, group) {
+  group_map(function(by_lau, unit) {
     try(cli_progress_update(.envir = cenv))
-    lau_id <- group$clid
+    lau_id <- unit$clid
     geom <- lau[lau$GISCO_ID %in% lau_id, ]
     poprast <- crop(popgrid, geom, mask = TRUE)
-    by_place <- by_lau %>%
+    by_lau %>%
       group_by(place_type) %>%
-      group_map(function(by_size, group) {
+      group_map(function(by_size, place) {
         th_dict <- list(
-          "Village" = 0,
-          "Town" = 100,
-          "City" = 300,
-          "Large city" = 1500
+          "Village" = c(0, 99),
+          "Town" = c(100, 299),
+          "City" = c(300, 1499),
+          "Large city" = c(1500, Inf)
         )
-        threshold <- th_dict[[group$place_type]]
+        threshold <- th_dict[[place$place_type]]
         # If there are less cells above the selected threshold, go down one
         # level (e.g. large city to city) until sampling is possible.
         # There are five reasons this might be happening:
@@ -106,16 +105,16 @@ survey_sampled <- survey_local %>%
         # intended response options
         # - Resolution error: Resolution is too coarse to uncover the place type
         # respondents refer to
-        while (!length(c(poprast[poprast >= threshold]))) {
-          faulty_lids <<- c(faulty_lids, lau_id)
-          new_index <- which(th_dict == threshold) - 1
+        while (!length(poprast[between(poprast[], threshold[1], threshold[2])][[1]])) {
+          new_index <- which(th_dict %in% list(threshold)) - 1
           if (new_index == 0) browser()
           threshold <- th_dict[[new_index]]
         }
         popgrid <- st_as_sf(as.polygons(poprast))
-        popgrid <- popgrid[popgrid[[1]] >= threshold, ]
+        popgrid <- popgrid[between(popgrid[[1]], threshold[1], threshold[2]), ]
         popgrid <- suppressWarnings(st_intersection(popgrid, geom))
-        samp <- st_sample(popgrid, size = nrow(by_size), type = "random")
+        samp <- try(st_sample(popgrid, size = nrow(by_size), type = "random"))
+        if (inherits(samp, "try-error")) browser()
         if (any(!st_contains(geom, samp, sparse = FALSE))) browser()
         st_geometry(by_size) <- samp
         by_size
@@ -223,3 +222,77 @@ dkat_p <- GGally::ggmatrix(
 )
 
 ggsave("data-raw/energy_poverty/geoimp_compare.png", plot = dkat_p)
+
+
+
+
+survey_sampled %>%
+  st_drop_geometry() %>%
+  group_by(clid) %>%
+  summarise(n = n()) %>%
+  arrange(desc(n)) %>%
+  filter(n > 10 & n < 20)
+
+exclid <- "BE_23104"
+
+exlau <- lau[lau$GISCO_ID %in% exclid, ]
+expop <- crop(popgrid, exlau, mask = TRUE) %>%
+  classify(matrix(c(
+    0, 99, 1,
+    100, 299, 2,
+    300, 1499, 3,
+    1500, Inf, 4
+  ), ncol = 3, byrow = TRUE)) %>%
+  categories(
+    value = data.frame(
+      id = 1:4,
+      category = c("0 - 100 inh.", "100 - 300 inh.", "300 - 1,500 inh.", "> 1,500 inh.")
+    )
+  )
+expts <- survey_local[st_within(survey_local, exlau, sparse = FALSE), ] %>%
+  select(geometry)
+eximp <- survey_sampled[st_within(survey_sampled, exlau, sparse = FALSE), ] %>%
+  mutate(place_type = case_when(
+    c5_village_small_town_less_than_10_000_people == 1 ~ "Village",
+    c5_medium_large_town_10_000_to_100_000_people == 1 ~ "Town",
+    c5_city_over_100_000_people == 1 ~ "City",
+    c5_very_large_city_over_1_000_000_people == 1 ~ "Large city"
+  )) %>%
+  select(place_type)
+expts <- bind_rows(eximp, bind_cols(expts[1,], place_type = "Centroid")) %>%
+  mutate(place_type = factor(place_type, levels = c(
+    "Centroid", "Large city", "City", "Town", "Village"
+  )))
+
+t <- st_intersection(st_as_sf(as.polygons(expop)), exlau) %>%
+  mutate(category = factor(category, levels = c(
+    "0 - 100 inh.", "100 - 300 inh.", "300 - 1,500 inh.", "> 1,500 inh."
+  )))
+
+ggplot() +
+  geom_sf(data = t, aes(fill = category), color = NA, na.rm = TRUE) +
+  geom_sf(data = exlau, fill = NA, linewidth = 1.5, color = "black") +
+  geom_sf(data = expts, aes(color = place_type), size = 5) +
+  theme_bw() +
+  scale_fill_manual(
+    name = "Population density",
+    function(breaks) {breaks[is.na(breaks)] <- "N/A"; breaks},
+    na.value = "transparent",
+    values = c("#333333", "#818181", "#ABABAB", "#CCCCCC")
+  ) +
+  scale_color_manual(
+    name = "Place type",
+    values = c(
+      Centroid = "#000000",
+      Village = "#FFFFB2",
+      Town = "#FECC5C",
+      City = "#FD8D3C",
+      `Large city` = "#E31A1C"
+    )
+  )
+
+survey_sampled %>%
+  filter(clid %in% exclid)
+
+
+
