@@ -1,7 +1,7 @@
 library(pacman)
 
 pacman::p_load(
-  "giscoR", "dplyr", "cli", "sf", "terra"
+  "giscoR", "dplyr", "cli", "sf", "terra", "ggplot2", "GGally"
 )
 
 # Get admin boundaries
@@ -59,13 +59,20 @@ cli_progress_bar(
 )
 cenv <- environment()
 
+popgrid <- focal(
+  popgrid,
+  fun = "mean",
+  na.rm = TRUE,
+  na.policy = "omit"
+)
+
 survey_sampled <- survey_local %>%
   group_by(clid) %>%
   group_map(function(by_lau, unit) {
     try(cli_progress_update(.envir = cenv))
     lau_id <- unit$clid
     
-    # Select geometry of primary sampling unit
+    # Select geometry of primary sampling unit (PSU
     geom <- lau[lau$GISCO_ID %in% lau_id, ]
     
     # Crop population grid to PSU geometry
@@ -80,9 +87,9 @@ survey_sampled <- survey_local %>%
       group_map(function(by_size, place) {
         # Match place type to population grid
         th_dict <- list(
-          "Village" = c(0, 99),
-          "Town" = c(100, 299),
-          "City" = c(300, 1499),
+          "Village" = c(0, 299),
+          "Town" = c(300, 799),
+          "City" = c(800, 1499),
           "Large city" = c(1500, Inf)
         )
         threshold <- th_dict[[place$place_type]]
@@ -90,12 +97,12 @@ survey_sampled <- survey_local %>%
         # If there are less cells above the selected threshold, go down one
         # level (e.g. large city to city) or up one level until sampling is
         # possible.
+        index <- index0 <- which(th_dict %in% list(threshold))
         while (!nrow(psu[between(psu[[1]], threshold[1], threshold[2]), ])) {
-          index <- which(th_dict %in% list(threshold))
-          if (index > 2) new_index <- index - 1
-          if (index <= 2) new_index <- index + 1
-          if (between(new_index, 1, 4)) {
-            threshold <- th_dict[[new_index]]
+          if (index0 > 2) index <- index - 1
+          if (index0 <= 2) index <- index + 1
+          if (between(index, 1, 4)) {
+            threshold <- th_dict[[index]]
           } else {
             threshold <- c(0, Inf)
           }
@@ -172,7 +179,7 @@ p <- GGally::ggmatrix(
   yAxisLabels = c("Original", "Geoimputed")
 )
 
-ggsave("geoimp_test2.png", plot = p, width = 40, height = 10)
+ggsave("data-raw/energy_poverty/geoimp_compare_all.png", plot = p, width = 40, height = 10)
 
 
 facet_points_dkat <- facet_points[facet_points$nuts0 %in% c("Austria", "Denmark"), ]
@@ -182,13 +189,13 @@ dkat_ps <- list()
 for (stage in c("Original", "Geoimputed")) {
   for (country in c("Austria", "Denmark")) {
     dkat_ps[[paste0(stage, "_", country)]] <- ggplot() +
-      geom_sf(data = facet_bounds_ieat[
-        facet_bounds_ieat$stage %in% stage &
-          facet_bounds_ieat$nuts0 %in% country, ]) +
-      geom_sf(data = facet_points_ieat[
-        facet_points_ieat$stage %in% stage &
-          facet_points_ieat$nuts0 %in% country, ],
-        size = 0.3) +
+      geom_sf(data = facet_bounds_dkat[
+        facet_bounds_dkat$stage %in% stage &
+          facet_bounds_dkat$nuts0 %in% country, ]) +
+      geom_sf(data = facet_points_dkat[
+        facet_points_dkat$stage %in% stage &
+          facet_points_dkat$nuts0 %in% country, ],
+        size = 0.5) +
       coord_sf(crs = st_crs(3035)) +
       theme_bw()
   }
@@ -261,7 +268,7 @@ t <- st_intersection(st_as_sf(as.polygons(expop)), exlau) %>%
     "0 - 100 inh.", "100 - 300 inh.", "300 - 1,500 inh.", "> 1,500 inh."
   )))
 
-ggplot() +
+concept <- ggplot() +
   geom_sf(data = t, aes(fill = category), color = NA, na.rm = TRUE) +
   geom_sf(data = exlau, fill = NA, linewidth = 1.5, color = "black") +
   geom_sf(data = expts, aes(color = place_type), size = 5) +
@@ -281,10 +288,9 @@ ggplot() +
       City = "#FD8D3C",
       `Large city` = "#E31A1C"
     )
-  )
+  ) +
+  theme_void()
 
-survey_sampled %>%
-  filter(clid %in% exclid)
-
+ggsave("data-raw/energy_poverty/concept.png")
 
 
