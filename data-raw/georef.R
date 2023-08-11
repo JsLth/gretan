@@ -96,7 +96,7 @@ topics <- dplyr::tribble(
   "c8", "Trust for energy information sources", "B",
   "c9", "Social media and energy information", "B",
   "c10", "Topics for energy information", "B",
-  "c11_1", "Complexity of energy issues", "B",
+  "c11", "Complexity of energy issues", "B",
   "c12", "National energy development", "B",
   "c13", "Energy saving", "B",
   "c14", "Opinion of energy behavior", "B",
