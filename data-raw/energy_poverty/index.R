@@ -52,23 +52,6 @@ survey_local <- survey_local %>%
 
 
 
-## Classic approach
-## Single stratified spatial sampling
-# cli::cli_progress_bar(
-# name = "Sampling NUTS-3",
-# total = length(unique(survey_local$nuts3))
-# )
-# cenv <- environment()
-# survey_jittered <- survey_local %>%
-#   group_by(nuts3) %>%
-#   group_map(function(x, group) {
-#     cli_progress_update(.envir = cenv)
-#     name <- group[[1]]
-#     st_sample(nuts3[nuts3$nid %in% name, ]$geometry, nrow(x))
-#   }) %>%
-#   do.call(c, .)
-
-
 # Two-stage stratified spatial sampling
 cli_progress_bar(
   name = "Sampling by LAU",
@@ -81,11 +64,21 @@ survey_sampled <- survey_local %>%
   group_map(function(by_lau, unit) {
     try(cli_progress_update(.envir = cenv))
     lau_id <- unit$clid
+    
+    # Select geometry of primary sampling unit
     geom <- lau[lau$GISCO_ID %in% lau_id, ]
-    poprast <- crop(popgrid, geom, mask = TRUE)
+    
+    # Crop population grid to PSU geometry
+    psu <- popgrid %>%
+      crop(geom, mask = TRUE) %>%
+      as.polygons() %>%
+      st_as_sf() %>%
+      st_intersection(geom) %>%
+      suppressWarnings()
     by_lau %>%
       group_by(place_type) %>%
       group_map(function(by_size, place) {
+        # Match place type to population grid
         th_dict <- list(
           "Village" = c(0, 99),
           "Town" = c(100, 299),
@@ -93,29 +86,28 @@ survey_sampled <- survey_local %>%
           "Large city" = c(1500, Inf)
         )
         threshold <- th_dict[[place$place_type]]
+        
         # If there are less cells above the selected threshold, go down one
-        # level (e.g. large city to city) until sampling is possible.
-        # There are five reasons this might be happening:
-        # - Survey error: Respondents gave the wrong answer
-        # - Sleaziness error: Respondents say they live in a city when they
-        # actually live in a rural area near the city
-        # - Perception error: Mismatch between typology thresholds and
-        # respondents perception. Respondents say their town is a city.
-        # - Georeferencing error: Mismatch between LAU boundaries and
-        # intended response options
-        # - Resolution error: Resolution is too coarse to uncover the place type
-        # respondents refer to
-        while (!length(poprast[between(poprast[], threshold[1], threshold[2])][[1]])) {
-          new_index <- which(th_dict %in% list(threshold)) - 1
-          if (new_index == 0) browser()
-          threshold <- th_dict[[new_index]]
+        # level (e.g. large city to city) or up one level until sampling is
+        # possible.
+        while (!nrow(psu[between(psu[[1]], threshold[1], threshold[2]), ])) {
+          index <- which(th_dict %in% list(threshold))
+          if (index > 2) new_index <- index - 1
+          if (index <= 2) new_index <- index + 1
+          if (between(new_index, 1, 4)) {
+            threshold <- th_dict[[new_index]]
+          } else {
+            threshold <- c(0, Inf)
+          }
         }
-        popgrid <- st_as_sf(as.polygons(poprast))
-        popgrid <- popgrid[between(popgrid[[1]], threshold[1], threshold[2]), ]
-        popgrid <- suppressWarnings(st_intersection(popgrid, geom))
-        samp <- try(st_sample(popgrid, size = nrow(by_size), type = "random"))
-        if (inherits(samp, "try-error")) browser()
-        if (any(!st_contains(geom, samp, sparse = FALSE))) browser()
+        
+        # Filter PSU to secondary sampling unit (SSU)
+        ssu <- psu[between(psu[[1]], threshold[1], threshold[2]), ]
+        
+        # Take a sample within SSU
+        samp <- st_sample(ssu, size = nrow(by_size), type = "random")
+        
+        # Replace geometries of geocoded dataset
         st_geometry(by_size) <- samp
         by_size
       }) %>%
