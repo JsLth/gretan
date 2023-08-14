@@ -69,19 +69,17 @@ popgrid <- focal(
 survey_sampled <- survey_local %>%
   group_by(clid) %>%
   group_map(function(by_lau, unit) {
-    try(cli_progress_update(.envir = cenv))
+    try(cli_progress_update(.envir = cenv), silent = TRUE)
     lau_id <- unit$clid
     
-    # Select geometry of primary sampling unit (PSU
-    geom <- lau[lau$GISCO_ID %in% lau_id, ]
+    # Select geometry of primary sampling unit (PSU)
+    geom <- vect(lau[lau$GISCO_ID %in% lau_id, ]$geometry)
     
     # Crop population grid to PSU geometry
     psu <- popgrid %>%
       crop(geom, mask = TRUE) %>%
       as.polygons() %>%
-      st_as_sf() %>%
-      st_intersection(geom) %>%
-      suppressWarnings()
+      intersect(geom)
     by_lau %>%
       group_by(place_type) %>%
       group_map(function(by_size, place) {
@@ -89,8 +87,8 @@ survey_sampled <- survey_local %>%
         th_dict <- list(
           "Village" = c(0, 299),
           "Town" = c(300, 799),
-          "City" = c(800, 1499),
-          "Large city" = c(1500, Inf)
+          "City" = c(800, 1999),
+          "Large city" = c(2000, Inf)
         )
         threshold <- th_dict[[place$place_type]]
         
@@ -98,7 +96,7 @@ survey_sampled <- survey_local %>%
         # level (e.g. large city to city) or up one level until sampling is
         # possible.
         index <- index0 <- which(th_dict %in% list(threshold))
-        while (!nrow(psu[between(psu[[1]], threshold[1], threshold[2]), ])) {
+        while (!nrow(psu[between(psu$focal_mean, threshold[1], threshold[2])])) {
           if (index0 > 2) index <- index - 1
           if (index0 <= 2) index <- index + 1
           if (between(index, 1, 4)) {
@@ -109,13 +107,22 @@ survey_sampled <- survey_local %>%
         }
         
         # Filter PSU to secondary sampling unit (SSU)
-        ssu <- psu[between(psu[[1]], threshold[1], threshold[2]), ]
+        ssu <- psu[between(psu$focal_mean, threshold[1], threshold[2])]
         
         # Take a sample within SSU
-        samp <- st_sample(ssu, size = nrow(by_size), type = "random")
+        samp <- NULL
+        add <- 0
+        while (!length(samp) >= nrow(by_size)) {
+          set.seed(45468575)
+          samp <- spatSample(ssu, size = nrow(by_size) + add, method = "random")
+          add <- add + 1
+        }
+        
+        if (length(samp) > nrow(by_size))
+          samp <- samp[1:nrow(by_size)]
         
         # Replace geometries of geocoded dataset
-        st_geometry(by_size) <- samp
+        st_geometry(by_size) <- st_geometry(st_as_sf(samp))
         by_size
       }) %>%
       bind_rows()
@@ -225,27 +232,42 @@ ggsave("data-raw/energy_poverty/geoimp_compare.png", plot = dkat_p)
 
 
 
-survey_sampled %>%
-  st_drop_geometry() %>%
-  group_by(clid) %>%
-  summarise(n = n()) %>%
-  arrange(desc(n)) %>%
-  filter(n > 10 & n < 20)
+# survey_sampled %>%
+#   st_join(select(lau, clid = "GISCO_ID"), join = st_within) %>%
+#   st_drop_geometry() %>%
+#   group_by(clid) %>%
+#   summarise(n = n()) %>%
+#   arrange(desc(n)) %>%
+#   filter(n > 10 & n < 20)
+# 
+# survey_sampled %>%
+#   mutate(place_type = case_when(
+#     c5_village_small_town_less_than_10_000_people == 1 ~ "Village",
+#     c5_medium_large_town_10_000_to_100_000_people == 1 ~ "Town",
+#     c5_city_over_100_000_people == 1 ~ "City",
+#     c5_very_large_city_over_1_000_000_people == 1 ~ "Large city"
+#   )) %>%
+#   st_join(select(lau, clid = "GISCO_ID"), join = st_within) %>%
+#   st_drop_geometry() %>%
+#   group_by(clid) %>%
+#   group_by(place_type, .add = TRUE) %>%
+#   summarise(n = n()) %>%
+#   arrange(desc(clid))
 
-exclid <- "BE_23104"
+exclid <- "AT_31235"
 
 exlau <- lau[lau$GISCO_ID %in% exclid, ]
 expop <- crop(popgrid, exlau, mask = TRUE) %>%
   classify(matrix(c(
-    0, 99, 1,
-    100, 299, 2,
-    300, 1499, 3,
-    1500, Inf, 4
+    0, 299, 1,
+    300, 799, 2,
+    800, 1999, 3,
+    2000, Inf, 4
   ), ncol = 3, byrow = TRUE)) %>%
   categories(
     value = data.frame(
       id = 1:4,
-      category = c("0 - 100 inh.", "100 - 300 inh.", "300 - 1,500 inh.", "> 1,500 inh.")
+      category = c("0 - 299 inh.", "300 - 799 inh.", "800 - 1,999 inh.", "> 2,000 inh.")
     )
   )
 expts <- survey_local[st_within(survey_local, exlau, sparse = FALSE), ] %>%
@@ -263,13 +285,13 @@ expts <- bind_rows(eximp, bind_cols(expts[1,], place_type = "Centroid")) %>%
     "Centroid", "Large city", "City", "Town", "Village"
   )))
 
-t <- st_intersection(st_as_sf(as.polygons(expop)), exlau) %>%
+expop <- st_intersection(st_as_sf(as.polygons(expop)), exlau) %>%
   mutate(category = factor(category, levels = c(
-    "0 - 100 inh.", "100 - 300 inh.", "300 - 1,500 inh.", "> 1,500 inh."
+    "0 - 299 inh.", "300 - 799 inh.", "800 - 1,999 inh.", "> 2,000 inh."
   )))
 
 concept <- ggplot() +
-  geom_sf(data = t, aes(fill = category), color = NA, na.rm = TRUE) +
+  geom_sf(data = expop, aes(fill = category), color = NA, na.rm = TRUE) +
   geom_sf(data = exlau, fill = NA, linewidth = 1.5, color = "black") +
   geom_sf(data = expts, aes(color = place_type), size = 5) +
   theme_bw() +
@@ -291,6 +313,6 @@ concept <- ggplot() +
   ) +
   theme_void()
 
-ggsave("data-raw/energy_poverty/concept.png")
+ggsave("data-raw/energy_poverty/concept.png", bg = "white")
 
 
