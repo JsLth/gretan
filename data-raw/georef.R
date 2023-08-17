@@ -212,6 +212,8 @@ survey <- haven::read_sav(
 ) %>%
   janitor::clean_names()
 
+cat("Total respondents:", nrow(survey), "\n")
+
 # Read in the provided codebook, filter out some stuff that's not needed and
 # add columns that help with cleaning
 codebook <- readxl::read_xlsx(
@@ -316,6 +318,8 @@ survey$c3 <- haven::as_factor(survey$c3)
 # Filter out rows with no spatial information
 survey <- survey[!is.na(survey$c2) & !is.na(survey$c3) & !is.na(survey$country), ]
 
+cat("Citizens:", nrow(survey), "\n")
+
 # Define countries and their currencies
 countries <- data.frame(
   name = c(
@@ -338,6 +342,7 @@ nuts1 <- readRDS("data-ext/bounds/nuts1.rds")
 nuts2 <- readRDS("data-ext/bounds/nuts2.rds")
 lau <- readRDS("data-ext/bounds/lau.rds")
 com <- readRDS("data-ext/bounds/com.rds")
+grid <- readRDS("data-ext/bounds/grid.rds")
 
 # Prepare lau
 lau <- bind_rows(lau, com[!com$name %in% lau$name, ])
@@ -396,6 +401,8 @@ nuts12 <- dplyr::bind_rows(nuts1, nuts2)
 # Filter out non-responses to geo question
 survey <- survey[!tolower(survey$c2) %in% "prefer not to say" &
                    !tolower(survey$c3) %in% "prefer not to say", ]
+
+cat("With geo-information:", nrow(survey), "\n")
 
 # Record linkage for C3 regions
 # The idea is to fuzzy match regions based on the heuristic Jaro Winkler string
@@ -549,6 +556,8 @@ survey_local <- survey_local %>%
   st_join(select(nuts1, nuts1 = "name"), st_nearest_feature) %>%
   st_join(select(nuts2, nuts2 = "name"), st_nearest_feature) %>%
   st_join(grid, st_nearest_feature)
+
+cat("Final:", nrow(survey_local), "\n")
 
 saveRDS(survey_local, "data-ext/survey_local.rds")
 
