@@ -29,16 +29,6 @@ survey_local <- readRDS("data-ext/survey_local.rds")
 # )
 popgrid <- rast("data-ext/popgrid_1km.tif")
 
-
-pov <- survey_local %>%
-  select(starts_with(c("c16", "c18", "c22", "c24", "c26", "c28",
-                       "c29", "c30", "c31", "c32", "c55")))
-cohesion <- survey_local %>%
-  select(starts_with(c("c39", "c46")))
-
-trust <- survey_local %>%
-  select(starts_with("c47"))
-
 clid <- lau$GISCO_ID[st_nearest_feature(survey_local, lau)]
 survey_local <- bind_cols(survey_local, clid = clid)
 
