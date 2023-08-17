@@ -310,7 +310,7 @@ mod_exp_server <- function(id, track = FALSE) {
       pal <- input$pal
       palettes <- list_palettes("viridis")
       if (pal %in% palettes[["Colorblind"]]) {
-        pal <- viridis::viridis_pal(option = tolower(pal))(5)
+        pal <- viridisLite::viridis(5, option = tolower(pal))
       }
       pal
     }) %>%

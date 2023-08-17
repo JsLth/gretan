@@ -5,8 +5,15 @@
 #' The default, none, returns the root of the app.
 #' 
 #' @noRd
-app_sys <- function(...){
-  system.file(..., package = "greta")
+app_sys <- function(...) {
+  path <- system.file(..., package = "greta")
+  
+  # for rsconnect
+  if (!nchar(path)) {
+    path <- file.path("inst", ...)
+  }
+  
+  path
 }
 
 
@@ -14,7 +21,6 @@ add_external_resources <- function() {
   addResourcePath("www", app_sys("app/www"))
   tags$head(
     waiter::useWaiter(),
-    cicerone::use_cicerone(),
     shinyWidgets::useSweetAlert(theme = "bootstrap-4"),
     shinyjs::useShinyjs(),
     tags$script(HTML("$('html').on('click', function(e) {

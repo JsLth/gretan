@@ -94,7 +94,7 @@ as_ref <- function(x, id, index) {
 #' @returns A named list containing reference metadata of the RIS file
 read_ris <- function(file, encoding = "UTF-8") {
   stopifnot(length(file) == 1)
-  
+print(file)
   if (!grepl("\\.ris$", file)) {
     stop("`file` must be a RIS file.")
   }
@@ -125,7 +125,7 @@ read_ris <- function(file, encoding = "UTF-8") {
       }
     })
 
-    x <- as.list(setNames(val, nms))
+    x <- as.list(stats::setNames(val, nms))
     n_authors <- sum(names(x) == "author")
     if (n_authors > 1) {
       aidx <- which(names(x) %in% "author")
@@ -156,7 +156,7 @@ read_ris <- function(file, encoding = "UTF-8") {
     x
   })
 
-  structure(setNames(ref, ids), class = "ris")
+  structure(stats::setNames(ref, ids), class = "ris")
 }
 
 #' @export
@@ -184,7 +184,7 @@ print.ris <- function(x, ...) {
 #' 
 #' @param ref Object of class `ris`
 #' @param ... Arguments passed from or to methods
-#' @param returns Named list of class `bib` containing formatted bibliography
+#' @returns Named list of class `bib` containing formatted bibliography
 #' entries. List names are IDs consisting of first author and year.
 #' 
 #' @references American Psychological Association (2019). Publication Manual

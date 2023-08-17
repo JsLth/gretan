@@ -10,9 +10,10 @@ as_bib(ref, ...)
 \item{ref}{Object of class `ris`}
 
 \item{...}{Arguments passed from or to methods}
-
-\item{returns}{Named list of class `bib` containing formatted bibliography
-entries. List names are IDs consisting of first author and year.}
+}
+\value{
+Named list of class `bib` containing formatted bibliography
+entries. List names are IDs consisting of first author and year.
 }
 \description{
 Converts an object of class `ris` to a bibliography

@@ -11,7 +11,7 @@ txts$taxonomy$introduction <- as.character(
   emergence of energy citizenship entails several proximity domains and
   dimensions. The taxonomy shows that different geographical levels play
   important roles in triggering the birth of different forms of energy
-  citizenship but mostly in supporting citizens’ engagement to grow and
+  citizenship but mostly in supporting citizens\u2019 engagement to grow and
   proceed in this pathway. It represents a multi-layered structure of relations
   and interdependencies that need to be considered while approaching the topic.
   This suggests looking at energy citizenship from a local-global networking
@@ -33,9 +33,9 @@ txts$taxonomy$methodology <- as.character(
   collecting empirical evidence on energy citizenship, case studies of
   energy communities or collective energy initiatives from EU projects, which
   can provide insights to understand the individual and collective level of
-  energy citizenship (Annex A). Sources are the EU COM JRC publication “Energy
-  communities: an overview of energy and social innovation” and the JPI Urban
-  Europe ‘Positive Energy Districts Case Studies Booklet’. Detecting
+  energy citizenship (Annex A). Sources are the EU COM JRC publication \u201cEnergy
+  communities: an overview of energy and social innovation\u201d and the JPI Urban
+  Europe ‘Positive Energy Districts Case Studies Booklet\u2019. Detecting
   determinants and conditions for EC at each geographical level, the taxonomy
   explores the EU-wide context of geographical levels of the emergence of
   energy citizenship. Secondly a case study analysis has been performed,
@@ -118,7 +118,7 @@ txts$taxonomy$scheme <- list(
     title = "National level",
     content = as.character(
       "The national level of energy citizenship emergence has mostly to do
-      with the different countries’ policies and political commitments but
+      with the different countries\u2019 policies and political commitments but
       also with economic incentives and lobbying. National policies oversee
       the definition of priorities to achieve energy balance and efficiency
       between use and supply, to comply with global targets set. Some national
@@ -149,7 +149,7 @@ txts$taxonomy$scheme <- list(
       the context of action and reaction of energy citizenship according
       to several domains. The concept of proximity appears critical to the
       emergence, stabilization, and growth of energy citizenship. It can help
-      move beyond viewing the “where” of energy initiatives as physical or
+      move beyond viewing the \u201cwhere\u201d of energy initiatives as physical or
       social sites, containers within which technological change occurs,
       moving toward geographic levels with both physical and socio-technical
       qualities."
@@ -185,7 +185,7 @@ txts$taxonomy$scheme <- list(
       enabling, or hampering the free association of people, the
       decentralisation of the government structure towards subsidiary
       outposts, the presence of institutional innovations such as green
-      public procurements – in short, all input and output dimensions of
+      public procurements \u2013 in short, all input and output dimensions of
       good governance. This entails also institutions decentralizing energy
       pathways; it also entails the proper development of financial incentive
       schemes which favour small-scale production over centralized approaches."

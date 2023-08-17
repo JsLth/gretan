@@ -1,6 +1,10 @@
-greta_survey
-coopernico_data
 data-ext
+data-raw
+electron
+library
+dev
+man
+tests
 TODO
 .RData
 .Rhistory

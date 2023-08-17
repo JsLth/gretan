@@ -11,7 +11,6 @@ Depends:
     utils
 Imports: 
     bs4Dash,
-    fresh,
     leaflegend,
     leaflet,
     jsonlite,
@@ -20,14 +19,10 @@ Imports:
     shinyjs,
     shinyWidgets,
     DT,
-    viridis,
+    viridisLite,
     waiter,
-    ggplot2,
     plotly,
-    shinipsum,
-    spdep,
-    cicerone,
-    handlr
+    fansi
 Suggests: 
     spelling,
     testthat (>= 3.0.0),
@@ -35,7 +30,6 @@ Suggests:
     reactlog,
     shinyloadtest,
     profvis,
-    fansi,
     rstudioapi
 Config/testthat/edition: 3
 Encoding: UTF-8

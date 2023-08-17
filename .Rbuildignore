@@ -3,6 +3,7 @@
 ^\.RDataTmp$
 ^data-raw$
 ^data-ext$
+^electron$
 dev_history.R
 ^dev$
 ^library$
@@ -18,3 +19,4 @@ $run_dev.*
 ^TODO$
 ^R-.*-win\.exe$
 ^shinycannon-.*\.jar$
+^.sass_cache_keys$

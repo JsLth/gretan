@@ -22,24 +22,6 @@ mod_main_server <- function(id, tab) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    shinyjs::onclick("tab-cs2", send_info(
-      "This tab has not yet been filled with contents."
-    ))
-    shinyjs::onclick("tab-cs3", send_info(
-      "This tab has not yet been filled with contents."
-    ))
-    shinyjs::onclick("tab-cs4", send_info(
-      "This tab has not yet been filled with contents."
-    ))
-    shinyjs::onclick("tab-cs5", send_info(
-      "This tab has not yet been filled with contents."
-    ))
-    shinyjs::onclick("tab-simulation", send_info(
-      "This tab has not yet been filled with contents."
-    ))
-    
-    init("exp")
-    
     mod_home_server("home")
     exp_params <- mod_exp_server("exp")
     mod_cmp_server("cmp")

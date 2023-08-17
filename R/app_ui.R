@@ -12,33 +12,10 @@ app_ui <- function(theme = NULL,
   all_pals <- list_palettes()
   
   if (!is.null(theme)) {
-    # source: agendahelsinki.tailored.css
-    theme <- fresh::create_theme(
-      fresh::bs4dash_status(
-        primary = "#FED22B",
-        secondary = "#F4F4F2",
-        info = "#B3DDFE",
-        danger = "#BF616A",
-        dark = "#F4F4F2"
-      ),
-      fresh::bs4dash_layout(main_bg = "#FDFDFD", sidebar_width = "350px"),
-      fresh::bs4dash_sidebar_light(bg = "#F4F4F2", color = "#000"),
-      fresh::bs4dash_color(
-        white = "#FDFDFD",
-        black = "#000",
-        gray_600 = "#CFCFCF",
-        gray_800 = "#B4B4B4",
-        gray_900 = "#000",
-        red = "#C1120E",
-        purple = "#3F1354",
-        yellow = "#FFFD37",
-        blue = "#002562",
-        teal = "#00767E"
-      ),
-      fresh::bs4dash_font(
-        family_sans_serif = "Tablet Gothic",
-        family_base = "Tablet Gothic"
-      )
+    theme <- structure(
+      paste(readLines(app_sys("app/www/theme.css"))),
+      class = c("css", "html", "character"),
+      html = TRUE
     )
   }
 

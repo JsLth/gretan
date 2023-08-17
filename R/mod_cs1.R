@@ -369,7 +369,7 @@ mod_cs1_server <- function(id, tab) {
       labels <- do.call(align_dl, lab_values)
       
       pal <- leaflet::colorBin(
-        palette = viridis::viridis(5),
+        palette = c("#000004FF", "#51127CFF", "#B63679FF", "#FB8861FF", "#FCFDBFFF"),
         domain = dt[[layer]],
         na.color = NA
       )

@@ -144,6 +144,10 @@ a.logo {
   padding: 0em;
 }
 
+#main-cs-cs1-map_box .card-body {
+  padding: 0em;
+}
+
 .tight-map-box {
   padding: 0em !important;
 }
