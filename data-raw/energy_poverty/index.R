@@ -3,30 +3,35 @@ library(stringr)
 library(purrr)
 library(tidyr)
 library(sf)
+library(missMDA)
 library(factoextra)
+library(corrplot)
+library(GWmodel)
+library(GWnnegPCA)
 library(kableExtra)
+library(ggcorrplot)
+library(RColorBrewer)
+library(patchwork)
 
+
+## Read data ----
 pov <- readRDS("data-ext/survey_resampled.rds") %>%
   select(starts_with(c(
-    "c6",  # Energy saving #1
+    "c6_",  # Energy saving #1
     "c11", # Energy complexity
     "c13", # Energy saving #2
     "c16", # Cooling system
     "c18", # Heating system
     "c19", # Heating system configuration
-    "c22", # Heating costs
-    "c24", # Hot water costs
     "c26", # Energy costs
     "c28", # Consensual energy poverty
     "c29", # Housing type
     "c30", # Housing area
     "c31", # Housing age
     "c32", # Major renovations
-    "c33", # Performance certificate
-    "c34", # Energy rating
     "c48", # Household size
     "c51", # Special conditions
-    "c55"  # Income
+    "c54"  # Income
   )), "id", "nuts0", "nuts1", "nuts2")
 
 cb <- readRDS("data-ext/codebook.rds") %>%
@@ -35,6 +40,8 @@ cb <- readRDS("data-ext/codebook.rds") %>%
 all_cats <- unique(tail(cb$category, -1))
 all_vars <- unique(tail(cb$og_var, -1))
 
+
+## Merge dummies ----
 for (v in all_vars) {
   cb_v <- cb[cb$og_var %in% v, ]
   opts <- cb_v$option
@@ -58,6 +65,9 @@ for (v in all_vars) {
 }
 
 
+
+## Rename variables ----
+## for readability
 vars_lookup <- list(
   # demographic variables
   household = "c48_1_open",
@@ -66,7 +76,7 @@ vars_lookup <- list(
   cond_trans = "c51_3",
   cond_smoke = "c51_4",
   cond_support = "c51_5",
-  income = "c55",
+  income = "c54",
   
   # behavioral variables
   behav_unplug = "c6_1",
@@ -93,8 +103,6 @@ vars_lookup <- list(
   heat_config = "c19",
   
   # energy affordability variables
-  heating_cost = "c22",
-  water_cost = "c24",
   energy_cost = "c26",
   ability_to_pay = "c28_1",
   supplier_threat = "c28_2",
@@ -105,15 +113,15 @@ vars_lookup <- list(
   house_type = "c29",
   house_area = "c30",
   house_age = "c31",
-  house_renov = "c32_1",
-  house_cert = "c33",
-  house_rate = "c34"
+  house_renov = "c32_1"
 )
 
 
-pov <- do.call(select, c(vars_lookup, id, nuts0, nuts1, nuts2))
+pov <- do.call(select, c(list(pov), vars_lookup, "id", "nuts0", "nuts1", "nuts2"))
 
 
+
+## Recode and transform ----
 pov <- pov %>%
   # Convert non-responses to NA
   mutate(across(
@@ -148,11 +156,6 @@ pov <- pov %>%
       house_type %in% c("Detached house", "Semi-detached house") ~ 1,
       !house_type %in% c("Detached house", "Semi-detached house") ~ 0,
       .default = NA
-    ),
-    house_rate = case_when(
-      house_rate %in% c("A or higher (e.g. A+)", "B or higher (e.g. B+)") ~ 1,
-      !house_rate %in% c("A or higher (e.g. A+)", "B or higher (e.g. B+)") ~ 0,
-      .default = NA
     )
   ) %>%
   rename(heat_central = heat_config, house_detach = house_type)
@@ -164,168 +167,169 @@ pov <- pov %>%
   )) %>%
   select(where(~!all(.x == 0, na.rm = TRUE)))
 
-summ <- tbl_summary(
-  st_drop_geometry(select(pov, !any_of(c("id", "nuts0", "nuts1", "nuts2")))),
-  statistic = list(
-    all_continuous2() ~ c("{mean}", "{sd}", "{median} ({min}, {max})"),
-    income ~ c("{median} ({p25}, {p75})", "{min}, {max}"),
-    behav_unplug ~ c("{median} ({p25}, {p75})", "{min}, {max}"),
-    behav_products ~ c("{median} ({p25}, {p75})", "{min}, {max}"),
-    behav_lights ~ c("{median} ({p25}, {p75})", "{min}, {max}"),
-    behav_share ~ c("{median} ({p25}, {p75})", "{min}, {max}"),
-    behav_carpool ~ c("{median} ({p25}, {p75})", "{min}, {max}"),
-    behav_car ~ c("{median} ({p25}, {p75})", "{min}, {max}"),
-    know_energy ~ c("{median} ({p25}, {p75})", "{min}, {max}"),
-    know_heating ~ c("{median} ({p25}, {p75})", "{min}, {max}"),
-    know_costs ~ c("{median} ({p25}, {p75})", "{min}, {max}"),
-    know_share ~ c("{median} ({p25}, {p75})", "{min}, {max}"),
-    know_solutions ~ c("{median} ({p25}, {p75})", "{min}, {max}"),
-    heating_cost ~ c("{median} ({p25}, {p75})", "{min}, {max}"),
-    water_cost ~ c("{median} ({p25}, {p75})", "{min}, {max}"),
-    energy_cost ~ c("{median} ({p25}, {p75})", "{min}, {max}"),
-    ability_to_pay ~ c("{median} ({p25}, {p75})", "{min}, {max}"),
-    supplier_threat ~ c("{median} ({p25}, {p75})", "{min}, {max}"),
-    safety_winter ~ c("{median} ({p25}, {p75})", "{min}, {max}"),
-    safety_summer ~ c("{median} ({p25}, {p75})", "{min}, {max}"),
-    house_area ~ c("{median} ({p25}, {p75})", "{min}, {max}"),
-    house_age ~ c("{median} ({p25}, {p75})", "{min}, {max}")
-  ),
-  type = list(
-    household ~ "continuous2",
-    income ~ "continuous2",
-    behav_unplug ~ "continuous2",
-    behav_products ~ "continuous2",
-    behav_lights ~ "continuous2",
-    behav_share ~ "continuous2",
-    behav_carpool ~ "continuous2",
-    behav_car ~ "continuous2",
-    know_energy ~ "continuous2",
-    know_heating ~ "continuous2",
-    know_costs ~ "continuous2",
-    know_share ~ "continuous2",
-    know_solutions ~ "continuous2",
-    heating_cost ~ "continuous2",
-    water_cost ~ "continuous2",
-    energy_cost ~ "continuous2",
-    ability_to_pay ~ "continuous2",
-    supplier_threat ~ "continuous2",
-    safety_winter ~ "continuous2",
-    safety_summer ~ "continuous2",
-    house_area ~ "continuous2",
-    house_age ~ "continuous2"
-  ),
-  label = list(
-    "household" ~ "Household size",
-    "cond_air" ~ "Condition requiring additional air",
-    "cond_heat" ~ "Condition requiring additional heating",
-    "cond_trans" ~ "Condition requiring additional transport",
-    "cond_smoke" ~ "Smoker",
-    "cond_support" ~ "Receiving public support",
-    "income" ~ "Income",
-    "behav_unplug" ~ "Unplug electronic devices",
-    "behav_products" ~ "Search for products that are more energy-efficient",
-    "behav_lights" ~ "Turn off lights before leaving a room",
-    "behav_share" ~ "Encourage friends or family to be more energy efficient",
-    "behav_carpool" ~ "Consciously participate in carpooling",
-    "behav_car" ~ "Consciously choose to travel without a car",
-    "behav_temp" ~ "Lower the temperature set point of your water heater",
-    "behav_shower" ~ "Take shorter showers",
-    "behav_drive" ~ "Drive slower on the highway",
-    "behav_dishwash" ~ "Run full loads in the dishwasher",
-    "know_energy" ~ "Understanding my monthly electricity consumption",
-    "know_heating" ~ "Understanding my monthly heating and/or cooling consumption",
-    "know_costs" ~ "Knowing how much I spend in energy",
-    "know_share" ~ "Knowing the share of renewable energy that I consume",
-    "know_solutions" ~ "Implementing green energy solutions at home",
-    "has_cooling" ~ "Has a cooling system",
-    "has_heating" ~ "Has a heating system",
-    "heat_central" ~ "Has central heating",
-    "heating_cost" ~ "Heating costs",
-    "water_cost" ~ "Hot water costs",
-    "energy_cost" ~ "Electricity costs",
-    "ability_to_pay" ~ "How often did you worry that you wouldnt be able to pay your home energy bill?",
-    "supplier_threat" ~ "How often did you have a supplier threaten you to disconnect your electricity or home heating fuel service, or discontinue making fuel deliveries?",
-    "safety_winter" ~ "During the winter months, how often did you keep your home at a temperature that you felt was unsafe or unhealthy?",
-    "safety_summer" ~ "During the summer months, how often did you keep your home at a temperature that you felt was unsafe or unhealthy?",
-    "house_detach" ~ "Living in a detached house",
-    "house_area" ~ "Housing area",
-    "house_age" ~ "Housing age",
-    "house_renov" ~ "Major renovations since construction",
-    "house_cert" ~ "Has an Energy Performance Certificate",
-    "house_rate" ~ "Energy rating of B or higher"
-  )
-) %>%
-  as_kable_extra(format = "latex")
+
+## Data summary ----
+print(skimr::skim(pov))
 
 
-clean_pov <- pov %>%
-  select(where(is.numeric) & !id) %>%
-  st_drop_geometry()
 
-item_desc <- c(
-  household = "Household size",
-  cond_air = "Chronical disease or disability that requires more air",
-  cond_heat = "Chronical disease or disability that requires more heating",
-  cond_trans = "Chronical disease or disability that requires special care for transport",
-  cond_smoke = "Smoking",
-  cond_support = "Receiving any form of public support such as social welfare payments or housing allowances",
-  income = "Household's annual mean net income [€] in the last year",
-  behav_unplug = "Performs activity: Unplug electronic devices that are not being used",
-  behav_products = "Performs activity: Actively search for products that are more energy efficient",
-  behav_lights = "Performs activity: Turn off all lights before leaving a room",
-  behav_share = "Performs activity: Encourage friends or family to be more energy efficient",
-  behav_carpool = "Performs activity: Consciously participate in carpooling",
-  behav_car = "Performs activity: Consciously choose to travel without a car (e.g., walk, bike, public transport, etc.)",
-  behav_temp = "Performs activity: Lower the temperature set point of your water heater",
-  behav_shower = "Performs activity: Take shorter showers",
-  behav_drive = "Performs activity: Drive slower on the highway",
-  behav_dishwash = "Performs activity: Run full loads in the dishwasher",
-  know_energy = "Finds complex: Understanding monthly electricity consumption",
-  know_heating = "Finds complex: Understanding my monthly heating and/or cooling consumption",
-  know_costs = "Finds complex: Understanding my monthly heating and/or cooling consumption",
-  know_share = "Finds complex: Knowing the share of renewable energy and fossil fuel-based energy that I consume",
-  know_solutions = "Finds complex: Implementing green energy solutions at home",
-  has_cooling = "Has a cooling system",
-  has_heating = "Has a heating system",
-  heat_central = "Has a central heating system",
-  heating_cost = "Average monthly expenditure [€] for heating in the last year",
-  water_cost = "Average monthly expenditure [€] for hot water in the last year",
-  energy_cost = "Average monthly expenditure [€] for electricity in the last year",
-  ability_to_pay = "How often did you worry that you wouldnt be able to pay your home energy bill?",
-  supplier_threat = "How often did you have a supplier threaten you to disconnect your electricity or home heating fuel service, or discontinue making fuel deliveries?",
-  safety_winter = "During the winter months, how often did you keep your home at a temperature that you felt was unsafe or unhealthy?",
-  safety_summer = "During the summer months, how often did you keep your home at a temperature that you felt was unsafe or unhealthy?",
-  house_detach = "Lives in a (semi) detached house",
-  house_area = "Area [m²] of home",
-  house_age = "Construction year of house",
-  house_renov = "Did the house have at least one major renovation since its construction?",
-  house_cert = "Does the house have an energy performance certificate?",
-  house_rate = "What is the energy rating of the house?"
+## Prepare data ----
+loc <- st_geometry(pov)
+
+pov_for_pca <- pov %>%
+  select(!any_of(c("id", "nuts0", "nuts1", "nuts2", "geometry"))) %>%
+  st_drop_geometry() %>%
+  scale() %>%
+  as.data.frame()
+
+
+## Imputation ----
+pov_for_pca <- as.data.frame(imputePCA(pov_for_pca)$completeObs)
+
+
+## Perform global PCA ----
+pca <- princomp(
+  as.formula(paste("~", paste(names(pov_for_pca), collapse = " + "))),
+  data = pov_for_pca
 )
 
-tibble(
-  Variable = paste0("\\texttt{", names(clean_pov), "}"),
-  #Item = item_desc,
-  Missing = map_dbl(clean_pov, ~sum(is.na(.x))),
-  Mean = round(map_dbl(clean_pov, mean, na.rm = TRUE), 2),
-  SD = round(map_dbl(clean_pov, sd, na.rm = TRUE), 2),
-  Min = round(map_dbl(clean_pov, min, na.rm = TRUE), 2),
-  P25 = round(map_dbl(clean_pov, quantile, probs = 0.25, na.rm = TRUE), 2),
-  Median = round(map_dbl(clean_pov, median, na.rm = TRUE), 2),
-  P75 = round(map_dbl(clean_pov, quantile, probs = 0.75, na.rm = TRUE), 2),
-  Max = round(map_dbl(clean_pov, max, na.rm = TRUE), 2),
-) %>%
-  kbl(format = "latex", booktabs = TRUE, longtable = TRUE) %>%
-  str_replace_all(fixed("\\{"), "{") %>%
-  str_replace_all(fixed("\\}"), "}") %>%
-  str_replace_all(fixed("\\textbackslash{}"), "\\") %>%
-  cat()
+
+## Extract info from PCA ----
+eig <- get_eigenvalue(pca)
+var <- get_pca_var(pca)
+pca_sel <- eig$eigenvalue > 1
+ci <- seq_len(sum(pca_sel))
+comp_names <- str_replace(colnames(pca$loadings), substr(colnames(pca$loadings), 2, 5), "")[ci]
 
 
+## Clustered bi-plot ----
+## Identify clusters from PCA coordinates and generate a biplot
+set.seed(10164987)
+clus <- kmeans(var$coord, centers = 5, nstart = 25)
+grps <- cut(
+  clus$cluster,
+  breaks = 5,
+  labels = c("Impairments", "Living conditions", "Disadvantage", "Knowledge", "Behavior")
+)
+fviz_pca_var(pca, col.var = grps, legend.title = "Cluster") +
+  ggtitle(NULL) +
+  theme_bw()
+ggsave("data-raw/energy_poverty/pca_var_clus.png", bg = "white")
 
-t <- pov %>%
-  select(!any_of(c("id", "nuts0", "nuts1", "nuts2", "geometry"))) %>%
-  st_drop_geometry()
-t2 <- prcomp(as.formula(paste("~", paste(names(t), collapse = " + "))), data = t)
 
-t <- prcomp(st_drop_geometry(select(pov, !any_of(c("id", "nuts0", "nuts1", "nuts2", "geometry")))), na.action = na.omit)
+## Scree test ----
+fviz_eig(pca, "eigenvalue", geom = "line", addlabels = TRUE, ncp = 20) +
+  ggtitle(NULL) +
+  theme_bw()
+ggsave("data-raw/energy_poverty/pca_scree.png", bg = "white")
+
+
+## PCA diagnostics ----
+## Plot correlation, cos2 and rotation vector in a matrix
+p1 <- ggcorrplot::ggcorrplot(
+  var$cor[, ci],
+  colors = RColorBrewer::brewer.pal(3, "PRGn"),
+  legend.title = "Pearson coef.",
+  ggtheme = theme_bw
+) +
+  scale_y_discrete(labels = c("C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9", "C10")) +
+  theme(
+    axis.text.x = element_blank(),
+    axis.text.y = element_text(size = 10)
+  )
+
+p2 <- ggcorrplot::ggcorrplot(
+  var$cos2[, ci],
+  colors = RColorBrewer::brewer.pal(3, "PRGn"),
+  legend.title = "Sq. Cosine",
+  ggtheme = theme_bw
+) +
+  scale_y_discrete(labels = c("C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9", "C10")) +
+  theme(
+    axis.text.x = element_blank(),
+    axis.text.y = element_text(size = 10)
+  )
+
+p3 <- ggcorrplot::ggcorrplot(
+  pca$loadings[, ci],
+  colors = RColorBrewer::brewer.pal(3, "PRGn"),
+  legend.title = "Loadings",
+  ggtheme = theme_bw
+) +
+  scale_y_discrete(labels = c("C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9", "C10")) +
+  theme(axis.text.x = element_text(size = 10, angle = 90), axis.text.y = element_text(size = 10))
+
+patchwork::wrap_plots(p1, p2, p3, nrow = 3) +
+  plot_layout(guides = "collect")
+ggsave("data-raw/energy_poverty/pca_corplot.png")
+
+
+## Add progress bar to GW functions (and fix a bug)
+body(gwpca)[[26]][[3]] <- quote(cli::cli_progress_along(1:ep.n))
+body(gw_nsprcomp)[[27]][[3]] <- quote(cli::cli_progress_along(1:ep.n))
+body(gw_nsprcomp)[[27]][[4]][[8]][[3]] <- quote(temp$rotation[var.n, k])
+
+## Find optimal bandwidth ----
+bw_gwpca <- GWmodel::bw.gwpca(
+  as_Spatial(st_sf(pov_for_pca, geometry = loc)),
+  vars = names(pov_for_pca),
+  k = 5,
+  kernel = "exp",
+  adaptive = TRUE
+)
+
+## Non-negative approach ----
+## (takes a loooong time, ~16 hours)
+gw_pca <- gw_nsprcomp(
+  as_Spatial(st_sf(pov_for_pca, geometry = loc)),
+  elocat = as_Spatial(loc),
+  vars = names(pov_for_pca),
+  bw = 1000 / nrow(pov_for_pca),
+  k = 5,
+  kernel = "gaussian",
+  adaptive = TRUE
+)
+
+## Traditional approach ----
+## (takes 5 minutes)
+gw_pca <- gwpca(
+  as_Spatial(st_sf(pov_for_pca, geometry = loc)),
+  elocat = as_Spatial(loc),
+  vars = names(pov_for_pca),
+  bw = 1000,
+  k = 5,
+  adaptive = TRUE,
+  kernel = "gaussian"
+)
+
+## Winning variables ----
+win1 <- colnames(gw_pca$loadings)[max.col(abs(gw_pca$loadings[, , 1]))] %>%
+  st_sf(winner = ., geometry = loc)
+win2 <- colnames(gw_pca$loadings)[max.col(abs(gw_pca$loadings[, , 2]))] %>%
+  st_sf(winner = ., geometry = loc)
+win3 <- colnames(gw_pca$loadings)[max.col(abs(gw_pca$loadings[, , 3]))] %>%
+  st_sf(winner = ., geometry = loc)
+win4 <- colnames(gw_pca$loadings)[max.col(abs(gw_pca$loadings[, , 4]))] %>%
+  st_sf(winner = ., geometry = loc)
+win <- bind_rows(PC1 = win1, PC2 = win2, PC3 = win3, PC4 = win4, .id = "comp")
+
+ggplot(win) +
+  geom_sf(aes(color = winner), key_glyph = "rect", size = 0.2) +
+  facet_wrap(~comp) +
+  theme_bw()
+ggsave("data-raw/energy_poverty/gwpca_winner.png", bg = "white")
+
+ggcharts::bar_chart(win, winner, facet = comp, fill = comp) + guides(fill="none")
+ggsave("data-raw/energy_poverty/gwpca_winner_counts.png")
+
+
+## Index composition ----
+# Geometric mean of PC1-5 for all locations
+evindex <- map_dbl(seq_len(nrow(gw_pca$loadings)), ~exp(mean(log(abs(gw_pca$loadings[.x, , 1]))))) %>%
+  st_sf(index = ., geometry = loc)
+
+ggplot(evindex) +
+  geom_sf(aes(color = index * 100), size = 0.7) +
+  scale_color_viridis_b() +
+  theme_bw()
+ggsave("data-raw/energy_poverty/gwpca_index.png")
