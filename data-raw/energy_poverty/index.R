@@ -1,41 +1,69 @@
-library(dplyr)
-library(stringr)
-library(purrr)
-library(tidyr)
-library(sf)
-library(missMDA)
-library(factoextra)
-library(corrplot)
-library(GWmodel)
-library(GWnnegPCA)
-library(kableExtra)
-library(ggcorrplot)
-library(RColorBrewer)
-library(patchwork)
+if (!require(pacman)) {
+  install.packages("pacman")
+}
+
+pacman::p_load(
+  # data wrangling
+  dplyr,
+  stringr,
+  purrr,
+  tidyr,
+  
+  # spatial data
+  sf,
+  
+  # PCA
+  missMDA,
+  factoextra,
+  FactoMineR,
+  
+  # GW PCA
+  GWmodel,
+  GWnnegPCA,
+  
+  # Visualization
+  skimr,
+  kableExtra,
+  ggcorrplot,
+  ggcharts,
+  RColorBrewer,
+  viridis,
+  patchwork,
+  
+  # Meta
+  cli,
+  magrittr
+)
 
 
 ## Read data ----
 pov <- readRDS("data-ext/survey_resampled.rds") %>%
   select(starts_with(c(
-    "c6_",  # Energy saving #1
-    "c11", # Energy complexity
-    "c13", # Energy saving #2
+    "d1", # Gender
+    "d2", # Occupation
+    "c1", # Age
+    "c4", # Education
+    #"c6_",  # Energy saving #1
+    #"c11", # Energy complexity
+    #"c13", # Energy saving #2
     "c16", # Cooling system
     "c18", # Heating system
     "c19", # Heating system configuration
     "c26", # Energy costs
     "c28", # Consensual energy poverty
-    "c29", # Housing type
+    #"c29", # Housing type
     "c30", # Housing area
     "c31", # Housing age
-    "c32", # Major renovations
+    #"c32", # Major renovations
     "c48", # Household size
+    "c49", # Tenancy
     "c51", # Special conditions
     "c54"  # Income
-  )), "id", "nuts0", "nuts1", "nuts2")
+  )), "id", "nuts0", "nuts1", "nuts2", -"c51_4")
 
 cb <- readRDS("data-ext/codebook.rds") %>%
   filter(variable %in% names(pov))
+cb[cb$category %in% "c18", "og_var"] <- "c18"
 
 all_cats <- unique(tail(cb$category, -1))
 all_vars <- unique(tail(cb$og_var, -1))
@@ -70,36 +98,40 @@ for (v in all_vars) {
 ## for readability
 vars_lookup <- list(
   # demographic variables
+  gender = "d1",
+  occupation = "d2",
+  age = "c1",
+  education = "c4",
   household = "c48_1_open",
   cond_air = "c51_1",
   cond_heat = "c51_2",
   cond_trans = "c51_3",
-  cond_smoke = "c51_4",
+  #cond_smoke = "c51_4",
   cond_support = "c51_5",
   income = "c54",
   
   # behavioral variables
-  behav_unplug = "c6_1",
-  behav_products = "c6_2",
-  behav_lights = "c6_3",
-  behav_share = "c6_4",
-  behav_carpool = "c6_5",
-  behav_car = "c6_6",
-  behav_temp = "c13_1",
-  behav_shower = "c13_2",
-  behav_drive = "c13_3",
-  behav_dishwash = "c13_4",
+  #behav_unplug = "c6_1",
+  #behav_products = "c6_2",
+  #behav_lights = "c6_3",
+  #behav_share = "c6_4",
+  #behav_carpool = "c6_5",
+  #behav_car = "c6_6",
+  #behav_temp = "c13_1",
+  #behav_shower = "c13_2",
+  #behav_drive = "c13_3",
+  #behav_dishwash = "c13_4",
   
   # knowledge variables
-  know_energy = "c11_1",
-  know_heating = "c11_2",
-  know_costs = "c11_3",
-  know_share = "c11_4",
-  know_solutions = "c11_5",
+  #know_energy = "c11_1",
+  #know_heating = "c11_2",
+  #know_costs = "c11_3",
+  #know_share = "c11_4",
+  #know_solutions = "c11_5",
   
   # energy access variables
   has_cooling = "c16", # include as yes/no or divide by option?
-  has_heating = "c18_1", # include as yes/no or divide by option?
+  has_heating = "c18", # include as yes/no or divide by option?
   heat_config = "c19",
   
   # energy affordability variables
@@ -110,10 +142,11 @@ vars_lookup <- list(
   safety_summer = "c28_4",
   
   # housing variables
-  house_type = "c29",
+  #house_type = "c29",
   house_area = "c30",
   house_age = "c31",
-  house_renov = "c32_1"
+  #house_renov = "c32_1"
+  tenancy = "c49"
 )
 
 
@@ -131,6 +164,8 @@ pov <- pov %>%
       as.character(x) %>%
         na_if("I do not know") %>%
         na_if("Prefer not to say") %>%
+        na_if("Do not know / prefer not to say") %>%
+        na_if("Not applicable") %>%
         factor(levels = lev)
     }
   )) %>%
@@ -142,27 +177,114 @@ pov <- pov %>%
     .fns = ~case_match(.x, "Yes" ~ 1, "No" ~ 0, .default = NA)
   )) %>%
   mutate(
-    heat_config = case_when(
-      heat_config %in% "Central heating (heating the whole building where I live)" ~ 1,
-      !heat_config %in% "Central heating (heating the whole building where I live)" ~ 0,
-      .default = NA
+    heat_config = if_else(
+      heat_config == "Central heating (heating the whole building where I live)",
+      FALSE, TRUE
     ),
-    has_cooling = case_when(
-      !has_cooling %in% "No" ~ 1,
-      has_cooling %in% "No" ~ 0,
-      .default = NA
+    has_cooling = if_else(
+      has_cooling == "No",
+      TRUE, FALSE
     ),
-    house_type = case_when(
-      house_type %in% c("Detached house", "Semi-detached house") ~ 1,
-      !house_type %in% c("Detached house", "Semi-detached house") ~ 0,
-      .default = NA
+    has_heating = if_else(
+      has_heating == "I dont use any heating system at home",
+      TRUE, FALSE
+    ),
+    tenancy = if_else(
+      tenancy == c("Owner, with mortgage or loan",
+                     "Owner, no outstanding mortgage or housing loan"),
+      FALSE, TRUE
+    ),
+    income = if_else(
+      income == c(
+        "Finding it very difficult to live on current income",
+        "Finding it difficult to live on current income", 
+        "Coping on current income"
+      ),
+      TRUE, FALSE
+    ),
+    gender = if_else(
+      gender == "Male",
+      TRUE, FALSE
+    ),
+    occupation = if_else(
+      occupation == c(
+        "In education or training", "Unemployed", "Retired",
+        "Taking care of the home or family",
+        "Ill or disabled for a long time or permanently"
+      ),
+      TRUE, FALSE
+    ),
+    education = if_else(
+      education == c("Not completed primary", "Completed primary"),
+      TRUE, FALSE
+    ),
+    ability_to_pay = if_else(
+      ability_to_pay == c(
+        "In 1 or 2 months in the last year", "Some months in the last year", 
+        "Almost every month in the last year"
+      ),
+      TRUE, FALSE
+    ),
+    supplier_threat = if_else(
+      supplier_threat == c(
+        "In 1 or 2 months in the last year", "Some months in the last year", 
+        "Almost every month in the last year"
+      ),
+      TRUE, FALSE
+    ),
+    safety_summer = if_else(
+      safety_summer == c(
+        "In 1 or 2 months in the last year", "Some months in the last year", 
+        "Almost every month in the last year"
+      ),
+      TRUE, FALSE
+    ),
+    safety_winter = if_else(
+      safety_winter == c(
+        "In 1 or 2 months in the last year", "Some months in the last year", 
+        "Almost every month in the last year"
+      ),
+      TRUE, FALSE
+    ),
+    house_area = if_else(
+      house_area == c("100 to 150 m2", "150 to 200 m2", "Greater than 200 m2"),
+      TRUE, FALSE
+    ),
+    house_age = if_else(
+      house_age == c("Before 1945", "1945–1969", "1970 –1979", "1980–1989"),
+      TRUE, FALSE
+    ),
+    energy_cost = if_else(
+      energy_cost == c("86 - 110 EUR", "111 - 135 EUR", "136 EUR or more"),
+      TRUE, FALSE
     )
+    # house_type = case_when(
+    #   house_type %in% c("Detached house", "Semi-detached house") ~ 1,
+    #   !house_type %in% c("Detached house", "Semi-detached house") ~ 0,
+    #   .default = NA
+    # )
   ) %>%
-  rename(heat_central = heat_config, house_detach = house_type)
+  rename(
+    no_central = heat_config,
+    lacks_cooling = has_cooling,
+    lacks_heating = has_heating,
+    is_tenant = tenancy,
+    not_male = gender,
+    unemployed = occupation,
+    lacks_education = education,
+    inability_to_pay = ability_to_pay,
+    danger_summer = safety_summer,
+    danger_winter = safety_winter,
+    large_house = house_area,
+    old_house = house_age,
+    energy_burden = energy_cost
+  )
 
 pov <- pov %>%
   mutate(across(
-    where(is.factor) & !any_of(c("id", "nuts0", "nuts1", "nuts2")),
+    where(is.factor) & any_of(c("income", "energy_cost", "ability_to_pay",
+                                "supplier_threat", "safety_winter",
+                                "safety_summer", "house_area", "house_age")),
     .fns = as.numeric
   )) %>%
   select(where(~!all(.x == 0, na.rm = TRUE)))
@@ -180,11 +302,11 @@ pov_for_pca <- pov %>%
   select(!any_of(c("id", "nuts0", "nuts1", "nuts2", "geometry"))) %>%
   st_drop_geometry() %>%
   scale() %>%
-  as.data.frame()
-
-
-## Imputation ----
-pov_for_pca <- as.data.frame(imputePCA(pov_for_pca)$completeObs)
+  as_tibble() %>%
+  imputePCA() %>%
+  extract2("completeObs") %>%
+  as_tibble() %>%
+  select(-not_male, -no_central, -age)
 
 
 ## Perform global PCA ----
@@ -193,11 +315,13 @@ pca <- princomp(
   data = pov_for_pca
 )
 
+pca <- PCA(pov_for_pca, ncp = ncol(pov_for_pca), graph = FALSE)
+
 
 ## Extract info from PCA ----
 eig <- get_eigenvalue(pca)
 var <- get_pca_var(pca)
-pca_sel <- eig$eigenvalue > 1
+pca_sel <- eig[, "eigenvalue"] > 1
 ci <- seq_len(sum(pca_sel))
 comp_names <- str_replace(colnames(pca$loadings), substr(colnames(pca$loadings), 2, 5), "")[ci]
 
@@ -251,7 +375,7 @@ p2 <- ggcorrplot::ggcorrplot(
   )
 
 p3 <- ggcorrplot::ggcorrplot(
-  pca$loadings[, ci],
+  sweep(var$coord, 2, sqrt(eig[1:ncol(var$coord), 1]), FUN = "/")[, ci],
   colors = RColorBrewer::brewer.pal(3, "PRGn"),
   legend.title = "Loadings",
   ggtheme = theme_bw
@@ -259,18 +383,18 @@ p3 <- ggcorrplot::ggcorrplot(
   scale_y_discrete(labels = c("C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9", "C10")) +
   theme(axis.text.x = element_text(size = 10, angle = 90), axis.text.y = element_text(size = 10))
 
-patchwork::wrap_plots(p1, p2, p3, nrow = 3) +
+wrap_plots(p1, p2, p3, nrow = 3) +
   plot_layout(guides = "collect")
 ggsave("data-raw/energy_poverty/pca_corplot.png")
 
 
 ## Add progress bar to GW functions (and fix a bug)
 body(gwpca)[[26]][[3]] <- quote(cli::cli_progress_along(1:ep.n))
-body(gw_nsprcomp)[[27]][[3]] <- quote(cli::cli_progress_along(1:ep.n))
-body(gw_nsprcomp)[[27]][[4]][[8]][[3]] <- quote(temp$rotation[var.n, k])
+#body(gw_nsprcomp)[[27]][[3]] <- quote(cli::cli_progress_along(1:ep.n))
+#body(gw_nsprcomp)[[27]][[4]][[8]][[3]] <- quote(temp$rotation[var.n, k])
 
 ## Find optimal bandwidth ----
-bw_gwpca <- GWmodel::bw.gwpca(
+bw_gwpca <- bw.gwpca(
   as_Spatial(st_sf(pov_for_pca, geometry = loc)),
   vars = names(pov_for_pca),
   k = 5,
@@ -280,15 +404,21 @@ bw_gwpca <- GWmodel::bw.gwpca(
 
 ## Non-negative approach ----
 ## (takes a loooong time, ~16 hours)
-gw_pca <- gw_nsprcomp(
-  as_Spatial(st_sf(pov_for_pca, geometry = loc)),
-  elocat = as_Spatial(loc),
-  vars = names(pov_for_pca),
-  bw = 1000 / nrow(pov_for_pca),
-  k = 5,
-  kernel = "gaussian",
-  adaptive = TRUE
-)
+options(future.globals.maxSize = +Inf)
+#handlers("cli")
+with_progress({
+  gw_pca <- gw_nsprcomp(
+    as_Spatial(st_sf(pov_for_pca, geometry = loc)),
+    elocat = as_Spatial(loc),
+    vars = names(pov_for_pca),
+    bw = 1000 / nrow(pov_for_pca),
+    k = 5,
+    kernel = "gaussian",
+    adaptive = TRUE,
+    workers = 4
+  )
+})
+
 
 ## Traditional approach ----
 ## (takes 5 minutes)
