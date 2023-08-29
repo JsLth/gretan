@@ -4,36 +4,23 @@ if (!require(pacman)) {
 
 pacman::p_load(
   # data wrangling
-  dplyr,
-  stringr,
-  purrr,
-  tidyr,
+  dplyr, stringr, purrr, tidyr,
   
   # spatial data
   sf,
   
   # PCA
-  missMDA,
-  factoextra,
-  FactoMineR,
-  psych,
+  missMDA, factoextra, FactoMineR, psych,
   
   # GW PCA
-  GWmodel,
-  GWnnegPCA,
+  GWmodel, GWnnegPCA,
   
   # Visualization
-  skimr,
-  kableExtra,
-  ggcorrplot,
-  ggcharts,
-  RColorBrewer,
-  viridis,
-  patchwork,
+  skimr, kableExtra, ggcorrplot, ggcharts, RColorBrewer, colorspace,
+  viridis, patchwork,
   
   # Meta
-  cli,
-  magrittr
+  cli, magrittr
 )
 
 
@@ -241,7 +228,7 @@ pov <- pov %>%
 
 
 ## Data summary ----
-print(skimr::skim(pov))
+print(skim(st_drop_geometry(pov)))
 
 
 
@@ -257,41 +244,55 @@ pov_for_pca <- pov %>%
   extract2("completeObs") %>%
   as_tibble()
 
-is_dichotomous <- function(x) {
-  all(x %in% c(0, 1, NA))
-}
-
-is_polytomous <- function(x) {
-  all(is.numeric(x) & length(unique(x)) < 8)
-}
+# is_dichotomous <- function(x) {
+#   all(x %in% c(0, 1, NA))
+# }
+# 
+# is_polytomous <- function(x) {
+#   all(is.numeric(x) & length(unique(x)) < 8)
+# }
 
 # Create a mix of polychoric, tetrachoric and pearson correlation matrices
 corr <- mixedCor(
   c = names(select(pov_for_pca, !where(is_polytomous) & !where(is_dichotomous))),
   p = names(select(pov_for_pca, where(is_polytomous) & !where(is_dichotomous))),
   d = names(select(pov_for_pca, where(is_dichotomous))),
-  data = pov_for_pca
+  data = pov_for_pca,
+  global = FALSE
 )
 
 
 
 ## Perform global PCA ----
-pca <- princomp(
-  as.formula(paste("~", paste(names(pov_for_pca), collapse = " + "))),
-  data = pov_for_pca
-)
+# pca <- princomp(
+#   as.formula(paste("~", paste(names(pov_for_pca), collapse = " + "))),
+#   data = pov_for_pca
+# )
 
-pca <- princomp(covmat = corr$rho)
+# pca <- princomp(covmat = corr$rho)
 
-pca <- nsprcomp::nsprcomp(
-  as.formula(paste("~", paste(names(pov_for_pca), collapse = " + "))),
-  data = pov_for_pca,
-  nneg = TRUE
-)
+# pca <- nsprcomp::nsprcomp(
+#   as.formula(paste("~", paste(names(pov_for_pca), collapse = " + "))),
+#   data = pov_for_pca,
+#   nneg = TRUE
+# )
 
-pca <- PCA(corr$rho, ncp = ncol(pov_for_pca), graph = FALSE)
+#pca <- PCA(corr$rho, ncp = ncol(pov_for_pca), graph = FALSE)
 
-pca <- principal(corr$rho, nfactors = 10, cor = "mixed")
+# pca <- principal(corr$rho, nfactors = 10, cor = "mixed")
+
+#fact <- factanal(covmat = corr$rho, factors = 1, n.obs = ncol(pov_for_pca))
+
+# 1 factor is sufficient (p = 1)
+fact <- factanal(covmat = corr$rho, factors = 1, n.obs = ncol(pov_for_pca))
+
+# 1 factor is not sufficient?? (p = 0)
+fact <- fa(r = pov_for_pca, cor = "mixed")
+
+irrelevant_vars <- names(fact$loadings[, 1])[abs(fact$loadings[, 1]) < 0.3]
+pov_for_pca2 <- select(pov_for_pca, -all_of(irrelevant_vars))
+
+fact <- fa(r = pov_for_pca2, cor = "mixed")
 
 
 ## Extract info from PCA ----
@@ -299,7 +300,7 @@ eig <- get_eigenvalue(pca)
 var <- get_pca_var(pca)
 pca_sel <- eig[, "eigenvalue"] > 1
 ci <- seq_len(sum(pca_sel))
-comp_names <- str_replace(colnames(pca$loadings), substr(colnames(pca$loadings), 2, 5), "")[ci]
+comp_names <- paste0("C", ci)
 
 
 ## Clustered bi-plot ----
@@ -326,46 +327,102 @@ ggsave("data-raw/energy_poverty/pca_scree.png", bg = "white")
 
 ## PCA diagnostics ----
 ## Plot correlation, cos2 and rotation vector in a matrix
-p1 <- ggcorrplot::ggcorrplot(
+body(ggcorrplot)[[20]][[3]][[2]][[3]][[3]] <- quote(ggplot2::geom_tile(
+  color = outline.color, ggplot2::aes_string(width = "value", height = "value")
+))
+body(ggcorrplot)[[20]][[3]][[2]] <- quote(
+  p <- p +
+    ggplot2::geom_tile(color = "grey", fill = "white") +
+    ggplot2::geom_tile(
+      color = outline.color,
+      ggplot2::aes_string(width = "value", height = "value"))
+)
+
+p1 <- ggcorrplot(
   var$cor[, ci],
-  colors = RColorBrewer::brewer.pal(3, "PRGn"),
-  legend.title = "Pearson coef.",
-  ggtheme = theme_bw
+  colors = diverge_hcl(3, palette = "Blue-Red 2"),
+  outline.color = NA,
+  legend.title = "Correlation",
+  ggtheme = theme_minimal
 ) +
   scale_y_discrete(labels = c("C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9", "C10")) +
   theme(
     axis.text.x = element_blank(),
-    axis.text.y = element_text(size = 10)
+    axis.text.y = element_text(size = 10),
+    legend.key.size = unit(0.5, 'cm'),
+    legend.key.height = unit(0.5, 'cm'),
+    legend.key.width = unit(0.5, 'cm'),
+    legend.title = element_text(size = 10),
+    legend.text = element_text(size = 8)
   )
 
-p2 <- ggcorrplot::ggcorrplot(
+p2 <- ggcorrplot(
   var$cos2[, ci],
-  colors = RColorBrewer::brewer.pal(3, "PRGn"),
+  colors = diverge_hcl(3, palette = "Blue-Red 2"),
+  outline.color = NA,
   legend.title = "Sq. Cosine",
-  ggtheme = theme_bw
+  ggtheme = theme_minimal
 ) +
   scale_y_discrete(labels = c("C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9", "C10")) +
   theme(
     axis.text.x = element_blank(),
-    axis.text.y = element_text(size = 10)
+    axis.text.y = element_text(size = 10),
+    legend.key.size = unit(0.5, 'cm'),
+    legend.key.height = unit(0.5, 'cm'),
+    legend.key.width = unit(0.5, 'cm'),
+    legend.title = element_text(size = 10),
+    legend.text = element_text(size = 8)
   )
 
-p3 <- ggcorrplot::ggcorrplot(
+p3 <- ggcorrplot(
   sweep(var$coord, 2, sqrt(eig[1:ncol(var$coord), 1]), FUN = "/")[, ci],
-  colors = RColorBrewer::brewer.pal(3, "PRGn"),
-  legend.title = "Loadings",
-  ggtheme = theme_bw
+  colors = diverge_hcl(3, palette = "Blue-Red 2"),
+  outline.color = NA,
+  legend.title = "Loadings\u2800",
+  ggtheme = theme_minimal
 ) +
   scale_y_discrete(labels = c("C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9", "C10")) +
-  theme(axis.text.x = element_text(size = 10, angle = 90), axis.text.y = element_text(size = 10))
+  theme(
+    axis.text.x = element_text(angle = 90, vjust = 0.3, size = 10),
+    axis.text.y = element_text(size = 10),
+    legend.key.size = unit(0.5, 'cm'),
+    legend.key.height = unit(0.5, 'cm'),
+    legend.key.width = unit(0.5, 'cm'),
+    legend.title = element_text(size = 10),
+    legend.text = element_text(size = 8)
+  )
 
 wrap_plots(p1, p2, p3, nrow = 3) +
-  plot_layout(guides = "collect")
+  plot_layout(guides = "auto")
 ggsave("data-raw/energy_poverty/pca_corplot.png")
+
+cordf <- data.frame(expand.grid(dimnames(var$cor[, ci])), value = as.vector(var$cor[, ci]))
+ggplot(cordf) +
+  geom_tile(aes(x = Var1, y = Var2, fill = value, height = value, width = value)) +
+  scale_fill_gradient2(
+    low = "#AF8DC3",
+    high = "#7FBF7B",
+    mid = "#F7F7F7",
+    midpoint = 0,
+    limit = c(-1, 1),
+    space = "Lab",
+    name = "Correlation"
+  ) +
+  theme(
+    axis.text.x = element_text(
+      angle = tl.srt,
+      vjust = 1,
+      size = tl.cex,
+      hjust = 1
+    ),
+    axis.text.y = element_text(size = tl.cex)
+  ) +
+  coord_fixed()
 
 
 ## Add progress bar to GW functions (and fix a bug)
 body(gwpca)[[26]][[3]] <- quote(cli::cli_progress_along(1:ep.n))
+body(gwfa)[[26]][[4]][[11]][[3]] <- quote(cli::cli_progress_along(1:ep.n))
 #body(gw_nsprcomp)[[27]][[3]] <- quote(cli::cli_progress_along(1:ep.n))
 #body(gw_nsprcomp)[[27]][[4]][[8]][[3]] <- quote(temp$rotation[var.n, k])
 
@@ -377,6 +434,19 @@ bw_gwpca <- bw.gwpca(
   kernel = "exp",
   adaptive = TRUE
 )
+
+
+# GWEFA
+gw_efa <- gwfa(
+  as_Spatial(st_sf(pov_for_pca, geometry = loc)),
+  elocat = as_Spatial(loc),
+  vars = names(pov_for_pca),
+  bw = 1000,
+  kernel = "gaussian",
+  adaptive = TRUE,
+  cor = "mixed"
+)
+
 
 ## Non-negative approach ----
 ## (takes a loooong time, ~16 hours)
