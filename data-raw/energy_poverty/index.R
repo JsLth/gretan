@@ -1,10 +1,11 @@
 if (!require(pacman)) {
   install.packages("pacman")
 }
+library(pacman)
 
-pacman::p_load(
+p_load(
   # data wrangling
-  dplyr, stringr, purrr, tidyr,
+  dplyr, stringr, purrr, tidyr, janitor,
   
   # spatial data
   sf,
@@ -24,6 +25,28 @@ pacman::p_load(
 )
 
 
+
+# Fix some functions
+body(ggcorrplot)[[20]][[3]][[2]][[3]][[3]] <- quote(ggplot2::geom_tile(
+  color = outline.color, ggplot2::aes_string(width = "value", height = "value")
+))
+body(ggcorrplot)[[20]][[3]][[2]] <- quote(
+  p <- p +
+    ggplot2::geom_tile(color = "grey", fill = "white") +
+    ggplot2::geom_tile(
+      color = outline.color,
+      ggplot2::aes_string(width = "value", height = "value"))
+)
+
+body(gwpca)[[26]][[3]] <- quote(cli::cli_progress_along(1:ep.n))
+body(gwpca)[[34]][[3]][[2]][[2]] <- quote(matrix(d1[, 1:k]))
+#body(gwfa)[[26]][[4]][[11]][[3]] <- quote(cli::cli_progress_along(1:ep.n))
+#body(gwfa)[[10]] <- quote(data <- as(sdata, "data.frame")[seq_len(ncol(sdata))])
+#body(gw_nsprcomp)[[27]][[3]] <- quote(cli::cli_progress_along(1:ep.n))
+#body(gw_nsprcomp)[[27]][[4]][[8]][[3]] <- quote(temp$rotation[var.n, k])
+
+
+
 ## Read data ----
 pov <- readRDS("data-ext/survey_resampled.rds") %>%
   select(starts_with(c(
@@ -33,7 +56,6 @@ pov <- readRDS("data-ext/survey_resampled.rds") %>%
     "c4", # Education
     "c6_",  # Energy saving #1
     "c11", # Energy complexity
-    "c13", # Energy saving #2
     "c16", # Cooling system
     "c18", # Heating system
     "c19", # Heating system configuration
@@ -103,10 +125,6 @@ vars_lookup <- list(
   behav_share = "c6_4",
   behav_carpool = "c6_5",
   behav_car = "c6_6",
-  behav_temp = "c13_1",
-  behav_shower = "c13_2",
-  behav_drive = "c13_3",
-  behav_dishwash = "c13_4",
   
   # knowledge variables
   know_energy = "c11_1",
@@ -244,13 +262,13 @@ pov_for_pca <- pov %>%
   extract2("completeObs") %>%
   as_tibble()
 
-# is_dichotomous <- function(x) {
-#   all(x %in% c(0, 1, NA))
-# }
-# 
-# is_polytomous <- function(x) {
-#   all(is.numeric(x) & length(unique(x)) < 8)
-# }
+is_dichotomous <- function(x) {
+  all(x %in% c(0, 1, NA))
+}
+
+is_polytomous <- function(x) {
+  all(is.numeric(x) & length(unique(x)) < 8)
+}
 
 # Create a mix of polychoric, tetrachoric and pearson correlation matrices
 corr <- mixedCor(
@@ -283,148 +301,211 @@ corr <- mixedCor(
 
 #fact <- factanal(covmat = corr$rho, factors = 1, n.obs = ncol(pov_for_pca))
 
-# 1 factor is sufficient (p = 1)
-fact <- factanal(covmat = corr$rho, factors = 1, n.obs = ncol(pov_for_pca))
+# TWO-STAGE PCA
+# BI-FACTOR MODEL
+# 
+# Idea: 
+# 1. Create subindices using PCA
+# 2. Combine subindices using PCA again
+# 
+# Why?
+# Take into account the latent nature of energy poverty. Creating sub-indices
+# allows for better control of the causality of energy poverty. It prevents
+# hard-to-interpret spikes of individual variables that have only very weak
+# causal links to energy poverty. For example, using all variables directly,
+# single knowledge or behavioral variables frequently occupy the 'winning'
+# spots in GWPCA or the first component in global PCA.
+# Generally, PCA is biased towards highly correlated variables leading to
+# groups of variables 'lumping together', e.g. knowledge and behavior dominating
+# the first two components.
+# 
+# Mishra 2007:
+# PCA loadings are highly elitist – preferring highly correlated
+# variables to poorly correlated variables, irrespective of the (possible)
+# contextual importance of the latter set of variables. On many occasions it
+# is found that some (evidently) very important variables are roughly dealt
+# with by the PCA simply because those variables exhibited widely distributed
+# scatter or they failed to fall within a narrow band around a straight line.
+# 
+# Further reading:
+# https://www.bbvaresearch.com/wp-content/uploads/2014/09/WP14-26_Financial-Inclusion1.pdf
+# https://mpra.ub.uni-muenchen.de/3377/1/MPRA_paper_3377.pdf
+# https://doi.org/10.1016/j.qref.2021.01.003
+# https://doi.org/10.3390/su8121287
+# https://doi.org/10.1111/rsp3.12607
+# https://doi.org/10.1162/ASEP_a_00009
+# https://doi.org/10.1007/s11205-018-1933-0
+# https://doi.org/10.1007/978-3-319-60595-1_7
+# https://doi.org/10.1007/s11135-022-01345-5
 
-# 1 factor is not sufficient?? (p = 0)
-fact <- fa(r = pov_for_pca, cor = "mixed")
-
-irrelevant_vars <- names(fact$loadings[, 1])[abs(fact$loadings[, 1]) < 0.3]
-pov_for_pca2 <- select(pov_for_pca, -all_of(irrelevant_vars))
-
-fact <- fa(r = pov_for_pca2, cor = "mixed")
-
-
-## Extract info from PCA ----
-eig <- get_eigenvalue(pca)
-var <- get_pca_var(pca)
-pca_sel <- eig[, "eigenvalue"] > 1
-ci <- seq_len(sum(pca_sel))
-comp_names <- paste0("C", ci)
-
-
-## Clustered bi-plot ----
-## Identify clusters from PCA coordinates and generate a biplot
-set.seed(10164987)
-clus <- kmeans(var$coord, centers = 5, nstart = 25)
-grps <- cut(
-  clus$cluster,
-  breaks = 5,
-  labels = c("Impairments", "Living conditions", "Disadvantage", "Knowledge", "Behavior")
-)
-fviz_pca_var(pca, col.var = grps, legend.title = "Cluster") +
-  ggtitle(NULL) +
-  theme_bw()
-ggsave("data-raw/energy_poverty/pca_var_clus.png", bg = "white")
-
-
-## Scree test ----
-fviz_eig(pca, "eigenvalue", geom = "line", addlabels = TRUE, ncp = 20) +
-  ggtitle(NULL) +
-  theme_bw()
-ggsave("data-raw/energy_poverty/pca_scree.png", bg = "white")
-
-
-## PCA diagnostics ----
-## Plot correlation, cos2 and rotation vector in a matrix
-body(ggcorrplot)[[20]][[3]][[2]][[3]][[3]] <- quote(ggplot2::geom_tile(
-  color = outline.color, ggplot2::aes_string(width = "value", height = "value")
-))
-body(ggcorrplot)[[20]][[3]][[2]] <- quote(
-  p <- p +
-    ggplot2::geom_tile(color = "grey", fill = "white") +
-    ggplot2::geom_tile(
-      color = outline.color,
-      ggplot2::aes_string(width = "value", height = "value"))
+subind_vars <- list(
+  afford = c("ability_to_pay", "supplier_threat", "safety_summer", "safety_winter", "income"),
+  access = c("no_central", "lacks_heating", "lacks_cooling"),
+  housing = c("detached", "house_area", "house_age", "is_tenant", "energy_cost"),
+  social = c("not_male", "unemployed", "age", "lacks_education", "household"),
+  cond = c("cond_support", "cond_trans", "cond_heat", "cond_air"),
+  behav = c("behav_unplug", "behav_products", "behav_lights", "behav_share", "behav_carpool", "behav_car"),
+  know = c("know_energy", "know_heating", "know_costs", "know_share", "know_solutions")
 )
 
-p1 <- ggcorrplot(
-  var$cor[, ci],
-  colors = diverge_hcl(3, palette = "Blue-Red 2"),
-  outline.color = NA,
-  legend.title = "Correlation",
-  ggtheme = theme_minimal
-) +
-  scale_y_discrete(labels = c("C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9", "C10")) +
-  theme(
-    axis.text.x = element_blank(),
-    axis.text.y = element_text(size = 10),
-    legend.key.size = unit(0.5, 'cm'),
-    legend.key.height = unit(0.5, 'cm'),
-    legend.key.width = unit(0.5, 'cm'),
-    legend.title = element_text(size = 10),
-    legend.text = element_text(size = 8)
+subind_nm <- list(
+  afford = "Affordability",
+  access = "Energy access",
+  housing = "Housing",
+  social = "Social conditions",
+  cond = "Special conditions",
+  behav = "Energy behavior",
+  know = "Energy literacy"
+)
+
+pca <- lapply(subind_vars, function(x) {
+  povdf <- pov_for_pca[x]
+  PCA(povdf, graph = FALSE)
+})
+
+pca_df <- lapply(pca, function(x) {
+  x$ind$coord[, 1]
+}) %>%
+  bind_cols(.name_repair = "minimal") %>%
+  setNames(subind_nm) %>%
+  clean_names()
+
+pca_index <- PCA(pca_df)
+pca_index <- st_sf(index = pca_index$ind$coord[, 1], geometry = st_geometry(pov))
+pca_index_agg <- aggregate(pca_index, readRDS("data-ext/bounds/nuts2.rds"), FUN = mean)
+ggplot(pca_index_agg) +
+  geom_sf(aes(fill = index), color = NA) +
+  coord_sf(xlim = c(2500000, 6000000), ylim = c(1500000, 5200000)) +
+  scale_fill_viridis_b()
+
+scree_plots <- lapply(seq_along(pca), function(i) {
+  pca <- pca[i]
+  title <- subind_nm[[names(pca)]]
+  fviz_eig(pca[[1]], "eigenvalue", title = title)
+})
+wrap_plots(scree_plots, ncol = 3)
+
+pca_plots <- lapply(seq_along(pca), function(i) {
+  pca <- pca[i]
+  title <- subind_nm[[names(pca)]]
+  fviz_pca_var(pca[[1]], title = title)
+})
+wrap_plots(pca_plots, ncol = 3)
+
+cos2_plots <- lapply(seq_along(pca), function(i) {
+  pca <- pca[i]
+  title <- subind_nm[[names(pca)]]
+  ggcorrplot(pca[[1]]$var$cos2) +
+    theme(axis.text.x = element_text(size = 8), axis.text.y = element_text(size = 8))
+})
+wrap_plots(cos2_plots, ncol = 3, guides = "collect")
+
+
+
+
+gw_pca <- list()
+bw <- list()
+
+subindex_bw <- function(subindex) {
+  bw.gwpca(
+    data = as_Spatial(st_sf(pov_for_pca, geometry = loc)[subind_vars[[subindex]]]),
+    vars = names(pov_for_pca[subind_vars[[subindex]]]),
+    k = 1,
+    robust = TRUE,
+    kernel = "exponential",
+    adaptive = TRUE
   )
+}
 
-p2 <- ggcorrplot(
-  var$cos2[, ci],
-  colors = diverge_hcl(3, palette = "Blue-Red 2"),
-  outline.color = NA,
-  legend.title = "Sq. Cosine",
-  ggtheme = theme_minimal
-) +
-  scale_y_discrete(labels = c("C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9", "C10")) +
-  theme(
-    axis.text.x = element_blank(),
-    axis.text.y = element_text(size = 10),
-    legend.key.size = unit(0.5, 'cm'),
-    legend.key.height = unit(0.5, 'cm'),
-    legend.key.width = unit(0.5, 'cm'),
-    legend.title = element_text(size = 10),
-    legend.text = element_text(size = 8)
+subindex_gwpca <- function(subindex) {
+  df <- pov_for_pca[subind_vars[[subindex]]]
+  
+  gwpca(
+    data = as_Spatial(st_sf(df, geometry = loc)),
+    elocat = as_Spatial(loc),
+    vars = names(df),
+    k = 1,
+    bw = 500,
+    kernel = "gaussian",
+    adaptive = TRUE,
+    cv = FALSE
   )
-
-p3 <- ggcorrplot(
-  sweep(var$coord, 2, sqrt(eig[1:ncol(var$coord), 1]), FUN = "/")[, ci],
-  colors = diverge_hcl(3, palette = "Blue-Red 2"),
-  outline.color = NA,
-  legend.title = "Loadings\u2800",
-  ggtheme = theme_minimal
-) +
-  scale_y_discrete(labels = c("C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9", "C10")) +
-  theme(
-    axis.text.x = element_text(angle = 90, vjust = 0.3, size = 10),
-    axis.text.y = element_text(size = 10),
-    legend.key.size = unit(0.5, 'cm'),
-    legend.key.height = unit(0.5, 'cm'),
-    legend.key.width = unit(0.5, 'cm'),
-    legend.title = element_text(size = 10),
-    legend.text = element_text(size = 8)
-  )
-
-wrap_plots(p1, p2, p3, nrow = 3) +
-  plot_layout(guides = "auto")
-ggsave("data-raw/energy_poverty/pca_corplot.png")
-
-cordf <- data.frame(expand.grid(dimnames(var$cor[, ci])), value = as.vector(var$cor[, ci]))
-ggplot(cordf) +
-  geom_tile(aes(x = Var1, y = Var2, fill = value, height = value, width = value)) +
-  scale_fill_gradient2(
-    low = "#AF8DC3",
-    high = "#7FBF7B",
-    mid = "#F7F7F7",
-    midpoint = 0,
-    limit = c(-1, 1),
-    space = "Lab",
-    name = "Correlation"
-  ) +
-  theme(
-    axis.text.x = element_text(
-      angle = tl.srt,
-      vjust = 1,
-      size = tl.cex,
-      hjust = 1
-    ),
-    axis.text.y = element_text(size = tl.cex)
-  ) +
-  coord_fixed()
+}
 
 
-## Add progress bar to GW functions (and fix a bug)
-body(gwpca)[[26]][[3]] <- quote(cli::cli_progress_along(1:ep.n))
-body(gwfa)[[26]][[4]][[11]][[3]] <- quote(cli::cli_progress_along(1:ep.n))
-#body(gw_nsprcomp)[[27]][[3]] <- quote(cli::cli_progress_along(1:ep.n))
-#body(gw_nsprcomp)[[27]][[4]][[8]][[3]] <- quote(temp$rotation[var.n, k])
+bw$afford <- subindex_bw("afford")
+gw_pca$afford <- subindex_gwpca("afford")
+gw_pca$access <- subindex_gwpca("access")
+gw_pca$housing <- subindex_gwpca("housing")
+gw_pca$social <- subindex_gwpca("social")
+gw_pca$cond <- subindex_gwpca("cond")
+gw_pca$behav <- subindex_gwpca("behav")
+gw_pca$know <- subindex_gwpca("know")
+gw_pca$access <- NULL
+
+
+plot_gwpca <- function(x, var = "Comp.1_PV") {
+  title <- subind_nm[names(gw_pca)[[get("i", envir = parent.frame())]]]
+  x <- st_as_sf(x$SDF)
+  ggplot(x) +
+    geom_sf(aes(color = .data[[var]]), size = 0.2) +
+    coord_sf(xlim = c(2500000, 6000000), ylim = c(1500000, 5200000)) +
+    scale_color_viridis_c(sprintf("**%s**<br>Proportion of variance", title)) +
+    theme_minimal() +
+    theme(
+      panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank(),
+      legend.position = c(0.3, 0.8),
+      legend.direction = "horizontal",
+      legend.key.size = unit(0.3, 'cm'),
+      legend.key.width = unit(0.6, "cm"),
+      legend.text = element_text(size = 5),
+      legend.title = element_markdown(size = 7),
+      axis.text = element_blank()
+    ) +
+    guides(color = guide_colorbar(title.position = "top"))
+}
+
+gwpca_pv1_plots <- lapply(gw_pca, plot_gwpca, var = "Comp.1_PV")
+gwpca_pc1_plots
+
+wrap_plots(gwpca_pc1_plots, ncol = 3)
+ggsave("data-raw/energy_poverty/gwpca_pv.png")
+
+GGally::ggmatrix(
+  setNames(gwpca_pc1_plots, subind_nm),
+  nrow = 3,
+  ncol = 3,
+  showAxisPlotLabels = FALSE,
+  showStrips = TRUE
+)
+
+
+gwpca_df <- lapply(gw_pca, function(x) {
+  st_drop_geometry(st_as_sf(x$SDF)["Comp.1_PV"])
+}) %>%
+  bind_cols(.name_repair = "minimal") %>%
+  setNames(subind_nm) %>%
+  st_sf(geometry = loc)
+
+compbw <- bw.gwpca(
+  as_Spatial(gwpca_df),
+  vars = names(st_drop_geometry(gwpca_df)),
+  k = 1,
+  kernel = "gaussian",
+  adaptive = TRUE
+)
+compindex <- gwpca(
+  as_Spatial(clean_names(gwpca_df)),
+  elocat = as_Spatial(loc),
+  vars = make_clean_names(names(st_drop_geometry(gwpca_df))),
+  k = 1,
+  bw = 500,
+  kernel = "gaussian",
+  adaptive = TRUE
+)
+
+
 
 ## Find optimal bandwidth ----
 bw_gwpca <- bw.gwpca(
@@ -438,13 +519,14 @@ bw_gwpca <- bw.gwpca(
 
 # GWEFA
 gw_efa <- gwfa(
-  as_Spatial(st_sf(pov_for_pca, geometry = loc)),
+  as_Spatial(st_sf(pov_for_pca2, geometry = loc)),
   elocat = as_Spatial(loc),
   vars = names(pov_for_pca),
   bw = 1000,
   kernel = "gaussian",
   adaptive = TRUE,
-  cor = "mixed"
+  cor = "mixed",
+  timeout = 20
 )
 
 
