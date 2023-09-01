@@ -18,7 +18,7 @@ p_load(
   
   # Visualization
   skimr, kableExtra, ggcorrplot, ggcharts, RColorBrewer, colorspace,
-  viridis, patchwork,
+  viridis, patchwork, ggtext,
   
   # Meta
   cli, magrittr
@@ -282,25 +282,6 @@ corr <- mixedCor(
 
 
 ## Perform global PCA ----
-# pca <- princomp(
-#   as.formula(paste("~", paste(names(pov_for_pca), collapse = " + "))),
-#   data = pov_for_pca
-# )
-
-# pca <- princomp(covmat = corr$rho)
-
-# pca <- nsprcomp::nsprcomp(
-#   as.formula(paste("~", paste(names(pov_for_pca), collapse = " + "))),
-#   data = pov_for_pca,
-#   nneg = TRUE
-# )
-
-#pca <- PCA(corr$rho, ncp = ncol(pov_for_pca), graph = FALSE)
-
-# pca <- principal(corr$rho, nfactors = 10, cor = "mixed")
-
-#fact <- factanal(covmat = corr$rho, factors = 1, n.obs = ncol(pov_for_pca))
-
 # TWO-STAGE PCA
 # BI-FACTOR MODEL
 # 
@@ -351,8 +332,8 @@ subind_vars <- list(
 subind_nm <- list(
   afford = "Affordability",
   access = "Energy access",
-  housing = "Housing",
-  social = "Social conditions",
+  housing = "Housing precarity",
+  social = "Disempowerment",
   cond = "Special conditions",
   behav = "Energy behavior",
   know = "Energy literacy"
@@ -360,7 +341,9 @@ subind_nm <- list(
 
 pca <- lapply(subind_vars, function(x) {
   povdf <- pov_for_pca[x]
-  PCA(povdf, graph = FALSE)
+  # PCA(povdf, graph = FALSE)
+  corr <- mixedCor(povdf)
+  princomp(covmat = corr$rho)
 })
 
 pca_df <- lapply(pca, function(x) {
@@ -411,13 +394,12 @@ subindex_bw <- function(subindex) {
     data = as_Spatial(st_sf(pov_for_pca, geometry = loc)[subind_vars[[subindex]]]),
     vars = names(pov_for_pca[subind_vars[[subindex]]]),
     k = 1,
-    robust = TRUE,
-    kernel = "exponential",
+    kernel = "gaussian",
     adaptive = TRUE
   )
 }
 
-subindex_gwpca <- function(subindex) {
+subindex_gwpca <- function(subindex, bw) {
   df <- pov_for_pca[subind_vars[[subindex]]]
   
   gwpca(
@@ -425,7 +407,7 @@ subindex_gwpca <- function(subindex) {
     elocat = as_Spatial(loc),
     vars = names(df),
     k = 1,
-    bw = 500,
+    bw = bw,
     kernel = "gaussian",
     adaptive = TRUE,
     cv = FALSE
@@ -433,24 +415,54 @@ subindex_gwpca <- function(subindex) {
 }
 
 
-bw$afford <- subindex_bw("afford")
-gw_pca$afford <- subindex_gwpca("afford")
-gw_pca$access <- subindex_gwpca("access")
-gw_pca$housing <- subindex_gwpca("housing")
-gw_pca$social <- subindex_gwpca("social")
-gw_pca$cond <- subindex_gwpca("cond")
-gw_pca$behav <- subindex_gwpca("behav")
-gw_pca$know <- subindex_gwpca("know")
-gw_pca$access <- NULL
+#subindex_bw("afford")
+bw <- list(
+  afford = 1410,
+  access = 30,
+  housing = 9122,
+  social = 8467,
+  cond = 5702
+  
+)
+gw_pca$afford <- subindex_gwpca("afford", bw$afford)
+gw_pca$access <- subindex_gwpca("access", bw$access)
+gw_pca$housing <- subindex_gwpca("housing", bw$housing)
+gw_pca$social <- subindex_gwpca("social", bw$social)
+gw_pca$cond <- subindex_gwpca("cond", bw$cond)
+gw_pca$behav <- subindex_gwpca("behav", bw$behav)
+gw_pca$know <- subindex_gwpca("know", bw$know)
+#gw_pca$access <- NULL
+
+rescale_minmax <- function(.x) {
+  (.x - min(.x)) / (max(.x) - min(.x))
+}
+
+t <- lapply(gw_pca, function(x) {
+  out <- st_as_sf(x$SDF)
+  # X <- mutate(
+  #   pov_for_pca,
+  #   across(everything(), .fns = rescale_minmax))
+  # )
+  
+  load <- scale(x$loadings[, , 1])
+  load <- apply(x$loadings[, , 1], 1, mean)
+  out <- bind_cols(out, index = load)
+  out
+})
 
 
 plot_gwpca <- function(x, var = "Comp.1_PV") {
   title <- subind_nm[names(gw_pca)[[get("i", envir = parent.frame())]]]
-  x <- st_as_sf(x$SDF)
+  legend <- switch(
+    var,
+    "Comp.1_PV" = "Proportion of variance",
+    "index" = "Index",
+    win_var_PC1 = "Winning variable"
+  )
   ggplot(x) +
     geom_sf(aes(color = .data[[var]]), size = 0.2) +
     coord_sf(xlim = c(2500000, 6000000), ylim = c(1500000, 5200000)) +
-    scale_color_viridis_c(sprintf("**%s**<br>Proportion of variance", title)) +
+    scale_color_viridis_c(sprintf("**%s**<br>%s", title, legend)) +
     theme_minimal() +
     theme(
       panel.grid.major = element_blank(),
@@ -467,10 +479,13 @@ plot_gwpca <- function(x, var = "Comp.1_PV") {
 }
 
 gwpca_pv1_plots <- lapply(gw_pca, plot_gwpca, var = "Comp.1_PV")
-gwpca_pc1_plots
+gwpca_pc1_plots <- lapply(t, plot_gwpca, var = "index")
 
-wrap_plots(gwpca_pc1_plots, ncol = 3)
+wrap_plots(gwpca_pv1_plots, ncol = 3)
 ggsave("data-raw/energy_poverty/gwpca_pv.png")
+wrap_plots(gwpca_pc1_plots, ncol = 3)
+ggsave("data-raw/energy_poverty/gwpca_index.png")
+
 
 GGally::ggmatrix(
   setNames(gwpca_pc1_plots, subind_nm),
@@ -479,6 +494,44 @@ GGally::ggmatrix(
   showAxisPlotLabels = FALSE,
   showStrips = TRUE
 )
+
+
+gw_subind <- lapply(t, function(x) {
+  x <- st_drop_geometry(x)
+  x <- x["index"]
+  names(x) <- names(gw_pca)[get("i", envir = parent.frame())]
+  x
+}) %>%
+  bind_cols() %>%
+  st_sf(geometry = loc)
+
+gw_index <- gwpca(
+  data = as_Spatial(gw_subind),
+  elocat = as_Spatial(loc),
+  vars = names(st_drop_geometry(gw_subind)),
+  k = 1,
+  bw = 500,
+  kernel = "gaussian",
+  adaptive = TRUE,
+  scores = TRUE
+)
+
+gw_index <- gwpca(
+  data = as_Spatial(st_sf(pov_for_pca, geometry = loc)),
+  elocat = as_Spatial(loc),
+  vars = names(pov_for_pca),
+  k = 1,
+  bw = 500,
+  kernel = "gaussian",
+  adaptive = TRUE,
+  scores = TRUE
+)
+
+t <- gw_index
+t$SDF <- st_as_sf(t$SDF)
+t$SDF <- bind_cols(t$SDF, index = t$loadings[, "social", 1])
+ggplot(t$SDF) + geom_sf(aes(color = index))
+
 
 
 gwpca_df <- lapply(gw_pca, function(x) {
