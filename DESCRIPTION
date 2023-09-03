@@ -3,7 +3,10 @@ Title: GIS tool of the GRETA project
 Version: 0.0.0.9000
 Authors@R: 
     person("Jonas", "Lieth", , "jonas.lieth@gesis.org", role = c("cre", "aut"))
-Description: PKG_DESC.
+Description: Visualize and explore the results from the GRETA project. Quickly 
+    get insights from GRETA's multi-national survey and case studies.
+    Understand statistical and spatial relationships of energy citizenship in
+    16 European countries among citizens, businesses and policymakers.
 License: GPL (>= 3)
 Depends: 
     R (>= 4.2.0),

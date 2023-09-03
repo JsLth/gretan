@@ -16,7 +16,6 @@ nodejs <- normalizePath(Sys.which("node"), winslash = "/")
 electrify(
   app_name = "greta-analytics",
   product_name = "GRETA Analytics",
-  short_description = "Visualize and explore the results from the GRETA project. Quickly get insights from GRETA's multi-national survey and case studies. Understand statistical and spatial relationships of energy citizenship in 16 European countries among citizens, businesses and policymakers.",
   build_path = "electron",
   local_package_path = getwd(),
   function_name = "run_greta",
