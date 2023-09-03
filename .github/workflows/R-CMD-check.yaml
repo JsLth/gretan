@@ -47,4 +47,4 @@ jobs:
         with:
           upload-snapshots: true
           error-on: 'error'
-          check-dir: 'check'
+          check-dir: '"check"'
