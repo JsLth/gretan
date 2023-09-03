@@ -2,9 +2,9 @@
 # Need help debugging build failures? Start at https://github.com/r-lib/actions#where-to-find-help
 on:
   push:
-    branches: [main, master]
+    branches: [main]
   pull_request:
-    branches: [main, master]
+    branches: [main]
 
 name: R-CMD-check
 
@@ -41,9 +41,10 @@ jobs:
         with:
           dependencies: '"hard"'
           extra-packages: any::rcmdcheck
+          need: check
 
       - uses: r-lib/actions/check-r-package@v2
         with:
           upload-snapshots: true
           error-on: 'error'
-          check-dir: 'tempdir()'
+          check-dir: 'check'
