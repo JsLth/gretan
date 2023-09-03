@@ -395,6 +395,7 @@ subindex_bw <- function(subindex) {
     vars = names(pov_for_pca[subind_vars[[subindex]]]),
     k = 1,
     kernel = "gaussian",
+    robust = TRUE,
     adaptive = TRUE
   )
 }
@@ -417,12 +418,12 @@ subindex_gwpca <- function(subindex, bw) {
 
 #subindex_bw("afford")
 bw <- list(
-  afford = 1410,
-  access = 30,
+  afford = 982, #
+  access = 1264, #
   housing = 9122,
   social = 8467,
-  cond = 5702
-  
+  cond = 5702,
+  behav = 7557 #
 )
 gw_pca$afford <- subindex_gwpca("afford", bw$afford)
 gw_pca$access <- subindex_gwpca("access", bw$access)
