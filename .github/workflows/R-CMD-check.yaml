@@ -52,3 +52,8 @@ jobs:
           upload-snapshots: true
           error-on: '"error"'
           check-dir: '"check"'
+      
+      - name: Package electron app
+        run: |
+          source("electron.R")
+        shell: Rscript {0}
