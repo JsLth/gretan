@@ -46,4 +46,4 @@ jobs:
         with:
           upload-snapshots: true
           error-on: 'error'
-          check-dir: 'NULL'
+          check-dir: 'tempdir()'
