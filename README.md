@@ -1,10 +1,10 @@
-# GRETA Analytics
-
 <!-- badges: start -->
 
 [![R-CMD-check](https://github.com/JsLth/greta-gis-tool/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/JsLth/greta-gis-tool/actions/workflows/R-CMD-check.yaml)
 
 <!-- badges: end -->
+
+# GRETA Analytics
 
 GRETA Analytics is the GIS tool of the GRETA project (GReen Energy Transition Actions). The tool serves to present and visualize the research output of the project in an interactive fashion. It is built using the R [Shiny](https://github.com/rstudio/shiny) framework and also runs Python code using [`reticulate`](https://rstudio.github.io/reticulate/).
 
@@ -24,6 +24,6 @@ devtools::install_github("JsLth/greta-gis-tool")
 
 ## Contact
 
-Jonas Lieth -- [jonas.lieth\@gesis.org](mailto:jonas.lieth@gesis.org){.email}
+Jonas Lieth -- [jonas.lieth\@gesis.org](mailto:jonas.lieth@gesis.org)
 
 GRETA project -- <https://projectgreta.eu/>

@@ -20,9 +20,10 @@ jobs:
         config:
           - {os: macos-latest,   r: 'release'}
           - {os: windows-latest, r: 'release'}
-          - {os: ubuntu-latest,   r: 'devel', http-user-agent: 'release'}
-          - {os: ubuntu-latest,   r: 'release'}
-          - {os: ubuntu-latest,   r: 'oldrel-1'}
+          # linux doesnt work for electricShine as of yet
+          #- {os: ubuntu-latest,   r: 'devel', http-user-agent: 'release'}
+          #- {os: ubuntu-latest,   r: 'release'}
+          #- {os: ubuntu-latest,   r: 'oldrel-1'}
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
@@ -45,6 +46,7 @@ jobs:
             any::testthat
             any::knitr
             any::rmarkdown
+            any::remotes
           need: check
 
       - uses: r-lib/actions/check-r-package@v2
@@ -55,5 +57,6 @@ jobs:
       
       - name: Package electron app
         run: |
+          remotes::install_github("JsLth/electricShine")
           source("electron.R")
         shell: Rscript {0}
