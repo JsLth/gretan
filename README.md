@@ -23,7 +23,7 @@ devtools::install_github("JsLth/greta-gis-tool")
 library(greta)
 ```
 
-The Shiny app can the be run using the following command:
+The Shiny app can then be run using the following command:
 
 ```         
 run_greta()
@@ -31,6 +31,6 @@ run_greta()
 
 ## Contact
 
-Jonas Lieth -- jonas.lieth\@gesis.org]([mailto:jonas.lieth\@gesis.org](mailto:jonas.lieth@gesis.org){.uri})
+Jonas Lieth – [jonas.lieth\@gesis.org](mailto:jonas.lieth@gesis.org)
 
-GRETA project -- <https://projectgreta.eu/>\>
+GRETA project – <https://projectgreta.eu/>
