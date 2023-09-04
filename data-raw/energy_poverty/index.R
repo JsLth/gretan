@@ -416,14 +416,16 @@ subindex_gwpca <- function(subindex, bw) {
 }
 
 
-#subindex_bw("afford")
+# subindex_bw("afford")
+# error: system is computationally singular: reciprocal condition number
 bw <- list(
   afford = 982, #
   access = 1264, #
-  housing = 9122,
-  social = 8467,
-  cond = 5702,
-  behav = 7557 #
+  housing = 1400, #
+  social = 1752, #
+  cond = 4686, #
+  behav = 7557, #
+  know = 1700 #
 )
 gw_pca$afford <- subindex_gwpca("afford", bw$afford)
 gw_pca$access <- subindex_gwpca("access", bw$access)
