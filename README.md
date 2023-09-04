@@ -20,10 +20,17 @@ The app is built under the golem framework and installs like an R package:
 
 ```         
 devtools::install_github("JsLth/greta-gis-tool")
+library(greta)
+```
+
+The Shiny app can the be run using the following command:
+
+```         
+run_greta()
 ```
 
 ## Contact
 
-Jonas Lieth -- [jonas.lieth\@gesis.org](mailto:jonas.lieth@gesis.org)
+Jonas Lieth -- jonas.lieth\@gesis.org]([mailto:jonas.lieth\@gesis.org](mailto:jonas.lieth@gesis.org){.uri})
 
-GRETA project -- <https://projectgreta.eu/>
+GRETA project -- <https://projectgreta.eu/>\>
