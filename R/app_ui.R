@@ -179,6 +179,26 @@ app_ui <- function(theme = NULL,
           icon = txts$stakeholder$icon,
           tabName = "stakeholder"
         ),
+        bs4Dash::menuItem(
+          text = txts$persona$title,
+          icon = txts$persona$icon,
+          tabName = "persona"
+        ),
+        bs4Dash::menuItem(
+          text = txts$enpov$title,
+          icon = txts$enpov$icon,
+          tabName = "enpov"
+        ),
+        bs4Dash::menuItem(
+          text = txts$attitudes$title,
+          icon = txts$attitudes$icon,
+          tabName = "attitudes"
+        ),
+        bs4Dash::menuItem(
+          text = txts$research$title,
+          icon = txts$research$icon,
+          tabName = "research"
+        ),
         flat = TRUE
       ),
       skin = "light",
