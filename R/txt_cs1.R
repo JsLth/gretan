@@ -73,41 +73,65 @@ txts$cs1$energy_model <- tagList(
 
 txts$cs1$case_study <- tagList(
   p2("The case study of Pilastro-Roveri is oriented towards the analysis of PV
-  generation as it has one of the largest rooftop PV plants in Europe in the
-  industrial area. According to the information on existing PV installations
-  reported in the GIS layers, there are currently 19,600 kWp installed on the
-  roofs of buildings in the area, resulting in an estimated production of
-  approximately 26 GWh/year."),
-  p2("As the image shows, most of the installations are located in tertiary
-  buildings, more specifically in industrial buildings. However, the largest
-  installations of all are on the roof of a commercial and office buildings
-  located next to eachother, which represents more than 50% of the installed
-  capacity of the entire case study area. This building has practically its
-  entire roof covered with PV panels, with an installed capacity of almost
-  10 MW."),
+    generation as it has one of the largest rooftop PV plants in Europe in the
+    industrial area. According to the information on existing PV installations
+    reported in the GIS layers, there are currently 19,600 kWp installed on the
+    roofs of buildings in the area, resulting in an estimated production of
+    approximately 26 GWh/year."),
+  p2("As the", actionLink("fig-link", "Figure", class = "intext"), "shows, most of the installations are located in tertiary
+    buildings, more specifically in industrial buildings. However, the largest
+    installations of all are on the roof of a commercial and office buildings
+    located next to eachother, which represents more than 50% of the installed
+    capacity of the entire case study area. This building has practically its
+    entire roof covered with PV panels, with an installed capacity of almost
+    10 MW."),
   p2("The following graph shows electricity demand and production by type of
-  building use. At this point it is important to note that industrial buildings
-  have not been included in the analysis, so no results are available, nor real
-  consumption data as these are private companies."),
+    building use. At this point it is important to note that industrial buildings
+    have not been included in the analysis, so no results are available, nor real
+    consumption data as these are private companies."),
   p2("The highest electricity demand comes from residential buildings, and that
-  they produce the least energy, accounting for only 0.44% of the total
-  installed power. Residential buildings account for 46% of the total floor
-  area and only 9% of the roof area (excluding industrial buildings in both
-  cases)."),
-  tags$img(src = "www/Figure2.png", width = "100%"),
-  p(
-    tags$b("Figure 2"),
-    "Electricity consumption vs. PV production by building use",
-    style = "align: center;"
+    they produce the least energy, accounting for only 0.44% of the total
+    installed power. Residential buildings account for 46% of the total floor
+    area and only 9% of the roof area (excluding industrial buildings in both
+    cases)."),
+  bs4Dash::accordion(
+    id = "fig",
+    bs4Dash::accordionItem(
+      tags$img(src = "www/Figure2.png", width = "100%"),
+      title = "Figure: Electricity consumption vs. PV production by building use",
+      status = "primary",
+      solidHeader = FALSE
+    )
   ),
   p2("Based on the results of the energy model, only 60% of the current PV
-  production would fully cover the electricity needs of residential buildings.
-  However, as mentioned above, the consumption data of industrial buildings and
-  the self-consumption that may take place in them are not available. Therefore,
-  it has been estimated how much installed capacity would be needed in
-  residential buildings to cover the electricity demand in these buildings.")
+    production would fully cover the electricity needs of residential buildings.
+    However, as mentioned above, the consumption data of industrial buildings and
+    the self-consumption that may take place in them are not available. Therefore,
+    it has been estimated how much installed capacity would be needed in
+    residential buildings to cover the electricity demand in these buildings.")
 )
 
+    # shiny::tags$div(
+    #   class = "card-outline",
+    #   shiny::tags$div(
+    #     class = "card-header", 
+    #     shiny::tags$h4(
+    #       class = "card-title w-100",
+    #       shiny::tags$a(
+    #         class = c("d-block w-100", "collapsed"), 
+    #         href = "#",
+    #         `data-toggle` = "collapse",
+    #         `aria-expanded` = "false",
+    #         title
+    #       )
+    #     )
+    #   ),
+    #   shiny::tags$div(
+    #     id = NULL, 
+    #     `data-parent` = NULL, class = "collapse",
+    #     shiny::tags$div(class = "card-body", ...)
+    #   )
+    # )
 txts$cs1$desc <- list(
   use = HTML("The <b>Use</b> layer shows the main use of each building. 17 uses are displayed
     on the map, but only 10 of them are considered in the energy demand model:

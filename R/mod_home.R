@@ -11,6 +11,12 @@ mod_home_ui <- function(id) {
           width = 12,
           status = "primary",
           txts$home$welcome
+        ),
+        bs4Dash::box(
+          title = with_literata("About GRETA"),
+          width = 12,
+          status = "primary",
+          txts$home$about
         )
       ),
       bs4Dash::column(

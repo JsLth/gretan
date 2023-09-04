@@ -19,7 +19,7 @@ mod_cs1_ui <- function(id) {
         width = 6,
         # Box 1 ----
         bs4Dash::box(
-          title = "Energy modelling",
+          title = with_literata("Energy modelling"),
           width = 12,
           status = "primary",
           txts$cs1$energy_model
@@ -29,7 +29,7 @@ mod_cs1_ui <- function(id) {
         width = 6,
         # Box 2 ----
         bs4Dash::box(
-          title = "Case study",
+          title = with_literata("Case study"),
           width = 12,
           status = "primary",
           txts$cs1$case_study
@@ -43,6 +43,7 @@ mod_cs1_ui <- function(id) {
         bs4Dash::tabBox(
           id = ns("map"),
           width = 12,
+          title = with_literata("Case study maps"),
           status = "primary",
           type = "tabs",
           maximizable = TRUE,
@@ -185,6 +186,11 @@ mod_cs1_server <- function(id, tab) {
       html = tagList(waiter::spin_pulse(), h4("Loading figure...")),
       color = "rgba(179, 221, 254, 1)"
     )
+    
+    observe({
+      bs4Dash::updateAccordion(session$ns("fig"), selected = 1)
+    }) %>%
+      bindEvent(input[["fig-link"]])
     
     # Data reading ----
     buildings <- reactive({

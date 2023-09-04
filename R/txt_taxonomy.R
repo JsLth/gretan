@@ -1,4 +1,4 @@
-txts$taxonomy$title <- "Geo Taxonomy"
+txts$taxonomy$title <- "Taxonomy"
 txts$taxonomy$icon <- icon("sitemap")
 txts$taxonomy$tags <- c(
   "geo", "geographic", "levels", "taxonomy"

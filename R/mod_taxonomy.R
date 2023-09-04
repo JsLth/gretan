@@ -19,7 +19,7 @@ mod_taxonomy_ui <- function(id) {
     fluidRow(
       col_6(
         bs4Dash::box(
-          title = "Introduction",
+          title = with_literata("Introduction"),
           status = "primary",
           width = 12,
           p2(txts$taxonomy$introduction)
@@ -27,7 +27,7 @@ mod_taxonomy_ui <- function(id) {
       ),
       col_6(
         bs4Dash::box(
-          title = "Methodology",
+          title = with_literata("Methodology"),
           status = "primary",
           width = 12,
           p2(txts$taxonomy$methodology)
@@ -35,7 +35,7 @@ mod_taxonomy_ui <- function(id) {
       )
     ),
     helpBox(
-      title = "Taxonomy",
+      title = with_literata("Taxonomy"),
       help_id = ns("taxHelp"),
       status = "primary",
       width = 12,
@@ -134,7 +134,7 @@ mod_taxonomy_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     popover2(
       id = "taxHelp",
-      title = "Explore GRETAs geo-taxonomy",
+      title = with_literata("Explore GRETAs geo-taxonomy"),
       content = txts$taxonomy$help$scheme
     )
     

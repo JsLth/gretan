@@ -70,13 +70,25 @@ mod_exp_ui <- function(id, titles) {
           )
         ),
         bs4Dash::box(
-          title = "Download",
+          title = "About",
           width = 12,
           solidHeader = FALSE,
           collapsible = TRUE,
           collapsed = TRUE,
           status = "primary",
-          downloadButton(ns("download"), "Download")
+          p(txts$exp$about, style = "text-align: justify;"),
+          div(
+            style = "margin: auto; width: 50%;",
+            tagAppendAttributes(
+              downloadButton(
+                outputId = ns("download"),
+                label = "Get the data!",
+                icon = icon("floppy-disk"),
+                style = "width: 100%;"
+              ),
+              class = c("btn-app", "bg-primary")
+            )
+          )
         )
       ),
       bs4Dash::column(

@@ -91,6 +91,22 @@ app_server <- function(input, output, session) {
     }
   })
   
+
+  all_tabs <- c("exp", "taxonomy", "cs1italy", "stakeholder",
+                "persona", "enpov", "attitudes", "research")
+  for (tab in all_tabs) {
+    env <- new.env()
+    env[["tab"]] <- tab
+    obs_label <- paste("forward to", tab)
+    welcome_id <- paste0("welcome-li-", tab)
+    with_eval_args({
+      observe({
+        bs4Dash::updateTabItems(inputId = "sidebar", selected = tab)
+      }, label = paste("forward to", obs_label)) %>%
+      bindEvent(input[[welcome_id]])
+    })
+  }
+
   # observe({
   #   guide <- cicerone::Cicerone$new(
   #     allow_close = FALSE,

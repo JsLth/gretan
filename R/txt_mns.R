@@ -27,6 +27,12 @@ txts$exp$help <- list(
     <b>Aggregate options:</b> Whether to show options seperately as percentages
     or show the most common response option for a topic."
 )
+txts$exp$about <- "This visualization is powered by GRETA's multinational
+  survey (MNS). The MNS is a social survey covering citizens, policymakers,
+  and businesses in 16 EU countries. Over 10,000 people responded to a variety
+  of questions related to energy, citizenship, and sustainability. The GRETA
+  Analytics data explorer allows you to explore what citizens responded to the
+  various questions in the survey."
 
 txts$cmp$title <- "Compare data"
 txts$cmp$icon <- icon("map")

@@ -6,6 +6,50 @@ txts$home$tags <- c(
 )
 
 txts$home$welcome <- tagList(
+  p2(HTML("GRETA Analytics is a <b>GIS-based analytical tool</b> to study the emergence of
+     energy citizenship. The tool allows you to freely and interactively explore
+     the output produced by the GRETA project with a geospatial focus. It
+     answers the the need to create a bridge between data collected from case
+     studies, their re-use in scenario predictions, and their framing for the 
+     purpose of <b>Community Transition Pathways (CTPs)</b>. GRETA Analytics accounts
+     for variations within and between geographical levels by georeferencing and
+     spatializing the data from the GRETA multinational survey and by studying
+     their spillover, crossover, and cross-level interaction effects on the
+     local, regional, national, and supranational levels. The tool facilitates
+     the geographic assessment of energy citizenship emergence."),
+  p2("What can you find on GRETA Analytics?")),
+  tags$ul(
+    tags$li(HTML("Quickly and comfortably <b>explore, compare, inspect</b> and
+                 download the data produced in GRETA's multinational survey.\u2800"),
+            actionLink("welcome-li-exp", label = "", icon = icon("arrow-right"))),
+    tags$li(HTML("Understand how GRETA taxonomises the geographical composition
+                 of energy citizenship across levels and domains.\u2800"),
+            actionLink("welcome-li-taxonomy", label = "", icon = icon("arrow-right"))),
+    tags$li(HTML("Explore the energy landscapes and energy fragility in
+                 the Pilastro-Roveri district of Bologna, Italy.\u2800"),
+            actionLink("welcome-li-cs1italy", label = "", icon = icon("arrow-right"))),
+    tags$li(HTML("Comprehend the interactions between citizens, policymakers,
+                 and businesses in a cross-country comparison.\u2800"),
+            actionLink("welcome-li-stakeholder", label = "", icon = icon("arrow-right"))),
+    tags$li(HTML("Learn about your own role as a citizen in the energy
+                 transition and how geography can impact it.\u2800"),
+            actionLink("welcome-li-persona", label = "", icon = icon("arrow-right"))),
+    tags$li(HTML("Understand the multi-dimensional vulnerability to energy
+                 poverty and how it compares across the EU.\u2800"),
+            actionLink("welcome-li-enpov", label = "", icon = icon("arrow-right"))),
+    tags$li(HTML("Find out how living environments steer the public social media
+                 discourse on energy transition and environmental change.\u2800"),
+            actionLink("welcome-li-attitudes", label = "", icon = icon("arrow-right"))),
+    tags$li(HTML("Learn about the uneven geographies of energy research and
+                 its thematic versatility.\u2800"),
+            actionLink("welcome-li-research", label = "", icon = icon("arrow-right")))
+  ),
+  p2("You can explore the contents by clicking on the triple-bar",
+     icon("bars", style = "vertical-align: center"),
+     "and browsing through the data explorer or one of the many studies done by
+     GRETA partners.")
+)
+txts$home$about <- tagList(
   p2("This website is part of the",
      a("GRETA project", href = "https://projectgreta.eu/", class = "intext"),
      "(GReen Energy Transition Actions). GRETA studies solutions and provides
@@ -28,49 +72,22 @@ txts$home$welcome <- tagList(
      energy, use electric vehicles, monitor their energy consumption and
      participate in the sustainable planning of mobility both within their
      cities and internationally. You can consult the case studies by clicking
-     on one of the pins on the map to the left.")),
+     on one of the pins"),
+     icon("map-pin", style = "vertical-align: center"),
+     "on the map to the left."),
   p2(HTML("GRETA also launched a first-of-its kind <b>EU-wide empirical citizen
      consultation</b>. The survey was sent to energy customers, suppliers,
      intermediaries, retailers and policymakers in 25 countries, driving
      unique insights about the emergence of energy citizenship. On the
      map to the left you can examine which countries were included in the
-     multinational citizen survey.")),
-  p2("For more insights into the research conducted in the GRETA project,
-     you can consult the",
+     multinational citizen survey. For more insights into the research conducted
+     in the GRETA project, you can consult the"),
      a(
        "deliverables",
        href = "https://projectgreta.eu/resources/",
        class = "intext"
-      ),
+     ),
      "published on the official website."),
-  h2(with_literata("GRETA Analytics", style = "font-size: 2rem;")),
-  p2(HTML("... is a <b>GIS-based analytical tool</b> to study the emergence of
-     energy citizenship. The tool allows you to freely and interactively explore
-     the output produced by the GRETA project with a geospatial focus. It
-     answers the the need to create a bridge between data collected from case
-     studies, their re-use in scenario predictions, and their framing for the 
-     purpose of Community Transition Pathways (CTPs). GRETA Analytics accounts
-     for variations within and between geographical levels by georeferencing and
-     spatializing the data from the GRETA multinational survey and by studying
-     their spillover, crossover, and cross-level interaction effects on the
-     local, regional, national, and supranational levels. The tool facilitates
-     the geographic assessment of energy citizenship emergence."),
-  p2("GRETA Analytics is structured into three parts:")),
-  tags$ul(
-    tags$li(HTML("The first part provides a way to quickly and comfortably
-                 <b>explore, compare, inspect</b> and download the data produced
-                 in GRETA's multinational survey.")),
-    tags$li(HTML("The second part expands on <b>GRETA's case studies</b> by
-                 showcasing the results of place-based qualitative or
-                 mixed-methods work.")),
-    tags$li(HTML("The third part introduces the work done by GRETA partners
-                 by presenting all types of <b>data analyses</b> conducted in
-                 the context of the project."))
-  ),
-  p2("You can explore the contents by clicking on the triple-bar",
-     icon("bars", style = "margin-left: -1.2em; vertical-align: center"),
-     "and browsing through the data explorer or one of the many studies done by
-     GRETA partners.")
 )
 
 txts$home$csdesc <- list(

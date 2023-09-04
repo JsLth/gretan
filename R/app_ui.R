@@ -77,7 +77,7 @@ app_ui <- function(theme = NULL,
         color: inherit
       }
       
-      a.nav-link {
+      a {
         color: #000;
       }
       
@@ -173,6 +173,11 @@ app_ui <- function(theme = NULL,
           text = txts$taxonomy$title,
           icon = txts$taxonomy$icon,
           tabName = "taxonomy"
+        ),
+        bs4Dash::menuItem(
+          text = txts$stakeholder$title,
+          icon = txts$stakeholder$icon,
+          tabName = "stakeholder"
         ),
         flat = TRUE
       ),

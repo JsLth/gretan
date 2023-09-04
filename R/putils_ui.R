@@ -265,7 +265,7 @@ make_header <- function(title,
 
   div(
     id = "header",
-    h2(HTML(title), class = "title toc-ignore"),
+    h2(with_literata(HTML(title)), class = "title toc-ignore"),
     h5(HTML(paste(
       "Prepared by:",
       paste(authors, collapse = ", ")
