@@ -31,6 +31,6 @@ run_greta()
 
 ## Contact
 
-Jonas Lieth – jonas.lieth\@gesis.org]([mailto:jonas.lieth\@gesis.org](mailto:jonas.lieth@gesis.org))
+Jonas Lieth – jonas.lieth\@gesis.org[mailto:jonas.lieth\@gesis.org](mailto:jonas.lieth@gesis.org)
 
 GRETA project – <https://projectgreta.eu/>
