@@ -74,12 +74,12 @@ txts$home$about <- tagList(
      cities and internationally. You can consult the case studies by clicking
      on one of the pins"),
      icon("map-pin", style = "vertical-align: center"),
-     "on the map to the left."),
+     "on the map to the right."),
   p2(HTML("GRETA also launched a first-of-its kind <b>EU-wide empirical citizen
      consultation</b>. The survey was sent to energy customers, suppliers,
      intermediaries, retailers and policymakers in 25 countries, driving
      unique insights about the emergence of energy citizenship. On the
-     map to the left you can examine which countries were included in the
+     map to the right you can examine which countries were included in the
      multinational citizen survey. For more insights into the research conducted
      in the GRETA project, you can consult the"),
      a(
