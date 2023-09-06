@@ -1,3 +1,4 @@
+# Package management ----
 if (!require(pacman)) {
   install.packages("pacman")
 }
@@ -26,7 +27,7 @@ p_load(
 
 
 
-# Fix some functions
+## Fix some functions ----
 body(ggcorrplot)[[20]][[3]][[2]][[3]][[3]] <- quote(ggplot2::geom_tile(
   color = outline.color, ggplot2::aes_string(width = "value", height = "value")
 ))
@@ -46,8 +47,11 @@ body(gwpca)[[34]][[3]][[2]][[2]] <- quote(matrix(d1[, 1:k]))
 #body(gw_nsprcomp)[[27]][[4]][[8]][[3]] <- quote(temp$rotation[var.n, k])
 
 
+## Custom functions ----
+source("index_fun.R")
 
-## Read data ----
+
+# Read data ----
 pov <- readRDS("data-ext/survey_resampled.rds") %>%
   select(starts_with(c(
     "d1", # Gender
@@ -78,18 +82,21 @@ all_cats <- unique(tail(cb$category, -1))
 all_vars <- unique(tail(cb$og_var, -1))
 
 
+# Pre-processing ----
 ## Merge dummies ----
 for (v in all_vars) {
   cb_v <- cb[cb$og_var %in% v, ]
   opts <- cb_v$option
   ext_var <- cb_v$variable
   if (!all(is.na(opts)) && length(opts) > 1) {
+    # exchange 1/0 with actual values
     for (o in seq_along(opts)) {
       col <- which(grepl(v, ext_var))[[o]]
       pov[ext_var[col]] <- if_else(
         pov[ext_var[col]][[1]] == 1, opts[o], NA
       )
     }
+    # combine dummy columns to a single one
     if (is.character(pov[[ext_var[1]]])) {
       pov[[ext_var[1]]] <- factor(do.call(
         coalesce,
@@ -159,26 +166,19 @@ pov <- do.call(select, c(list(pov), vars_lookup, "id", "nuts0", "nuts1", "nuts2"
 
 ## Recode and transform ----
 pov <- pov %>%
-  # Convert non-responses to NA
+  ### Convert non-responses to NA ----
   mutate(across(
     where(is.factor),
-    .fns = function(x) {
-      lev <- levels(x)
-      as.character(x) %>%
-        na_if("I do not know") %>%
-        na_if("Prefer not to say") %>%
-        na_if("Do not know / prefer not to say") %>%
-        na_if("Not applicable") %>%
-        factor(levels = lev)
-    }
+    .fns = filter_non_responses
   )) %>%
-  # Unify binary codings
+  ### Unify binary codings ----
   mutate(across(where(is.logical), .fns = as.numeric)) %>%
-  # Convert Yes/No to binary
+  ### Convert Yes/No to binary ----
   mutate(across(
     where(~identical(unique(na.omit(as.character(.x))), c("Yes", "No"))),
     .fns = ~case_match(.x, "Yes" ~ 1, "No" ~ 0, .default = NA)
   )) %>%
+  ### Recode categorical variables ----
   mutate(
     heat_config = if_else(
       heat_config %in% "Central heating (heating the whole building where I live)",
@@ -237,6 +237,7 @@ pov <- pov %>%
     detached = house_type
   )
 
+### Convert factors to ordinal
 pov <- pov %>%
   mutate(across(
     where(is.factor),
@@ -250,7 +251,7 @@ print(skim(st_drop_geometry(pov)))
 
 
 
-## Prepare data ----
+## Prepare data for PCA ----
 loc <- st_geometry(pov)
 
 pov_for_pca <- pov %>%
@@ -261,14 +262,6 @@ pov_for_pca <- pov %>%
   imputePCA() %>%
   extract2("completeObs") %>%
   as_tibble()
-
-is_dichotomous <- function(x) {
-  all(x %in% c(0, 1, NA))
-}
-
-is_polytomous <- function(x) {
-  all(is.numeric(x) & length(unique(x)) < 8)
-}
 
 # Create a mix of polychoric, tetrachoric and pearson correlation matrices
 corr <- mixedCor(
@@ -281,7 +274,8 @@ corr <- mixedCor(
 
 
 
-## Perform global PCA ----
+
+# Global index creation ----
 # TWO-STAGE PCA
 # BI-FACTOR MODEL
 # 
@@ -319,26 +313,30 @@ corr <- mixedCor(
 # https://doi.org/10.1007/978-3-319-60595-1_7
 # https://doi.org/10.1007/s11135-022-01345-5
 
+## Define subindex indicators ----
 subind_vars <- list(
   afford = c("ability_to_pay", "supplier_threat", "safety_summer", "safety_winter", "income"),
   access = c("no_central", "lacks_heating", "lacks_cooling"),
   housing = c("detached", "house_area", "house_age", "is_tenant", "energy_cost"),
-  social = c("not_male", "unemployed", "age", "lacks_education", "household"),
+  social = c("not_male", "unemployed", "lacks_education", "household"),
   cond = c("cond_support", "cond_trans", "cond_heat", "cond_air"),
   behav = c("behav_unplug", "behav_products", "behav_lights", "behav_share", "behav_carpool", "behav_car"),
   know = c("know_energy", "know_heating", "know_costs", "know_share", "know_solutions")
 )
 
+## Define subindex names ----
 subind_nm <- list(
-  afford = "Affordability",
-  access = "Energy access",
+  afford = "Energy insecurity",
+  access = "Energy exclusion",
   housing = "Housing precarity",
   social = "Disempowerment",
-  cond = "Special conditions",
+  cond = "Disability",
   behav = "Energy behavior",
   know = "Energy literacy"
 )
 
+
+## Perform 1st stage PCA ----
 pca <- lapply(subind_vars, function(x) {
   povdf <- pov_for_pca[x]
   # PCA(povdf, graph = FALSE)
@@ -346,6 +344,7 @@ pca <- lapply(subind_vars, function(x) {
   princomp(covmat = corr$rho)
 })
 
+## Tidy PCA results
 pca_df <- lapply(pca, function(x) {
   x$ind$coord[, 1]
 }) %>%
@@ -353,9 +352,12 @@ pca_df <- lapply(pca, function(x) {
   setNames(subind_nm) %>%
   clean_names()
 
+## Perform 2nd stage PCA
 pca_index <- PCA(pca_df)
 pca_index <- st_sf(index = pca_index$ind$coord[, 1], geometry = st_geometry(pov))
 pca_index_agg <- aggregate(pca_index, readRDS("data-ext/bounds/nuts2.rds"), FUN = mean)
+
+## Plot PCA ----
 ggplot(pca_index_agg) +
   geom_sf(aes(fill = index), color = NA) +
   coord_sf(xlim = c(2500000, 6000000), ylim = c(1500000, 5200000)) +
@@ -386,47 +388,25 @@ wrap_plots(cos2_plots, ncol = 3, guides = "collect")
 
 
 
+# Local index creation ----
 gw_pca <- list()
 bw <- list()
 
-subindex_bw <- function(subindex) {
-  bw.gwpca(
-    data = as_Spatial(st_sf(pov_for_pca, geometry = loc)[subind_vars[[subindex]]]),
-    vars = names(pov_for_pca[subind_vars[[subindex]]]),
-    k = 1,
-    kernel = "gaussian",
-    robust = TRUE,
-    adaptive = TRUE
-  )
-}
 
-subindex_gwpca <- function(subindex, bw) {
-  df <- pov_for_pca[subind_vars[[subindex]]]
-  
-  gwpca(
-    data = as_Spatial(st_sf(df, geometry = loc)),
-    elocat = as_Spatial(loc),
-    vars = names(df),
-    k = 1,
-    bw = bw,
-    kernel = "gaussian",
-    adaptive = TRUE,
-    cv = FALSE
-  )
-}
-
-
+## Identify 1st stage bandwidths ----
 # subindex_bw("afford")
 # error: system is computationally singular: reciprocal condition number
 bw <- list(
-  afford = 982, #
+  afford = 1200, #
   access = 1264, #
   housing = 1400, #
-  social = 1752, #
+  social = 3000, #
   cond = 4686, #
   behav = 7557, #
   know = 1700 #
 )
+
+## Perform 1st stage GWPCA
 gw_pca$afford <- subindex_gwpca("afford", bw$afford)
 gw_pca$access <- subindex_gwpca("access", bw$access)
 gw_pca$housing <- subindex_gwpca("housing", bw$housing)
@@ -436,70 +416,24 @@ gw_pca$behav <- subindex_gwpca("behav", bw$behav)
 gw_pca$know <- subindex_gwpca("know", bw$know)
 #gw_pca$access <- NULL
 
-rescale_minmax <- function(.x) {
-  (.x - min(.x)) / (max(.x) - min(.x))
-}
+## Tidy GWPCA results ----
+gw_pca_tidy <- lapply(gw_pca, tidy_gwpca)
 
-t <- lapply(gw_pca, function(x) {
-  out <- st_as_sf(x$SDF)
-  # X <- mutate(
-  #   pov_for_pca,
-  #   across(everything(), .fns = rescale_minmax))
-  # )
-  
-  load <- scale(x$loadings[, , 1])
-  load <- apply(x$loadings[, , 1], 1, mean)
-  out <- bind_cols(out, index = load)
-  out
-})
-
-
-plot_gwpca <- function(x, var = "Comp.1_PV") {
-  title <- subind_nm[names(gw_pca)[[get("i", envir = parent.frame())]]]
-  legend <- switch(
-    var,
-    "Comp.1_PV" = "Proportion of variance",
-    "index" = "Index",
-    win_var_PC1 = "Winning variable"
-  )
-  ggplot(x) +
-    geom_sf(aes(color = .data[[var]]), size = 0.2) +
-    coord_sf(xlim = c(2500000, 6000000), ylim = c(1500000, 5200000)) +
-    scale_color_viridis_c(sprintf("**%s**<br>%s", title, legend)) +
-    theme_minimal() +
-    theme(
-      panel.grid.major = element_blank(),
-      panel.grid.minor = element_blank(),
-      legend.position = c(0.3, 0.8),
-      legend.direction = "horizontal",
-      legend.key.size = unit(0.3, 'cm'),
-      legend.key.width = unit(0.6, "cm"),
-      legend.text = element_text(size = 5),
-      legend.title = element_markdown(size = 7),
-      axis.text = element_blank()
-    ) +
-    guides(color = guide_colorbar(title.position = "top"))
-}
-
-gwpca_pv1_plots <- lapply(gw_pca, plot_gwpca, var = "Comp.1_PV")
-gwpca_pc1_plots <- lapply(t, plot_gwpca, var = "index")
+## Plot GWPCA ----
+gwpca_pv1_plots <- lapply(gw_pca_tidy, plot_gwpca, var = "Comp.1_PV")
+gwpca_pc1_plots <- lapply(gw_pca_tidy, plot_gwpca, var = "index")
+gwpca_win_plots <- lapply(gw_pca_tidy, plot_gwpca, var = "win_var_PC1")
 
 wrap_plots(gwpca_pv1_plots, ncol = 3)
-ggsave("data-raw/energy_poverty/gwpca_pv.png")
+ggsave("data-raw/energy_poverty/gwpca_pv.png", width = 12, height = 12)
 wrap_plots(gwpca_pc1_plots, ncol = 3)
-ggsave("data-raw/energy_poverty/gwpca_index.png")
+ggsave("data-raw/energy_poverty/gwpca_index.png", width = 12, height = 12)
+wrap_plots(gwpca_win_plots, ncol = 3)
+ggsave("data-raw/energy_poverty/gwpca_winner.png", width = 12, height = 12)
 
 
-GGally::ggmatrix(
-  setNames(gwpca_pc1_plots, subind_nm),
-  nrow = 3,
-  ncol = 3,
-  showAxisPlotLabels = FALSE,
-  showStrips = TRUE
-)
-
-
-gw_subind <- lapply(t, function(x) {
+## Tidy subindex data ----
+gw_subind <- lapply(gw_pca_tidy, function(x) {
   x <- st_drop_geometry(x)
   x <- x["index"]
   names(x) <- names(gw_pca)[get("i", envir = parent.frame())]
@@ -508,142 +442,33 @@ gw_subind <- lapply(t, function(x) {
   bind_cols() %>%
   st_sf(geometry = loc)
 
+
+## Identify 2nd stage bandwidths ----
+# bw_index <- bw.gwpca(
+#   data = as_Spatial(gw_subind),
+#   vars = names(st_drop_geometry(gw_subind)),
+#   k = 1,
+#   robust = TRUE,
+#   kernel = "gaussian",
+#   adaptive = TRUE
+# )
+
+# 1195
+bw_index <- 1195
+
+## Perform 2nd stage GWPCA ----
 gw_index <- gwpca(
-  data = as_Spatial(gw_subind),
+  data = as_Spatial(st_sf(scale(st_drop_geometry(gw_subind)), geometry = loc)),
   elocat = as_Spatial(loc),
   vars = names(st_drop_geometry(gw_subind)),
   k = 1,
-  bw = 500,
-  kernel = "gaussian",
-  adaptive = TRUE,
-  scores = TRUE
-)
-
-gw_index <- gwpca(
-  data = as_Spatial(st_sf(pov_for_pca, geometry = loc)),
-  elocat = as_Spatial(loc),
-  vars = names(pov_for_pca),
-  k = 1,
-  bw = 500,
-  kernel = "gaussian",
-  adaptive = TRUE,
-  scores = TRUE
-)
-
-t <- gw_index
-t$SDF <- st_as_sf(t$SDF)
-t$SDF <- bind_cols(t$SDF, index = t$loadings[, "social", 1])
-ggplot(t$SDF) + geom_sf(aes(color = index))
-
-
-
-gwpca_df <- lapply(gw_pca, function(x) {
-  st_drop_geometry(st_as_sf(x$SDF)["Comp.1_PV"])
-}) %>%
-  bind_cols(.name_repair = "minimal") %>%
-  setNames(subind_nm) %>%
-  st_sf(geometry = loc)
-
-compbw <- bw.gwpca(
-  as_Spatial(gwpca_df),
-  vars = names(st_drop_geometry(gwpca_df)),
-  k = 1,
-  kernel = "gaussian",
-  adaptive = TRUE
-)
-compindex <- gwpca(
-  as_Spatial(clean_names(gwpca_df)),
-  elocat = as_Spatial(loc),
-  vars = make_clean_names(names(st_drop_geometry(gwpca_df))),
-  k = 1,
-  bw = 500,
+  bw = bw_index,
+  robust = TRUE,
   kernel = "gaussian",
   adaptive = TRUE
 )
 
-
-
-## Find optimal bandwidth ----
-bw_gwpca <- bw.gwpca(
-  as_Spatial(st_sf(pov_for_pca, geometry = loc)),
-  vars = names(pov_for_pca),
-  k = 5,
-  kernel = "exp",
-  adaptive = TRUE
-)
-
-
-# GWEFA
-gw_efa <- gwfa(
-  as_Spatial(st_sf(pov_for_pca2, geometry = loc)),
-  elocat = as_Spatial(loc),
-  vars = names(pov_for_pca),
-  bw = 1000,
-  kernel = "gaussian",
-  adaptive = TRUE,
-  cor = "mixed",
-  timeout = 20
-)
-
-
-## Non-negative approach ----
-## (takes a loooong time, ~16 hours)
-options(future.globals.maxSize = +Inf)
-#handlers("cli")
-with_progress({
-  gw_pca <- gw_nsprcomp(
-    as_Spatial(st_sf(pov_for_pca, geometry = loc)),
-    elocat = as_Spatial(loc),
-    vars = names(pov_for_pca),
-    bw = 1000 / nrow(pov_for_pca),
-    k = 5,
-    kernel = "gaussian",
-    adaptive = TRUE,
-    workers = 4
-  )
-})
-
-
-## Traditional approach ----
-## (takes 5 minutes)
-gw_pca <- gwpca(
-  as_Spatial(st_sf(pov_for_pca, geometry = loc)),
-  elocat = as_Spatial(loc),
-  vars = names(pov_for_pca),
-  bw = 1000,
-  k = 5,
-  adaptive = TRUE,
-  kernel = "gaussian"
-)
-
-## Winning variables ----
-win1 <- colnames(gw_pca$loadings)[max.col(abs(gw_pca$loadings[, , 1]))] %>%
-  st_sf(winner = ., geometry = loc)
-win2 <- colnames(gw_pca$loadings)[max.col(abs(gw_pca$loadings[, , 2]))] %>%
-  st_sf(winner = ., geometry = loc)
-win3 <- colnames(gw_pca$loadings)[max.col(abs(gw_pca$loadings[, , 3]))] %>%
-  st_sf(winner = ., geometry = loc)
-win4 <- colnames(gw_pca$loadings)[max.col(abs(gw_pca$loadings[, , 4]))] %>%
-  st_sf(winner = ., geometry = loc)
-win <- bind_rows(PC1 = win1, PC2 = win2, PC3 = win3, PC4 = win4, .id = "comp")
-
-ggplot(win) +
-  geom_sf(aes(color = winner), key_glyph = "rect", size = 0.2) +
-  facet_wrap(~comp) +
-  theme_bw()
-ggsave("data-raw/energy_poverty/gwpca_winner.png", bg = "white")
-
-ggcharts::bar_chart(win, winner, facet = comp, fill = comp) + guides(fill="none")
-ggsave("data-raw/energy_poverty/gwpca_winner_counts.png")
-
-
-## Index composition ----
-# Geometric mean of PC1-5 for all locations
-evindex <- map_dbl(seq_len(nrow(gw_pca$loadings)), ~exp(mean(log(abs(gw_pca$loadings[.x, , 1]))))) %>%
-  st_sf(index = ., geometry = loc)
-
-ggplot(evindex) +
-  geom_sf(aes(color = index * 100), size = 0.7) +
-  scale_color_viridis_b() +
-  theme_bw()
-ggsave("data-raw/energy_poverty/gwpca_index.png")
+gw_index <- tidy_gwpca(gw_index)
+plot_gwpca(gw_index, var = "Comp.1_PV", title = "Energy vulnerability")
+plot_gwpca(gw_index, var = "index", title = "Energy vulnerability")
+plot_gwpca(gw_index, var = "win_var_PC1", title = "Energy vulnerability")
