@@ -147,6 +147,10 @@ a.logo {
   padding: 0em;
 }
 
+#main-ind-persona-mapbox .card-body, #main-ind-persona-mapbox .card-header {
+  padding: 0em;
+}
+
 .tight-map-box {
   padding: 0em !important;
 }
@@ -381,3 +385,12 @@ a.logo {
 .tax-tech    { grid-area: tech; }
 .tax-econ    { grid-area: econ; }
 .tax-dims    { grid-area: dims; }
+
+
+.persona-page {
+  margin-top: 5%;
+  margin-left: 5%;
+  margin-right: 5%;
+  padding: 2.5%;
+  fill: #FFF
+}
