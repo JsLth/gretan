@@ -16,7 +16,54 @@ mod_home_ui <- function(id) {
           title = with_literata("About GRETA"),
           width = 12,
           status = "primary",
-          txts$home$about
+          txts$home$about,
+          fluidRow(
+            style = "margin-top: 5%;",
+            col_6(
+              div(
+                style = "margin: auto; width: 70%; padding-top: 15%;",
+                tags$img(src = "www/greta_logo.svg")
+              )
+            ),
+            col_6(
+              div(
+                style = "margin: auto; width: 50%;",
+                tags$b("CONTACT"),
+                br(), br(),
+                "Annika Wolff",
+                br(),
+                "Project coordinator",
+                br(),
+                a("LUT.Greta@lut.fi", href = "mailto:LUT.Greta.lut.fi"),
+                br(), br(),
+                "Elina Palkama",
+                br(),
+                "Communication coordinator",
+                br(),
+                a("elina.palkama@kaskas.fi", href = "mailto:elina.palkama@kaskas.fi")
+              )
+            ),
+            fluidRow(
+              style = "margin-top: 5%;",
+              col_12(
+                div(
+                  style = "display: flex",
+                  tags$img(
+                    src = "www/eu_flag.jpg",
+                    width = "10%",
+                    height = "10%",
+                    style = "float: left;"
+                  ),
+                  p(
+                    "GRETA HAS RECEIVED FUNDING FROM THE EUROPEAN UNION'S HORIZON
+                    2020 RESEARCH AND INNOVATION PROGRAMME UNDER GRANT AGREEMENT
+                    NO 101022317.",
+                    style = "float: right; margin-left: 15px;"
+                  )
+                )
+              )
+            )
+          )
         )
       ),
       bs4Dash::column(
