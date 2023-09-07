@@ -1,26 +1,3 @@
-locm_colors_abel <- function(locm, df) {
-  n <- nrow(df)
-  vec <- seq(1, n)
-  vec <- locm[, 5] < 0.05
-  q <- attributes(locm)$quadr$mean
-  colors <- seq(1, n)
-  for (i in 1:n) {
-    if (q[i] == "High-High") colors[i] <- "red"
-    if (q[i] == "Low-Low")   colors[i] <- "blue"
-    if (q[i] == "Low-High")  colors[i] <- "lightblue"
-    if (q[i] == "High-Low")  colors[i] <- "pink"
-  }
-  locm.dt <- as.numeric(as.factor(q)) * vec
-  colors1 <- colors
-  for (i in 1:n) {
-    if (!is.na(locm.dt[i]) )  {
-      if (locm.dt[i] == 0) colors1[i] <- "white"
-    }
-  }
-  
-  list(outline = colors, fill = colors1)
-}
-
 list_to_css <- function(x) {
   paste(paste0(names(x), ": ", x, ";"), collapse = " ")
 }
@@ -31,13 +8,11 @@ as_likert <- function(x, scale = NULL) {
     stop(sprintf("Likert scale is too long (%s items)", length(x)))
   }
   
-  if (is.null(scale)) {
-    scale <- c(
-      "Strongly disagree", "Disagree", "Somewhat disagree",
-      "Neutral",
-      "Somewhat agree", "Agree", "Strongly agree"
-    )
-  }
+  scale <- scale %||% c(
+    "Strongly disagree", "Disagree", "Somewhat disagree",
+    "Neutral",
+    "Somewhat agree", "Agree", "Strongly agree"
+  )
   
   if (is.factor(scale)) {
     scale <- as.character(scale)
@@ -194,12 +169,10 @@ execute_safely <- function(expr,
                            stopOperation = TRUE,
                            session = getDefaultReactiveDomain()
   ) {
-  if (is.null(message)) {
-    message <- paste(
-      "Something went wrong! If this keeps happening, consider",
-      "notifying the tool maintainer (jonas.lieth@gesis.org)."
-    )
-  }
+  message <- message %||% paste(
+    "Something went wrong! If this keeps happening, consider",
+    "notifying the tool maintainer (jonas.lieth@gesis.org)."
+  )
   
   tryCatch(
     expr = expr,
@@ -332,9 +305,8 @@ log_it <- function(log = NULL, type = c("info", "warn", "error", "success")) {
     col <- "[%s]"
   }
   type <- sprintf(col, toupper(type))
-  if (is.null(log)) {
-    log <- srcloc(idx = 2L)
-  }
+  log <- log %||% srcloc(idx = 2L)
+  
   cat2(sprintf("%s %s %s", time, type, log), file = out, append = TRUE)
 }
 
@@ -434,12 +406,3 @@ drop_nulls <- function(x) {
     x
   }
 }
-
-#' Typing reactiveValues is too long
-#'
-#' @inheritParams reactiveValues
-#' @inheritParams reactiveValuesToList
-#'
-#' @noRd
-rv <- function(...) shiny::reactiveValues(...)
-rvtl <- function(...) shiny::reactiveValuesToList(...)
