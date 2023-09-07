@@ -17,6 +17,10 @@ is_polytomous <- function(x) {
   all(is.numeric(x) & length(unique(x)) < 8) && !is_dichotomous(x)
 }
 
+scale_minmax <- function(x, na.rm = TRUE) {
+  (x - min(x, na.rm = na.rm)) / (max(x, na.rm = na.rm) - min(x, na.rm = na.rm))
+}
+
 # GWPCA bandwith selection with specific defaults
 subindex_bw <- function(subindex, df = NULL, loc = NULL, vars = NULL) {
   if (is.null(df))
@@ -65,31 +69,76 @@ subindex_gwpca <- function(subindex, bw, robust = FALSE, df = NULL, loc = NULL, 
 }
 
 
-tidy_gwpca <- function(x) {
+tidy_gwpca <- function(x, rev = FALSE, names = NULL) {
   out <- st_as_sf(x$SDF)
-  load <- scale(x$loadings[, , 1])
-  load <- apply(x$loadings[, , 1], 1, mean)
+  load <- x$loadings[, , 1]
+  
+  # Rescale to 0-1
+  load <- apply(load, 2, function(x) {
+    to <- c(0, 1)
+    from <- range(x, na.rm = TRUE, finite = TRUE)
+    (x - from[1]) / diff(from) * diff(to) + to[1]
+  })
+  
+  # Reverse scales for consistency
+  if (rev) {
+    load[rev] <- apply(load, 2, function(x) 1 - x)
+  }
+  
+  if (!is.null(names)) {
+    out$win_var_PC1 <- unlist(names[out$win_var_PC1], use.names = FALSE)
+  }
+  
+  # Aggregate using geometric mean
+  load <- apply(load, 1, geometric.mean)
+  
   out <- bind_cols(out, index = load)
   out
 }
 
 
-plot_gwpca <- function(x, var = "Comp.1_PV", title = NULL) {
-  subind_nm <- parent.frame()$subind_nm
-  gw_pca <- parent.frame()$gw_pca
+plot_gwpca <- function(x,
+                       var = "Comp.1_PV",
+                       title = NULL,
+                       single_plot = FALSE,
+                       env = parent.frame()) {
+  subind_nm <- env$subind_nm
+  gw_pca <- env$gw_pca
   
   if (is.null(title)) {
     title <- subind_nm[names(gw_pca)[[get("i", envir = parent.frame())]]]
   }
   
+  size_args <- if (single_plot) {
+    list(
+      size = 0.7,
+      key_size = 0.6,
+      key_width = 1.5,
+      text_size = 11,
+      title_size = 13,
+      qual_key_size = 6,
+      qual_key_space = -0.3
+    )
+  } else {
+    list(
+      size = 0.2,
+      key_size = 0.3,
+      key_width = 0.6,
+      text_size = 5,
+      title_size = 7,
+      qual_key_size = 3,
+      qual_key_space = -0.1
+    )
+  }
+  
   legend <- switch(
     var,
     "Comp.1_PV" = "Proportion of variance",
-    "index" = "Index",
+    "index" = "Local index",
     "win_var_PC1" = "Winning variable"
   )
   p <- ggplot(x) +
-    geom_sf(aes(color = .data[[var]]), size = 0.2) +
+    geom_sf(aes(color = .data[[var]]), size = size_args$size) +
     coord_sf(xlim = c(2500000, 6000000), ylim = c(1500000, 5200000))
   
   if (!var %in% "win_var_PC1") {
@@ -100,7 +149,7 @@ plot_gwpca <- function(x, var = "Comp.1_PV", title = NULL) {
       name = sprintf("**%s**<br>%s", title, legend)
     )
   }
-  
+
   p <- p +
     theme_minimal() +
     theme(
@@ -108,10 +157,10 @@ plot_gwpca <- function(x, var = "Comp.1_PV", title = NULL) {
       panel.grid.minor = element_blank(),
       legend.position = c(0.3, 0.8),
       legend.direction = "horizontal",
-      legend.key.size = unit(0.3, 'cm'),
-      legend.key.width = unit(0.6, "cm"),
-      legend.text = element_text(size = 5),
-      legend.title = element_markdown(size = 7),
+      legend.key.size = ggplot2::unit(size_args$key_size, 'cm'),
+      legend.key.width = ggplot2::unit(size_args$key_width, "cm"),
+      legend.text = element_text(size = size_args$text_size),
+      legend.title = element_markdown(size = size_args$title_size),
       axis.text = element_blank()
     )
   
@@ -120,9 +169,10 @@ plot_gwpca <- function(x, var = "Comp.1_PV", title = NULL) {
   } else {
     p + guides(color = guide_legend(
       title.position = "top",
-      override.aes = list(shape = 15, size = 3),
-      direction = "vertical"
+      override.aes = list(shape = 15, size = size_args$qual_key_size),
+      direction = "vertical",
+      ncol = if (length(unique(x$win_var_PC1)) > 1) 2 else 1 
     )) +
-      theme(legend.spacing.x = unit(-0.1, "cm"))
+      theme(legend.spacing.x = unit(size_args$qual_key_space, "cm"))
   }
 }

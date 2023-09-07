@@ -19,7 +19,7 @@ p_load(
   
   # Visualization
   skimr, kableExtra, ggcorrplot, ggcharts, RColorBrewer, colorspace,
-  viridis, patchwork, ggtext,
+  viridis, patchwork, gridExtra, ggtext,
   
   # Meta
   cli, magrittr
@@ -48,7 +48,7 @@ body(gwpca)[[34]][[3]][[2]][[2]] <- quote(matrix(d1[, 1:k]))
 
 
 ## Custom functions ----
-source("index_fun.R")
+source("data-raw/energy_poverty/index_fun.R")
 
 
 # Read data ----
@@ -264,13 +264,13 @@ pov_for_pca <- pov %>%
   as_tibble()
 
 # Create a mix of polychoric, tetrachoric and pearson correlation matrices
-corr <- mixedCor(
-  c = names(select(pov_for_pca, !where(is_polytomous) & !where(is_dichotomous))),
-  p = names(select(pov_for_pca, where(is_polytomous) & !where(is_dichotomous))),
-  d = names(select(pov_for_pca, where(is_dichotomous))),
-  data = pov_for_pca,
-  global = FALSE
-)
+# corr <- mixedCor(
+#   c = names(select(pov_for_pca, !where(is_polytomous) & !where(is_dichotomous))),
+#   p = names(select(pov_for_pca, where(is_polytomous) & !where(is_dichotomous))),
+#   d = names(select(pov_for_pca, where(is_dichotomous))),
+#   data = pov_for_pca,
+#   global = FALSE
+# )
 
 
 
@@ -339,51 +339,84 @@ subind_nm <- list(
 ## Perform 1st stage PCA ----
 pca <- lapply(subind_vars, function(x) {
   povdf <- pov_for_pca[x]
-  # PCA(povdf, graph = FALSE)
-  corr <- mixedCor(povdf)
-  princomp(covmat = corr$rho)
+  prcomp(povdf, scale. = TRUE)
 })
 
 ## Tidy PCA results
 pca_df <- lapply(pca, function(x) {
-  x$ind$coord[, 1]
+  x$x[, 1]
 }) %>%
   bind_cols(.name_repair = "minimal") %>%
   setNames(subind_nm) %>%
   clean_names()
 
 ## Perform 2nd stage PCA
-pca_index <- PCA(pca_df)
-pca_index <- st_sf(index = pca_index$ind$coord[, 1], geometry = st_geometry(pov))
-pca_index_agg <- aggregate(pca_index, readRDS("data-ext/bounds/nuts2.rds"), FUN = mean)
+pca_index <- prcomp(pca_df, scale. = TRUE, center = TRUE)
+pca_index <- st_sf(index = pca_index$x[, 1], geometry = st_geometry(pov))
+pca_index_agg <- aggregate(pca_index, readRDS("data-ext/bounds/nuts1.rds"), FUN = mean)
+
+lims <- list(x = c(2500000, 6000000), y = c(1500000, 5200000))
 
 ## Plot PCA ----
 ggplot(pca_index_agg) +
-  geom_sf(aes(fill = index), color = NA) +
-  coord_sf(xlim = c(2500000, 6000000), ylim = c(1500000, 5200000)) +
-  scale_fill_viridis_b()
+  geom_sf(aes(fill = scale_minmax(index * -1)), color = NA) +
+  coord_sf(xlim = lims$x, ylim = lims$y) +
+  scale_fill_viridis_c(sprintf("**%s**<br>%s", "Energy vulnerability", "Global index")) +
+  theme_minimal() +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    legend.position = c(0.3, 0.8),
+    legend.direction = "horizontal",
+    legend.key.width = unit(1.2, "cm"),
+    legend.title = element_markdown(size = 12),
+    axis.text = element_blank()
+  ) +
+  guides(fill = guide_colorbar(title.position = "top"))
+ggsave("data-raw/energy_poverty/pca_index.png", bg = "white", width = 6, height = 6)
 
 scree_plots <- lapply(seq_along(pca), function(i) {
   pca <- pca[i]
   title <- subind_nm[[names(pca)]]
-  fviz_eig(pca[[1]], "eigenvalue", title = title)
+  fviz_eig(
+    pca[[1]],
+    choice = "eigenvalue",
+    title = title,
+    barfill = "grey50",
+    barcolor = "black",
+    main = "",
+    xlab = "",
+    ylab = ""
+  )
 })
-wrap_plots(scree_plots, ncol = 3)
+p <- gridExtra::grid.arrange(grobs = scree_plots, bottom = "Dimensions", left = "Eigenvalue")
+ggsave("data-raw/energy_poverty/pca_scree.png", plot = p, width = 6, height = 6)
 
 pca_plots <- lapply(seq_along(pca), function(i) {
   pca <- pca[i]
   title <- subind_nm[[names(pca)]]
-  fviz_pca_var(pca[[1]], title = title)
+  fviz_pca_var(
+    pca[[1]],
+    title = title,
+    labelsize = 3,
+    arrowsize = 0.4,
+    repel = TRUE,
+    ggtheme = theme_minimal()
+  )
 })
 wrap_plots(pca_plots, ncol = 3)
+ggsave("data-raw/energy_poverty/pca_biplot.png", width = 6, height = 6)
 
 cos2_plots <- lapply(seq_along(pca), function(i) {
   pca <- pca[i]
   title <- subind_nm[[names(pca)]]
-  ggcorrplot(pca[[1]]$var$cos2) +
+  var <- get_pca_var(pca[[1]])
+  ggcorrplot(var$cor) +
     theme(axis.text.x = element_text(size = 8), axis.text.y = element_text(size = 8))
 })
-wrap_plots(cos2_plots, ncol = 3, guides = "collect")
+wrap_plots(cos2_plots, ncol = 3) +
+  plot_layout(guides = "collect")
+ggsave("data-raw/energy_poverty/pca_cos2.png", width = 6, height = 6)
 
 
 
@@ -417,19 +450,25 @@ gw_pca$know <- subindex_gwpca("know", bw$know)
 #gw_pca$access <- NULL
 
 ## Tidy GWPCA results ----
-gw_pca_tidy <- lapply(gw_pca, tidy_gwpca)
+gw_pca_tidy <- mapply(
+  FUN = tidy_gwpca,
+  gw_pca,
+  names(gw_pca) %in% c("social", "cond", "behav", "know"),
+  SIMPLIFY = FALSE
+)
+
 
 ## Plot GWPCA ----
-gwpca_pv1_plots <- lapply(gw_pca_tidy, plot_gwpca, var = "Comp.1_PV")
-gwpca_pc1_plots <- lapply(gw_pca_tidy, plot_gwpca, var = "index")
-gwpca_win_plots <- lapply(gw_pca_tidy, plot_gwpca, var = "win_var_PC1")
+gwpca_pv1_plots <- lapply(gw_pca_tidy, plot_gwpca, var = "Comp.1_PV", env = environment())
+gwpca_pc1_plots <- lapply(gw_pca_tidy, plot_gwpca, var = "index", env = environment())
+gwpca_win_plots <- lapply(gw_pca_tidy, plot_gwpca, var = "win_var_PC1", env = environment())
 
 wrap_plots(gwpca_pv1_plots, ncol = 3)
-ggsave("data-raw/energy_poverty/gwpca_pv.png", width = 12, height = 12)
+ggsave("data-raw/energy_poverty/gwpca_pv.png", width = 7, height = 8)
 wrap_plots(gwpca_pc1_plots, ncol = 3)
-ggsave("data-raw/energy_poverty/gwpca_index.png", width = 12, height = 12)
+ggsave("data-raw/energy_poverty/gwpca_index.png", width = 7, height = 8)
 wrap_plots(gwpca_win_plots, ncol = 3)
-ggsave("data-raw/energy_poverty/gwpca_winner.png", width = 12, height = 12)
+ggsave("data-raw/energy_poverty/gwpca_winner.png", width = 7, height = 8)
 
 
 ## Tidy subindex data ----
@@ -463,12 +502,29 @@ gw_index <- gwpca(
   vars = names(st_drop_geometry(gw_subind)),
   k = 1,
   bw = bw_index,
-  robust = TRUE,
   kernel = "gaussian",
   adaptive = TRUE
 )
 
-gw_index <- tidy_gwpca(gw_index)
-plot_gwpca(gw_index, var = "Comp.1_PV", title = "Energy vulnerability")
-plot_gwpca(gw_index, var = "index", title = "Energy vulnerability")
-plot_gwpca(gw_index, var = "win_var_PC1", title = "Energy vulnerability")
+gw_index_tidy <- tidy_gwpca(gw_index, names = subind_nm)
+plot_gwpca(
+  gw_index_tidy,
+  var = "Comp.1_PV",
+  title = "Energy vulnerability",
+  single_plot = TRUE
+)
+ggsave("data-raw/energy_poverty/gwpca_comp_pv.png", width = 7, height = 8, bg = "white")
+plot_gwpca(
+  gw_index_tidy,
+  var = "index",
+  title = "Energy vulnerability",
+  single_plot = TRUE
+)
+ggsave("data-raw/energy_poverty/gwpca_comp_index.png", width = 7, height = 8, bg = "white")
+plot_gwpca(
+  gw_index_tidy,
+  var = "win_var_PC1",
+  title = "Energy vulnerability",
+  single_plot = TRUE
+)
+ggsave("data-raw/energy_poverty/gwpca_comp_winner.png", width = 7, height = 8, bg = "white")
