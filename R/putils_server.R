@@ -321,7 +321,7 @@ log_it <- function(log = NULL, type = c("info", "warn", "error", "success")) {
   if (isFALSE(getOption("greta_log"))) return(invisible(NULL))
   type <- match.arg(type)
   time <- format(Sys.time(), "%F %T")
-  if (!nzchar(out)) {
+  if (!nzchar(out) && interactive()) {
     col <- switch(type,
       info = "\033[32m[%s]\033[39m",
       warn = "\033[33m[%s]\033[39m",
