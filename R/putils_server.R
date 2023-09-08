@@ -177,6 +177,9 @@ execute_safely <- function(expr,
   tryCatch(
     expr = expr,
     error = function(e) {
+      # Stop without error message
+      if (!inherits(e, "shiny.silent.error")) req(FALSE)
+      
       send_error(div(
         style = "text-align: left",
         message,
@@ -184,6 +187,8 @@ execute_safely <- function(expr,
         "Error details:", br(),
         tags$code(rlang_error_to_html(e))
       ), session = session, title = title)
+      
+      # Send error message and then stop
       if (stopOperation) req(FALSE)
     }
   )
