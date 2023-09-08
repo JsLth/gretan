@@ -1,8 +1,3 @@
-list_to_css <- function(x) {
-  paste(paste0(names(x), ": ", x, ";"), collapse = " ")
-}
-
-
 as_likert <- function(x, scale = NULL) {
   if (length(scale) > 7) {
     stop(sprintf("Likert scale is too long (%s items)", length(x)))
@@ -66,7 +61,7 @@ align_td <- function(x, y, char = " ", bold = TRUE) {
   }, left = x, right = y, SIMPLIFY = FALSE, USE.NAMES = FALSE)
 }
 
-
+# Selects a map element on click
 leaflet_select <- function(id, geom, action, tol = 1) {
   if (!is.null(action)) {
     marker <- sf::st_sfc(sf::st_point(c(action$lng, action$lat)), crs = 4326)
@@ -80,7 +75,7 @@ leaflet_select <- function(id, geom, action, tol = 1) {
   }
 }
 
-
+# Selects a text in `txts` that corresponds to a selected Leaflet element
 leaflet_text_on_click <- function(id, geom, texts, click, col = "name", tol = 1) {
   target <- leaflet_select(id, geom, click, tol = tol)
   
@@ -93,8 +88,17 @@ leaflet_text_on_click <- function(id, geom, texts, click, col = "name", tol = 1)
   texts[[target]]
 }
 
-
-track_coordinates <- function(map, id, session = getDefaultReactiveDomain()) {
+#' Track Leaflet coordinates
+#' @description
+#' Adds a Javascript Hook to Leaflet map widget that creates a input value
+#' called `mousemove` which makes it possible to access map coordinates in a
+#' server environment.
+#' 
+#' @param map Leaflet map widget
+#' @param id ID of the leaflet widget
+#' 
+#' @noRd
+track_coordinates <- function(map, id) {
   map$jsHooks[["render"]] <- c(
     map$jsHooks[["render"]],
     list(list(
@@ -116,24 +120,14 @@ track_coordinates <- function(map, id, session = getDefaultReactiveDomain()) {
   map
 }
 
-scroll <- function(id, block = c("start", "center", "end", "nearest")){
-  if (missing(id))
-    stop("Missing `id`", call. = FALSE)
-  
-  blk <- match.arg(block)
-  
-  session <- getDefaultReactiveDomain()
-  session$sendCustomMessage("scroll", list(id = id, block = blk))
-  invisible()
-}
-
+# Convert ANSI formatting of rlang errors to HTML
 rlang_error_to_html <- function(x) {
   x <- as.character(x)
   x <- fansi::to_html(x)
   HTML(gsub("\n", "<br>", x))
 }
 
-
+# Send info message
 send_info <- function(text,
                       title = "Info",
                       session = getDefaultReactiveDomain()) {
@@ -147,6 +141,7 @@ send_info <- function(text,
   )
 }
 
+# Send error message
 send_error <- function(text,
                        title = "Oops!",
                        session = getDefaultReactiveDomain()) {
@@ -161,6 +156,22 @@ send_error <- function(text,
 }
 
 
+#' Execute expression safely in server
+#' @description
+#' Errors in a server environment usually lead to the Shiny app crashing. To
+#' prevent this, `execute_safely` catches errors and displays a user message
+#' instead. This function is a modified version of
+#' `shinyWidgets::execute_safely`. With other defaults, different formatting,
+#' and the ability to handle silent expressions.
+#' 
+#' @param expr Expression to evaluate
+#' @param title Title to display
+#' @param message Message to display
+#' @param stopOperation Whether to stop the reactive chain after showing the
+#' error message.
+#' @param session Session object.
+#' 
+#' @noRd
 execute_safely <- function(expr,
                            title = "Oops!",
                            message = NULL,
@@ -193,7 +204,7 @@ execute_safely <- function(expr,
 }
 
 
-# 4, wobblebar, pulse, throbber, riplle, ring, wave
+# global waiter defaults
 waiter_default <- list(
   color = "rgba(179, 221, 254, 0.8)", # greta blue
   html = tagList(
@@ -204,6 +215,7 @@ waiter_default <- list(
   hide_on_error = FALSE # on error, spin forever
 )
 
+# global highlight defaults
 highlight_opts <- leaflet::highlightOptions(
   weight = 2,
   color = "black",
@@ -213,6 +225,7 @@ highlight_opts <- leaflet::highlightOptions(
   sendToBack = TRUE
 )
 
+# plotly::config with custom defaults
 plotly_config_default <- function(p) {
   plotly::config(
     p,
@@ -228,6 +241,7 @@ plotly_config_default <- function(p) {
   )
 }
 
+# popover with custom defaults
 popover2 <- function(id,
                      title = NULL,
                      content,
@@ -253,12 +267,25 @@ popover2 <- function(id,
   )
 }
 
+#' Execute call with evaluated arguments
+#' @description
+#' Forces the evaluation of arguments in a call in a given environment.
+#' Useful for looping through function calls that defuse expressions and
+#' evaluate them in a different environment.
+#' 
+#' @param call Function call or expression
+#' @param envir Environment that arguments in `call` should be evaluated in.
+#' 
+#' @noRd
 with_eval_args <- function(call, envir = parent.frame()) {
   call <- substitute(call)
   call <- eval_args(call, envir = envir)
   eval(call, envir = envir)
 }
 
+# Forces evaluation of arguments in a call before passing it on.
+# Useful for looping through function calls that defuse expressions and
+# evaluate them in a different environment.
 eval_args <- function(call, envir) {
   for (i in seq_along(call)[-1]) {
     arg <- call[[i]]
@@ -274,6 +301,7 @@ eval_args <- function(call, envir) {
   call
 }
 
+# Get caller source, if possible with code line
 srcloc <- function(idx = 1) {
   x <- .traceback(x = 1)
   srcref <- attr(x[[idx]], "srcref")
@@ -288,11 +316,13 @@ srcloc <- function(idx = 1) {
   }
 }
 
+# Get ID of a Shiny module based on namespace
 get_module_id <- function(session = getDefaultReactiveDomain()) {
   ns <- strsplit(session$ns(""), "-")[[1]]
   ns[length(ns)]
 }
 
+# Alternative to cat that prints line breaks
 cat2 <- function(...) {
   cat(..., "\n")
 }
