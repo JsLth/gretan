@@ -20,25 +20,45 @@ mod_persona_ui <- function(id) {
     fluidRow(
       col_1(),
       col_10(
-        bs4Dash::box(
-          id = ns("mapbox"),
-          status = "primary",
-          width = 12,
-          height = 800,
-          headerBorder = FALSE,
-          collapsible = FALSE,
-          boxToolSize = "lg",
-          leaflet::leafletOutput(ns("map"), height = "100%"),
-          leafletPanel(
-            ns("map-info"),
-            title = with_literata("How do you compare?"),
-            position = "topleft",
-            p("This map shows you how you compare to other regions in the EU.
-              Where do other energy citizens live? Which regions perform
-              better than others? What changes can you expect when moving to
-              a different region?")
+        shinyjs::hidden(div(
+          id = ns("results"),
+          bs4Dash::box(
+            id = ns("typebox"),
+            status = "primary",
+            width = 12,
+            headerBorder = FALSE,
+            solidHeader = TRUE,
+            collapsible = FALSE,
+            boxToolSize = "lg",
+            background = "primary",
+            bs4Dash::appButton(
+              label = "Reset results",
+              inputId = ns("reset"),
+              icon = icon("refresh"),
+              color = "info"
+            ),
+            uiOutput(ns("type"))
+          ),
+          bs4Dash::box(
+            id = ns("mapbox"),
+            status = "primary",
+            width = 12,
+            height = 800,
+            headerBorder = FALSE,
+            collapsible = FALSE,
+            boxToolSize = "lg",
+            leaflet::leafletOutput(ns("map"), height = "100%"),
+            leafletPanel(
+              ns("map-info"),
+              title = with_literata("How do you compare?"),
+              position = "topleft",
+              p("This map shows you how you compare to other regions in the EU.
+                Where do other energy citizens live? Which regions perform
+                better than others? What changes can you expect when moving to
+                a different region?")
+            )
           )
-        ),
+        )),
         bs4Dash::box(
           id = ns("surveybox"),
           status = "primary",
@@ -119,7 +139,9 @@ mod_persona_ui <- function(id) {
               icon = icon("wand-magic-sparkles"),
               size = "lg",
               status = "success"
-            )
+            ),
+            br(), br(),
+            bs4Dash::infoBoxOutput(ns("required"))
           ),
           div(
             bs4Dash::actionButton(
@@ -151,13 +173,15 @@ mod_persona_server <- function(id) {
     ns <- session$ns
     page <- reactiveVal(1)
     prev_page <- reactiveVal(NULL)
+    log_cache <- reactiveVal(list(from = NULL, to = 1))
+    ready <- reactiveVal(0)
     
     waiter <- waiter::Waiter$new(
-      id = ns("map"),
+      id = c(ns("results"), ns("map")),
       html = tagList(waiter::spin_pulse(), h4("Determining your energy citizen type...")),
       color = "rgba(179, 221, 254, 1)"
     )
-    
+
     observe({
       shinyjs::toggleState(
         id = "prevBtn",
@@ -171,22 +195,45 @@ mod_persona_server <- function(id) {
         id = "submit",
         condition = all(has_answered())
       )
-      shinyjs::toggleElement(
-        id = "surveybox",
-        condition = !isTruthy(input$submit)
-      )
-      shinyjs::toggleElement(
-        id = "mapbox",
-        condition = isTruthy(input$submit)
-      )
       shinyjs::hide(id = paste0("step", prev_page()))
-      log_it(sprintf(
-        "{persona} - Switching from %s to %s",
-        ns(paste0("step", prev_page())),
-        ns(paste0("step", page()))
-      ))
       shinyjs::show(paste0("step", page()))
+      
+      pgs <- list(from = prev_page(), to = page())
+      if (!identical(pgs, log_cache())) {
+        log_cache(pgs)
+        log_it(sprintf(
+          "{persona} - Switching from %s to %s",
+          paste("step", prev_page()),
+          paste("step", page())
+        ))
+      }
+        
+
     })
+    
+    observe({
+      shinyjs::hide("surveybox")
+      shinyjs::show("results")
+    }) %>%
+      bindEvent(input$submit)
+    
+    observe({
+      shinyWidgets::updatePrettyToggle(inputId = ns("consent"), value = FALSE)
+      
+      for (i in seq(5)) {
+        with_eval_args(shinyWidgets::updateAwesomeRadio(
+          inputId = ns(paste0("question", i)),
+          selected = "None selected"
+        ))
+      }
+      
+      shinyjs::hide("results")
+      shinyjs::show("surveybox")
+      prev_page(page())
+      page(1)
+      ready(FALSE)
+    }) %>%
+      bindEvent(input$reset)
     
     observe({
       prev_page(page())
@@ -217,10 +264,74 @@ mod_persona_server <- function(id) {
     })
     
     
-    output$map <- leaflet::renderLeaflet({
+    output$required <- renderUI({
+      idx <- which(!has_answered())
+      if (length(idx)) {
+        div(
+          tagAppendChildren(
+            div(
+              style = "margin-left: -7.5px; width: 400px;",
+              class = "info-box bg-danger"
+            ),
+            span(class = "info-box-icon", icon("circle-exclamation")),
+            div(
+              style = "margin-left: 20px;",
+              span(
+                HTML("The following question need to be answered before proceeding:"),
+                p(list_to_li(as.list(paste("Question", idx))))
+              )
+            )
+          )
+        )
+      } else {
+        div()
+      }
+    })
+    
+    results <- reactiveVal()
+    observe({
+      # reticulate::py_run_file()
       waiter$show()
-      on.exit(waiter$hide())
-      leaflet::leaflet() %>%
+      print("starting")
+      Sys.sleep(1)
+      waiter$hide()
+      results(list(
+        list(name = "Persona 1", p = 0.853, desc = paste("This persona is characterized by", shinipsum::random_text(nchars = 250))),
+        list(name = "Persona 2", p = 0.437, desc = paste("This persona is characterized by", shinipsum::random_text(nchars = 250))),
+        list(name = "Persona 3", p = 0.194, desc = paste("This persona is characterized by", shinipsum::random_text(nchars = 250)))
+      ))
+    })
+    
+    
+    output$type <- renderUI({
+      items <- lapply(results(), function(x) {
+        bs4Dash::carouselItem(
+          fluidRow(
+            col_2(),
+            col_8(
+              h4(
+                sprintf("With a chance of %s %% you are...", x$p * 100),
+                style = "text-align: center;"
+              ),
+              h1(x$name, style = "text-align: center;"),
+              p(x$desc, style = "margin-bottom: 50px; text-align: justify;")
+            ),
+            col_2()
+          )
+        )
+      })
+      ready(ready() + 1)
+      bs4Dash::carousel(
+        id = "type-carousel",
+        .list = items
+      )
+    }) %>%
+      bindEvent(input$submit)
+    
+    
+    output$map <- leaflet::renderLeaflet({
+      results()
+      p <- leaflet::leaflet() %>%
         leaflet::addTiles() %>%
         leaflet::setView(lng = 9, lat = 55, zoom = 4) %>%
         leaflet::addPolygons(
@@ -254,6 +365,8 @@ mod_persona_server <- function(id) {
           data = sf::st_transform(srv_nuts2, 4326)
         ) %>%
         leaflet::addLayersControl(baseGroups = c("NUTS-2", "NUTS-1", "NUTS-0"))
-    })
+      p
+    }) %>%
+      bindEvent(input$submit)
   })
 }
