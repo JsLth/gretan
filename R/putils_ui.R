@@ -139,6 +139,33 @@ groupRadioButtons <- function(widget,
 }
 
 
+loadingButton <- function(inputId,
+                          label,
+                          ...,
+                          loadingLabel = "Loading...",
+                          loadingSpinner = "spinner") {
+  opts <- list(
+    label = label, loadingLabel = loadingLabel,
+    loadingSpinner = loadingSpinner
+  )
+  
+  opts <- jsonlite::toJSON(opts, auto_unbox = TRUE)
+  
+  span(
+    class = "sf-loading-button",
+    id = paste0("sf-loading-button", inputId),
+    bs4Dash::actionButton(
+      inputId = inputId,
+      label = label,
+      ...
+    ),
+    tags$head(tags$script(
+      sprintf("loadingButtons.create('%s', %s)", inputId, opts)
+    ))
+  )
+}
+
+
 with_literata <- function(x, ...) {
   p(x, style = "font-family: Literata; margin-bottom: 0px;", ...)
 }
