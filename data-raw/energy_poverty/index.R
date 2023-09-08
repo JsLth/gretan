@@ -330,7 +330,7 @@ subind_nm <- list(
   access = "Energy exclusion",
   housing = "Housing precarity",
   social = "Disempowerment",
-  cond = "Disability",
+  cond = "Special conditions",
   behav = "Energy behavior",
   know = "Energy literacy"
 )
@@ -374,6 +374,7 @@ ggplot(pca_index_agg) +
   ) +
   guides(fill = guide_colorbar(title.position = "top"))
 ggsave("data-raw/energy_poverty/pca_index.png", bg = "white", width = 6, height = 6)
+knitr::plot_crop("data-raw/energy_poverty/pca_index.png")
 
 scree_plots <- lapply(seq_along(pca), function(i) {
   pca <- pca[i]
@@ -391,6 +392,7 @@ scree_plots <- lapply(seq_along(pca), function(i) {
 })
 p <- gridExtra::grid.arrange(grobs = scree_plots, bottom = "Dimensions", left = "Eigenvalue")
 ggsave("data-raw/energy_poverty/pca_scree.png", plot = p, width = 6, height = 6)
+knitr::plot_crop("data-raw/energy_poverty/pca_scree.png")
 
 pca_plots <- lapply(seq_along(pca), function(i) {
   pca <- pca[i]
@@ -406,6 +408,7 @@ pca_plots <- lapply(seq_along(pca), function(i) {
 })
 wrap_plots(pca_plots, ncol = 3)
 ggsave("data-raw/energy_poverty/pca_biplot.png", width = 6, height = 6)
+knitr::plot_crop("data-raw/energy_poverty/pca_biplot.png")
 
 cos2_plots <- lapply(seq_along(pca), function(i) {
   pca <- pca[i]
@@ -417,6 +420,7 @@ cos2_plots <- lapply(seq_along(pca), function(i) {
 wrap_plots(cos2_plots, ncol = 3) +
   plot_layout(guides = "collect")
 ggsave("data-raw/energy_poverty/pca_cos2.png", width = 6, height = 6)
+knitr::plot_crop("data-raw/energy_poverty/pca_cor.png")
 
 
 
@@ -463,12 +467,15 @@ gwpca_pv1_plots <- lapply(gw_pca_tidy, plot_gwpca, var = "Comp.1_PV", env = envi
 gwpca_pc1_plots <- lapply(gw_pca_tidy, plot_gwpca, var = "index", env = environment())
 gwpca_win_plots <- lapply(gw_pca_tidy, plot_gwpca, var = "win_var_PC1", env = environment())
 
-wrap_plots(gwpca_pv1_plots, ncol = 3)
-ggsave("data-raw/energy_poverty/gwpca_pv.png", width = 7, height = 8)
-wrap_plots(gwpca_pc1_plots, ncol = 3)
-ggsave("data-raw/energy_poverty/gwpca_index.png", width = 7, height = 8)
-wrap_plots(gwpca_win_plots, ncol = 3)
-ggsave("data-raw/energy_poverty/gwpca_winner.png", width = 7, height = 8)
+wrap_plots(gwpca_pv1_plots, ncol = 4)
+ggsave("data-raw/energy_poverty/gwpca_pv.png", width = 10, height = 5.5)
+plot_crop("data-raw/energy_poverty/gwpca_pv.png")
+wrap_plots(gwpca_pc1_plots, ncol = 4)
+ggsave("data-raw/energy_poverty/gwpca_index.png", width = 10, height = 5.5)
+plot_crop("data-raw/energy_poverty/gwpca_index.png")
+wrap_plots(gwpca_win_plots, ncol = 4)
+ggsave("data-raw/energy_poverty/gwpca_winner.png", width = 10, height = 5.5)
+plot_crop("data-raw/energy_poverty/gwpca_winner.png")
 
 
 ## Tidy subindex data ----
@@ -513,18 +520,21 @@ plot_gwpca(
   title = "Energy vulnerability",
   single_plot = TRUE
 )
-ggsave("data-raw/energy_poverty/gwpca_comp_pv.png", width = 7, height = 8, bg = "white")
+ggsave("data-raw/energy_poverty/gwpca_comp_pv.png", width = 7, height = 7, bg = "white")
+plot_crop("data-raw/energy_poverty/gwpca_comp_pv.png")
 plot_gwpca(
   gw_index_tidy,
   var = "index",
   title = "Energy vulnerability",
   single_plot = TRUE
 )
-ggsave("data-raw/energy_poverty/gwpca_comp_index.png", width = 7, height = 8, bg = "white")
+ggsave("data-raw/energy_poverty/gwpca_comp_index.png", width = 7, height = 7, bg = "white")
+plot_crop("data-raw/energy_poverty/gwpca_comp_index.png")
 plot_gwpca(
   gw_index_tidy,
   var = "win_var_PC1",
   title = "Energy vulnerability",
   single_plot = TRUE
 )
-ggsave("data-raw/energy_poverty/gwpca_comp_winner.png", width = 7, height = 8, bg = "white")
+ggsave("data-raw/energy_poverty/gwpca_comp_winner.png", width = 7, height = 7, bg = "white")
+plot_crop("data-raw/energy_poverty/gwpca_comp_winner.png")
