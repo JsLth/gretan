@@ -9,6 +9,9 @@ TODO
 .RData
 .Rhistory
 .gitignore
+.github
 shinycannon-1.1.3.jar
 ocm_all_stations.json
 ocm_all_stations.rds
+electron.R
+shiny-run.R
