@@ -129,9 +129,7 @@ scroll <- function(id, block = c("start", "center", "end", "nearest")){
 
 rlang_error_to_html <- function(x) {
   x <- as.character(x)
-  if (requireNamespace("fansi", quietly = TRUE)) {
-    x <- fansi::sgr_to_html(x)
-  }
+  x <- fansi::to_html(x)
   HTML(gsub("\n", "<br>", x))
 }
 
