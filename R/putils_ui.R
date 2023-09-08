@@ -41,6 +41,7 @@ leafletPanel <- function(inputId,
                          bottom = NULL,
                          right = NULL,
                          left = NULL) {
+  position <- match.arg(position)
   if (any(!vapply(list(top, bottom, right, left), is.null, logical(1)))) {
     gaps <- list(left = left, right = right, top = top, bottom = bottom)
   } else {
@@ -62,7 +63,6 @@ leafletPanel <- function(inputId,
       width = width,
       class = "leaflet-info",
       draggable = draggable,
-      id = inputId,
       div(
         span(
           h5(title, style = "display: inline-block; margin: 0.2rem;"),
@@ -71,7 +71,7 @@ leafletPanel <- function(inputId,
               class = "card-tools float-right",
               tags$button(
                 class = "btn btn-tool btn-sm",
-                style = "margin-bottom: 0px;",
+                # style = "margin-bottom: 0px;",
                 `data-toggle` = "collapse",
                 `data-target` = paste0("#", inputId),
                 type = "button",
@@ -86,6 +86,7 @@ leafletPanel <- function(inputId,
         class = "leaflet-info-header"
       ),
       div(
+        id = inputId,
         class = if (collapsible) "collapse show",
         ...,
         class = "leaflet-info-body"
