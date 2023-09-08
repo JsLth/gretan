@@ -216,6 +216,7 @@ mod_persona_server <- function(id) {
       cond <- ready() >= 2
       
       if (cond) {
+        freezeReactiveValue(input, "submit")
         session$sendCustomMessage(
           "resetLoadingButton",
           message = list(inputId = session$ns("submit"))
