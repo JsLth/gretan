@@ -395,3 +395,12 @@ a.logo {
   padding: 2.5%;
   fill: #FFF
 }
+
+
+.persona-reset {
+  background-color: transparent !important;
+  border-color: transparent !important;
+  color: #000 !important;
+  margin-top: -40px !important;
+  margin-left: -10px !important;
+}
