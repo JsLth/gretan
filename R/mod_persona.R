@@ -20,7 +20,7 @@ mod_persona_ui <- function(id) {
     fluidRow(
       col_1(),
       col_10(
-        shinyjs::hidden(div(
+        div(
           id = ns("results"),
           bs4Dash::box(
             id = ns("typebox"),
@@ -35,7 +35,8 @@ mod_persona_ui <- function(id) {
               label = "Reset results",
               inputId = ns("reset"),
               icon = icon("refresh"),
-              color = "info"
+              color = NULL,
+              class = "persona-reset"
             ),
             uiOutput(ns("type"))
           ),
@@ -58,7 +59,7 @@ mod_persona_ui <- function(id) {
                 a different region?")
             )
           )
-        )),
+        ),
         bs4Dash::box(
           id = ns("surveybox"),
           status = "primary",
@@ -133,12 +134,12 @@ mod_persona_ui <- function(id) {
             h2("Thank you!"),
             p("You have finished the survey. Click \u201cSubmit\u201d
               now to have your information analyzed."),
-            bs4Dash::actionButton(
-              ns("submit"),
+            loadingButton(
+              inputId = ns("submit"),
               label = "Submit!",
               icon = icon("wand-magic-sparkles"),
-              size = "lg",
-              status = "success"
+              status = "success",
+              size = "lg"
             ),
             br(), br(),
             bs4Dash::infoBoxOutput(ns("required"))
@@ -212,10 +213,18 @@ mod_persona_server <- function(id) {
     })
     
     observe({
-      shinyjs::hide("surveybox")
-      shinyjs::show("results")
-    }) %>%
-      bindEvent(input$submit)
+      cond <- ready() >= 2
+      
+      if (cond) {
+        session$sendCustomMessage(
+          "resetLoadingButton",
+          message = list(inputId = session$ns("submit"))
+        )
+      }
+      
+      shinyjs::toggleElement("surveybox", condition = !cond)
+      shinyjs::toggleElement("results", condition = cond)
+    })
     
     observe({
       shinyWidgets::updatePrettyToggle(inputId = ns("consent"), value = FALSE)
@@ -231,7 +240,7 @@ mod_persona_server <- function(id) {
       shinyjs::show("surveybox")
       prev_page(page())
       page(1)
-      ready(FALSE)
+      ready(0)
     }) %>%
       bindEvent(input$reset)
     
@@ -288,22 +297,23 @@ mod_persona_server <- function(id) {
       }
     })
     
-    results <- reactiveVal()
-    observe({
+    
+    results <- reactive({
       # reticulate::py_run_file()
       waiter$show()
       print("starting")
       Sys.sleep(1)
       waiter$hide()
-      results(list(
+      list(
         list(name = "Persona 1", p = 0.853, desc = paste("This persona is characterized by", shinipsum::random_text(nchars = 250))),
         list(name = "Persona 2", p = 0.437, desc = paste("This persona is characterized by", shinipsum::random_text(nchars = 250))),
         list(name = "Persona 3", p = 0.194, desc = paste("This persona is characterized by", shinipsum::random_text(nchars = 250)))
-      ))
+      )
     })
     
     
     output$type <- renderUI({
+      ready(ready() + 1)
       items <- lapply(results(), function(x) {
         bs4Dash::carouselItem(
           fluidRow(
@@ -330,6 +340,7 @@ mod_persona_server <- function(id) {
     
     
     output$map <- leaflet::renderLeaflet({
+      ready(ready() + 1)
       results()
       p <- leaflet::leaflet() %>%
         leaflet::addTiles() %>%
@@ -368,5 +379,8 @@ mod_persona_server <- function(id) {
       p
     }) %>%
       bindEvent(input$submit)
+    
+    outputOptions(output, "type", suspendWhenHidden = FALSE, priority = 1)
+    outputOptions(output, "map", suspendWhenHidden = FALSE, priority = 2)
   })
 }
