@@ -287,18 +287,19 @@ mod_exp_server <- function(id, track = FALSE) {
     # this is undesirable and not very appealing.
     observe({
       has_option <- all(!is.na(cb[cb$variable %in% invar(), ]$option))
+      freezeReactiveValue(input, "pal")
       if (!has_option) {
         shinyjs::hide("option", anim = TRUE)
-        #palettes <- list_palettes("seq")
-        #shinyWidgets::updatePickerInput(session, "pal", choices = palettes)
+        palettes <- list_palettes("seq")
+        shinyWidgets::updatePickerInput(session, "pal", choices = palettes)
       } else if (isTRUE(input$mode) && has_option) {
         shinyjs::hide("option", anim = TRUE)
-        #palettes <- list_palettes("qual")
-        #shinyWidgets::updatePickerInput(session, "pal", choices = palettes)
+        palettes <- list_palettes("qual")
+        shinyWidgets::updatePickerInput(session, "pal", choices = palettes)
       } else {
         shinyjs::show("option", anim = TRUE)
-        #palettes <- list_palettes("seq")
-        #shinyWidgets::updatePickerInput(session, "pal", choices = palettes)
+        palettes <- list_palettes("seq")
+        shinyWidgets::updatePickerInput(session, "pal", choices = palettes)
       }
     }, label = "show or hide mode switch") %>%
       bindEvent(input$mode, invar())
