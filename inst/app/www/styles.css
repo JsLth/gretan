@@ -145,6 +145,7 @@ a.logo {
 
 #main-cs-cs1-map_box .card-body {
   padding: 0em;
+  margin-bottom: -10px;
 }
 
 #main-ind-persona-mapbox .card-body, #main-ind-persona-mapbox .card-header {
