@@ -14,7 +14,8 @@ run_greta(...)
 
 \item{log}{Where to output app logs. Accepts a directory path where a log
 file is created. If `""`, prints directly to the console. If `FALSE`,
-disables logging.}
+disables logging. Also accepts a character vector containing module IDs.
+In this case, logging is enabled only for these modules.}
 
 \item{reactlog}{Whether to enable logging using the reactlog package.
 For debugging purposes.}

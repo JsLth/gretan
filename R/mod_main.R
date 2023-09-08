@@ -25,7 +25,6 @@ mod_main_server <- function(id, tab) {
     mod_home_server("home")
     exp_params <- mod_exp_server("exp")
     mod_cmp_server("cmp")
-    mod_cmp_server("insp")
     mod_insp_server("insp")
     mod_cs_server("cs", tab = tab)
     mod_ind_server("ind")

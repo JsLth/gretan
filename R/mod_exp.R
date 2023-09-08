@@ -219,31 +219,29 @@ mod_exp_server <- function(id, track = FALSE) {
       mode_switched <- mode_switched()
       can_change <- any(!was_updated, has_new_title, is_init_run, mode_switched)
       
+      details <- list(
+        sprintf(
+          "update: subitem - %s, option - %s (%s)",
+          subitem_server, option_server, ifelse(was_updated, "not passed", "passed")
+        ),
+        sprintf(
+          "new title: %s (%s)",
+          has_new_title, ifelse(has_new_title, "passed", "not passed")
+        ),
+        sprintf(
+          "mode switch: %s (%s)",
+          mode_switched, ifelse(mode_switched, "passed", "not passed")
+        ),
+        sprintf(
+          "is init run: %s (%s)",
+          is_init_run, ifelse(is_init_run, "passed", "not passed")
+        )
+      )
       if (can_change) {
-        log_it(
-          sprintf("{%s} - Permitted to change input variable; details:", id)
-        )
+        log_it("Permitted to change input variable; details:", details = details)
       } else {
-        log_it(
-          sprintf("{%s} - Suspended from changing input variable; details:", id)
-        )
+        log_it("Suspended from changing input variable; details:", details = details)
       }
-      log_details(sprintf(
-        "update: subitem - %s, option - %s (%s)",
-        subitem_server, option_server, ifelse(was_updated, "not passed", "passed")
-      ))
-      log_details(sprintf(
-        "new title: %s (%s)",
-        has_new_title, ifelse(has_new_title, "passed", "not passed")
-      ))
-      log_details(sprintf(
-        "mode switch: %s (%s)",
-        mode_switched, ifelse(mode_switched, "passed", "not passed")
-      ))
-      log_details(sprintf(
-        "is init run: %s (%s)",
-        is_init_run, ifelse(is_init_run, "passed", "not passed")
-      ))
 
       updated$subitem <- FALSE
       updated$option <- FALSE

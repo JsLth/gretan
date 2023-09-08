@@ -203,7 +203,7 @@ mod_persona_server <- function(id) {
       if (!identical(pgs, log_cache())) {
         log_cache(pgs)
         log_it(sprintf(
-          "{persona} - Switching from %s to %s",
+          "Switching from %s to %s",
           paste("step", prev_page()),
           paste("step", page())
         ))

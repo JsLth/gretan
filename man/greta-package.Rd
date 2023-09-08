@@ -6,7 +6,7 @@
 \alias{greta-package}
 \title{greta: GIS tool of the GRETA project}
 \description{
-PKG_DESC.
+Visualize and explore the results from the GRETA project. Quickly get insights from GRETA's multi-national survey and case studies. Understand statistical and spatial relationships of energy citizenship in 16 European countries among citizens, businesses and policymakers.
 }
 \author{
 \strong{Maintainer}: Jonas Lieth \email{jonas.lieth@gesis.org}

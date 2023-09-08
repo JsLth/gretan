@@ -288,15 +288,43 @@ srcloc <- function(idx = 1) {
   }
 }
 
+get_module_id <- function(session = getDefaultReactiveDomain()) {
+  ns <- strsplit(session$ns(""), "-")[[1]]
+  ns[length(ns)]
+}
+
 cat2 <- function(...) {
   cat(..., "\n")
 }
 
-log_it <- function(log = NULL, type = c("info", "warn", "error", "success")) {
-  out <- getOption("greta_log", "")
-  if (isFALSE(getOption("greta_log"))) return(invisible(NULL))
+#' Internal logging
+#' 
+#' Basic Shiny app logging
+#' @param log Log message
+#' @param type Type of the message
+#' @param details Optional details to append to the logs
+#' @param priority Whether the log is a priority log. Priority logs are always
+#' printed, even if the input parameters from `run_app` restrict log output.
+#' @param session Session object
+#' 
+#' @noRd
+log_it <- function(log = NULL,
+                   type = c("info", "warn", "error", "success"),
+                   details = NULL,
+                   priority = FALSE,
+                   session = getDefaultReactiveDomain()) {
+  out <- getShinyOption("greta.logging", "")
+  if (isFALSE(out)) return(invisible())
   type <- match.arg(type)
   time <- format(Sys.time(), "%F %T")
+  ns <- get_module_id(session)
+
+  if (!dir.exists(out) && isTRUE(!ns %in% out)) {
+    return(invisible())
+  }
+  
+  out <- ""
+  
   if (!nzchar(out) && interactive()) {
     col <- switch(type,
       info = "\033[32m[%s]\033[39m",
@@ -310,17 +338,22 @@ log_it <- function(log = NULL, type = c("info", "warn", "error", "success")) {
   type <- sprintf(col, toupper(type))
   log <- log %||% srcloc(idx = 2L)
   
-  cat2(sprintf("%s %s %s", time, type, log), file = out, append = TRUE)
+  cat2(sprintf("%s %s {%s} %s", time, type, ns, log), file = out, append = TRUE)
+  
+  if (!is.null(details)) {
+    log_details(details)
+  }
 }
 
-log_details <- function(log) {
-  cat2(paste0("\t", log))
+log_details <- function(logs, session = getDefaultReactiveDomain()) {
+  for (l in logs) {
+    cat2(paste0("\t", l))
+  }
 }
 
-with_logging <- function(code, value) {
-  old <- options(greta_log = value)
-  on.exit(options(old))
-  force(code)
+with_logging <- function(app, value) {
+  app$appOptions$greta.logging <- value
+  app
 }
 
 protect_html <- function(x) HTML(as.character(x))
