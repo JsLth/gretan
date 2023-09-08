@@ -25,7 +25,8 @@ Imports:
     viridisLite,
     waiter,
     plotly,
-    fansi
+    fansi,
+    shinipsum
 Suggests: 
     spelling,
     testthat (>= 3.0.0),
