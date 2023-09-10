@@ -64,7 +64,7 @@
       awesome
     Output
       <div id="test" class="form-group shiny-input-radiogroup awesome-bootstrap-radio shiny-input-container">
-        <label class="control-label" for="test" style="margin-bottom: 5px;"></label>
+        <label class="control-label" id="test-label" for="test" style="margin-bottom: 5px;"></label>
         <div style="height: 7px;"></div>
         <div class="shiny-options-group">
           <div class="awesome-radio radio-primary">
@@ -91,7 +91,7 @@
       pretty
     Output
       <div id="test" class="form-group shiny-input-radiogroup shiny-input-container">
-        <label class="control-label" for="test"></label>
+        <label class="control-label" id="test-label" for="test"></label>
         <div class="shiny-options-group">
           <div style="margin-bottom: 10px; font-size: 16px; font-weight: bold;">1st</div>
           <div class="pretty p-default p-round">
