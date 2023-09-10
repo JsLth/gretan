@@ -1,6 +1,7 @@
 <!-- badges: start -->
 
 [![R-CMD-check](https://github.com/JsLth/greta-gis-tool/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/JsLth/greta-gis-tool/actions/workflows/R-CMD-check.yaml)
+[![electron-build](https://github.com/JsLth/greta-gis-tool/actions/workflows/electron-build.yaml/badge.svg)](https://github.com/JsLth/greta-gis-tool/actions/workflows/electron-build.yaml)
 
 <!-- badges: end -->
 

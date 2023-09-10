@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [main]
 
-name: R-CMD-check
+name: build
 
 jobs:
   build:
@@ -49,7 +49,6 @@ jobs:
 
       - name: Package electron app
         run: |
-          options(timeout = 600)
           pak::pkg_install("JsLth/electricShine")
           source("electron.R")
         shell: Rscript {0}

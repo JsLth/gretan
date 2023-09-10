@@ -34,7 +34,8 @@ Suggests:
     reactlog,
     shinyloadtest,
     profvis,
-    rstudioapi
+    rstudioapi,
+    rlang
 Config/testthat/edition: 3
 Encoding: UTF-8
 Language: en-US
