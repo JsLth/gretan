@@ -1,6 +1,6 @@
 mod_stakeholder_ui <- function(id) {
   ns <- NS(id)
-  
+
   bs4Dash::tabItem(
     "stakeholder",
     make_header(
@@ -53,8 +53,8 @@ mod_stakeholder_ui <- function(id) {
           max = 100,
           value = 20,
           step = 1
-        )
-      )),
+        ))
+      ),
       col_4(
         div(style = "margin: auto", sliderInput(
           ns("slider2"),
@@ -63,8 +63,8 @@ mod_stakeholder_ui <- function(id) {
           max = 100,
           value = 50,
           step = 1
-        )
-      )),
+        ))
+      ),
       col_4(
         div(style = "margin: auto", sliderInput(
           ns("slider3"),
@@ -73,8 +73,8 @@ mod_stakeholder_ui <- function(id) {
           max = 100,
           value = 20,
           step = 1
-        )
-      )),
+        ))
+      ),
       col_4(
         div(style = "margin: auto", sliderInput(
           ns("slider4"),
@@ -83,8 +83,8 @@ mod_stakeholder_ui <- function(id) {
           max = 100,
           value = 10,
           step = 1
-        )
-      )),
+        ))
+      ),
       col_4(
         div(style = "margin: auto", sliderInput(
           ns("slider5"),
@@ -93,8 +93,8 @@ mod_stakeholder_ui <- function(id) {
           max = 100,
           value = 50,
           step = 1
-        )
-      )),
+        ))
+      ),
       col_4(
         div(style = "margin: auto", sliderInput(
           ns("slider6"),
@@ -103,8 +103,8 @@ mod_stakeholder_ui <- function(id) {
           max = 100,
           value = 90,
           step = 1
-        )
-      ))
+        ))
+      )
     )
   )
 }
@@ -112,6 +112,6 @@ mod_stakeholder_ui <- function(id) {
 
 mod_stakeholder_server <- function(id) {
   moduleServer(id, function(input, output, session) {
-    
+
   })
 }

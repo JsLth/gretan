@@ -1,6 +1,6 @@
 mod_research_ui <- function(id) {
   ns <- NS(id)
-  
+
   bs4Dash::tabItem(
     "research",
     make_header(
@@ -15,6 +15,6 @@ mod_research_ui <- function(id) {
 
 mod_research_server <- function(id) {
   moduleServer(id, function(input, output, session) {
-    
+
   })
 }

@@ -76,14 +76,14 @@ mod_insp_server <- function(id) {
       if (length(input$subitem) > 2) {
         entries <- entries[entries$subitem %in% input$subitem, ]
       }
-      
+
       if (length(input$option) > 2) {
         entries <- entries[entries$option %in% input$option, ]
       }
       entries$variable
     }) %>%
       bindEvent(input$title, input$subitem, input$options)
-    
+
     observe({
       entry <- cb_ext[cb_ext$variable %in% invar(), ]
       titles <- entry$title
@@ -108,7 +108,7 @@ mod_insp_server <- function(id) {
       }
     }) %>%
       bindEvent(input$title)
-    
+
     observe({
       entry <- cb_ext[cb_ext$variable %in% invar(), ]
       titles <- entry$title
@@ -136,19 +136,18 @@ mod_insp_server <- function(id) {
           choices = character()
         )
       }
-
     }) %>%
       bindEvent(input$title, input$subitem)
-    
+
     table <- reactive({
       invar <- invar()
       poly <- get(paste0("srv_", input$aggr))
-      if (length(invar) > 0)  {
+      if (length(invar) > 0) {
         poly <- subset_mns(poly, invar)
       }
       mns_pivot_longer(poly)
     })
-    
+
     dt <- reactive({
       DT::datatable(
         table(),
@@ -227,7 +226,7 @@ mod_insp_server <- function(id) {
     })
 
     output$table <- DT::renderDataTable(execute_safely(dt()), server = TRUE)
-    
+
     output$csv <- downloadHandler(
       filename = function() {
         paste0("greta-mns-", input$aggr, ".csv")
@@ -236,7 +235,7 @@ mod_insp_server <- function(id) {
         utils::write.csv(table(), file, row.names = FALSE)
       }
     )
-    
+
     output$json <- downloadHandler(
       filename = function() {
         paste0("greta-mns-", input$aggr, ".json")

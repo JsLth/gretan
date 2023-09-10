@@ -6,55 +6,77 @@ txts$home$tags <- c(
 )
 
 txts$home$welcome <- tagList(
-  p2(HTML("GRETA Analytics is a <b>GIS-based analytical tool</b> to study the emergence of
+  p2(
+    HTML("GRETA Analytics is a <b>GIS-based analytical tool</b> to study the emergence of
      energy citizenship. The tool allows you to freely and interactively explore
      the output produced by the GRETA project with a geospatial focus. It
      answers the the need to create a bridge between data collected from case
-     studies, their re-use in scenario predictions, and their framing for the 
+     studies, their re-use in scenario predictions, and their framing for the
      purpose of <b>Community Transition Pathways (CTPs)</b>. GRETA Analytics accounts
      for variations within and between geographical levels by georeferencing and
      spatializing the data from the GRETA multinational survey and by studying
      their spillover, crossover, and cross-level interaction effects on the
      local, regional, national, and supranational levels. The tool facilitates
      the geographic assessment of energy citizenship emergence."),
-  p2("What can you find on GRETA Analytics?")),
-  tags$ul(
-    tags$li(HTML("Quickly and comfortably <b>explore, compare, inspect</b> and
-                 download the data produced in GRETA's multinational survey.\u2800"),
-            actionLink("welcome-li-exp", label = "", icon = icon("arrow-right"))),
-    tags$li(HTML("Understand how GRETA taxonomises the geographical composition
-                 of energy citizenship across levels and domains.\u2800"),
-            actionLink("welcome-li-taxonomy", label = "", icon = icon("arrow-right"))),
-    tags$li(HTML("Explore the energy landscapes and energy fragility in
-                 the Pilastro-Roveri district of Bologna, Italy.\u2800"),
-            actionLink("welcome-li-cs1italy", label = "", icon = icon("arrow-right"))),
-    tags$li(HTML("Comprehend the interactions between citizens, policymakers,
-                 and businesses in a cross-country comparison.\u2800"),
-            actionLink("welcome-li-stakeholder", label = "", icon = icon("arrow-right"))),
-    tags$li(HTML("Learn about your own role as a citizen in the energy
-                 transition and how geography can impact it.\u2800"),
-            actionLink("welcome-li-persona", label = "", icon = icon("arrow-right"))),
-    tags$li(HTML("Understand the multi-dimensional vulnerability to energy
-                 poverty and how it compares across the EU.\u2800"),
-            actionLink("welcome-li-enpov", label = "", icon = icon("arrow-right"))),
-    tags$li(HTML("Find out how living environments steer the public social media
-                 discourse on energy transition and environmental change.\u2800"),
-            actionLink("welcome-li-attitudes", label = "", icon = icon("arrow-right"))),
-    tags$li(HTML("Learn about the uneven geographies of energy research and
-                 its thematic versatility.\u2800"),
-            actionLink("welcome-li-research", label = "", icon = icon("arrow-right")))
+    p2("What can you find on GRETA Analytics?")
   ),
-  p2("You can explore the contents by clicking on the triple-bar",
-     icon("bars", style = "vertical-align: center"),
-     "and browsing through the data explorer or one of the many studies done by
-     GRETA partners.")
+  tags$ul(
+    tags$li(
+      HTML("Quickly and comfortably <b>explore, compare, inspect</b> and
+                 download the data produced in GRETA's multinational survey.\u2800"),
+      actionLink("welcome-li-exp", label = "", icon = icon("arrow-right"))
+    ),
+    tags$li(
+      HTML("Understand how GRETA taxonomises the geographical composition
+                 of energy citizenship across levels and domains.\u2800"),
+      actionLink("welcome-li-taxonomy", label = "", icon = icon("arrow-right"))
+    ),
+    tags$li(
+      HTML("Explore the energy landscapes and energy fragility in
+                 the Pilastro-Roveri district of Bologna, Italy.\u2800"),
+      actionLink("welcome-li-cs1italy", label = "", icon = icon("arrow-right"))
+    ),
+    tags$li(
+      HTML("Comprehend the interactions between citizens, policymakers,
+                 and businesses in a cross-country comparison.\u2800"),
+      actionLink("welcome-li-stakeholder", label = "", icon = icon("arrow-right"))
+    ),
+    tags$li(
+      HTML("Learn about your own role as a citizen in the energy
+                 transition and how geography can impact it.\u2800"),
+      actionLink("welcome-li-persona", label = "", icon = icon("arrow-right"))
+    ),
+    tags$li(
+      HTML("Understand the multi-dimensional vulnerability to energy
+                 poverty and how it compares across the EU.\u2800"),
+      actionLink("welcome-li-enpov", label = "", icon = icon("arrow-right"))
+    ),
+    tags$li(
+      HTML("Find out how living environments steer the public social media
+                 discourse on energy transition and environmental change.\u2800"),
+      actionLink("welcome-li-attitudes", label = "", icon = icon("arrow-right"))
+    ),
+    tags$li(
+      HTML("Learn about the uneven geographies of energy research and
+                 its thematic versatility.\u2800"),
+      actionLink("welcome-li-research", label = "", icon = icon("arrow-right"))
+    )
+  ),
+  p2(
+    "You can explore the contents by clicking on the triple-bar",
+    icon("bars", style = "vertical-align: center"),
+    "and browsing through the data explorer or one of the many studies done by
+     GRETA partners."
+  )
 )
 txts$home$about <- tagList(
-  p2("This website is part of the",
-     a("GRETA project", href = "https://projectgreta.eu/", class = "intext"),
-     "(GReen Energy Transition Actions). GRETA studies solutions and provides
+  p2(
+    "This website is part of the",
+    a("GRETA project", href = "https://projectgreta.eu/", class = "intext"),
+    "(GReen Energy Transition Actions). GRETA studies solutions and provides
      recommendations on how to achieve civic energy empowerment through energy
-     citizenship. The project has five objectives:"),
+     citizenship. The project has five objectives:"
+  ),
   tags$ol(
     tags$li("To understand who energy citizens are"),
     tags$li("To understand how energy citizens act and interact."),
@@ -64,7 +86,8 @@ txts$home$about <- tagList(
             national, and supranational levels."),
     tags$li("To improve the policymaking process.")
   ),
-  p2(HTML("The project creates roadmaps for decarbonisation that enhance energy
+  p2(
+    HTML("The project creates roadmaps for decarbonisation that enhance energy
      citizenship. The findings will help policymakers encourage active citizen
      participation in the energy transition. From 2021 to 2023, GRETA partners
      <b>worked with energy communities</b> in Germany, Italy, the Netherlands,
@@ -73,21 +96,24 @@ txts$home$about <- tagList(
      participate in the sustainable planning of mobility both within their
      cities and internationally. You can consult the case studies by clicking
      on one of the pins"),
-     icon("map-pin", style = "vertical-align: center"),
-     "on the map to the right."),
-  p2(HTML("GRETA also launched a first-of-its kind <b>EU-wide empirical citizen
+    icon("map-pin", style = "vertical-align: center"),
+    "on the map to the right."
+  ),
+  p2(
+    HTML("GRETA also launched a first-of-its kind <b>EU-wide empirical citizen
      consultation</b>. The survey was sent to energy customers, suppliers,
      intermediaries, retailers and policymakers in 25 countries, driving
      unique insights about the emergence of energy citizenship. On the
      map to the right you can examine which countries were included in the
      multinational citizen survey. For more insights into the research conducted
      in the GRETA project, you can consult the"),
-     a(
-       "deliverables",
-       href = "https://projectgreta.eu/resources/",
-       class = "intext"
-     ),
-     "published on the official website."),
+    a(
+      "deliverables",
+      href = "https://projectgreta.eu/resources/",
+      class = "intext"
+    ),
+    "published on the official website."
+  ),
 )
 
 txts$home$csdesc <- list(

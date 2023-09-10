@@ -20,7 +20,7 @@ on <- function(name, expr, session = getDefaultReactiveDomain()) {
   if (is.null(session$userData[[name]])) {
     stop(sprintf("Flag %s has not been initiated: can't listen to it."))
   }
-  
+
   observe({
     substitute(expr)
   }) %>%

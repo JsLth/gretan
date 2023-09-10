@@ -3,7 +3,7 @@
 # Author:      Jonas Lieth
 # R version:   R version 4.2.1 (2022-06-23 ucrt)
 # OS:          Windows 10 x64 (build 22621)
-# Requirements: 
+# Requirements:
 #   - GRETA multinational survey results in ./greta_survey/
 #   - Boundary data created by bounds.R (needs to be in evaluated environment)
 # Packages:
@@ -59,7 +59,7 @@ sort_variables <- function(var) {
 # Handle survey values during aggregation. If a variable is a likert item,
 # compute median, if it's an interval numeric, compute mean. Otherwise,
 # select by frequency.
-# If a likert item has 
+# If a likert item has
 aggregate_survey <- function(x) {
   vec <- get0("e", envir = parent.frame(2))
   if (is.null(vec)) {
@@ -67,7 +67,7 @@ aggregate_survey <- function(x) {
   } else {
     is_likert <- isTRUE(attr(vec, "is_likert"))
   }
-  
+
   if (is_likert) {
     nr <- strtoi(attr(vec, "labels")[[1]])
     nr <- nr[!is.na(nr)]
@@ -190,7 +190,8 @@ topics <- dplyr::tribble(
   "c103", "Optimal relation to government on gas in appliances", "J",
   "c104", "Feelings towards replacing gas in appliances", "B"
 ) %>%
-  mutate(topic = case_match(topic,
+  mutate(topic = case_match(
+    topic,
     "A" ~ "Demographics",
     "B" ~ "Energy literacy and information",
     "C" ~ "Energy efficiency / energy use",
@@ -227,15 +228,17 @@ codebook <- readxl::read_xlsx(
     variable = janitor::make_clean_names(variable),
     is_metric = purrr::map_lgl(
       survey[variable],
-      ~!haven::is.labelled(.x) & is.numeric(.x)
+      ~ !haven::is.labelled(.x) & is.numeric(.x)
     )
   ) %>%
   select(variable, question, is_metric) %>%
   filter(!(stringr::str_ends(variable, "_open") & !is_metric)) %>% # filter useless open questions
   filter(!stringr::str_detect(question, "if applicable|<none>|all that apply")) %>% # filter weird optional questions with no proper label
   filter(!stringr::str_starts(variable, stringr::regex("p|b[0-9]"))) %>% # only citizen
-  filter(variable %in% c("id", "d1", "d2", # filter technical columns
-                         stringr::str_match_all(variable, "^c[0-9]{1,2}.*"))) %>%
+  filter(variable %in% c(
+    "id", "d1", "d2", # filter technical columns
+    stringr::str_match_all(variable, "^c[0-9]{1,2}.*")
+  )) %>%
   filter(!variable %in% c("c2", "c3")) %>% # filter geo questions
   filter(!variable %in% "c8_13") %>% # this subitem is not suitable for mapping
   mutate(question = stringr::str_remove_all(question, stringr::fixed(", please specify"))) %>% # remove label appendices that don't look good in the app
@@ -262,15 +265,17 @@ codebook <- readxl::read_xlsx(
   )) %>%
   mutate(is_pdummy = map_lgl( # pseudo dummies = Yes/No questions - don't need dummifying
     survey[variable],
-    ~is.labelled(.x) & all(names(attr(.x, "labels")) %in% c("Yes", "No")))) %>%
+    ~ is.labelled(.x) & all(names(attr(.x, "labels")) %in% c("Yes", "No"))
+  )) %>%
   mutate(is_dummy = purrr::map_lgl( # find dummies based on number of labels
     survey[variable],
-    ~length(attr(.x, "labels")) == 1)) %>% 
+    ~ length(attr(.x, "labels")) == 1
+  )) %>%
   mutate(needs_dummy = !is_metric &
-           !variable == "id" &
-           !is_dummy &
-           !is_pdummy &
-           !is_likert) %>%
+    !variable == "id" &
+    !is_dummy &
+    !is_pdummy &
+    !is_likert) %>%
   mutate( # split question labels for dummies
     option = dplyr::if_else(is_dummy, stringr::str_split_i(question, " - ", 1), NA),
     question = dplyr::if_else(is_dummy, stringr::str_split_i(question, " - ", 2), question)
@@ -328,7 +333,7 @@ countries <- data.frame(
     "Romania", "Spain"
   ),
   iso = c(
-    "AT", "BE", "CZ", "DK", "FI", "FR", "DE", "EL", "HU", "IE", 
+    "AT", "BE", "CZ", "DK", "FI", "FR", "DE", "EL", "HU", "IE",
     "IT", "NL", "PL", "PT", "RO", "ES"
   ),
   curr = c(
@@ -351,7 +356,7 @@ lau <- bind_rows(lau, com[!com$name %in% lau$name, ])
 # inconsistent
 nuts1$place <- str_remove_all(nuts1$name, "\\([A-Z]{2}\\)") %>% trimws()
 nuts2$place <- str_remove_all(nuts2$name, "\\([A-Z]{2}\\)") %>% trimws()
-survey$c2   <- str_remove_all(survey$c2,   "\\([A-Z]{2}\\)") %>% trimws()
+survey$c2 <- str_remove_all(survey$c2, "\\([A-Z]{2}\\)") %>% trimws()
 
 # Manually revise some place names
 survey$c3 <- survey$c3 %>%
@@ -364,13 +369,14 @@ survey$c3 <- survey$c3 %>%
 replace <- c(`'` = "", "\u03bc" = "u", "´" = "")
 survey$clean_c2 <- make_clean_names(survey$c2, allow_dupes = TRUE, replace = replace)
 survey$clean_c3 <- make_clean_names(survey$c3, allow_dupes = TRUE, replace = replace)
-nuts1$clean_c2  <- make_clean_names(nuts1$place, allow_dupes = TRUE, replace = replace)
-nuts2$clean_c2  <- make_clean_names(nuts2$place, allow_dupes = TRUE, replace = replace)
-lau$clean_c3    <- make_clean_names(lau$name, allow_dupes = TRUE, replace = replace)
+nuts1$clean_c2 <- make_clean_names(nuts1$place, allow_dupes = TRUE, replace = replace)
+nuts2$clean_c2 <- make_clean_names(nuts2$place, allow_dupes = TRUE, replace = replace)
+lau$clean_c3 <- make_clean_names(lau$name, allow_dupes = TRUE, replace = replace)
 
 # Survey country labels are standardized while nuts country labels are
 # localized. Recode to match survey labelling.
-nuts0 <- mutate(nuts0, name = dplyr::case_match(name,
+nuts0 <- mutate(nuts0, name = dplyr::case_match(
+  name,
   "Česko" ~ "Czechia",
   "Deutschland" ~ "Germany",
   "Danmark" ~ "Denmark",
@@ -400,7 +406,7 @@ nuts12 <- dplyr::bind_rows(nuts1, nuts2)
 
 # Filter out non-responses to geo question
 survey <- survey[!tolower(survey$c2) %in% "prefer not to say" &
-                   !tolower(survey$c3) %in% "prefer not to say", ]
+  !tolower(survey$c3) %in% "prefer not to say", ]
 
 cat("With geo-information:", nrow(survey), "\n")
 
@@ -434,8 +440,8 @@ survey_local <- pairs %>%
   reclin2::link(selection = "threshold", x = lau, y = survey, all_y = TRUE) %>%
   as_tibble() %>%
   mutate(geometry = geometry %>%
-           sf::st_sfc() %>% # fix geometries
-           sf::st_centroid()) %>% # compute centroids for easier spatial aggregation
+    sf::st_sfc() %>% # fix geometries
+    sf::st_centroid()) %>% # compute centroids for easier spatial aggregation
   sf::st_as_sf() %>%
   filter(!is.na(.x)) %>%
   select(all_of(codebook$variable)) %>%
@@ -452,7 +458,7 @@ survey_local <- pairs %>%
     .fns = function(x) {
       dplyr::case_match(as.character(x),
         "Yes" ~ TRUE,
-        "No"  ~ FALSE,
+        "No" ~ FALSE,
         .default = NA
       )
     }
@@ -477,8 +483,8 @@ survey_local <- fastDummies::dummy_cols(
   # adjust columns that were dummies before
   mutate(dplyr::across(
     dplyr::where(is.factor),
-    ~dplyr::case_when(is.na(.x) ~ 0, .default = 1))
-  ) %>%
+    ~ dplyr::case_when(is.na(.x) ~ 0, .default = 1)
+  )) %>%
   sf::st_as_sf() %>%
   dplyr::relocate(geometry, .before = ncol(.))
 

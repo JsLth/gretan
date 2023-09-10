@@ -1,6 +1,6 @@
 mod_cs5_ui <- function(id) {
   ns <- NS(id)
-  
+
   bs4Dash::tabItem(
     "cs5",
     make_header(
@@ -17,6 +17,6 @@ mod_cs5_ui <- function(id) {
 
 mod_cs5_server <- function(id, tab) {
   moduleServer(id, function(input, output, session) {
-    
+
   })
 }

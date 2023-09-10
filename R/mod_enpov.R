@@ -1,6 +1,6 @@
 mod_enpov_ui <- function(id) {
   ns <- NS(id)
-  
+
   bs4Dash::tabItem(
     "enpov",
     make_header(
@@ -15,6 +15,6 @@ mod_enpov_ui <- function(id) {
 
 mod_enpov_server <- function(id) {
   moduleServer(id, function(input, output, session) {
-    
+
   })
 }

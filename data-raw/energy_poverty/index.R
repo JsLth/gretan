@@ -7,20 +7,20 @@ library(pacman)
 p_load(
   # data wrangling
   dplyr, stringr, purrr, tidyr, janitor,
-  
+
   # spatial data
   sf,
-  
+
   # PCA
   missMDA, factoextra, FactoMineR, psych,
-  
+
   # GW PCA
   GWmodel, GWnnegPCA,
-  
+
   # Visualization
   skimr, kableExtra, ggcorrplot, ggcharts, RColorBrewer, colorspace,
   viridis, patchwork, gridExtra, ggtext,
-  
+
   # Meta
   cli, magrittr
 )
@@ -36,15 +36,16 @@ body(ggcorrplot)[[20]][[3]][[2]] <- quote(
     ggplot2::geom_tile(color = "grey", fill = "white") +
     ggplot2::geom_tile(
       color = outline.color,
-      ggplot2::aes_string(width = "value", height = "value"))
+      ggplot2::aes_string(width = "value", height = "value")
+    )
 )
 
 body(gwpca)[[26]][[3]] <- quote(cli::cli_progress_along(1:ep.n))
 body(gwpca)[[34]][[3]][[2]][[2]] <- quote(matrix(d1[, 1:k]))
-#body(gwfa)[[26]][[4]][[11]][[3]] <- quote(cli::cli_progress_along(1:ep.n))
-#body(gwfa)[[10]] <- quote(data <- as(sdata, "data.frame")[seq_len(ncol(sdata))])
-#body(gw_nsprcomp)[[27]][[3]] <- quote(cli::cli_progress_along(1:ep.n))
-#body(gw_nsprcomp)[[27]][[4]][[8]][[3]] <- quote(temp$rotation[var.n, k])
+# body(gwfa)[[26]][[4]][[11]][[3]] <- quote(cli::cli_progress_along(1:ep.n))
+# body(gwfa)[[10]] <- quote(data <- as(sdata, "data.frame")[seq_len(ncol(sdata))])
+# body(gw_nsprcomp)[[27]][[3]] <- quote(cli::cli_progress_along(1:ep.n))
+# body(gw_nsprcomp)[[27]][[4]][[8]][[3]] <- quote(temp$rotation[var.n, k])
 
 
 ## Custom functions ----
@@ -58,7 +59,7 @@ pov <- readRDS("data-ext/survey_resampled.rds") %>%
     "d2", # Occupation
     "c1", # Age
     "c4", # Education
-    "c6_",  # Energy saving #1
+    "c6_", # Energy saving #1
     "c11", # Energy complexity
     "c16", # Cooling system
     "c18", # Heating system
@@ -71,7 +72,7 @@ pov <- readRDS("data-ext/survey_resampled.rds") %>%
     "c48", # Household size
     "c49", # Tenancy
     "c51", # Special conditions
-    "c54"  # Income
+    "c54" # Income
   )), "id", "nuts0", "nuts1", "nuts2", -"c51_4")
 
 cb <- readRDS("data-ext/codebook.rds") %>%
@@ -124,7 +125,7 @@ vars_lookup <- list(
   cond_trans = "c51_3",
   cond_support = "c51_5",
   income = "c54",
-  
+
   # behavioral variables
   behav_unplug = "c6_1",
   behav_products = "c6_2",
@@ -132,26 +133,26 @@ vars_lookup <- list(
   behav_share = "c6_4",
   behav_carpool = "c6_5",
   behav_car = "c6_6",
-  
+
   # knowledge variables
   know_energy = "c11_1",
   know_heating = "c11_2",
   know_costs = "c11_3",
   know_share = "c11_4",
   know_solutions = "c11_5",
-  
+
   # energy access variables
   has_cooling = "c16", # include as yes/no or divide by option?
   has_heating = "c18", # include as yes/no or divide by option?
   heat_config = "c19",
-  
+
   # energy affordability variables
   energy_cost = "c26",
   ability_to_pay = "c28_1",
   supplier_threat = "c28_2",
   safety_winter = "c28_3",
   safety_summer = "c28_4",
-  
+
   # housing variables
   house_type = "c29",
   house_area = "c30",
@@ -175,8 +176,8 @@ pov <- pov %>%
   mutate(across(where(is.logical), .fns = as.numeric)) %>%
   ### Convert Yes/No to binary ----
   mutate(across(
-    where(~identical(unique(na.omit(as.character(.x))), c("Yes", "No"))),
-    .fns = ~case_match(.x, "Yes" ~ 1, "No" ~ 0, .default = NA)
+    where(~ identical(unique(na.omit(as.character(.x))), c("Yes", "No"))),
+    .fns = ~ case_match(.x, "Yes" ~ 1, "No" ~ 0, .default = NA)
   )) %>%
   ### Recode categorical variables ----
   mutate(
@@ -193,14 +194,16 @@ pov <- pov %>%
       TRUE, FALSE
     ),
     tenancy = if_else(
-      tenancy %in% c("Owner, with mortgage or loan",
-                     "Owner, no outstanding mortgage or housing loan"),
+      tenancy %in% c(
+        "Owner, with mortgage or loan",
+        "Owner, no outstanding mortgage or housing loan"
+      ),
       FALSE, TRUE
     ),
     income = if_else(
       income %in% c(
         "Finding it very difficult to live on current income",
-        "Finding it difficult to live on current income", 
+        "Finding it difficult to live on current income",
         "Coping on current income"
       ),
       TRUE, FALSE
@@ -243,7 +246,7 @@ pov <- pov %>%
     where(is.factor),
     .fns = as.numeric
   )) %>%
-  select(where(~!all(.x == 0, na.rm = TRUE)))
+  select(where(~ !all(.x == 0, na.rm = TRUE)))
 
 
 ## Data summary ----
@@ -278,11 +281,11 @@ pov_for_pca <- pov %>%
 # Global index creation ----
 # TWO-STAGE PCA
 # BI-FACTOR MODEL
-# 
-# Idea: 
+#
+# Idea:
 # 1. Create subindices using PCA
 # 2. Combine subindices using PCA again
-# 
+#
 # Why?
 # Take into account the latent nature of energy poverty. Creating sub-indices
 # allows for better control of the causality of energy poverty. It prevents
@@ -293,7 +296,7 @@ pov_for_pca <- pov %>%
 # Generally, PCA is biased towards highly correlated variables leading to
 # groups of variables 'lumping together', e.g. knowledge and behavior dominating
 # the first two components.
-# 
+#
 # Mishra 2007:
 # PCA loadings are highly elitist – preferring highly correlated
 # variables to poorly correlated variables, irrespective of the (possible)
@@ -301,7 +304,7 @@ pov_for_pca <- pov %>%
 # is found that some (evidently) very important variables are roughly dealt
 # with by the PCA simply because those variables exhibited widely distributed
 # scatter or they failed to fall within a narrow band around a straight line.
-# 
+#
 # Further reading:
 # https://www.bbvaresearch.com/wp-content/uploads/2014/09/WP14-26_Financial-Inclusion1.pdf
 # https://mpra.ub.uni-muenchen.de/3377/1/MPRA_paper_3377.pdf
@@ -451,7 +454,7 @@ gw_pca$social <- subindex_gwpca("social", bw$social)
 gw_pca$cond <- subindex_gwpca("cond", bw$cond)
 gw_pca$behav <- subindex_gwpca("behav", bw$behav)
 gw_pca$know <- subindex_gwpca("know", bw$know)
-#gw_pca$access <- NULL
+# gw_pca$access <- NULL
 
 ## Tidy GWPCA results ----
 gw_pca_tidy <- mapply(

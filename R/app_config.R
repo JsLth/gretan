@@ -1,18 +1,18 @@
 #' Access files in the current app
-#' 
-#' @param ... character vectors, specifying subdirectory 
-#' and file(s) within your package. 
+#'
+#' @param ... character vectors, specifying subdirectory
+#' and file(s) within your package.
 #' The default, none, returns the root of the app.
-#' 
+#'
 #' @noRd
 app_sys <- function(...) {
   path <- system.file(..., package = "greta")
-  
+
   # for rsconnect
   if (!nchar(path)) {
     path <- file.path("inst", ...)
   }
-  
+
   path
 }
 

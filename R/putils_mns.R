@@ -1,15 +1,17 @@
 render_question <- function(title, subitem, option) {
-  if (is.null(title)) return("")
+  if (is.null(title)) {
+    return("")
+  }
   indat <- cb_ext[cb_ext$title %in% title, ]
-  
+
   if (!all(is.na(indat$subitem))) {
     indat <- indat[indat$subitem %in% subitem, ]
   }
-  
+
   if (!all(is.na(indat$option))) {
     indat <- indat[indat$option %in% option, ]
   }
-  
+
   HTML(sprintf(
     "<b>Question %s:</b><br>%s",
     toupper(indat$og_var),
@@ -25,7 +27,7 @@ get_mns_variable <- function(title, subitem, option, mode) {
   # case: multiple items exist, look for subitems
   if (length(invar$variable) > 1) {
     has_subitem <- invar$subitem %in% subitem
-    
+
     # only select subitem if any exist
     if (any(has_subitem)) {
       invar <- invar[has_subitem, ]
@@ -61,10 +63,10 @@ get_mns_params <- function(invar, fixed, palette, aggr) {
   cb_entry <- cb_ext[cb_ext$variable %in% invar, ]
   is_metric <- cb_entry$is_metric
   is_likert <- cb_entry$is_likert
-  
+
   domain <- NULL
   values <- stats::as.formula(paste0("~", invar))
-  
+
   if (identical(invar, "c1")) {
     lgd <- "Mean age"
     unit <- " years"
@@ -72,7 +74,7 @@ get_mns_params <- function(invar, fixed, palette, aggr) {
     labs <- cb_entry$labels[[1]]
     values <- domain <- factor(labs, levels = labs)
     lgd <- "Mode"
-    unit = ""
+    unit <- ""
   } else if (is_likert) {
     labs <- cb_entry$labels[[1]]
     if (is_non_default_likert(labs)) {
@@ -120,7 +122,7 @@ get_mns_params <- function(invar, fixed, palette, aggr) {
     "sep"
   )
   labels <- do.call(align_dl, label_values)
-  
+
   poly <- sf::st_transform(poly, 4326)
 
   list(
@@ -158,12 +160,12 @@ map_mns <- function(params, track = FALSE) {
       title = params$lgd,
       labFormat = leaflet::labelFormat(suffix = params$unit)
     )
-  
+
   if (track) {
     id <- paste0(getCurrentOutputInfo()$name, "_mousemove")
     m <- track_coordinates(m, id = id)
   }
-  
+
   m
 }
 
@@ -239,8 +241,10 @@ mns_pivot_longer <- function(df) {
   pivot <- utils::stack(df, select = do_stack)[2:1]
   entries <- merge(
     pivot,
-    cb_ext[c("variable", "og_var", "question", "subitem", "option",
-             "is_metric", "is_likert")],
+    cb_ext[c(
+      "variable", "og_var", "question", "subitem", "option",
+      "is_metric", "is_likert"
+    )],
     by.x = "ind",
     by.y = "variable",
     sort = FALSE
@@ -248,7 +252,7 @@ mns_pivot_longer <- function(df) {
   type <- rep("%", nrow(entries))
   type[entries$is_metric] <- "mean"
   type[entries$is_likert] <- "median"
-  
+
   data.frame(
     variable = entries$og_var,
     question = entries$question,

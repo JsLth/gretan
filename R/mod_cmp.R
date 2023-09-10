@@ -9,7 +9,7 @@ mod_cmp_side_ui <- function(id, titles, selected = NULL) {
       width = 12,
       type = "tabs",
       tabPanel(
-        title = "Data", 
+        title = "Data",
         id = ns("databox"),
         icon = icon("filter"),
         shinyWidgets::pickerInput(
@@ -78,7 +78,7 @@ mod_cmp_side_ui <- function(id, titles, selected = NULL) {
 
 mod_cmp_ui <- function(id, titles) {
   ns <- NS(id)
-  
+
   bs4Dash::tabItem(
     "cmp",
     fluidRow(
@@ -91,33 +91,37 @@ mod_cmp_ui <- function(id, titles) {
 
 mod_cmp <- function(input, output, session) {
   ns <- session$ns
-  
+
   exp_params_left <- mod_exp_server("left", track = TRUE)
   exp_params_right <- mod_exp_server("right", track = TRUE)
-  
+
   null_indicator <- reactiveValues(left = TRUE, right = TRUE)
   indicator_label <- reactiveValues(left = NULL, right = NULL)
-  
+
   observe({
     mouse <- unlist(input[["right-explorer_shape_mouseout"]])
-    if (is.null(mouse)) return(TRUE)
+    if (is.null(mouse)) {
+      return(TRUE)
+    }
     params <- exp_params_right()
     mouse <- sf::st_sfc(sf::st_point(mouse[c("lng", "lat")]), crs = 4326)
     has_mouse <- sf::st_contains(mouse, params$poly, sparse = FALSE)
     null_indicator$left <- !any(has_mouse)
   }) %>%
     bindEvent(input[["right-explorer_shape_mouseout"]])
-  
+
   observe({
     mouse <- unlist(input[["left-explorer_shape_mouseout"]])
-    if (is.null(mouse)) return(TRUE)
+    if (is.null(mouse)) {
+      return(TRUE)
+    }
     params <- exp_params_left()
     mouse <- sf::st_sfc(sf::st_point(mouse[c("lng", "lat")]), crs = 4326)
     has_mouse <- sf::st_contains(mouse, params$poly, sparse = FALSE)
     null_indicator$right <- !any(has_mouse)
   }) %>%
     bindEvent(input[["left-explorer_shape_mouseout"]])
-  
+
   observe({
     mouse <- unlist(input[["right-explorer_shape_mouseover"]])
     req(!is.null(mouse))
@@ -128,7 +132,7 @@ mod_cmp <- function(input, output, session) {
     indicator_label$left <- params$labels[[country_idx]]
   }) %>%
     bindEvent(input[["right-explorer_shape_mouseover"]])
-  
+
   observe({
     mouse <- unlist(input[["left-explorer_shape_mouseover"]])
     req(!is.null(mouse))
@@ -139,13 +143,13 @@ mod_cmp <- function(input, output, session) {
     indicator_label$right <- params$labels[[country_idx]]
   }) %>%
     bindEvent(input[["left-explorer_shape_mouseover"]])
-  
+
   observe({
     hover <- input[["left-explorer_mousemove"]]
     label <- indicator_label$right
     outside <- null_indicator$right
-    
-    if (is.null(hover) || is.null(label) || outside)  {
+
+    if (is.null(hover) || is.null(label) || outside) {
       leaflet::leafletProxy("right-explorer") %>%
         leaflet::removeMarker(ns("right-indicator"))
     } else {
@@ -159,13 +163,13 @@ mod_cmp <- function(input, output, session) {
         )
     }
   })
-  
+
   observe({
     hover <- input[["right-explorer_mousemove"]]
     label <- indicator_label$left
     outside <- null_indicator$left
-    
-    if (is.null(hover) || is.null(label) || outside)  {
+
+    if (is.null(hover) || is.null(label) || outside) {
       leaflet::leafletProxy("left-explorer") %>%
         leaflet::removeMarker(ns("left-indicator"))
     } else {
