@@ -3,7 +3,7 @@ helpBox <- function(..., help_id = NULL, tabBox = FALSE) {
   if (is.null(help_id)) {
     return(bx)
   }
-  
+
   help <- tags$button(
     id = help_id,
     class = "btn btn-tool btn-sm action-button",
@@ -22,9 +22,9 @@ helpBox <- function(..., help_id = NULL, tabBox = FALSE) {
       children[[1]]$
       children[[2]]$
       children[[2]] <- c(list(help), bx$children[[1]]$
-                           children[[1]]$
-                           children[[2]]$
-                           children[[2]])
+      children[[1]]$
+      children[[2]]$
+      children[[2]])
   }
   bx
 }
@@ -56,7 +56,7 @@ leafletPanel <- function(inputId,
     }
   }
 
-  
+
   div(
     class = paste0("leaflet-", position),
     absolutePanel(
@@ -66,7 +66,7 @@ leafletPanel <- function(inputId,
       div(
         span(
           h5(title, style = "display: inline-block; margin: 0.2rem;"),
-          if (collapsible)
+          if (collapsible) {
             div(
               class = "card-tools float-right",
               tags$button(
@@ -82,6 +82,7 @@ leafletPanel <- function(inputId,
                 )
               )
             )
+          }
         ),
         class = "leaflet-info-header"
       ),
@@ -117,7 +118,7 @@ groupRadioButtons <- function(widget,
     grp <- groups[i]
     sty <- style[i]
     fidx <- ifelse(is_awesome, 3, 2)
-    
+
     if (is_pretty) {
       if (idx == 1) {
         widget$children[[2]]$children[[1]]$children <- grp
@@ -134,7 +135,7 @@ groupRadioButtons <- function(widget,
       )
     }
   }
-  
+
   widget
 }
 
@@ -148,9 +149,9 @@ loadingButton <- function(inputId,
     label = label, loadingLabel = loadingLabel,
     loadingSpinner = loadingSpinner
   )
-  
+
   opts <- jsonlite::toJSON(opts, auto_unbox = TRUE)
-  
+
   span(
     class = "sf-loading-button",
     id = paste0("sf-loading-button", inputId),
@@ -223,7 +224,7 @@ match_regex <- function(string, pattern, perl = FALSE, fixed = FALSE) {
 
 
 #' Converts a shiny.tag object to unformatted raw text
-#' 
+#'
 #' @param x A shiny.tag, shiny.tag.list or list
 #' @param ... Passed to or from other methods
 #' @export
@@ -242,10 +243,14 @@ tag_to_text.default <- function(x, ...) {
 
 #' @export
 tag_to_text.shiny.tag <- function(x, ...) {
-  if (identical(class(x), "html_dependency")) return("")
-  if (x$name %in% c("script", "head", "meta", "style")) return("")
+  if (identical(class(x), "html_dependency")) {
+    return("")
+  }
+  if (x$name %in% c("script", "head", "meta", "style")) {
+    return("")
+  }
   x <- x$children
-  
+
   if (!length(x)) {
     ""
   } else {
@@ -281,11 +286,12 @@ make_header <- function(title,
       paste0(x, paste(
         lapply(
           aff_df[aff_df$author == x, ]$num,
-          \(x) as.character(tags$sup(x))), collapse = ","
-        )
-      )
+          \(x) as.character(tags$sup(x))
+        ),
+        collapse = ","
+      ))
     })
-    
+
     affil <- lapply(unique(aff_df$num), function(x) {
       unique(paste0(tags$sup(x), aff_df[aff_df$num == x, ]$affil))
     })
@@ -316,7 +322,7 @@ corp_logo <- function(inst) {
     cleanwatts = "https://www.cleanwatts.energy/",
     isi = "https://www.isi.fraunhofer.de/"
   )
-  
+
   div(class = "logo", a(
     class = "logo",
     href = web[[inst]],
@@ -330,13 +336,13 @@ invert <- function(x) {
 
 p2 <- function(...) p(..., class = "running-text")
 
-noWS <- function(.f) function(...) .f(..., .noWS = c("inside", "outside")) 
+noWS <- function(.f) function(...) .f(..., .noWS = c("inside", "outside"))
 
 list_palettes <- function(type = NULL) {
   if (missing(type)) {
     type <- c("seq", "viridis")
   }
-  
+
   type <- vapply(
     type,
     switch,
@@ -346,7 +352,7 @@ list_palettes <- function(type = NULL) {
     viridis = "Colorblind",
     FUN.VALUE = character(1)
   )
-  
+
   pal <- list(
     Sequential = c(
       "Blues", "BuGn", "BuPu", "GnBu", "Greens", "Greys", "Oranges", "OrRd",
@@ -354,11 +360,11 @@ list_palettes <- function(type = NULL) {
       "YlOrBr", "YlOrRd"
     ),
     Diverging = c(
-      "BrBG", "PiYG", "PRGn", "PuOr", "RdBu", "RdGy", "RdYlBu", "RdYlGn", 
+      "BrBG", "PiYG", "PRGn", "PuOr", "RdBu", "RdGy", "RdYlBu", "RdYlGn",
       "Spectral"
     ),
     Qualitative = c(
-      "Accent", "Dark2", "Paired", "Pastel1", "Pastel2", "Set1", 
+      "Accent", "Dark2", "Paired", "Pastel1", "Pastel2", "Set1",
       "Set2", "Set3"
     ),
     Colorblind = c(
@@ -366,7 +372,7 @@ list_palettes <- function(type = NULL) {
       "Turbo"
     )
   )
-  
+
   pal[type]
 }
 
