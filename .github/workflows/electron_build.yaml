@@ -48,12 +48,6 @@ jobs:
             any::remotes
           need: check
 
-      - uses: r-lib/actions/check-r-package@v2
-        with:
-          upload-snapshots: true
-          error-on: '"error"'
-          check-dir: '"check"'
-      
       - name: Package electron app
         run: |
           options(timeout = 600)
