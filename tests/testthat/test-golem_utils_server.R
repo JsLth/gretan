@@ -31,12 +31,12 @@ test_that("rlang_error_to_html works", {
 
 test_that("with_eval_args works", {
   funfact <- function(expr) {
-   expr <- deparse(substitute(expr))
-   pframe <- parent.frame()
-   function() eval(parse(text = expr), envir = pframe)
+    expr <- deparse(substitute(expr))
+    pframe <- parent.frame()
+    function() eval(parse(text = expr), envir = pframe)
   }
   
-  fun2 <- lapply(1:3, \(x) with_eval_args(testf(x)))
+  fun2 <- lapply(1:3, \(x) with_eval_args(funfact(x)))
   x <- vapply(fun2, \(f) f(), FUN.VALUE = numeric(1))
   expect_equal(x, 1:3)
 })
