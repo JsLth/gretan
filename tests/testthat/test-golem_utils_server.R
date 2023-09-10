@@ -25,7 +25,9 @@ test_that("align_td works", {
 })
 
 test_that("rlang_error_to_html works", {
-  e <- tryCatch(expr = rlang::abort("test"), error = function(e) return(e))
+  e <- tryCatch(expr = rlang::abort("test"), error = function(e) {
+    return(e)
+  })
   expect_snapshot(rlang_error_to_html(e))
 })
 
@@ -35,7 +37,7 @@ test_that("with_eval_args works", {
     pframe <- parent.frame()
     function() eval(parse(text = expr), envir = pframe)
   }
-  
+
   fun2 <- lapply(1:3, \(x) with_eval_args(funfact(x)))
   x <- vapply(fun2, \(f) f(), FUN.VALUE = numeric(1))
   expect_equal(x, 1:3)
@@ -51,9 +53,9 @@ test_that("riffle works", {
     riffle(c(1, 2, 3), c("a", "b", "c")),
     c("1", "a", "2", "b", "3", "c")
   )
-  
+
   expect_identical(
-    riffle(c(1,2,3), c("a", "b", "c", "d", "f")),
+    riffle(c(1, 2, 3), c("a", "b", "c", "d", "f")),
     c("1", "a", "2", "b", "3", "c", "d", "f")
   )
 })

@@ -27,8 +27,8 @@ test_that("leafletPanel works", {
     title = "title",
     position = "bottomleft",
     width = 400,
-    top = 10)
-  )
+    top = 10
+  ))
 })
 
 test_that("groupRadioButtons works", {
@@ -44,7 +44,7 @@ test_that("groupRadioButtons works", {
     type = "awesome"
   )
   expect_snapshot(awesome)
-  
+
   pretty <- shinyWidgets::prettyRadioButtons(
     "test",
     label = "",
@@ -57,7 +57,7 @@ test_that("groupRadioButtons works", {
     type = "pretty"
   )
   expect_snapshot(pretty)
-  
+
   classic <- shiny::radioButtons(
     "test",
     label = "",

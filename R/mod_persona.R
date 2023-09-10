@@ -1,6 +1,6 @@
 mod_persona_ui <- function(id) {
   ns <- NS(id)
-  
+
   persona_step <- function(..., step, format = TRUE) {
     shinyjs::hidden(div(
       id = ns(paste0("step", step)),
@@ -8,7 +8,7 @@ mod_persona_ui <- function(id) {
       ...
     ))
   }
-  
+
   bs4Dash::tabItem(
     "persona",
     make_header(
@@ -87,7 +87,7 @@ mod_persona_ui <- function(id) {
             tags$hr(class = "my-4"),
             shinyWidgets::prettyToggle(
               inputId = ns("consent"),
-              label_on = "I give consent to the GRETA research team to analyze the data that I provide in this survey.", 
+              label_on = "I give consent to the GRETA research team to analyze the data that I provide in this survey.",
               label_off = "I give consent to the GRETA research team to analyze the data that I provide in this survey.",
               outline = TRUE,
               plain = TRUE,
@@ -95,7 +95,7 @@ mod_persona_ui <- function(id) {
               animation = "smooth",
               status_on = "success",
               status_off = "info",
-              icon_on = icon("square-check"), 
+              icon_on = icon("square-check"),
               icon_off = icon("square")
             )
           ),
@@ -166,7 +166,7 @@ mod_persona_ui <- function(id) {
     )
   )
 }
-        
+
 
 
 mod_persona_server <- function(id) {
@@ -176,7 +176,7 @@ mod_persona_server <- function(id) {
     prev_page <- reactiveVal(NULL)
     log_cache <- reactiveVal(list(from = NULL, to = 1))
     ready <- reactiveVal(0)
-    
+
     waiter <- waiter::Waiter$new(
       id = c(ns("results"), ns("map")),
       html = tagList(waiter::spin_pulse(), h4("Determining your energy citizen type...")),
@@ -198,7 +198,7 @@ mod_persona_server <- function(id) {
       )
       shinyjs::hide(id = paste0("step", prev_page()))
       shinyjs::show(paste0("step", page()))
-      
+
       pgs <- list(from = prev_page(), to = page())
       if (!identical(pgs, log_cache())) {
         log_cache(pgs)
@@ -208,13 +208,11 @@ mod_persona_server <- function(id) {
           paste("step", page())
         ))
       }
-        
-
     })
-    
+
     observe({
       cond <- ready() >= 2
-      
+
       if (cond) {
         freezeReactiveValue(input, "submit")
         session$sendCustomMessage(
@@ -222,21 +220,21 @@ mod_persona_server <- function(id) {
           message = list(inputId = session$ns("submit"))
         )
       }
-      
+
       shinyjs::toggleElement("surveybox", condition = !cond)
       shinyjs::toggleElement("results", condition = cond)
     })
-    
+
     observe({
       shinyWidgets::updatePrettyToggle(inputId = ns("consent"), value = FALSE)
-      
+
       for (i in seq(5)) {
         with_eval_args(shinyWidgets::updateAwesomeRadio(
           inputId = ns(paste0("question", i)),
           selected = "None selected"
         ))
       }
-      
+
       shinyjs::hide("results")
       shinyjs::show("surveybox")
       prev_page(page())
@@ -244,19 +242,19 @@ mod_persona_server <- function(id) {
       ready(0)
     }) %>%
       bindEvent(input$reset)
-    
+
     observe({
       prev_page(page())
       page(page() + 1)
     }) %>%
       bindEvent(input$nextBtn)
-    
+
     observe({
       prev_page(page())
       page(page() - 1)
     }) %>%
       bindEvent(input$prevBtn)
-    
+
     has_answered <- reactive({
       vapply(
         FUN.VALUE = logical(1),
@@ -268,12 +266,12 @@ mod_persona_server <- function(id) {
           } else {
             TRUE
           }
-        } 
+        }
       ) %>%
         stats::setNames(paste0("question", seq(5)))
     })
-    
-    
+
+
     output$required <- renderUI({
       idx <- which(!has_answered())
       if (length(idx)) {
@@ -297,8 +295,8 @@ mod_persona_server <- function(id) {
         div()
       }
     })
-    
-    
+
+
     results <- reactive({
       # reticulate::py_run_file()
       waiter$show()
@@ -311,8 +309,8 @@ mod_persona_server <- function(id) {
         list(name = "Persona 3", p = 0.194, desc = paste("This persona is characterized by", shinipsum::random_text(nchars = 250)))
       )
     })
-    
-    
+
+
     output$type <- renderUI({
       ready(ready() + 1)
       items <- lapply(results(), function(x) {
@@ -338,8 +336,8 @@ mod_persona_server <- function(id) {
       )
     }) %>%
       bindEvent(input$submit)
-    
-    
+
+
     output$map <- leaflet::renderLeaflet({
       ready(ready() + 1)
       results()
@@ -351,8 +349,8 @@ mod_persona_server <- function(id) {
           weight = 1,
           color = "black",
           opacity = 0.5,
-          #label = params$labels,
-          #highlightOptions = highlight_opts,
+          # label = params$labels,
+          # highlightOptions = highlight_opts,
           group = "NUTS-0",
           data = sf::st_transform(srv_nuts0, 4326)
         ) %>%
@@ -361,8 +359,8 @@ mod_persona_server <- function(id) {
           weight = 1,
           color = "black",
           opacity = 0.5,
-          #label = params$labels,
-          #highlightOptions = highlight_opts,
+          # label = params$labels,
+          # highlightOptions = highlight_opts,
           group = "NUTS-1",
           data = sf::st_transform(srv_nuts1, 4326)
         ) %>%
@@ -371,8 +369,8 @@ mod_persona_server <- function(id) {
           weight = 1,
           color = "black",
           opacity = 0.5,
-          #label = params$labels,
-          #highlightOptions = highlight_opts,
+          # label = params$labels,
+          # highlightOptions = highlight_opts,
           group = "NUTS-2",
           data = sf::st_transform(srv_nuts2, 4326)
         ) %>%
@@ -380,7 +378,7 @@ mod_persona_server <- function(id) {
       p
     }) %>%
       bindEvent(input$submit)
-    
+
     outputOptions(output, "type", suspendWhenHidden = FALSE, priority = 1)
     outputOptions(output, "map", suspendWhenHidden = FALSE, priority = 2)
   })

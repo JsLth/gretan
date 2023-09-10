@@ -61,10 +61,10 @@ survey_sampled <- survey_local %>%
   group_map(function(by_lau, unit) {
     try(cli_progress_update(.envir = cenv), silent = TRUE)
     lau_id <- unit$clid
-    
+
     # Select geometry of primary sampling unit (PSU)
     geom <- vect(lau[lau$GISCO_ID %in% lau_id, ]$geometry)
-    
+
     # Crop population grid to PSU geometry
     psu <- popgrid %>%
       crop(geom, mask = TRUE) %>%
@@ -81,7 +81,7 @@ survey_sampled <- survey_local %>%
           "Large city" = c(2000, Inf)
         )
         threshold <- th_dict[[place$place_type]]
-        
+
         # If there are less cells above the selected threshold, go down one
         # level (e.g. large city to city) or up one level until sampling is
         # possible.
@@ -95,10 +95,10 @@ survey_sampled <- survey_local %>%
             threshold <- c(0, Inf)
           }
         }
-        
+
         # Filter PSU to secondary sampling unit (SSU)
         ssu <- psu[between(psu$focal_mean, threshold[1], threshold[2])]
-        
+
         # Take a sample within SSU
         samp <- NULL
         add <- 0
@@ -107,10 +107,11 @@ survey_sampled <- survey_local %>%
           samp <- spatSample(ssu, size = nrow(by_size) + add, method = "random")
           add <- add + 1
         }
-        
-        if (length(samp) > nrow(by_size))
+
+        if (length(samp) > nrow(by_size)) {
           samp <- samp[1:nrow(by_size)]
-        
+        }
+
         # Replace geometries of geocoded dataset
         st_geometry(by_size) <- st_geometry(st_as_sf(samp))
         by_size
@@ -132,7 +133,7 @@ saveRDS(survey_sampled, file = "data-ext/survey_resampled.rds")
 # at LAU level sadly). A solution to this could be using human settlement data
 # and creating a continuous spatial dataset by combining settlement points
 # using voronoi polygons.
-# 
+#
 # - Polygonize raster before sampling? This would solve the problem that for
 # one raster cell only one point can be sampled. This is particularly
 # problematic when small, but populated places (e.g. Espinho, Portugal) have
@@ -140,14 +141,16 @@ saveRDS(survey_sampled, file = "data-ext/survey_resampled.rds")
 # This could be solved by either using polygons (where multiple sampled
 # points can fall into one grid cell) or by using a downsampled population
 # raster (at the cost of accuracy)
-# 
+#
 # - What if urban-rural typologies don't match respondents answers? In some
 # cases respondents say they live in a large city when in reality they live
 # in a rural area.
 
 # plot differences
-facet_points <- bind_rows(Original = survey_local,
-                          Geoimputed = survey_sampled, .id = "stage") %>%
+facet_points <- bind_rows(
+  Original = survey_local,
+  Geoimputed = survey_sampled, .id = "stage"
+) %>%
   mutate(stage = factor(stage, levels = c("Original", "Geoimputed")))
 
 facet_bounds <- lau %>%
@@ -170,7 +173,8 @@ for (stage in unique(facet_bounds$stage)) {
 }
 
 p <- GGally::ggmatrix(
-  ps, nrow = 2,
+  ps,
+  nrow = 2,
   ncol = 16,
   xAxisLabels = unique(facet_bounds$nuts0),
   yAxisLabels = c("Original", "Geoimputed")
@@ -188,11 +192,15 @@ for (stage in c("Original", "Geoimputed")) {
     dkat_ps[[paste0(stage, "_", country)]] <- ggplot() +
       geom_sf(data = facet_bounds_dkat[
         facet_bounds_dkat$stage %in% stage &
-          facet_bounds_dkat$nuts0 %in% country, ]) +
-      geom_sf(data = facet_points_dkat[
-        facet_points_dkat$stage %in% stage &
-          facet_points_dkat$nuts0 %in% country, ],
-        size = 0.5) +
+          facet_bounds_dkat$nuts0 %in% country,
+      ]) +
+      geom_sf(
+        data = facet_points_dkat[
+          facet_points_dkat$stage %in% stage &
+            facet_points_dkat$nuts0 %in% country,
+        ],
+        size = 0.5
+      ) +
       coord_sf(crs = st_crs(3035)) +
       theme_bw()
   }
@@ -229,7 +237,7 @@ ggsave("data-raw/energy_poverty/geoimp_compare.png", plot = dkat_p)
 #   summarise(n = n()) %>%
 #   arrange(desc(n)) %>%
 #   filter(n > 10 & n < 20)
-# 
+#
 # survey_sampled %>%
 #   mutate(place_type = case_when(
 #     c5_village_small_town_less_than_10_000_people == 1 ~ "Village",
@@ -270,7 +278,7 @@ eximp <- survey_sampled[st_within(survey_sampled, exlau, sparse = FALSE), ] %>%
     c5_very_large_city_over_1_000_000_people == 1 ~ "Large city"
   )) %>%
   select(place_type)
-expts <- bind_rows(eximp, bind_cols(expts[1,], place_type = "Centroid")) %>%
+expts <- bind_rows(eximp, bind_cols(expts[1, ], place_type = "Centroid")) %>%
   mutate(place_type = factor(place_type, levels = c(
     "Centroid", "Large city", "City", "Town", "Village"
   )))
@@ -287,7 +295,10 @@ concept <- ggplot() +
   theme_bw() +
   scale_fill_manual(
     name = "Population density",
-    function(breaks) {breaks[is.na(breaks)] <- "N/A"; breaks},
+    function(breaks) {
+      breaks[is.na(breaks)] <- "N/A"
+      breaks
+    },
     na.value = "transparent",
     values = c("#333333", "#818181", "#ABABAB", "#CCCCCC")
   ) +
@@ -304,5 +315,3 @@ concept <- ggplot() +
   theme_void()
 
 ggsave("data-raw/energy_poverty/concept.png", bg = "white")
-
-

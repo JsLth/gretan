@@ -7,7 +7,7 @@ tax <- function(..., type = NULL) {
 
 mod_taxonomy_ui <- function(id) {
   ns <- NS(id)
-  
+
   bs4Dash::tabItem(
     "taxonomy",
     make_header(
@@ -82,7 +82,8 @@ mod_taxonomy_ui <- function(id) {
           class = "tax-domains-container",
           tax(
             p("proximity domains",
-              style = "writing-mode: vertical-lr;"),
+              style = "writing-mode: vertical-lr;"
+            ),
             class = "tax-prox",
             id = ns("greta-prox"),
             type = "domain-sidebar"
@@ -137,7 +138,7 @@ mod_taxonomy_server <- function(id) {
       title = with_literata("Explore GRETAs geo-taxonomy"),
       content = txts$taxonomy$help$scheme
     )
-    
+
     for (name in names(txts$taxonomy$scheme)) {
       id <- paste0("greta-", name)
       bs4Dash::addTooltip(id, options = list(title = "Click to learn more"))

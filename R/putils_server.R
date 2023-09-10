@@ -2,13 +2,13 @@ as_likert <- function(x, scale = NULL) {
   if (length(scale) > 7) {
     stop(sprintf("Likert scale is too long (%s items)", length(x)))
   }
-  
+
   scale <- scale %||% c(
     "Strongly disagree", "Disagree", "Somewhat disagree",
     "Neutral",
     "Somewhat agree", "Agree", "Strongly agree"
   )
-  
+
   if (is.factor(scale)) {
     scale <- as.character(scale)
   }
@@ -29,7 +29,7 @@ align_dl <- function(..., sep = " ", bold = TRUE, .list = NULL) {
     bold = bold,
     SIMPLIFY = FALSE
   )
-  
+
   lapply(
     do.call(paste, labels),
     function(x) protect_html(tags$table(HTML(x)))
@@ -42,7 +42,9 @@ align_td <- function(x, y, char = " ", bold = TRUE) {
   tr2 <- noWS(tags$tr)
   td2 <- noWS(tags$td)
   mapply(function(left, right) {
-    if (is.null(right) || is.na(right)) return("")
+    if (is.null(right) || is.na(right)) {
+      return("")
+    }
     if (is.character(right) && startsWith(as.character(right), "NA")) {
       right <- "N/A"
     }
@@ -66,7 +68,7 @@ align_td <- function(x, y, char = " ", bold = TRUE) {
 leaflet_select <- function(id, geom, action, tol = 1) {
   if (!is.null(action)) {
     marker <- sf::st_sfc(sf::st_point(c(action$lng, action$lat)), crs = 4326)
-    
+
     target <- geom[sf::st_is_within_distance(
       geom,
       marker,
@@ -79,13 +81,13 @@ leaflet_select <- function(id, geom, action, tol = 1) {
 # Selects a text in `txts` that corresponds to a selected Leaflet element
 leaflet_text_on_click <- function(id, geom, texts, click, col = "name", tol = 1) {
   target <- leaflet_select(id, geom, click, tol = tol)
-  
+
   if (is.null(target)) {
     target <- "none"
   } else {
     target <- target[[col]]
   }
-  
+
   texts[[target]]
 }
 
@@ -94,10 +96,10 @@ leaflet_text_on_click <- function(id, geom, texts, click, col = "name", tol = 1)
 #' Adds a Javascript Hook to Leaflet map widget that creates a input value
 #' called `mousemove` which makes it possible to access map coordinates in a
 #' server environment.
-#' 
+#'
 #' @param map Leaflet map widget
 #' @param id ID of the leaflet widget
-#' 
+#'
 #' @noRd
 track_coordinates <- function(map, id) {
   map$jsHooks[["render"]] <- c(
@@ -117,7 +119,7 @@ track_coordinates <- function(map, id) {
       data = NULL
     ))
   )
-  
+
   map
 }
 
@@ -163,32 +165,31 @@ send_error <- function(text,
 #' instead. This function is a modified version of
 #' `shinyWidgets::execute_safely`. With other defaults, different formatting,
 #' and the ability to handle silent expressions.
-#' 
+#'
 #' @param expr Expression to evaluate
 #' @param title Title to display
 #' @param message Message to display
 #' @param stopOperation Whether to stop the reactive chain after showing the
 #' error message.
 #' @param session Session object.
-#' 
+#'
 #' @noRd
 execute_safely <- function(expr,
                            title = "Oops!",
                            message = NULL,
                            stopOperation = TRUE,
-                           session = getDefaultReactiveDomain()
-  ) {
+                           session = getDefaultReactiveDomain()) {
   message <- message %||% paste(
     "Something went wrong! If this keeps happening, consider",
     "notifying the tool maintainer (jonas.lieth@gesis.org)."
   )
-  
+
   tryCatch(
     expr = expr,
     error = function(e) {
       # Stop without error message
       if (!inherits(e, "shiny.silent.error")) req(FALSE)
-      
+
       send_error(div(
         style = "text-align: left",
         message,
@@ -196,7 +197,7 @@ execute_safely <- function(expr,
         "Error details:", br(),
         rlang_error_to_html(e, warn = FALSE)
       ), session = session, title = title)
-      
+
       # Send error message and then stop
       if (stopOperation) req(FALSE)
     }
@@ -275,17 +276,17 @@ popover2 <- function(id,
 #' Examples:
 #' - shiny::onclick
 #' - shiny update functions
-#' 
+#'
 #' @param call Function call or expression
 #' @param envir Environment that arguments in `call` should be evaluated in.
-#' 
+#'
 #' @examples
 #' funfact <- function(expr) {
 #'   expr <- deparse(substitute(expr))
 #'   pframe <- parent.frame()
 #'   function() eval(parse(text = expr), envir = pframe)
 #' }
-#' 
+#'
 #' fun1 <- lapply(1:3, testf)
 #' fun2 <- lapply(1:3, \(x) with_eval_args(testf(x)))
 #' for (f in fun1) print(f())
@@ -344,7 +345,7 @@ cat2 <- function(...) {
 }
 
 #' Internal logging
-#' 
+#'
 #' Basic Shiny app logging
 #' @param log Log message
 #' @param type Type of the message
@@ -352,7 +353,7 @@ cat2 <- function(...) {
 #' @param priority Whether the log is a priority log. Priority logs are always
 #' printed, even if the input parameters from `run_app` restrict log output.
 #' @param session Session object
-#' 
+#'
 #' @noRd
 log_it <- function(log = NULL,
                    type = c("info", "warn", "error", "success"),
@@ -360,7 +361,9 @@ log_it <- function(log = NULL,
                    priority = FALSE,
                    session = getDefaultReactiveDomain()) {
   out <- getShinyOption("greta.logging", "")
-  if (isFALSE(out)) return(invisible())
+  if (isFALSE(out)) {
+    return(invisible())
+  }
   type <- match.arg(type)
   time <- format(Sys.time(), "%F %T")
   ns <- get_module_id(session)
@@ -368,9 +371,9 @@ log_it <- function(log = NULL,
   if (!dir.exists(out) && isTRUE(!ns %in% out)) {
     return(invisible())
   }
-  
+
   out <- ""
-  
+
   if (!nzchar(out) && interactive()) {
     col <- switch(type,
       info = "\033[32m[%s]\033[39m",
@@ -383,9 +386,9 @@ log_it <- function(log = NULL,
   }
   type <- sprintf(col, toupper(type))
   log <- log %||% srcloc(idx = 2L)
-  
+
   cat2(sprintf("%s %s {%s} %s", time, type, ns, log), file = out, append = TRUE)
-  
+
   if (!is.null(details)) {
     log_details(details)
   }
@@ -418,14 +421,16 @@ riffle <- function(a, b) {
   len_b <- length(b)
   len_comm <- pmin(len_a, len_b)
   len_tail <- abs(len_a - len_b)
-  
+
   if (len_a < 1) stop("First vector has length less than 1")
   if (len_b < 1) stop("Second vector has length less than 1")
-  
+
   riffle_common <- c(rbind(a[1:len_comm], b[1:len_comm]))
-  
-  if (len_tail == 0) return(riffle_common)
-  
+
+  if (len_tail == 0) {
+    return(riffle_common)
+  }
+
   if (len_a > len_b) {
     return(c(riffle_common, a[(len_comm + 1):len_a]))
   } else {

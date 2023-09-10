@@ -72,22 +72,22 @@ gantt <- (ganttrify(
 # - What is energy vulnerability?
 #   - Conceptually (assemblage geographies)
 #   - Analytically
-# - Literature review on energy vulnerability indices  
+# - Literature review on energy vulnerability indices
 # - What is the link between energy vulnerability, trust and social cohesion?
-# 
+#
 # Methodology
 # - Data cleaning
 # - Adding noise
 # - GWPCA
 # - Multilevel SEM
-# 
-# 
+#
+#
 # Results
 # - Reporting
 # - Visualization
 # - Discussion / Linking to theory
 # - Policy recommendations
-# 
+#
 # Dissemination
 # - 1st paper
 # - 2nd paper

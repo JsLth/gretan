@@ -6,7 +6,7 @@
 #' greta::run_app()
 #' greta::run_greta()
 #' }
-#' 
+#'
 #' @param ... Arguments passed on to \code{\link[shiny]{shinyApp}}
 #' @param log Where to output app logs. Accepts a directory path where a log
 #' file is created. If `""`, prints directly to the console. If `FALSE`,
@@ -27,10 +27,13 @@ run_app <- function(..., log = NULL, reactlog = FALSE, options = list()) {
     }
     reactlog::reactlog_enable()
   }
-  
-  with_logging({
-    shinyApp(ui = app_ui, server = app_server, options = options, ...)
-  }, value = log)
+
+  with_logging(
+    {
+      shinyApp(ui = app_ui, server = app_server, options = options, ...)
+    },
+    value = log
+  )
 }
 
 

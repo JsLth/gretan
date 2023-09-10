@@ -1,6 +1,6 @@
 mod_attitudes_ui <- function(id) {
   ns <- NS(id)
-  
+
   bs4Dash::tabItem(
     "attitudes",
     make_header(
@@ -15,6 +15,6 @@ mod_attitudes_ui <- function(id) {
 
 mod_attitudes_server <- function(id) {
   moduleServer(id, function(input, output, session) {
-    
+
   })
 }

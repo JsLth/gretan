@@ -3,20 +3,20 @@
 #' @rdname mod_base
 app_server <- function(input, output, session) {
   log_it("Starting app")
-  
+
   onSessionEnded(fun = function() {
     log_it("Shutting down app")
   })
-  
+
   # Hide help switch
   shinyjs::hideElement(selector = "ul.navbar-right")
-  
+
   # Capture search term
   searchbox_input <- reactive({
     search_input <- input$textSearch
     isTRUE(nzchar(search_input))
   })
-  
+
   # Change tab when search output is clicked
   for (x in names(txts)) {
     with_eval_args(
@@ -27,14 +27,14 @@ app_server <- function(input, output, session) {
       ))
     )
   }
-  
+
   # Fix sidebar when search is triggered (otherwise search bar won't show)
   shinyjs::onclick("textSearch", expr = {
     if (isFALSE(input$sidebarState)) {
       bs4Dash::updateSidebar("sidebarState")
     }
   })
-  
+
   # Search texts and determine which search items to show
   search_results <- reactive({
     req(searchbox_input())
@@ -64,12 +64,12 @@ app_server <- function(input, output, session) {
     }
     do.call(div, c(options, class = "form-suggestions"))
   })
-  
+
   # If no search term is provided, hide search results UI
   # If a search term is provided, show it
   observe({
     has_input <- searchbox_input()
-    
+
     if (has_input) {
       insertUI(
         selector = "#textSearch",
@@ -88,20 +88,25 @@ app_server <- function(input, output, session) {
       )
     }
   })
-  
 
-  all_tabs <- c("exp", "taxonomy", "cs1italy", "stakeholder",
-                "persona", "enpov", "attitudes", "research")
+
+  all_tabs <- c(
+    "exp", "taxonomy", "cs1italy", "stakeholder",
+    "persona", "enpov", "attitudes", "research"
+  )
   for (tab in all_tabs) {
     env <- new.env()
     env[["tab"]] <- tab
     obs_label <- paste("forward to", tab)
     welcome_id <- paste0("welcome-li-", tab)
     with_eval_args({
-      observe({
-        bs4Dash::updateTabItems(inputId = "sidebar", selected = tab)
-      }, label = paste("forward to", obs_label)) %>%
-      bindEvent(input[[welcome_id]])
+      observe(
+        {
+          bs4Dash::updateTabItems(inputId = "sidebar", selected = tab)
+        },
+        label = paste("forward to", obs_label)
+      ) %>%
+        bindEvent(input[[welcome_id]])
     })
   }
 
@@ -137,6 +142,6 @@ app_server <- function(input, output, session) {
   #   )$init()$start()
   # }, priority = 0) %>%
   #   bindEvent(input$tour)
-  
+
   mod_main_server("main", tab = tabsel)
 }

@@ -111,27 +111,27 @@ txts$cs1$case_study <- tagList(
     residential buildings to cover the electricity demand in these buildings.")
 )
 
-    # shiny::tags$div(
-    #   class = "card-outline",
-    #   shiny::tags$div(
-    #     class = "card-header", 
-    #     shiny::tags$h4(
-    #       class = "card-title w-100",
-    #       shiny::tags$a(
-    #         class = c("d-block w-100", "collapsed"), 
-    #         href = "#",
-    #         `data-toggle` = "collapse",
-    #         `aria-expanded` = "false",
-    #         title
-    #       )
-    #     )
-    #   ),
-    #   shiny::tags$div(
-    #     id = NULL, 
-    #     `data-parent` = NULL, class = "collapse",
-    #     shiny::tags$div(class = "card-body", ...)
-    #   )
-    # )
+# shiny::tags$div(
+#   class = "card-outline",
+#   shiny::tags$div(
+#     class = "card-header",
+#     shiny::tags$h4(
+#       class = "card-title w-100",
+#       shiny::tags$a(
+#         class = c("d-block w-100", "collapsed"),
+#         href = "#",
+#         `data-toggle` = "collapse",
+#         `aria-expanded` = "false",
+#         title
+#       )
+#     )
+#   ),
+#   shiny::tags$div(
+#     id = NULL,
+#     `data-parent` = NULL, class = "collapse",
+#     shiny::tags$div(class = "card-body", ...)
+#   )
+# )
 txts$cs1$desc <- list(
   use = HTML("The <b>Use</b> layer shows the main use of each building. 17 uses are displayed
     on the map, but only 10 of them are considered in the energy demand model:

@@ -1,6 +1,6 @@
 mod_home_ui <- function(id) {
   ns <- NS(id)
-  
+
   bs4Dash::tabItem(
     "home",
     fluidRow(
@@ -99,7 +99,7 @@ mod_home <- function(input, output, session) {
       crs = 4326
     )
   )
-  
+
   output$map <- leaflet::renderLeaflet({
     leaflet::leaflet(cs_coords) %>%
       leaflet::addTiles() %>%
@@ -129,7 +129,7 @@ mod_home <- function(input, output, session) {
         labelStyle = "font-size: 12px; vertical-align: middle;"
       )
   })
-  
+
   observe({
     click <- input$map_marker_click
     target <- leaflet_select(
@@ -137,7 +137,7 @@ mod_home <- function(input, output, session) {
       geom = cs_coords,
       action = click
     )
-    
+
     if (!is.null(target)) {
       cc <- cs_coords[!cs_coords$name %in% target$name, ]
       leaflet::leafletProxy("map") %>%
@@ -165,7 +165,7 @@ mod_home <- function(input, output, session) {
     }
   }) %>%
     bindEvent(input$map_marker_click)
-  
+
   # Show case study description based on map clicks
   output$desc <- renderUI({
     click <- input$map_marker_click

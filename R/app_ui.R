@@ -10,7 +10,7 @@ app_ui <- function(theme = NULL,
                    controlbar = NULL,
                    footer = NULL) {
   all_pals <- list_palettes()
-  
+
   if (!is.null(theme)) {
     theme <- structure(
       paste(readLines(app_sys("app/www/theme.css"))),
@@ -19,7 +19,7 @@ app_ui <- function(theme = NULL,
     )
   }
 
-  
+
   # Configure loading screen
   if (is.null(preloader)) {
     preloader <- list(
@@ -27,12 +27,12 @@ app_ui <- function(theme = NULL,
       color = "#B3DDFE"
     )
   }
-  
-  
+
+
   # UI assembly ----
   #' @title GRETA Shiny base module
   #' @description Create the UI and server function of the GRETA Shiny app.
-  #' 
+  #'
   #' @param theme Fresh theme to apply to the UI
   #' @param preloader Preloader to run when the UI is loading
   #' @param options Further AdminLTE options, see \code{\link[bs4Dash]{dashboardPage}}
@@ -44,7 +44,7 @@ app_ui <- function(theme = NULL,
   #' @param input internal
   #' @param output internal
   #' @param session internal
-  #' 
+  #'
   #' @keywords internal
   #' @rdname mod_base
   #' @export
@@ -55,12 +55,12 @@ app_ui <- function(theme = NULL,
       .fa-bars {
         color: #00000;
       }
-      
+
       /* set sidebar header to the same height as navbar (roughly) */
       .sidebar-header {
         height: 4.37rem;
       }
-      
+
       /* align sidebar logo and title */
       .brand-link {
         height: 3.1em;
@@ -71,23 +71,23 @@ app_ui <- function(theme = NULL,
         vertical-align: middle;
         font-weight: bold;
       }
-      
+
       /* remove coloring from some elements */
       .nav-pills .nav-link:not(.active):hover {
         color: inherit
       }
-      
+
       a {
         color: #000;
       }
-      
+
       /* remove white space from header */
       .navbar {
         padding-top: 0em;
         padding-bottom: 0em;
         padding-right: 0em
       }
-      
+
       /* Align tooltip text */
       .tooltip-inner {
         text-align: left;
@@ -127,7 +127,8 @@ app_ui <- function(theme = NULL,
     ),
     bs4Dash::dashboardSidebar(
       id = "sidebarState",
-      tags$style(HTML("
+      tags$style(HTML(
+        "
         .layout-fixed .wrapper .sidebar {
           height: calc(95vh - (3.5rem + 1px));
         }" # TODO: quick workaround, maybe reconsider
@@ -144,7 +145,7 @@ app_ui <- function(theme = NULL,
               id = "textSearch",
               type = "search",
               style = "margin: 5px;",
-              class = "form-control", 
+              class = "form-control",
               placeholder = "Search..."
             ))
           )

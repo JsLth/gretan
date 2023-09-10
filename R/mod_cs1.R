@@ -1,6 +1,6 @@
 mod_cs1_ui <- function(id) {
   ns <- NS(id)
-  
+
   bs4Dash::tabItem(
     "cs1italy",
     # Header ----
@@ -186,17 +186,17 @@ mod_cs1_server <- function(id, tab) {
       html = tagList(waiter::spin_pulse(), h4("Loading figure...")),
       color = "rgba(179, 221, 254, 1)"
     )
-    
+
     observe({
       bs4Dash::updateAccordion(session$ns("fig"), selected = 1)
     }) %>%
       bindEvent(input[["fig-link"]])
-    
+
     # Data reading ----
     buildings <- reactive({
       sf::read_sf(app_sys("db/cs1italy.gpkg"), layer = "buildings")
     })
-    
+
     fragility <- reactive({
       sf::read_sf(app_sys("db/cs1italy.gpkg"), layer = "fragility")
     })
@@ -206,7 +206,7 @@ mod_cs1_server <- function(id, tab) {
       layer <- input$buildings_layer
       p(txts$cs1$desc[[layer]])
     })
-    
+
     blabels <- NULL
 
     ## Parameters ----
@@ -232,9 +232,10 @@ mod_cs1_server <- function(id, tab) {
       pal <- switch(layer,
         use = leaflet::colorFactor(
           palette = c(
-            "#AA0DFE", "#3283FE", "#85660D", "#782AB6", "#565656", "#1C8356", 
-            "#16FF32", "#F7E1A0", "#E2E2E2", "#1CBE4F", "#C4451C", "#DEA0FD", 
-            "#FE00FA", "#325A9B", "#FEAF16", "#F8A19F", "#90AD1C"),
+            "#AA0DFE", "#3283FE", "#85660D", "#782AB6", "#565656", "#1C8356",
+            "#16FF32", "#F7E1A0", "#E2E2E2", "#1CBE4F", "#C4451C", "#DEA0FD",
+            "#FE00FA", "#325A9B", "#FEAF16", "#F8A19F", "#90AD1C"
+          ),
           domain = dt$use
         ),
         year_constr = leaflet::colorBin(
@@ -258,14 +259,14 @@ mod_cs1_server <- function(id, tab) {
           domain = dt$installed_pv_capacity_k_w
         )
       )
-      
+
       list(data = dt, layer = layer, pal = pal, labels = blabels)
     })
-    
+
     ## Render ----
     output$buildings <- leaflet::renderLeaflet({
       params <- isolate(bparams())
-      
+
       leaflet::leaflet() %>%
         leaflet::setView(lng = 11.399926, lat = 44.507145, zoom = 15) %>%
         leaflet::addProviderTiles(leaflet::providers$OpenStreetMap) %>%
@@ -296,10 +297,10 @@ mod_cs1_server <- function(id, tab) {
           )
         )
     })
-    
+
     ## Select layer ----
     updates <- 0
-    
+
     observe({
       # Only show loading screen on first two updates
       # First one on startup
@@ -311,7 +312,7 @@ mod_cs1_server <- function(id, tab) {
       }
 
       params <- bparams()
-      
+
       leaflet::leafletProxy("buildings") %>%
         leaflet::clearShapes() %>%
         leaflet::clearControls() %>%
@@ -342,28 +343,28 @@ mod_cs1_server <- function(id, tab) {
           )
         )
     })
-    
+
     ## Basemap ----
     observe({
       basemap <- switch(input$buildings_basemap,
         "OpenStreetMap" = leaflet::providers$OpenStreetMap,
         "Satellite" = leaflet::providers$Esri.WorldImagery
       )
-      
+
       leaflet::leafletProxy("buildings") %>%
         leaflet::clearTiles() %>%
         leaflet::addProviderTiles(basemap)
     })
-    
-    
+
+
     # Fragility ----
-    
+
     ## Parameters ----
     fparams <- reactive({
       req(identical(tab(), "cs1italy"))
       dt <- isolate(fragility())
       layer <- input$fragility_layer
-      
+
       lab_values <- dt[c("area_stati", "nomezona", layer)] %>%
         sf::st_drop_geometry() %>%
         as.list() %>%
@@ -373,16 +374,16 @@ mod_cs1_server <- function(id, tab) {
           .
         }
       labels <- do.call(align_dl, lab_values)
-      
+
       pal <- leaflet::colorBin(
         palette = c("#000004FF", "#51127CFF", "#B63679FF", "#FB8861FF", "#FCFDBFFF"),
         domain = dt[[layer]],
         na.color = NA
       )
-      
+
       list(data = dt, layer = layer, palette = pal, labels = labels)
     })
-    
+
     ## Render ----
     output$fragility <- leaflet::renderLeaflet({
       params <- isolate(fparams())
@@ -416,53 +417,53 @@ mod_cs1_server <- function(id, tab) {
             suffix = txts$cs1$dict$fragility[[params$layer]]$lab
           )
         )
-      })
-      
-      ## Select layer ----
-      fupdates <- 0
-      
-      observe({
-        # Only show loading screen on first two updates
-        # First one on startup
-        # Second one when loading the tab item
-        if (fupdates < 2) {
-          fwaiter$show()
-          fupdates <<- fupdates + 1
-          on.exit(fwaiter$hide())
-        }
-        
-        params <- fparams()
-        
-        leaflet::leafletProxy("fragility") %>%
-          leaflet::clearShapes() %>%
-          leaflet::clearControls() %>%
-          leaflet::addPolygons(
-            data = sf::st_transform(params$data, 4326),
-            fillColor = stats::as.formula(paste0("~params$pal(", params$layer, ")")),
-            fillOpacity = 0.7,
-            color = "black",
+    })
+
+    ## Select layer ----
+    fupdates <- 0
+
+    observe({
+      # Only show loading screen on first two updates
+      # First one on startup
+      # Second one when loading the tab item
+      if (fupdates < 2) {
+        fwaiter$show()
+        fupdates <<- fupdates + 1
+        on.exit(fwaiter$hide())
+      }
+
+      params <- fparams()
+
+      leaflet::leafletProxy("fragility") %>%
+        leaflet::clearShapes() %>%
+        leaflet::clearControls() %>%
+        leaflet::addPolygons(
+          data = sf::st_transform(params$data, 4326),
+          fillColor = stats::as.formula(paste0("~params$pal(", params$layer, ")")),
+          fillOpacity = 0.7,
+          color = "black",
+          opacity = 1,
+          weight = 1,
+          label = params$labels,
+          highlightOptions = leaflet::highlightOptions(
+            weight = 2,
+            stroke = TRUE,
             opacity = 1,
-            weight = 1,
-            label = params$labels,
-            highlightOptions = leaflet::highlightOptions(
-              weight = 2,
-              stroke = TRUE,
-              opacity = 1,
-              bringToFront = TRUE,
-              sendToBack = TRUE,
-              fillOpacity = 1
-            )
-          ) %>%
-          leaflet::addLegend(
-            position = "bottomleft",
-            na.label = "N/A",
-            pal = params$palette,
-            title = txts$cs1$dict$buildings[[params$layer]]$title,
-            values = params$data[[params$layer]],
-            labFormat = leaflet::labelFormat(
-              suffix = txts$cs1$dict$buildings[[params$layer]]$lab
-            )
+            bringToFront = TRUE,
+            sendToBack = TRUE,
+            fillOpacity = 1
           )
-      })
+        ) %>%
+        leaflet::addLegend(
+          position = "bottomleft",
+          na.label = "N/A",
+          pal = params$palette,
+          title = txts$cs1$dict$buildings[[params$layer]]$title,
+          values = params$data[[params$layer]],
+          labFormat = leaflet::labelFormat(
+            suffix = txts$cs1$dict$buildings[[params$layer]]$lab
+          )
+        )
+    })
   })
 }

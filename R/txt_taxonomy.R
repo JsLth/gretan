@@ -46,12 +46,12 @@ txts$taxonomy$methodology <- as.character(
   was written and on European cases of energy communities."
 )
 txts$taxonomy$help <- list(
-  scheme = HTML("Explore the interactive scheme below to learn about GRETA's 
+  scheme = HTML("Explore the interactive scheme below to learn about GRETA's
   geographical taxonomy. You can click on each element to understand the
   taxonomy's <b>geographical levels</b> and <b>proxmity domains</b> in more detail.
   <br>
-  The taxonomy was first introduced in <a href=https://projectgreta.eu/wp-content/uploads/2022/02/GRETA_D5_1_Taxonomy-of-geographical-levels-and-drivers_v1_0.pdf#page=34>Deliverable D5.1</a> of the GRETA project."
-))
+  The taxonomy was first introduced in <a href=https://projectgreta.eu/wp-content/uploads/2022/02/GRETA_D5_1_Taxonomy-of-geographical-levels-and-drivers_v1_0.pdf#page=34>Deliverable D5.1</a> of the GRETA project.")
+)
 txts$taxonomy$scheme <- list(
   header = list(
     title = "GRETA levels",

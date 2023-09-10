@@ -1,6 +1,6 @@
 #' Recursively searches a list for strings of the following form:
 #' `{@authorYYYY,narr,pages}`
-#' 
+#'
 #' where authorYYYY refers to the unique ID given by `read_ris`, narr determines
 #' whether narrative citation is applied and pages refers to the suffix of a
 #' citation.
@@ -30,7 +30,7 @@ reference <- function(lst, bib, ns) {
       }
     }
   }
-  
+
   structure(lst, ref = ref)
 }
 
@@ -42,7 +42,7 @@ reference <- function(lst, bib, ns) {
 #' @noRd
 as_ref <- function(x, id, index) {
   author <- lapply(x$author, function(x) strsplit(x, ", ")[[1]][1])
-  
+
   if (length(author) == 1) {
     author <- author[[1]]
   } else if (length(author) == 2) {
@@ -50,7 +50,7 @@ as_ref <- function(x, id, index) {
   } else if (length(author) >= 3) {
     author <- paste(author[[1]], "et al. ")
   }
-  
+
   pop <- paste0(
     author,
     " (",
@@ -58,9 +58,9 @@ as_ref <- function(x, id, index) {
     paste0(": ", x$title),
     ")"
   )
-  
+
   id <- paste0("biblink-", id)
-  
+
   tagList(
     singleton(tags$head(tags$script(sprintf(
       "$(function () {
@@ -85,30 +85,30 @@ as_ref <- function(x, id, index) {
 
 
 #' @title Read RIS files
-#' 
+#'
 #' @description
 #' Takes a RIS file and parses it as a named list
-#' 
+#'
 #' @param file Path to an RIS file
 #' @param encoding Encoding to be assumed for input strings
 #' @returns A named list containing reference metadata of the RIS file
 read_ris <- function(file, encoding = "UTF-8") {
   stopifnot(length(file) == 1)
-print(file)
+  print(file)
   if (!grepl("\\.ris$", file)) {
     stop("`file` must be a RIS file.")
   }
-  
+
   ris <- readLines(file, encoding = encoding)
   ris <- split(ris, cumsum(!nzchar(ris)))
   ids <- NULL
-  
+
   ref <- lapply(ris, function(x) {
     x <- gsub("^\\s*$", "", gsub("ER  -", "", x, fixed = TRUE))
     x <- x[nzchar(x)]
     x <- strsplit(x, "  - ", fixed = TRUE)
     nms <- vapply(x, "[[", FUN.VALUE = character(1), 1)
-    
+
     fields_known <- nms %in% names(ris_fields)
     if (!all(fields_known)) {
       stop(
@@ -117,7 +117,7 @@ print(file)
         call. = FALSE
       )
     }
-    
+
     nms <- unlist(ris_fields[nms], use.names = FALSE)
     val <- lapply(x, function(v) {
       if (length(v) > 1) {
@@ -133,7 +133,7 @@ print(file)
       x[aidx[1:length(aidx) - 1]] <- NULL
       x$author <- unname(authors)
     }
-    
+
     n_editors <- sum(names(x) == "editor")
     if (sum(names(x) == "editor") > 1) {
       eidx <- which(names(x) %in% "editor")
@@ -141,7 +141,7 @@ print(file)
       x[eidx[1:length(eidx) - 1]] <- NULL
       x$editor <- unname(editors)
     }
-    
+
     id <- gsub(
       "[[:blank:]]|[[:punct:]]", "",
       paste0(strsplit(tolower(x$author[[1]]), ",")[[1]][1], x$year)
@@ -152,7 +152,7 @@ print(file)
       i <- i + 1
     }
     ids <<- append(ids, id)
-    
+
     x
   })
 
@@ -164,33 +164,35 @@ print.ris <- function(x, ...) {
   x <- x[1:10]
   x <- paste0(
     "first 10 references:\n",
-    paste(paste0(
-      "   id: ",
-      names(x),
-      ", type: ",
-      sapply(x, "[[", "type")),
+    paste(
+      paste0(
+        "   id: ",
+        names(x),
+        ", type: ",
+        sapply(x, "[[", "type")
+      ),
       collapse = "\n"
     )
   )
-  
+
   cat("<ris>\n", x, "\n")
 }
 
 
 #' @title Create a bibliography
-#' 
+#'
 #' @description
 #' Converts an object of class `ris` to a bibliography
-#' 
+#'
 #' @param ref Object of class `ris`
 #' @param ... Arguments passed from or to methods
 #' @returns Named list of class `bib` containing formatted bibliography
 #' entries. List names are IDs consisting of first author and year.
-#' 
+#'
 #' @references American Psychological Association (2019). Publication Manual
 #' of the American Psychological Association (7th Edition). American
 #' Psychological Association.
-#' 
+#'
 #' @export
 as_bib <- function(ref, ...) {
   UseMethod("as_bib", ref)
@@ -228,7 +230,7 @@ bib_jour <- function(...) {
   year <- format_year(dots$year)
   pages <- format_pages(dots$start_page, dots$end_page)
   volume <- format_volume_issue(dots$volume, dots$issue)
-  
+
   paste0(
     author,
     paste0(" (", year, "). "),
@@ -243,13 +245,13 @@ bib_book <- function(...) {
   dots <- list(...)
   author <- format_author(dots$author, dots$editor)
   year <- format_year(dots$year)
-  
+
   paste0(
     author,
     paste0(" (", year, "). "),
     dots$title, if (!is.null(dots$publisher)) ". ",
     dots$publisher, if (!is.null(dots$doi) || !is.null(dots$url)) ". ",
-    dots$doi %||% dots$url,  "."
+    dots$doi %||% dots$url, "."
   )
 }
 
@@ -259,7 +261,7 @@ bib_chap <- function(...) {
   year <- format_year(dots$year)
   editor <- format_author(NULL, dots$editor, anon = FALSE)
   pages <- format_pages(dots$start_page, dots$end_page)
-  
+
   paste0(
     author,
     paste0(" (", year, "). "),
@@ -290,7 +292,7 @@ bib_gen <- function(...) {
   dots <- list(...)
   author <- format_author(dots$author)
   year <- format_year(dots$year)
-  
+
   paste0(
     author,
     paste0(" (", year, "). "),
@@ -343,16 +345,16 @@ format_author <- function(author = NULL, editor = NULL, anon = TRUE) {
     if (length(prt) > 20) {
       prt <- c(prt[1:19], "...", prt[length(prt)])
     }
-    
+
     prt <- paste(prt, collapse = ", ")
-    
+
     if (is.null(author) && !is.null(editor)) {
       prt <- sprintf("%s (%s)", prt, ifelse(length(editor) > 1, "Eds.", "Ed."))
     }
   } else if (anon) {
     prt <- "Anon."
   }
-  
+
   prt
 }
 
