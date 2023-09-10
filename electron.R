@@ -22,6 +22,7 @@ electrify(
   pkg = ".",
   product_name = "GRETA Analytics",
   build_path = "electron",
+  cran_like_url = "https://cran.r-project.org/",
   function_name = "run_greta",
   nodejs_version = "v14.17.3",
   r_bitness = "x64",
