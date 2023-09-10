@@ -4,7 +4,7 @@
 \name{greta-package}
 \alias{greta}
 \alias{greta-package}
-\title{greta: GIS tool of the GRETA project}
+\title{greta: The official GIS tool of the GRETA project}
 \description{
 Visualize and explore the results from the GRETA project. Quickly get insights from GRETA's multi-national survey and case studies. Understand statistical and spatial relationships of energy citizenship in 16 European countries among citizens, businesses and policymakers.
 }

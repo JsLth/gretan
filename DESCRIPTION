@@ -1,5 +1,5 @@
 Package: greta
-Title: GIS tool of the GRETA project
+Title: The official GIS tool of the GRETA project
 Version: 0.0.0.9000
 Authors@R: 
     person("Jonas", "Lieth", , "jonas.lieth@gesis.org", role = c("cre", "aut"))

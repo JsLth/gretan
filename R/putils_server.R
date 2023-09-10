@@ -17,18 +17,19 @@ as_likert <- function(x, scale = NULL) {
   ordered(values, levels = scale)
 }
 
-align_dl <- function(..., sep = " ", bold = TRUE) {
-  dots <- drop_nulls(list(...))
-  lhs <- names(dots)
+align_dl <- function(..., sep = " ", bold = TRUE, .list = NULL) {
+  .list <- .list %||% drop_nulls(list(...))
+
+  lhs <- names(.list)
   labels <- mapply(
     align_td,
     x = lhs,
-    y = dots,
+    y = .list,
     char = sep,
     bold = bold,
     SIMPLIFY = FALSE
   )
-
+  
   lapply(
     do.call(paste, labels),
     function(x) protect_html(tags$table(HTML(x)))
@@ -121,10 +122,9 @@ track_coordinates <- function(map, id) {
 }
 
 # Convert ANSI formatting of rlang errors to HTML
-rlang_error_to_html <- function(x) {
-  x <- as.character(x)
-  x <- fansi::to_html(x)
-  HTML(gsub("\n", "<br>", x))
+rlang_error_to_html <- function(e, ...) {
+  e <- fansi::to_html(format(e), ...)
+  tags$pre(HTML(gsub("\n", "<br>", e)))
 }
 
 # Send info message
@@ -194,7 +194,7 @@ execute_safely <- function(expr,
         message,
         br(), br(),
         "Error details:", br(),
-        tags$code(rlang_error_to_html(e))
+        rlang_error_to_html(e, warn = FALSE)
       ), session = session, title = title)
       
       # Send error message and then stop
@@ -270,12 +270,26 @@ popover2 <- function(id,
 #' Execute call with evaluated arguments
 #' @description
 #' Forces the evaluation of arguments in a call in a given environment.
-#' Useful for looping through function calls that defuse expressions and
-#' evaluate them in a different environment.
+#' Useful for looping through function factories that defuse expressions
+#' and evaluate them later when the returned function is called.
+#' Examples:
+#' - shiny::onclick
+#' - shiny update functions
 #' 
 #' @param call Function call or expression
 #' @param envir Environment that arguments in `call` should be evaluated in.
 #' 
+#' @examples
+#' funfact <- function(expr) {
+#'   expr <- deparse(substitute(expr))
+#'   pframe <- parent.frame()
+#'   function() eval(parse(text = expr), envir = pframe)
+#' }
+#' 
+#' fun1 <- lapply(1:3, testf)
+#' fun2 <- lapply(1:3, \(x) with_eval_args(testf(x)))
+#' for (f in fun1) print(f())
+#' for (f in fun2) print(f())
 #' @noRd
 with_eval_args <- function(call, envir = parent.frame()) {
   call <- substitute(call)
@@ -318,8 +332,10 @@ srcloc <- function(idx = 1) {
 
 # Get ID of a Shiny module based on namespace
 get_module_id <- function(session = getDefaultReactiveDomain()) {
-  ns <- strsplit(session$ns(""), "-")[[1]]
-  ns[length(ns)]
+  if (!is.null(session)) {
+    ns <- strsplit(session$ns(""), "-")[[1]]
+    ns[length(ns)]
+  }
 }
 
 # Alternative to cat that prints line breaks
@@ -387,7 +403,6 @@ with_logging <- function(app, value) {
 }
 
 protect_html <- function(x) HTML(as.character(x))
-with_html <- function(.f) function(...) protect_html(.f(...))
 
 #' Riffle-merges two vectors, possibly of different lengths
 #'

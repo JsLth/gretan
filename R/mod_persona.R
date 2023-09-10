@@ -270,7 +270,7 @@ mod_persona_server <- function(id) {
           }
         } 
       ) %>%
-        setNames(paste0("question", seq(5)))
+        stats::setNames(paste0("question", seq(5)))
     })
     
     

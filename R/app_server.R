@@ -8,8 +8,6 @@ app_server <- function(input, output, session) {
     log_it("Shutting down app")
   })
   
-  tabsel <- reactive(input$sidebar)
-  
   # Hide help switch
   shinyjs::hideElement(selector = "ul.navbar-right")
   

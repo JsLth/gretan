@@ -5,7 +5,7 @@ mod_attitudes_ui <- function(id) {
     "attitudes",
     make_header(
       title = "Digital geographies of environmental attitudes",
-      authors = c("Jonas Lieth", "Stefan Jünger"),
+      authors = c("Jonas Lieth", "Stefan J\u00fcnger"),
       affil = "GESIS - Leibniz Institute for the Social Sciences",
       date = "DD-MM-YYYY"
     )

@@ -35,7 +35,7 @@ txts$taxonomy$methodology <- as.character(
   can provide insights to understand the individual and collective level of
   energy citizenship (Annex A). Sources are the EU COM JRC publication \u201cEnergy
   communities: an overview of energy and social innovation\u201d and the JPI Urban
-  Europe ‘Positive Energy Districts Case Studies Booklet\u2019. Detecting
+  Europe \u2018Positive Energy Districts Case Studies Booklet\u2019. Detecting
   determinants and conditions for EC at each geographical level, the taxonomy
   explores the EU-wide context of geographical levels of the emergence of
   energy citizenship. Secondly a case study analysis has been performed,
@@ -109,8 +109,8 @@ txts$taxonomy$scheme <- list(
       outermost regions like islands, archipelagos, mountains, sparsely
       populated areas and land territories; they are administratively
       identified as: intermediate-level between State and cities (Italian,
-      French, etc.), sub-statal entities (Germany \u201cLänder\u201d) or federal
-      autonomies (Spanish \u201cComunidades Autónomas\u201d, rumenian
+      French, etc.), sub-statal entities (Germany \u201cL\u00e4nder\u201d) or federal
+      autonomies (Spanish \u201cComunidades Aut\u00f3nomas\u201d, rumenian
       \u201cvoivodati\u201d)."
     )
   ),

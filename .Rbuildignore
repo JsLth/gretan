@@ -11,7 +11,7 @@ $run_dev.*
 ^LICENSE\.md$
 ^app\.R$
 ^shiny-run\.R$
-^install\.R$
+^electron\.R$
 ^rsconnect$
 ^.rscignore$
 ^greta_survey$

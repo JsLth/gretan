@@ -5,7 +5,7 @@ mod_enpov_ui <- function(id) {
     "enpov",
     make_header(
       title = "Landscapes of vulnerability to energy poverty in the EU",
-      authors = c("Jonas Lieth", "Dennis Abel", "Stefan Jünger"),
+      authors = c("Jonas Lieth", "Dennis Abel", "Stefan J\u00fcnger"),
       affil = "GESIS - Leibniz Institute for the Social Sciences",
       date = "DD-MM-YYYY"
     )

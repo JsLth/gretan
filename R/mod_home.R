@@ -99,7 +99,7 @@ mod_home <- function(input, output, session) {
       crs = 4326
     )
   )
-
+  
   output$map <- leaflet::renderLeaflet({
     leaflet::leaflet(cs_coords) %>%
       leaflet::addTiles() %>%
