@@ -46,7 +46,9 @@ jobs:
             any::knitr
             any::rmarkdown
             any::remotes
-          need: check
+          needs: |
+            check
+            coverage
 
       - name: Package electron app
         run: |
