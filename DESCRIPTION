@@ -26,7 +26,8 @@ Imports:
     waiter,
     plotly,
     fansi,
-    shinipsum
+    shinipsum,
+    reticulate,
 Suggests: 
     spelling,
     testthat (>= 3.0.0),

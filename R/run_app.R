@@ -20,7 +20,11 @@
 #' @export
 #' @import shiny
 #' @importFrom leaflet %>%
-run_app <- function(..., log = NULL, reactlog = FALSE, options = list()) {
+run_app <- function(...,
+                    log = NULL,
+                    reactlog = FALSE,
+                    set_python = NULL,
+                    options = list()) {
   if (reactlog) {
     if (!requireNamespace("reactlog")) {
       stop("The package reactlog is required to enable logging.")
@@ -28,6 +32,10 @@ run_app <- function(..., log = NULL, reactlog = FALSE, options = list()) {
     reactlog::reactlog_enable()
   }
 
+  if (!is.null(set_python)) {
+    reticulate::use_python(set_python)
+  }
+  
   with_logging(
     {
       shinyApp(ui = app_ui, server = app_server, options = options, ...)
