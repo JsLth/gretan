@@ -52,8 +52,3 @@ jobs:
           pak::pkg_install("JsLth/electricShine")
           source("electron.R")
         shell: Rscript {0}
-        
-      - name: Upload electron app
-        uses: actions/upload-artifact@v3
-        with:
-          path: electron/
