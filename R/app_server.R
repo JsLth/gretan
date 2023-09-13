@@ -18,7 +18,7 @@ app_server <- function(input, output, session) {
     search_input <- input$textSearch
     isTRUE(nzchar(search_input))
   })
-
+  
   # Change tab when search output is clicked
   for (x in names(txts)) {
     with_eval_args(

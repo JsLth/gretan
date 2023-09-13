@@ -226,6 +226,7 @@ mod_persona_server <- function(id) {
     })
 
     observe({
+      freezeReactiveValue("consent")
       shinyWidgets::updatePrettyToggle(inputId = ns("consent"), value = FALSE)
 
       for (i in seq(5)) {
