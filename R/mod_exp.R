@@ -260,7 +260,6 @@ mod_exp_server <- function(id, track = FALSE) {
     # Render initial leaflet map. Isolate reactives so they are only called once.
     output$explorer <- leaflet::renderLeaflet({
       params <- isolate(exp_params())
-      init <- TRUE
       log_it("Initializing explorer")
       map_mns(params, track = track)
     })
@@ -268,7 +267,6 @@ mod_exp_server <- function(id, track = FALSE) {
     # Continuously update leaflet map
     observe(
       {
-        req(init)
         params <- exp_params()
         log_it("Updating explorer")
         update_mns_map("explorer", params)
