@@ -20,7 +20,7 @@ The app is deployed as an Electron app using [`electricShine`](https://github.co
 The app is built under the golem framework and installs like an R package:
 
 ```         
-devtools::install_github("JsLth/greta-analytics")
+devtools::install_github("JsLth/gretan")
 library(gretan)
 ```
 
