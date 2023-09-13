@@ -188,7 +188,7 @@ execute_safely <- function(expr,
     expr = expr,
     error = function(e) {
       # Stop without error message
-      if (!inherits(e, "shiny.silent.error")) req(FALSE)
+      if (inherits(e, "shiny.silent.error")) req(FALSE)
 
       send_error(div(
         style = "text-align: left",
