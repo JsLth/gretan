@@ -33,12 +33,12 @@ run_app <- function(...,
   }
   
   if (isTRUE(getOption("app.prod"))) {
-    if (!missing(log)) {
+    if (missing(log)) {
       file.create("gretan.log")
       log <- "gretan.log"
     }
     
-    if (!missing(reactlog))
+    if (missing(reactlog))
       reactlog <- FALSE
   }
 
@@ -47,9 +47,7 @@ run_app <- function(...,
   }
   
   with_logging(
-    {
-      shinyApp(ui = app_ui, server = app_server, options = options, ...)
-    },
+    shinyApp(ui = app_ui, server = app_server, options = options, ...),
     value = log
   )
 }
