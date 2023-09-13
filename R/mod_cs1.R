@@ -22,7 +22,7 @@ mod_cs1_ui <- function(id) {
           title = with_literata("Energy modelling"),
           width = 12,
           status = "primary",
-          txts$cs1$energy_model
+          with_supref(txts$cs1$energy_model)
         )
       ),
       bs4Dash::column(
@@ -186,9 +186,19 @@ mod_cs1_server <- function(id, tab) {
       html = tagList(waiter::spin_pulse(), h4("Loading figure...")),
       color = "rgba(179, 221, 254, 1)"
     )
+    
+    popover2(
+      "biblink-1",
+      title = "",
+      content = "Tecnalia Innovation & Research (2019)<br>
+        ENERKAD. More information: <a href='https://www.enerkad.net/'>
+        https://www.enerkad.net/</a>",
+      trigger = "click",
+      placement = "top"
+    )
 
     observe({
-      bs4Dash::updateAccordion(session$ns("fig"), selected = 1)
+      bs4Dash::updateAccordion("fig", selected = 0)
     }) %>%
       bindEvent(input[["fig-link"]])
 

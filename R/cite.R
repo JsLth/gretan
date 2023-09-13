@@ -94,7 +94,6 @@ as_ref <- function(x, id, index) {
 #' @returns A named list containing reference metadata of the RIS file
 read_ris <- function(file, encoding = "UTF-8") {
   stopifnot(length(file) == 1)
-  print(file)
   if (!grepl("\\.ris$", file)) {
     stop("`file` must be a RIS file.")
   }

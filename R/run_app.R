@@ -2,9 +2,9 @@
 #'
 #' @examples
 #' \dontrun{
-#' library(greta)
-#' greta::run_app()
-#' greta::run_greta()
+#' library(gretan)
+#' gretan::run_app()
+#' gretan::run_greta()
 #' }
 #'
 #' @param ... Arguments passed on to \code{\link[shiny]{shinyApp}}
@@ -30,6 +30,16 @@ run_app <- function(...,
       stop("The package reactlog is required to enable logging.")
     }
     reactlog::reactlog_enable()
+  }
+  
+  if (isTRUE(getOption("app.prod"))) {
+    if (!missing(log)) {
+      file.create("gretan.log")
+      log <- "gretan.log"
+    }
+    
+    if (!missing(reactlog))
+      reactlog <- FALSE
   }
 
   if (!is.null(set_python)) {

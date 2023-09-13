@@ -3,5 +3,5 @@
 # Or use the blue button on top of this file
 
 pkgload::load_all(export_all = FALSE, helpers = FALSE, attach_testthat = FALSE)
-options("golem.app.prod" = TRUE)
-greta::run_app() # add parameters here (if any)
+options("app.prod" = TRUE)
+gretan::run_app() # add parameters here (if any)

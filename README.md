@@ -20,8 +20,8 @@ The app is deployed as an Electron app using [`electricShine`](https://github.co
 The app is built under the golem framework and installs like an R package:
 
 ```         
-devtools::install_github("JsLth/greta-gis-tool")
-library(greta)
+devtools::install_github("JsLth/greta-analytics")
+library(gretan)
 ```
 
 The Shiny app can then be run using the following command:

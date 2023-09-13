@@ -6,7 +6,7 @@
 #'
 #' @noRd
 app_sys <- function(...) {
-  path <- system.file(..., package = "greta")
+  path <- system.file(..., package = "gretan")
 
   # for rsconnect
   if (!nchar(path)) {

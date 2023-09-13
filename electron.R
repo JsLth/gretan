@@ -11,14 +11,14 @@ if (!dir.exists("electron")) {
   dir.create("electron")
 }
 
-if (dir.exists("electron/greta-analytics")) {
-  unlink("electron/greta-analytics", recursive = TRUE)
+if (dir.exists("electron/gretan")) {
+  unlink("electron/gretan", recursive = TRUE)
 }
 
 nodejs <- normalizePath(Sys.which("node"), winslash = "/")
 
 electrify(
-  app_name = "greta-analytics",
+  app_name = "gretan",
   pkg = ".",
   product_name = "GRETA Analytics",
   build_path = "electron",

@@ -167,6 +167,20 @@ loadingButton <- function(inputId,
 }
 
 
+with_supref <- function(text, ns = get0("ns", parent.frame())) {
+  ns <- ns %||% identity
+  HTML(gsub(
+    "\\{@([0-9]+)\\}",
+    as.character(tags$sup(tags$a(
+      id = ns(paste0("biblink-", "\\1")),
+      href = "#",
+      "\\1"
+    ))),
+    text
+  ))
+}
+
+
 with_literata <- function(x, ...) {
   p(x, style = "font-family: Literata; margin-bottom: 0px;", ...)
 }

@@ -51,8 +51,7 @@ txts$cs1$energy_model <- tagList(
   be made or may be more favourable to implement certain actions or strategies.
   In this way, energy modelling can also be used to identify the suitability of
   implementing energy policies and planning decisions in different locations."),
-  p2("In the GRETA project, the ENERKAD\u00ae{@tecnaliaresearchinnovation2019}
-  tool has been used to generate the models.
+  p2("In the GRETA project, the ENERKAD\u00ae{@1} tool has been used to generate the models.
   ENERKAD\u00ae is a plugin for QGIS which evaluates urban energy scenarios at
   building, district and city scale and calculates the thermal energy demand
   and consumption per hour for each building in a district, using cadastral
@@ -78,7 +77,8 @@ txts$cs1$case_study <- tagList(
     reported in the GIS layers, there are currently 19,600 kWp installed on the
     roofs of buildings in the area, resulting in an estimated production of
     approximately 26 GWh/year."),
-  p2("As the", actionLink("fig-link", "Figure", class = "intext"), "shows, most of the installations are located in tertiary
+  p2("As the", actionLink("main-cs-cs1-fig-link", "Figure", class = "intext"),
+    "shows, most of the installations are located in tertiary
     buildings, more specifically in industrial buildings. However, the largest
     installations of all are on the roof of a commercial and office buildings
     located next to eachother, which represents more than 50% of the installed
@@ -95,7 +95,7 @@ txts$cs1$case_study <- tagList(
     area and only 9% of the roof area (excluding industrial buildings in both
     cases)."),
   bs4Dash::accordion(
-    id = "fig",
+    id = "main-cs-cs1-fig",
     bs4Dash::accordionItem(
       tags$img(src = "www/Figure2.png", width = "100%"),
       title = "Figure: Electricity consumption vs. PV production by building use",
@@ -154,12 +154,6 @@ txts$cs1$desc <- list(
     each building if existing. Most of the existing installations are located
     in tertiary buildings")
 )
-
-
-txts$cs1$bibliography <- read_ris(app_sys("app/bib/cs1.ris"))
-
-txts$cs1 <- reference(txts$cs1, txts$cs1$bibliography)
-txts$cs1$bibliography <- as_bib(txts$cs1$bibliography[attr(txts$cs1, "ref")])
 
 
 cs1coords <- sf::st_sf(
