@@ -4,10 +4,10 @@ mod_attitudes_ui <- function(id) {
   bs4Dash::tabItem(
     "attitudes",
     make_header(
-      title = "Digital geographies of environmental attitudes",
-      authors = c("Jonas Lieth", "Stefan J\u00fcnger"),
-      affil = "GESIS - Leibniz Institute for the Social Sciences",
-      date = "DD-MM-YYYY"
+      title = txts$attitudes$title,
+      authors = txts$attitudes$authors,
+      affil = txts$attitudes$affil,
+      date = txts$attitudes$date
     )
   )
 }

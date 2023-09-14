@@ -148,6 +148,14 @@ a.logo {
   margin-bottom: -10px;
 }
 
+#main-cs-cs5-mapbox .card-body, #main-cs-cs5-mapbox .card-header {
+  padding: 0em;
+}
+
+#main-cs-cs5-mapbox .card-body {
+  margin-bottom: -10px;
+}
+
 #main-ind-persona-mapbox .card-body, #main-ind-persona-mapbox .card-header {
   padding: 0em;
 }

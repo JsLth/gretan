@@ -11,13 +11,13 @@ mod_taxonomy_ui <- function(id) {
   bs4Dash::tabItem(
     "taxonomy",
     make_header(
-      title = "GRETA taxonomy of geographical levels",
-      authors = c("Saveria Olga Murielle Boulanger", "Martina Massari"),
-      affil = "University of Bologna",
-      date = "DD-MM-YYYY"
+      title = txts$taxonomy$title,
+      authors = txts$taxonomy$authors,
+      affil = txts$taxonomy$affil,
+      date = txts$taxonomy$date
     ),
     fluidRow(
-      col_6(
+      bs4Dash::column(5,
         bs4Dash::box(
           title = with_literata("Introduction"),
           status = "primary",
@@ -25,7 +25,7 @@ mod_taxonomy_ui <- function(id) {
           p2(txts$taxonomy$introduction)
         )
       ),
-      col_6(
+      bs4Dash::column(7,
         bs4Dash::box(
           title = with_literata("Methodology"),
           status = "primary",

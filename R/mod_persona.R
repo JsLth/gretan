@@ -12,10 +12,10 @@ mod_persona_ui <- function(id) {
   bs4Dash::tabItem(
     "persona",
     make_header(
-      title = "Persona-based clustering of energy citizens",
-      authors = c("Ajesh Kumar", "Toni Kuronen", "Annika Wolff"),
-      affil = "Lappeenranta-Lahti University of Technology LUT",
-      date = "DD-MM-YYYY"
+      title = txts$persona$title,
+      authors = txts$persona$authors,
+      affil = txts$persona$affil,
+      date = txts$persona$date
     ),
     fluidRow(
       col_1(),

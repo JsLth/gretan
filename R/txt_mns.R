@@ -1,4 +1,4 @@
-txts$exp$title <- "Explore data"
+txts$exp$shortitle <- "Explore data"
 txts$exp$icon <- icon("map")
 txts$exp$tags <- c(
   "explore", "data", "multinational", "survey", "map"

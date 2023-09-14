@@ -1,4 +1,4 @@
-txts$home$title <- "Home"
+txts$home$shortitle <- "Home"
 txts$home$icon <- icon("house")
 txts$home$tags <- c(
   "home", "welcome", "overview", "introduction", "case", "study", "studies",

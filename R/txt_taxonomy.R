@@ -1,8 +1,13 @@
-txts$taxonomy$title <- "Taxonomy"
+txts$taxonomy$shortitle <- "Taxonomy"
+txts$taxonomy$title <- "GRETA taxonomy of geographical levels"
 txts$taxonomy$icon <- icon("sitemap")
 txts$taxonomy$tags <- c(
   "geo", "geographic", "levels", "taxonomy"
 )
+txts$taxonomy$authors <- c("Saveria Olga Murielle Boulanger", "Martina Massari")
+txts$taxonomy$affil <- "University of Bologna"
+txts$taxonomy$date <- "DD-MM-YYYY"
+
 txts$taxonomy$introduction <- as.character(
   "The taxonomy of geographical levels and drivers for energy citizenship
   emergence provides a framework for the definition of the emerging characters

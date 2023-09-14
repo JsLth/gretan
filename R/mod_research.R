@@ -4,10 +4,10 @@ mod_research_ui <- function(id) {
   bs4Dash::tabItem(
     "research",
     make_header(
-      title = "Mapping the spatial turn in energy transition research",
-      authors = c("Dennis Abel", "Jonas Lieth", "Stefan J\u00fcnger"),
-      affil = "GESIS - Leibniz Institute for the Social Sciences",
-      date = "DD-MM-YYYY"
+      title = txts$research$title,
+      authors = txts$research$authors,
+      affil = txts$research$affil,
+      date = txts$research$date
     )
   )
 }

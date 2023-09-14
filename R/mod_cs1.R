@@ -5,14 +5,10 @@ mod_cs1_ui <- function(id) {
     "cs1italy",
     # Header ----
     make_header(
-      title = "Case study: Reneweable energy district Pilastro-Roveri",
-      authors = c("Martina Massari", "Saveria Boulanger", "Nekane Hermoso"),
-      affil = list(
-        "Martina Massari" = "University of Bologna, Department of Architecture",
-        "Saveria Boulanger" = "University of Bologna, Department of Architecture",
-        "Nekane Hermoso" = "Tecnalia Research & Innovation"
-      ),
-      date = "2023-mm-dd"
+      title = txts$cs1$title,
+      authors = names(txts$cs1$affil),
+      affil = txts$cs1$affil,
+      date = txts$cs1$date
     ),
     fluidRow(
       bs4Dash::column(
@@ -55,12 +51,7 @@ mod_cs1_ui <- function(id) {
               ns("buildings-info"),
               title = with_literata("Buildings in Pilastro-Roveri"),
               position = "topleft",
-              p(
-                "This map presents the energy models for buildings in",
-                "Pilastro-Roveri. Hover over individual buildings to learn more",
-                "about their energy-related properties. Using the controls on",
-                "the right side of the map you can also switch between layers"
-              ),
+              p(txts$cs1$buildings_info),
               hr(),
               htmlOutput(ns("buildings-info-layer-desc")),
               hr(),
@@ -75,39 +66,16 @@ mod_cs1_ui <- function(id) {
               right = 10,
               width = 200,
               shinyWidgets::prettyRadioButtons(
-                inputId = ns("buildings_basemap"),
+                inputId = ns("buildings-basemap"),
                 label = "Basemap",
                 choices = c("OpenStreetMap", "Satellite"),
                 selected = "OpenStreetMap"
               ),
               shinyWidgets::prettyRadioButtons(
-                inputId = ns("buildings_layer"),
+                inputId = ns("buildings-layer"),
                 label = "Select layer",
                 choices = invert(lapply(txts$cs1$dict$buildings, "[[", "title")),
-                selected = "use"
-              )
-            ),
-            ## Description panel ----
-            leafletPanel(
-              inputId = ns("buildings-desc"),
-              title = with_literata("Description"),
-              position = "bottomright",
-              width = 350,
-              top = 420,
-              right = 10,
-              with_gothic(
-                "This panel could be used as a means to showcase descriptions",
-                "of individual buildings or groups of buildings. Specifically,",
-                "the idea is to click on a building and then have a description",
-                "about either the building, the estate, the neighborhood",
-                "or similar pop up in this panel to give further context about",
-                "the role of it within the case study area.",
-                hr(),
-                tags$b("Example", style = "font-size: 13px;"),
-                "This building is located next to the Parco Pier Paolo Pasolini.",
-                "In 2019, residents have gathered in the park to lead a public",
-                "discussion about the decision of the municipality of Bologna",
-                "to extend PV coverage in the Pilastro area."
+                selected = "year_constr"
               )
             ),
             # bring leaflet panels to front when selected
@@ -125,15 +93,9 @@ mod_cs1_ui <- function(id) {
               inputId = ns("fragility-info"),
               title = with_literata("Fragility in Pilastro-Roveri"),
               position = "topleft",
-              with_gothic(
-                "This map depicts the fragility index in Pilastro-Roveri",
-                "consisting of a demographic, social and economic dimension.",
-                "On the right you can also select additional",
-                "indicators to learn more about the socio-economic divide",
-                "between the Pilastro and Roveri neighborhoods of Bologna."
-              ),
+              with_gothic(txts$cs1$fragility_info),
               hr(),
-              shiny::helpText(with_gothic("Data source: UNIBO, Tecnalia"))
+              helpText(with_gothic("Data source: UNIBO, Tecnalia"))
             ),
             ## Control panel ----
             leafletPanel(
@@ -213,7 +175,7 @@ mod_cs1_server <- function(id, tab) {
 
     # Buildings ----
     output[["buildings-info-layer-desc"]] <- renderUI({
-      layer <- input$buildings_layer
+      layer <- input$`buildings-layer`
       p(txts$cs1$desc[[layer]])
     })
 
@@ -223,7 +185,7 @@ mod_cs1_server <- function(id, tab) {
     bparams <- reactive({
       req(identical(tab(), "cs1italy"))
       dt <- isolate(buildings())
-      layer <- input$buildings_layer
+      layer <- input$`buildings-layer`
 
       # Only create labels once and then save them to the server module for
       # re-use
@@ -356,7 +318,7 @@ mod_cs1_server <- function(id, tab) {
 
     ## Basemap ----
     observe({
-      basemap <- switch(input$buildings_basemap,
+      basemap <- switch(input$`buildings-basemap`,
         "OpenStreetMap" = leaflet::providers$OpenStreetMap,
         "Satellite" = leaflet::providers$Esri.WorldImagery
       )

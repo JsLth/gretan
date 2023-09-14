@@ -1,8 +1,15 @@
-txts$cs1$title <- "Pilastro-Roveri, Italy"
+txts$cs1$shortitle <- "Pilastro-Roveri, Italy"
+txts$cs1$title <- "Case study: Reneweable energy district Pilastro-Roveri"
+txts$cs1$date <- "2023-mm-dd"
 txts$cs1$icon <- icon("map-pin")
 txts$cs1$tags <- c(
   "case", "study", "studies", "bologna", "pilastro", "roveri", "dummy",
   "example"
+)
+txts$cs1$affil <- list(
+  "Martina Massari" = "University of Bologna, Department of Architecture",
+  "Saveria Boulanger" = "University of Bologna, Department of Architecture",
+  "Nekane Hermoso Martinez" = "Tecnalia Research & Innovation"
 )
 
 txts$cs1$dict <- list(
@@ -111,27 +118,6 @@ txts$cs1$case_study <- tagList(
     residential buildings to cover the electricity demand in these buildings.")
 )
 
-# shiny::tags$div(
-#   class = "card-outline",
-#   shiny::tags$div(
-#     class = "card-header",
-#     shiny::tags$h4(
-#       class = "card-title w-100",
-#       shiny::tags$a(
-#         class = c("d-block w-100", "collapsed"),
-#         href = "#",
-#         `data-toggle` = "collapse",
-#         `aria-expanded` = "false",
-#         title
-#       )
-#     )
-#   ),
-#   shiny::tags$div(
-#     id = NULL,
-#     `data-parent` = NULL, class = "collapse",
-#     shiny::tags$div(class = "card-body", ...)
-#   )
-# )
 txts$cs1$desc <- list(
   use = HTML("The <b>Use</b> layer shows the main use of each building. 17 uses are displayed
     on the map, but only 10 of them are considered in the energy demand model:
@@ -155,21 +141,23 @@ txts$cs1$desc <- list(
     in tertiary buildings")
 )
 
+txts$cs1$buildings_info <- paste(
+  "This map presents the energy models for buildings in",
+  "Pilastro-Roveri. Hover over individual buildings to learn more",
+  "about their energy-related properties. Using the controls on",
+  "the right side of the map you can also switch between layers"
+)
+txts$cs1$fragility_info <- paste(
+  "This map depicts the fragility index in Pilastro-Roveri",
+  "consisting of a demographic, social and economic dimension.",
+  "On the right you can also select additional",
+  "indicators to learn more about the socio-economic divide",
+  "between the Pilastro and Roveri neighborhoods of Bologna."
+)
 
 cs1coords <- sf::st_sf(
   name = c("a"),
   geometry = sf::st_sfc(
     sf::st_point(c(11.399926, 44.507145))
   ), crs = 4326
-)
-
-txts$cs1$poi <- list(
-  a = HTML(paste(
-    p("You selected a marker on the map. This marker could be a point of
-      interest relating to the case study and this text could be a text that
-      explains or is otherwise relevant to that point of interest.")
-  )),
-  none = HTML(paste(
-    p("Click on a map marker to learn more about the places of this case study.")
-  ))
 )

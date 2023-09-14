@@ -4,10 +4,10 @@ mod_stakeholder_ui <- function(id) {
   bs4Dash::tabItem(
     "stakeholder",
     make_header(
-      title = "Stakeholder interaction modelling",
-      authors = c("Omar Usmani", "Carlos Montalvo Corral"),
-      affil = "TNO - Netherlands Organisation for Applied Scientific Research",
-      date = "DD-MM-YYYY"
+      title = txts$stakeholder$title,
+      authors = txts$stakeholder$authors,
+      affil = txts$stakeholder$affil,
+      date = txts$stakeholder$date
     ),
     fluidRow(
       col_6(

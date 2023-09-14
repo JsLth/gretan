@@ -152,7 +152,7 @@ app_ui <- function(theme = NULL,
         ),
         bs4Dash::sidebarHeader("Start"),
         bs4Dash::menuItem(
-          text = txts$home$title,
+          text = txts$home$shortitle,
           icon = txts$home$icon,
           tabName = "home"
         ),
@@ -166,37 +166,42 @@ app_ui <- function(theme = NULL,
         ),
         bs4Dash::sidebarHeader("GRETA output"),
         bs4Dash::menuItem(
-          text = txts$cs1$title,
+          text = txts$cs1$shortitle,
           icon = txts$cs1$icon,
           tabName = "cs1italy"
         ),
         bs4Dash::menuItem(
-          text = txts$taxonomy$title,
+          text = txts$cs5$shortitle,
+          icon = txts$cs1$icon,
+          tabName = "cs5spain"
+        ),
+        bs4Dash::menuItem(
+          text = txts$taxonomy$shortitle,
           icon = txts$taxonomy$icon,
           tabName = "taxonomy"
         ),
         bs4Dash::menuItem(
-          text = txts$stakeholder$title,
+          text = txts$stakeholder$shortitle,
           icon = txts$stakeholder$icon,
           tabName = "stakeholder"
         ),
         bs4Dash::menuItem(
-          text = txts$persona$title,
+          text = txts$persona$shortitle,
           icon = txts$persona$icon,
           tabName = "persona"
         ),
         bs4Dash::menuItem(
-          text = txts$enpov$title,
+          text = txts$enpov$shortitle,
           icon = txts$enpov$icon,
           tabName = "enpov"
         ),
         bs4Dash::menuItem(
-          text = txts$attitudes$title,
+          text = txts$attitudes$shortitle,
           icon = txts$attitudes$icon,
           tabName = "attitudes"
         ),
         bs4Dash::menuItem(
-          text = txts$research$title,
+          text = txts$research$shortitle,
           icon = txts$research$icon,
           tabName = "research"
         ),
@@ -205,6 +210,7 @@ app_ui <- function(theme = NULL,
       skin = "light",
       minified = TRUE,
       collapsed = TRUE,
+      expandOnHover = FALSE,
       fixed = FALSE
     ),
     bs4Dash::dashboardBody(
