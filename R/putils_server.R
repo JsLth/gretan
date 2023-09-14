@@ -360,7 +360,7 @@ log_it <- function(log = NULL,
                    details = NULL,
                    priority = FALSE,
                    session = getDefaultReactiveDomain()) {
-  out <- getShinyOption("greta.logging", "")
+  out <- getGretaOption("logging", "")
   if (isFALSE(out)) {
     return(invisible())
   }
@@ -400,9 +400,21 @@ log_details <- function(logs, session = getDefaultReactiveDomain()) {
   }
 }
 
-with_logging <- function(app, value) {
-  app$appOptions$greta.logging <- value
+with_greta_options <- function(app, options) {
+  app$appOptions$greta_options <- options
   app
+}
+
+getGretaOption <- function(name, default = NULL) {
+  opts <- getShinyOption("greta_options")
+  
+  option <- if (!is.null(opts)) {
+    opts[[name]] %||% default
+  } else {
+    default
+  }
+
+  option
 }
 
 protect_html <- function(x) HTML(as.character(x))

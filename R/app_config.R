@@ -23,6 +23,7 @@ add_external_resources <- function() {
     waiter::useWaiter(),
     shinyWidgets::useSweetAlert(theme = "bootstrap-4"),
     shinyjs::useShinyjs(),
+    if (isTRUE(getGretaOption("console", FALSE))) keys::useKeys(),
     tags$script(src = "www/textsearch.js"),
     tags$script(src = "www/loadingbutton.js"),
     includeCSS(app_sys("app/www/styles.css")),

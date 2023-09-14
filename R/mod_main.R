@@ -5,6 +5,8 @@ mod_main_ui <- function(id) {
   titles <- stats::setNames(lapply(categories, function(x) {
     as.list(unique(cb_ext[cb_ext$topic %in% x, ]$title))
   }), categories)
+  
+
 
   shiny::div(
     mod_home_ui(ns("home")),
@@ -13,6 +15,8 @@ mod_main_ui <- function(id) {
     mod_insp_ui(ns("insp"), titles),
     mod_ind_ui(ns("ind")),
     mod_cs_ui(ns("cs")),
+    if (isTRUE(getGretaOption("console", FALSE)))
+      keys::keysInput(ns("debug"), "ctrl+shift+d"),
     class = "tab-content"
   )
 }
@@ -21,7 +25,7 @@ mod_main_ui <- function(id) {
 mod_main_server <- function(id, tab) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-
+    
     mod_home_server("home")
     exp_params <- mod_exp_server("exp")
     mod_cmp_server("cmp")
@@ -64,5 +68,47 @@ mod_main_server <- function(id, tab) {
         sf::st_write(poly, file, layer_options = c(desc, "WRITE_NAME=NO"))
       }
     )
+    
+    if (isTRUE(getGretaOption("console", FALSE))) {
+      observe({
+        send_info(
+          title = "In-app console (for debugging only!)",
+          text = shiny::tagList(
+            tags$style(sprintf("#{%s} { font-family: monospace }", ns(id))),
+            shinyAce::aceEditor(
+              ns("runcode_expr"),
+              mode = "r", 
+              value = "",
+              height = "200px",
+              theme = "github", 
+              fontSize = 16
+            ),
+            shiny::actionButton(
+              ns("runcode_run"), 
+              "Run",
+              class = "btn-success"
+            ),
+            shinyjs::hidden(
+              shiny::div(
+                id = ns("runcode_error"), 
+                style = "color: red; font-weight: bold;",
+                shiny::div("Oops, that resulted in an error! Try again."), 
+                shiny::div(
+                  "Error: ",
+                  shiny::br(),
+                  shiny::tags$i(shiny::span(
+                    id = ns("runcode_errorMsg"),
+                    style = "margin-left: 10px;"
+                  ))
+                )
+              )
+            )
+          )
+        )
+      }) %>%
+        bindEvent(input$debug)
+      
+      shinyjs::runcodeServer()
+    }
   })
 }

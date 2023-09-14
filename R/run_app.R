@@ -24,6 +24,7 @@ run_app <- function(...,
                     log = NULL,
                     reactlog = FALSE,
                     set_python = NULL,
+                    console = FALSE,
                     options = list()) {
   if (reactlog) {
     if (!requireNamespace("reactlog")) {
@@ -40,15 +41,17 @@ run_app <- function(...,
     
     if (missing(reactlog))
       reactlog <- FALSE
+    
+    console <- FALSE
   }
 
   if (!is.null(set_python)) {
     reticulate::use_python(set_python)
   }
   
-  with_logging(
+  with_greta_options(
     shinyApp(ui = app_ui, server = app_server, options = options, ...),
-    value = log
+    options = list(logging = log, console = console)
   )
 }
 
