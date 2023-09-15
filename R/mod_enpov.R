@@ -1,13 +1,15 @@
 mod_enpov_ui <- function(id) {
   ns <- NS(id)
 
+  get_text <- dispatch_to_txt(id)
+  
   bs4Dash::tabItem(
     "enpov",
     make_header(
-      title = txts$enpov$title,
-      authors = txts$enpov$authors,
-      affil = txts$enpov$affil,
-      date = txts$enpov$date
+      title = get_text("title"),
+      authors = get_text("authors"),
+      affil = get_text("affil"),
+      date = get_text("date")
     )
   )
 }

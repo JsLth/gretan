@@ -1,6 +1,8 @@
 mod_persona_ui <- function(id) {
   ns <- NS(id)
-
+  
+  get_text <- dispatch_to_txt(id)
+  
   persona_step <- function(..., step, format = TRUE) {
     shinyjs::hidden(div(
       id = ns(paste0("step", step)),
@@ -12,10 +14,10 @@ mod_persona_ui <- function(id) {
   bs4Dash::tabItem(
     "persona",
     make_header(
-      title = txts$persona$title,
-      authors = txts$persona$authors,
-      affil = txts$persona$affil,
-      date = txts$persona$date
+      title = get_text("title"),
+      authors = get_text("authors"),
+      affil = get_text("affil"),
+      date = get_text("date")
     ),
     fluidRow(
       col_1(),
@@ -51,12 +53,9 @@ mod_persona_ui <- function(id) {
             leaflet::leafletOutput(ns("map"), height = "100%"),
             leafletPanel(
               ns("map-info"),
-              title = with_literata("How do you compare?"),
+              title = with_literata(get_text("results", "map_info", "title")),
               position = "topleft",
-              p("This map shows you how you compare to other regions in the EU.
-                Where do other energy citizens live? Which regions perform
-                better than others? What changes can you expect when moving to
-                a different region?")
+              p(get_text("results", "map_info", "content"))
             )
           )
         ),
@@ -74,21 +73,13 @@ mod_persona_ui <- function(id) {
             step = 1,
             format = FALSE,
             class = "jumbotron bg-primary",
-            tags$h1(class = "display-4", "Welcome to the persona grouping tool!"),
-            tags$p(
-              class = "lead",
-              "Take this survey and learn about your role in the energy transition.",
-              br(),
-              "Discover how you compare to other people in the EU.",
-              br(),
-              "Find out how moving to a different country
-            can change your outlook."
-            ),
+            tags$h1(class = "display-4", get_text("steps", 1, "title")),
+            tags$p(class = "lead", get_text("steps", 1, "desc")),
             tags$hr(class = "my-4"),
             shinyWidgets::prettyToggle(
               inputId = ns("consent"),
-              label_on = "I give consent to the GRETA research team to analyze the data that I provide in this survey.",
-              label_off = "I give consent to the GRETA research team to analyze the data that I provide in this survey.",
+              label_on = get_text("steps", 1, "consent"),
+              label_off = get_text("steps", 1, "consent"),
               outline = TRUE,
               plain = TRUE,
               bigger = TRUE,
@@ -104,36 +95,55 @@ mod_persona_ui <- function(id) {
             h2("Question 1"),
             shinyWidgets::awesomeRadio(
               ns("question1"),
-              label = "How would you asses your knowledge and financial resources to participate in cooperative self-generation of renewable energy?",
-              choices = c(
-                "None selected", "Very low", "Low", "Somewhat low", "Neutral",
-                "Somewhat high", "High", "Very high", "I do not know"
-              ),
+              label = get_text("steps", 2, "question"),
+              choices = get_text("steps", 2, "choices"),
               status = "info"
             )
           ),
           persona_step(
             step = 3,
-            h2("Question 5"),
+            h2("Question 2"),
             shinyWidgets::awesomeRadio(
-              ns("question5"),
-              label = HTML("To what degree do you agree to the following
-                           statement?<br>\u201cI feel proud about the idea of
-                           cooperative self-generation of renewable energy for
-                           my household use\u201d"),
-              choices = c(
-                "None selected", "Strongly disagree", "Disagree",
-                "Somewhat disagree", "Neutral", "Somewhat agree", "Agree",
-                "Strongly agree", "I do not know"
-              ),
+              ns("question2"),
+              label = get_text("steps", 3, "question"),
+              choices = get_text("steps", 3, "choices"),
               status = "info"
             )
           ),
           persona_step(
             step = 4,
-            h2("Thank you!"),
-            p("You have finished the survey. Click \u201cSubmit\u201d
-              now to have your information analyzed."),
+            h2("Question 3"),
+            shinyWidgets::awesomeRadio(
+              ns("question3"),
+              label = get_text("steps", 4, "question"),
+              choices = get_text("steps", 4, "choices"),
+              status = "info"
+            )
+          ),
+          persona_step(
+            step = 5,
+            h2("Question 4"),
+            shinyWidgets::awesomeRadio(
+              ns("question4"),
+              label = get_text("steps", 5, "question"),
+              choices = get_text("steps", 5, "choices"),
+              status = "info"
+            )
+          ),
+          persona_step(
+            step = 6,
+            h2("Question 5"),
+            shinyWidgets::awesomeRadio(
+              ns("question5"),
+              label = get_text("steps", 6, "question"),
+              choices = get_text("steps", 6, "choices"),
+              status = "info"
+            )
+          ),
+          persona_step(
+            step = 7,
+            h2(get_text("steps", 7, "thanks")),
+            p(get_text("steps", 7, "submit")),
             loadingButton(
               inputId = ns("submit"),
               label = "Submit!",
@@ -172,15 +182,18 @@ mod_persona_ui <- function(id) {
 mod_persona_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
+    get_text <- dispatch_to_txt(session$ns(NULL))
+    
     page <- reactiveVal(1)
     prev_page <- reactiveVal(NULL)
     log_cache <- reactiveVal(list(from = NULL, to = 1))
     ready <- reactiveVal(0)
 
-    waiter <- waiter::Waiter$new(
-      id = c(ns("results"), ns("map")),
-      html = tagList(waiter::spin_pulse(), h4("Determining your energy citizen type...")),
-      color = "rgba(179, 221, 254, 1)"
+    waitress <- waiter::Waitress$new(
+      selector = paste0("#", ns("submit")),
+      infinite = TRUE,
+      theme = "line"#,
+      #color = "rgba(179, 221, 254, 1)"
     )
 
     observe({
@@ -190,7 +203,7 @@ mod_persona_server <- function(id) {
       )
       shinyjs::toggleState(
         id = "nextBtn",
-        condition = page() < 4 && input$consent
+        condition = page() < 7 && input$consent
       )
       shinyjs::toggleState(
         id = "submit",
@@ -209,24 +222,15 @@ mod_persona_server <- function(id) {
         ))
       }
     })
-
+    
+    observe(log_it(paste0(print(ready()))))
+    
     observe({
-      cond <- ready() >= 2
-
-      if (cond) {
-        freezeReactiveValue(input, "submit")
-        session$sendCustomMessage(
-          "resetLoadingButton",
-          message = list(inputId = session$ns("submit"))
-        )
-      }
-
-      shinyjs::toggleElement("surveybox", condition = !cond)
-      shinyjs::toggleElement("results", condition = cond)
+      shinyjs::toggleElement("surveybox", condition = ready() < 2)
+      shinyjs::toggleElement("results", condition = ready() >= 2)
     })
 
     observe({
-      freezeReactiveValue("consent")
       shinyWidgets::updatePrettyToggle(inputId = ns("consent"), value = FALSE)
 
       for (i in seq(5)) {
@@ -235,7 +239,12 @@ mod_persona_server <- function(id) {
           selected = "None selected"
         ))
       }
-
+      
+      session$sendCustomMessage(
+        "resetLoadingButton",
+        message = list(inputId = session$ns("submit"))
+      )
+      
       shinyjs::hide("results")
       shinyjs::show("surveybox")
       prev_page(page())
@@ -260,14 +269,7 @@ mod_persona_server <- function(id) {
       vapply(
         FUN.VALUE = logical(1),
         seq(5),
-        function(i) {
-          answer <- input[[paste0("question", i)]]
-          if (!is.null(answer)) {
-            !identical(answer, "None selected")
-          } else {
-            TRUE
-          }
-        }
+        function(i) !is.na(input[[paste0("question", i)]])
       ) %>%
         stats::setNames(paste0("question", seq(5)))
     })
@@ -296,36 +298,82 @@ mod_persona_server <- function(id) {
         div()
       }
     })
-
-
+    
+    model <- reactive(reticulate::py_load_object(system.file(
+      "python/persona_model.pkl",
+      package = "gretan"
+    )))
+    
+    responses <- reactive(as.integer(c(
+      input$question1, input$question2, input$question3,
+      input$question4, input$question5
+    )))
+    
     results <- reactive({
-      # reticulate::py_run_file()
-      waiter$show()
-      print("starting")
-      Sys.sleep(1)
-      waiter$hide()
-      list(
-        list(name = "Persona 1", p = 0.853, desc = paste("This persona is characterized by", shinipsum::random_text(nchars = 250))),
-        list(name = "Persona 2", p = 0.437, desc = paste("This persona is characterized by", shinipsum::random_text(nchars = 250))),
-        list(name = "Persona 3", p = 0.194, desc = paste("This persona is characterized by", shinipsum::random_text(nchars = 250)))
-      )
-    })
-
-
+      waitress$start()
+      waitress$inc(10)
+      
+      # Load model
+      model <- isolate(model())
+      
+      waitress$inc(30)
+      
+      # Reshape input data
+      features <- responses() %>%
+        reticulate::np_array() %>%
+        reticulate::array_reshape(c(1, -1))
+      
+      waitress$inc(30)
+      
+      # Predict persona from input
+      pred <- c(model$predict(features))
+      
+      # Extract and order personas
+      top_personas <- which(order(pred, decreasing = TRUE) <= 3)
+      top_prob <- pred[top_personas]
+      top_order <- order(top_prob, decreasing = TRUE)
+      top_personas <- top_personas[top_order]
+      top_prob <- top_prob[top_order]
+      
+      waitress$inc(30)
+      waitress$close()
+      
+      personas <- get_text("results", "personas")
+      lapply(seq(3), function(i) {
+        pers <- top_personas[i]
+        prob <- top_prob[i]
+        list(
+          name = personas[[pers]]$name,
+          p = round(prob, 4),
+          desc = personas[[pers]]$desc,
+          src = "www/personas/prototype.png"
+        )
+      })
+    }) %>%
+      bindEvent(input$submit)
+    
+    
     output$type <- renderUI({
-      ready(ready() + 1)
       items <- lapply(results(), function(x) {
         bs4Dash::carouselItem(
           fluidRow(
             col_2(),
-            col_8(
-              h4(
-                sprintf("With a chance of %s %% you are...", x$p * 100),
-                style = "text-align: center;"
-              ),
-              h1(x$name, style = "text-align: center;"),
-              p(x$desc, style = "margin-bottom: 50px; text-align: justify;")
+            col_5(
+              div(
+                h4(
+                  sprintf("With a chance of %s %% you are...", x$p * 100),
+                  style = "text-align: center;"
+                ),
+                h1(x$name, style = "text-align: center;"),
+                p(x$desc, style = "margin-bottom: 50px; text-align: justify;"),
+                style = "margin-top: auto; margin-bottom: auto; display: block;"
+              )
+
             ),
+            col_3(tags$img(
+              src = x$src,
+              style = "margin-left: auto; margin-right: auto; display:block;"
+            )),
             col_2()
           )
         )
@@ -337,11 +385,17 @@ mod_persona_server <- function(id) {
       )
     }) %>%
       bindEvent(input$submit)
-
-
+    
+    
+    clusters <- reactive(readRDS(system.file(
+      "extdata/persona.rds",
+      package = "greta"
+    )))
+    
+    
     output$map <- leaflet::renderLeaflet({
-      ready(ready() + 1)
-      results()
+      res <- responses()
+      clus <- clusters()
       p <- leaflet::leaflet() %>%
         leaflet::addTiles() %>%
         leaflet::setView(lng = 9, lat = 55, zoom = 4) %>%
@@ -376,6 +430,7 @@ mod_persona_server <- function(id) {
           data = sf::st_transform(srv_nuts2, 4326)
         ) %>%
         leaflet::addLayersControl(baseGroups = c("NUTS-2", "NUTS-1", "NUTS-0"))
+      ready(ready() + 1)
       p
     }) %>%
       bindEvent(input$submit)

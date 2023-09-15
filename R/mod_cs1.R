@@ -1,34 +1,36 @@
 mod_cs1_ui <- function(id) {
   ns <- NS(id)
-
+  
+  get_text <- dispatch_to_txt(id)
+  
   bs4Dash::tabItem(
     "cs1italy",
     # Header ----
     make_header(
-      title = txts$cs1$title,
-      authors = names(txts$cs1$affil),
-      affil = txts$cs1$affil,
-      date = txts$cs1$date
+      title = get_text("title"),
+      authors = names(get_text("affil")),
+      affil = get_text("affil"),
+      date = get_text("date")
     ),
     fluidRow(
       bs4Dash::column(
         width = 6,
         # Box 1 ----
         bs4Dash::box(
-          title = with_literata("Energy modelling"),
+          title = with_literata(get_text("energy_model", "title")),
           width = 12,
           status = "primary",
-          with_supref(txts$cs1$energy_model)
+          with_supref(get_text("energy_model", "content"))
         )
       ),
       bs4Dash::column(
         width = 6,
         # Box 2 ----
         bs4Dash::box(
-          title = with_literata("Case study"),
+          title = with_literata(get_text("case_study", "title")),
           width = 12,
           status = "primary",
-          txts$cs1$case_study
+          get_text("case_study", "content")
         )
       )
     ),
@@ -51,7 +53,7 @@ mod_cs1_ui <- function(id) {
               ns("buildings-info"),
               title = with_literata("Buildings in Pilastro-Roveri"),
               position = "topleft",
-              p(txts$cs1$buildings_info),
+              p(get_text("buildings_info")),
               hr(),
               htmlOutput(ns("buildings-info-layer-desc")),
               hr(),
@@ -74,7 +76,11 @@ mod_cs1_ui <- function(id) {
               shinyWidgets::prettyRadioButtons(
                 inputId = ns("buildings-layer"),
                 label = "Select layer",
-                choices = invert(lapply(txts$cs1$dict$buildings, "[[", "title")),
+                choices = invert(lapply(
+                  get_text("dict", "buildings"),
+                  "[[",
+                  "title"
+                )),
                 selected = "year_constr"
               )
             ),
@@ -93,7 +99,7 @@ mod_cs1_ui <- function(id) {
               inputId = ns("fragility-info"),
               title = with_literata("Fragility in Pilastro-Roveri"),
               position = "topleft",
-              with_gothic(txts$cs1$fragility_info),
+              with_gothic(get_text("fragility_info")),
               hr(),
               helpText(with_gothic("Data source: UNIBO, Tecnalia"))
             ),
@@ -109,7 +115,11 @@ mod_cs1_ui <- function(id) {
                 shinyWidgets::prettyRadioButtons(
                   inputId = ns("fragility_layer"),
                   label = "",
-                  choices = invert(lapply(txts$cs1$dict$fragility, "[[", "title")),
+                  choices = invert(lapply(
+                    get_text("dict", "fragility"),
+                    "[[",
+                    "title"
+                  )),
                   selected = "frag_compl"
                 ),
                 index = c(1, 16),
@@ -137,6 +147,8 @@ mod_cs1_ui <- function(id) {
 
 mod_cs1_server <- function(id, tab) {
   moduleServer(id, function(input, output, session) {
+    get_text <- dispatch_to_txt(session$ns(NULL))
+    
     # Waiter setup ----
     bwaiter <- waiter::Waiter$new(
       id = session$ns("buildings"),
@@ -176,7 +188,7 @@ mod_cs1_server <- function(id, tab) {
     # Buildings ----
     output[["buildings-info-layer-desc"]] <- renderUI({
       layer <- input$`buildings-layer`
-      p(txts$cs1$desc[[layer]])
+      p(get_text("desc", layer))
     })
 
     blabels <- NULL
@@ -190,10 +202,10 @@ mod_cs1_server <- function(id, tab) {
       # Only create labels once and then save them to the server module for
       # re-use
       if (is.null(blabels)) {
-        lab_values <- dt[names(txts$cs1$dict$buildings)] %>%
+        lab_values <- dt[names(get_text("dict", "buildings"))] %>%
           sf::st_drop_geometry() %>%
           as.list() %>%
-          stats::setNames(sapply(txts$cs1$dict$buildings, "[[", "title")) %>%
+          stats::setNames(sapply(get_text("dict", "buildings"), "[[", "title")) %>%
           lapply(\(x) if (is.numeric(x)) round(x, 2) else x)
         lab_values$`Electricity demand` <- paste(lab_values$`Electricity demand`, "kWh/m\u00b2")
         lab_values$`Heating demand` <- paste(lab_values$`Heating demand`, "kWh/m\u00b2")
@@ -262,10 +274,10 @@ mod_cs1_server <- function(id, tab) {
         leaflet::addLegend(
           position = "bottomleft",
           pal = params$pal,
-          title = txts$cs1$dict$buildings[[params$layer]]$title,
+          title = get_text("dict", "buildings", params$layer, "title"),
           values = params$data[[params$layer]],
           labFormat = leaflet::labelFormat(
-            suffix = txts$cs1$dict$buildings[[params$layer]]$lab
+            suffix = get_text("dict", "buildings", params$layer, "lab")
           )
         )
     })
@@ -308,10 +320,10 @@ mod_cs1_server <- function(id, tab) {
         leaflet::addLegend(
           position = "bottomleft",
           pal = params$pal,
-          title = txts$cs1$dict$buildings[[params$layer]]$title,
+          title = get_text("dict", "buildings", params$layer, "title"),
           values = params$data[[params$layer]],
           labFormat = leaflet::labelFormat(
-            suffix = txts$cs1$dict$buildings[[params$layer]]$lab
+            suffix = get_text("dict", "buildings", params$layer, "lab")
           )
         )
     })
@@ -340,9 +352,16 @@ mod_cs1_server <- function(id, tab) {
       lab_values <- dt[c("area_stati", "nomezona", layer)] %>%
         sf::st_drop_geometry() %>%
         as.list() %>%
-        stats::setNames(c("Area", "Zone", txts$cs1$dict$fragility[[layer]]$title)) %>%
+        stats::setNames(c(
+          "Area",
+          "Zone",
+          get_text("dict", "fragility", layer, "title")
+        )) %>%
         {
-          .[[3]] <- paste(round(.[[3]], 2), txts$cs1$dict$fragility[[layer]]$lab)
+          .[[3]] <- paste(
+            round(.[[3]], 2),
+            get_text("dict", "fragility", layer, "lab")
+          )
           .
         }
       labels <- do.call(align_dl, lab_values)
@@ -383,10 +402,10 @@ mod_cs1_server <- function(id, tab) {
         leaflet::addLegend(
           position = "bottomleft",
           pal = params$pal,
-          title = txts$cs1$dict$fragility[[params$layer]]$title,
+          title = get_text("dict", "fragility", params$layer, "title"),
           values = params$data[[params$layer]],
           labFormat = leaflet::labelFormat(
-            suffix = txts$cs1$dict$fragility[[params$layer]]$lab
+            suffix = get_text("dict", "fragility", params$layer, "lab")
           )
         )
     })
@@ -430,10 +449,10 @@ mod_cs1_server <- function(id, tab) {
           position = "bottomleft",
           na.label = "N/A",
           pal = params$palette,
-          title = txts$cs1$dict$buildings[[params$layer]]$title,
+          title = get_text("dict", "fragility", params$layer, "title"),
           values = params$data[[params$layer]],
           labFormat = leaflet::labelFormat(
-            suffix = txts$cs1$dict$buildings[[params$layer]]$lab
+            suffix = get_text("dict", "fragility", params$layer, "lab")
           )
         )
     })

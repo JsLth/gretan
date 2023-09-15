@@ -1,22 +1,23 @@
 mod_home_ui <- function(id) {
   ns <- NS(id)
-
+  get_text <- dispatch_to_txt(id)
+  
   bs4Dash::tabItem(
     "home",
     fluidRow(
       bs4Dash::column(
         width = 6,
         bs4Dash::box(
-          title = with_literata("Welcome to GRETA Analytics!"),
+          title = with_literata(get_text("welcome", "title")),
           width = 12,
           status = "primary",
-          txts$home$welcome
+          get_text("welcome", "content")
         ),
         bs4Dash::box(
-          title = with_literata("About GRETA"),
+          title = with_literata(get_text("about", "title")),
           width = 12,
           status = "primary",
-          txts$home$about,
+          get_text("about", "content"),
           fluidRow(
             style = "margin-top: 5%;",
             col_6(
@@ -25,24 +26,7 @@ mod_home_ui <- function(id) {
                 tags$img(src = "www/greta_logo.svg")
               )
             ),
-            col_6(
-              div(
-                style = "margin: auto; width: 50%;",
-                tags$b("CONTACT"),
-                br(), br(),
-                "Annika Wolff",
-                br(),
-                "Project coordinator",
-                br(),
-                a("LUT.Greta@lut.fi", href = "mailto:LUT.Greta.lut.fi"),
-                br(), br(),
-                "Elina Palkama",
-                br(),
-                "Communication coordinator",
-                br(),
-                a("elina.palkama@kaskas.fi", href = "mailto:elina.palkama@kaskas.fi")
-              )
-            ),
+            col_6(get_text("contact")),
             fluidRow(
               style = "margin-top: 5%;",
               col_12(
@@ -54,10 +38,8 @@ mod_home_ui <- function(id) {
                     height = "10%",
                     style = "float: left;"
                   ),
-                  p(
-                    "GRETA HAS RECEIVED FUNDING FROM THE EUROPEAN UNION'S HORIZON
-                    2020 RESEARCH AND INNOVATION PROGRAMME UNDER GRANT AGREEMENT
-                    NO 101022317.",
+                  tags$p(
+                    get_text("funding"),
                     style = "float: right; margin-left: 15px;"
                   )
                 )
@@ -87,63 +69,27 @@ mod_home_ui <- function(id) {
 }
 
 
-mod_home <- function(input, output, session) {
-  cs_coords <- sf::st_sf(
-    name = c("Italy", "Portugal", "Germany", "The Netherlands", "Spain"),
-    geometry = sf::st_sfc(
-      sf::st_point(c(11.399926, 44.507145)),
-      sf::st_point(c(-9.136693, 38.710479)),
-      sf::st_point(c(8.651177, 49.872775)),
-      sf::st_point(c(5.6343227, 52.2434979)),
-      sf::st_point(c(-1.994286, 43.300075)),
-      crs = 4326
-    )
-  )
-
-  output$map <- leaflet::renderLeaflet({
-    leaflet::leaflet(cs_coords) %>%
-      leaflet::addTiles() %>%
-      leaflet::setView(lng = 9, lat = 55, zoom = 3) %>%
-      leaflet::addMarkers(
-        icon = leaflet::makeIcon(
-          "https://www.svgrepo.com/download/352253/map-pin.svg",
-          iconWidth = 25,
-          iconHeight = 25,
-          iconAnchorY = 25,
-          iconAnchorX = 12.5
-        )
-      ) %>%
-      leaflet::addPolylines(
-        data = sf::st_transform(srv_nuts0, 4326),
-        fillOpacity = 0,
-        weight = 1,
-        color = "red"
-      ) %>%
-      leaflegend::addLegendImage(
-        images = leaflegend::makeSymbol("line", width = 7, color = "red"),
-        labels = "Surveyed countries",
-        orientation = "vertical",
-        position = "bottomleft",
-        width = 10,
-        height = 10,
-        labelStyle = "font-size: 12px; vertical-align: middle;"
+mod_home_server <- function(id) {
+  moduleServer(id, function(input, output, session) {
+    get_text <- dispatch_to_txt(session$ns(NULL))
+    
+    cs_coords <- sf::st_sf(
+      name = setdiff(names(get_text("csdesc")), "none"),
+      geometry = sf::st_sfc(
+        sf::st_point(c(11.399926, 44.507145)),
+        sf::st_point(c(-9.136693, 38.710479)),
+        sf::st_point(c(8.651177, 49.872775)),
+        sf::st_point(c(5.6343227, 52.2434979)),
+        sf::st_point(c(-1.994286, 43.300075)),
+        crs = 4326
       )
-  })
-
-  observe({
-    click <- input$map_marker_click
-    target <- leaflet_select(
-      id = "map",
-      geom = cs_coords,
-      action = click
     )
-
-    if (!is.null(target)) {
-      cc <- cs_coords[!cs_coords$name %in% target$name, ]
-      leaflet::leafletProxy("map") %>%
-        leaflet::clearMarkers() %>%
+    
+    output$map <- leaflet::renderLeaflet({
+      leaflet::leaflet(cs_coords) %>%
+        leaflet::addTiles() %>%
+        leaflet::setView(lng = 9, lat = 55, zoom = 3) %>%
         leaflet::addMarkers(
-          data = cc,
           icon = leaflet::makeIcon(
             "https://www.svgrepo.com/download/352253/map-pin.svg",
             iconWidth = 25,
@@ -152,34 +98,69 @@ mod_home <- function(input, output, session) {
             iconAnchorX = 12.5
           )
         ) %>%
-        leaflet::addMarkers(
-          data = target,
-          icon = leaflet::makeIcon(
-            "https://www.svgrepo.com/download/352253/map-pin.svg",
-            iconWidth = 37.5,
-            iconHeight = 37.5,
-            iconAnchorY = 37.5,
-            iconAnchorX = 18.75
-          )
+        leaflet::addPolylines(
+          data = sf::st_transform(srv_nuts0, 4326),
+          fillOpacity = 0,
+          weight = 1,
+          color = "red"
+        ) %>%
+        leaflegend::addLegendImage(
+          images = leaflegend::makeSymbol("line", width = 7, color = "red"),
+          labels = "Surveyed countries",
+          orientation = "vertical",
+          position = "bottomleft",
+          width = 10,
+          height = 10,
+          labelStyle = "font-size: 12px; vertical-align: middle;"
         )
-    }
-  }) %>%
-    bindEvent(input$map_marker_click)
-
-  # Show case study description based on map clicks
-  output$desc <- renderUI({
-    click <- input$map_marker_click
-
-    leaflet_text_on_click(
-      id = "map",
-      geom = cs_coords,
-      texts = txts$home$csdesc,
-      click = click
-    )
+    })
+    
+    observe({
+      click <- input$map_marker_click
+      target <- leaflet_select(
+        id = "map",
+        geom = cs_coords,
+        action = click
+      )
+      
+      if (!is.null(target)) {
+        cc <- cs_coords[!cs_coords$name %in% target$name, ]
+        leaflet::leafletProxy("map") %>%
+          leaflet::clearMarkers() %>%
+          leaflet::addMarkers(
+            data = cc,
+            icon = leaflet::makeIcon(
+              "https://www.svgrepo.com/download/352253/map-pin.svg",
+              iconWidth = 25,
+              iconHeight = 25,
+              iconAnchorY = 25,
+              iconAnchorX = 12.5
+            )
+          ) %>%
+          leaflet::addMarkers(
+            data = target,
+            icon = leaflet::makeIcon(
+              "https://www.svgrepo.com/download/352253/map-pin.svg",
+              iconWidth = 37.5,
+              iconHeight = 37.5,
+              iconAnchorY = 37.5,
+              iconAnchorX = 18.75
+            )
+          )
+      }
+    }) %>%
+      bindEvent(input$map_marker_click)
+    
+    # Show case study description based on map clicks
+    output$desc <- renderUI({
+      click <- input$map_marker_click
+      
+      leaflet_text_on_click(
+        id = "map",
+        geom = cs_coords,
+        texts = get_text("csdesc"),
+        click = click
+      )
+    })
   })
-}
-
-
-mod_home_server <- function(id) {
-  moduleServer(id, mod_home)
 }

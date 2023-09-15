@@ -13,8 +13,14 @@ mod_main_ui <- function(id) {
     mod_exp_ui(ns("exp"), titles),
     mod_cmp_ui(ns("cmp"), titles),
     mod_insp_ui(ns("insp"), titles),
-    mod_ind_ui(ns("ind")),
-    mod_cs_ui(ns("cs")),
+    mod_taxonomy_ui(ns("taxonomy")),
+    mod_stakeholder_ui(ns("stakeholder")),
+    mod_persona_ui(ns("persona")),
+    mod_enpov_ui(ns("enpov")),
+    mod_attitudes_ui(ns("attitudes")),
+    mod_research_ui(ns("research")),
+    mod_cs1_ui(ns("cs1")),
+    mod_cs5_ui(ns("cs5")),
     if (isTRUE(getGretaOption("console", FALSE)))
       keys::keysInput(ns("debug"), "ctrl+shift+d"),
     class = "tab-content"
@@ -30,8 +36,14 @@ mod_main_server <- function(id, tab) {
     exp_params <- mod_exp_server("exp")
     mod_cmp_server("cmp")
     mod_insp_server("insp")
-    mod_cs_server("cs", tab = tab)
-    mod_ind_server("ind")
+    mod_cs1_server("cs1", tab = tab)
+    mod_cs5_server("cs5", tab = tab)
+    mod_taxonomy_server("taxonomy")
+    mod_stakeholder_server("stakeholder")
+    mod_persona_server("persona")
+    mod_enpov_server("enpov")
+    mod_attitudes_server("attitudes")
+    mod_research_server("research")
 
     output[["exp-download"]] <- downloadHandler(
       filename = function() {
@@ -73,8 +85,7 @@ mod_main_server <- function(id, tab) {
       observe({
         send_info(
           title = "In-app console (for debugging only!)",
-          text = shiny::tagList(
-            tags$style(sprintf("#{%s} { font-family: monospace }", ns(id))),
+          text = tagList(
             shinyAce::aceEditor(
               ns("runcode_expr"),
               mode = "r", 
@@ -83,20 +94,20 @@ mod_main_server <- function(id, tab) {
               theme = "github", 
               fontSize = 16
             ),
-            shiny::actionButton(
+            bs4Dash::actionButton(
               ns("runcode_run"), 
               "Run",
               class = "btn-success"
             ),
             shinyjs::hidden(
-              shiny::div(
+              div(
                 id = ns("runcode_error"), 
                 style = "color: red; font-weight: bold;",
-                shiny::div("Oops, that resulted in an error! Try again."), 
-                shiny::div(
+                tags$code("Oops, that resulted in an error! Try again."), 
+                div(
                   "Error: ",
-                  shiny::br(),
-                  shiny::tags$i(shiny::span(
+                  br(),
+                  tags$i(span(
                     id = ns("runcode_errorMsg"),
                     style = "margin-left: 10px;"
                   ))

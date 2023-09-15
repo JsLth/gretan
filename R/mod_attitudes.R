@@ -1,13 +1,15 @@
 mod_attitudes_ui <- function(id) {
   ns <- NS(id)
 
+  get_text <- dispatch_to_txt(id)
+  
   bs4Dash::tabItem(
     "attitudes",
     make_header(
-      title = txts$attitudes$title,
-      authors = txts$attitudes$authors,
-      affil = txts$attitudes$affil,
-      date = txts$attitudes$date
+      title = get_text("title"),
+      authors = get_text("authors"),
+      affil = get_text("affil"),
+      date = get_text("date")
     )
   )
 }

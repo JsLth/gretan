@@ -1,34 +1,36 @@
 mod_cs5_ui <- function(id) {
   ns <- NS(id)
   
+  get_text <- dispatch_to_txt(id)
+  
   bs4Dash::tabItem(
     "cs5spain",
     # Header ----
     make_header(
-      title = txts$cs5$title,
-      authors = names(txts$cs5$affil),
-      affil = txts$cs5$affil,
-      date = txts$cs5$date
+      title = get_text("title"),
+      authors = names(get_text("affil")),
+      affil = get_text("affil"),
+      date = get_text("date")
     ),
     fluidRow(
       bs4Dash::column(
         width = 6,
         # Box 1 ----
         bs4Dash::box(
-          title = with_literata("Energy modelling"),
+          title = with_literata(get_text("energy_model", "title")),
           width = 12,
           status = "primary",
-          shinipsum::random_text(nwords = 250)
+          get_text("energy_model", "content")
         )
       ),
       bs4Dash::column(
         width = 6,
         # Box 2 ----
         bs4Dash::box(
-          title = with_literata("Case study"),
+          title = with_literata(get_text("case_study", "title")),
           width = 12,
           status = "primary",
-          shinipsum::random_text(nwords = 250)
+          get_text("case_study", "content")
         )
       )
     ),
@@ -48,7 +50,7 @@ mod_cs5_ui <- function(id) {
             ns("buildings-info"),
             title = with_literata("Buildings in Bera Bera"),
             position = "topleft",
-            p(txts$cs5$buildings_info),
+            p(get_text("buildings_info")),
             hr(),
             htmlOutput(ns("buildings-info-layer-desc")),
             hr(),
@@ -71,7 +73,11 @@ mod_cs5_ui <- function(id) {
             shinyWidgets::prettyRadioButtons(
               inputId = ns("buildings-layer"),
               label = "Select layer",
-              choices = invert(lapply(txts$cs5$dict$buildings, "[[", "title")),
+              choices = invert(lapply(
+                get_text("dict", "buildings"),
+                "[[",
+                "title"
+              )),
               selected = "substation"
             )
           ),
@@ -89,6 +95,8 @@ mod_cs5_ui <- function(id) {
 
 mod_cs5_server <- function(id, tab) {
   moduleServer(id, function(input, output, session) {
+    get_text <- dispatch_to_txt(session$ns(NULL))
+    
     waiter <- waiter::Waiter$new(
       id = session$ns("buildings"),
       html = tagList(waiter::spin_pulse(), h4("Loading figure...")),
@@ -101,7 +109,7 @@ mod_cs5_server <- function(id, tab) {
     
     output[["buildings-info-layer-desc"]] <- renderUI({
       layer <- input$`buildings-layer`
-      p(txts$cs5$desc[[layer]])
+      p(get_text("dict", layer))
     })
     
     labels <- NULL
@@ -115,10 +123,10 @@ mod_cs5_server <- function(id, tab) {
       # Only create labels once and then save them to the server module for
       # re-use
       if (is.null(labels)) {
-        lab_values <- dt[names(txts$cs5$dict$buildings)] %>%
+        lab_values <- dt[names(get_text("dict", "buildings"))] %>%
           sf::st_drop_geometry() %>%
           as.list() %>%
-          stats::setNames(sapply(txts$cs5$dict$buildings, "[[", "title")) %>%
+          stats::setNames(sapply(get_text("dict", "buildings"), "[[", "title")) %>%
           lapply(\(x) if (is.numeric(x)) round(x, 2) else x)
         lab_values$`Electricity demand` <- paste(lab_values$`Electricity demand`, "kWh/m\u00b2")
         lab_values$`Heating demand` <- paste(lab_values$`Heating demand`, "kWh/m\u00b2")
@@ -178,10 +186,10 @@ mod_cs5_server <- function(id, tab) {
         leaflet::addLegend(
           position = "bottomleft",
           pal = params$pal,
-          title = txts$cs5$dict$buildings[[params$layer]]$title,
+          title = get_text("dict", "buildings", params$layer, "title"),
           values = params$data[[params$layer]],
           labFormat = leaflet::labelFormat(
-            suffix = txts$cs5$dict$buildings[[params$layer]]$lab
+            suffix = get_text("dict", "buildings", params$layer, "lab")
           )
         )
     })
@@ -223,10 +231,10 @@ mod_cs5_server <- function(id, tab) {
         leaflet::addLegend(
           position = "bottomleft",
           pal = params$pal,
-          title = txts$cs5$dict$buildings[[params$layer]]$title,
+          title = get_text("dict", "buildings", params$layer, "title"),
           values = params$data[[params$layer]],
           labFormat = leaflet::labelFormat(
-            suffix = txts$cs5$dict$buildings[[params$layer]]$lab
+            suffix = get_text("dict", "buildings", params$layer, "lab")
           )
         )
     })

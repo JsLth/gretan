@@ -1,6 +1,26 @@
 # Create global list to store UI texts to prevent spamming code files
-txts <- list()
+txts <- list(main = list())
 
+
+# UI assembly ----
+#' @title GRETA Shiny base module
+#' @description Create the UI and server function of the GRETA Shiny app.
+#'
+#' @param theme Fresh theme to apply to the UI
+#' @param preloader Preloader to run when the UI is loading
+#' @param options Further AdminLTE options, see \code{\link[bs4Dash]{dashboardPage}}
+#' @param sidebar_fixed Whether to fix the sidebar to the screen
+#' @param header_fixed Whether to fix the header to the screen
+#' @param minifed Whether to minify the sidebar when collapsed
+#' @param controlbar UI to add to the controlbar, see \code{\link[bs4Dash]{dashboardControlbar}}
+#' @param footer UI to add to the footer, see \code{\link[bs4Dash]{dashboardFooter}}
+#' @param input internal
+#' @param output internal
+#' @param session internal
+#'
+#' @keywords internal
+#' @rdname mod_base
+#' @export
 app_ui <- function(theme = NULL,
                    preloader = NULL,
                    options = NULL,
@@ -10,6 +30,7 @@ app_ui <- function(theme = NULL,
                    controlbar = NULL,
                    footer = NULL) {
   all_pals <- list_palettes()
+  get_text <- dispatch_to_txt("main")
 
   if (!is.null(theme)) {
     theme <- structure(
@@ -28,26 +49,6 @@ app_ui <- function(theme = NULL,
     )
   }
 
-
-  # UI assembly ----
-  #' @title GRETA Shiny base module
-  #' @description Create the UI and server function of the GRETA Shiny app.
-  #'
-  #' @param theme Fresh theme to apply to the UI
-  #' @param preloader Preloader to run when the UI is loading
-  #' @param options Further AdminLTE options, see \code{\link[bs4Dash]{dashboardPage}}
-  #' @param sidebar_fixed Whether to fix the sidebar to the screen
-  #' @param header_fixed Whether to fix the header to the screen
-  #' @param minifed Whether to minify the sidebar when collapsed
-  #' @param controlbar UI to add to the controlbar, see \code{\link[bs4Dash]{dashboardControlbar}}
-  #' @param footer UI to add to the footer, see \code{\link[bs4Dash]{dashboardFooter}}
-  #' @param input internal
-  #' @param output internal
-  #' @param session internal
-  #'
-  #' @keywords internal
-  #' @rdname mod_base
-  #' @export
   bs4Dash::dashboardPage(
     bs4Dash::dashboardHeader(
       tags$style("
@@ -152,57 +153,66 @@ app_ui <- function(theme = NULL,
         ),
         bs4Dash::sidebarHeader("Start"),
         bs4Dash::menuItem(
-          text = txts$home$shortitle,
-          icon = txts$home$icon,
+          text = get_text("home", "shortitle"),
+          icon = icon(get_text("home", "icon")),
           tabName = "home"
         ),
         bs4Dash::menuItem(
           text = "Multinational survey",
-          icon = txts$exp$icon,
+          icon = icon(get_text("exp", "icon")),
           tabName = "mns",
-          bs4Dash::menuSubItem(text = "Explore data", tabName = "exp"),
-          bs4Dash::menuSubItem(text = "Compare data", tabName = "cmp"),
-          bs4Dash::menuSubItem(text = "Inspect data", tabName = "insp")
+          bs4Dash::menuSubItem(
+            text = get_text("exp", "shortitle"),
+            tabName = "exp"
+          ),
+          bs4Dash::menuSubItem(
+            text = get_text("cmp", "shortitle"),
+            tabName = "cmp"
+          ),
+          bs4Dash::menuSubItem(
+            text = get_text("insp", "shortitle"),
+            tabName = "insp"
+          )
         ),
         bs4Dash::sidebarHeader("GRETA output"),
         bs4Dash::menuItem(
-          text = txts$cs1$shortitle,
-          icon = txts$cs1$icon,
+          text = get_text("cs1", "shortitle"),
+          icon = icon(get_text("cs1", "icon")),
           tabName = "cs1italy"
         ),
         bs4Dash::menuItem(
-          text = txts$cs5$shortitle,
-          icon = txts$cs1$icon,
+          text = get_text("cs5", "shortitle"),
+          icon = icon(get_text("cs5", "icon")),
           tabName = "cs5spain"
         ),
         bs4Dash::menuItem(
-          text = txts$taxonomy$shortitle,
-          icon = txts$taxonomy$icon,
+          text = get_text("taxonomy", "shortitle"),
+          icon = icon(get_text("taxonomy", "icon")),
           tabName = "taxonomy"
         ),
         bs4Dash::menuItem(
-          text = txts$stakeholder$shortitle,
-          icon = txts$stakeholder$icon,
+          text = get_text("stakeholder", "shortitle"),
+          icon = icon(get_text("stakeholder", "icon")),
           tabName = "stakeholder"
         ),
         bs4Dash::menuItem(
-          text = txts$persona$shortitle,
-          icon = txts$persona$icon,
+          text = get_text("persona", "shortitle"),
+          icon = icon(get_text("persona", "icon")),
           tabName = "persona"
         ),
         bs4Dash::menuItem(
-          text = txts$enpov$shortitle,
-          icon = txts$enpov$icon,
+          text = get_text("enpov", "shortitle"),
+          icon = icon(get_text("enpov", "icon")),
           tabName = "enpov"
         ),
         bs4Dash::menuItem(
-          text = txts$attitudes$shortitle,
-          icon = txts$attitudes$icon,
+          text = get_text("attitudes", "shortitle"),
+          icon = icon(get_text("attitudes", "icon")),
           tabName = "attitudes"
         ),
         bs4Dash::menuItem(
-          text = txts$research$shortitle,
-          icon = txts$research$icon,
+          text = get_text("research", "shortitle"),
+          icon = icon(get_text("research", "icon")),
           tabName = "research"
         ),
         flat = TRUE

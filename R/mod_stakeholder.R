@@ -1,29 +1,31 @@
 mod_stakeholder_ui <- function(id) {
   ns <- NS(id)
 
+  get_text <- dispatch_to_txt(id)
+  
   bs4Dash::tabItem(
     "stakeholder",
     make_header(
-      title = txts$stakeholder$title,
-      authors = txts$stakeholder$authors,
-      affil = txts$stakeholder$affil,
-      date = txts$stakeholder$date
+      title = get_text("title"),
+      authors = get_text("authors"),
+      affil = get_text("affil"),
+      date = get_text("date")
     ),
     fluidRow(
       col_6(
         bs4Dash::box(
-          title = with_literata("What are stakeholder interactions?"),
+          title = with_literata(get_text("what", "title")),
           status = "primary",
           width = 12,
-          p2(shinipsum::random_text(nwords = 200))
+          p2(get_text("what", "content"))
         )
       ),
       col_6(
         bs4Dash::box(
-          title = with_literata("How can we model them?"),
+          title = with_literata(get_text("how", "title")),
           status = "primary",
           width = 12,
-          p2(shinipsum::random_text(nwords = 200))
+          p2(get_text("how", "content"))
         )
       )
     ),

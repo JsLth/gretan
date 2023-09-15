@@ -1,3 +1,23 @@
+dispatch_to_txt <- function(id, session = getDefaultReactiveDomain()) {
+  ids <- strsplit(id, shiny::ns.sep)[[1]]
+  target <- txts
+  
+  for (id in ids) {
+    target <- target[[id]]
+  }
+  
+  function(...) {
+    dots <- list(...)
+    out <- target
+    
+    for (name in dots) {
+      out <- out[[name]]
+    }
+    
+    out
+  }
+}
+
 helpBox <- function(..., help_id = NULL, tabBox = FALSE) {
   bx <- bs4Dash::box(...)
   if (is.null(help_id)) {
@@ -195,41 +215,18 @@ with_gothic <- function(x, ...) {
 #' `column(12, ...)`, `column(6, ...)`, `column(4, ...)`...
 #'
 #' @noRd
-col_12 <- function(...) {
-  bs4Dash::column(12, ...)
-}
-
-col_10 <- function(...) {
-  bs4Dash::column(10, ...)
-}
-
-col_8 <- function(...) {
-  bs4Dash::column(8, ...)
-}
-
-col_6 <- function(...) {
-  bs4Dash::column(6, ...)
-}
-
-
-col_4 <- function(...) {
-  bs4Dash::column(4, ...)
-}
-
-
-col_3 <- function(...) {
-  bs4Dash::column(3, ...)
-}
-
-
-col_2 <- function(...) {
-  bs4Dash::column(2, ...)
-}
-
-
-col_1 <- function(...) {
-  bs4Dash::column(1, ...)
-}
+col_12 <- function(...) bs4Dash::column(12, ...)
+col_11 <- function(...) bs4Dash::column(11, ...)
+col_10 <- function(...) bs4Dash::column(10, ...)
+col_9 <- function(...) bs4Dash::column(9, ...)
+col_8 <- function(...) bs4Dash::column(8, ...)
+col_7 <- function(...) bs4Dash::column(7, ...)
+col_6 <- function(...) bs4Dash::column(6, ...)
+col_5 <- function(...) bs4Dash::column(5, ...)
+col_4 <- function(...) bs4Dash::column(4, ...)
+col_3 <- function(...) bs4Dash::column(3, ...)
+col_2 <- function(...) bs4Dash::column(2, ...)
+col_1 <- function(...) bs4Dash::column(1, ...)
 
 
 match_regex <- function(string, pattern, perl = FALSE, fixed = FALSE) {

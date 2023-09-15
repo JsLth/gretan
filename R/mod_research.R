@@ -1,13 +1,15 @@
 mod_research_ui <- function(id) {
   ns <- NS(id)
 
+  get_text <- dispatch_to_txt(id)
+  
   bs4Dash::tabItem(
     "research",
     make_header(
-      title = txts$research$title,
-      authors = txts$research$authors,
-      affil = txts$research$affil,
-      date = txts$research$date
+      title = get_text("title"),
+      authors = get_text("authors"),
+      affil = get_text("affil"),
+      date = get_text("date")
     )
   )
 }

@@ -1,6 +1,8 @@
 mod_exp_ui <- function(id, titles) {
   ns <- NS(id)
   cb <- cb_ext
+  
+  get_text <- dispatch_to_txt(id)
 
   bs4Dash::tabItem(
     "exp",
@@ -76,7 +78,7 @@ mod_exp_ui <- function(id, titles) {
           collapsible = TRUE,
           collapsed = TRUE,
           status = "primary",
-          p(txts$exp$about, style = "text-align: justify;"),
+          p(get_text("about"), style = "text-align: justify;"),
           div(
             style = "margin: auto; width: 50%;",
             tagAppendAttributes(
@@ -108,21 +110,18 @@ mod_exp_ui <- function(id, titles) {
 
 mod_exp_server <- function(id, track = FALSE) {
   moduleServer(id, function(input, output, session) {
-    ns <- session$ns
     cb <- cb_ext
-
-    # Has the explorer rendered for the first time?
-    init <- FALSE
-
+    get_text <- dispatch_to_txt(session$ns(NULL))
+    
     popover2(
       "databoxHelp",
       title = "Select a topic",
-      content = txts$exp$help$databox
+      content = get_text("help", "databox")
     )
     popover2(
       "configHelp",
       title = "Configure the map",
-      content = txts$exp$help$confbox
+      content = get_text("help", "confbox")
     )
 
     # Show question

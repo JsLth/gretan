@@ -7,35 +7,37 @@ tax <- function(..., type = NULL) {
 
 mod_taxonomy_ui <- function(id) {
   ns <- NS(id)
+  
+  get_text <- dispatch_to_txt(id)
 
   bs4Dash::tabItem(
     "taxonomy",
     make_header(
-      title = txts$taxonomy$title,
-      authors = txts$taxonomy$authors,
-      affil = txts$taxonomy$affil,
-      date = txts$taxonomy$date
+      title = get_text("title"),
+      authors = get_text("authors"),
+      affil = get_text("affil"),
+      date = get_text("date")
     ),
     fluidRow(
       bs4Dash::column(5,
         bs4Dash::box(
-          title = with_literata("Introduction"),
+          title = with_literata(get_text("introduction", "title")),
           status = "primary",
           width = 12,
-          p2(txts$taxonomy$introduction)
+          p2(get_text("introduction", "content"))
         )
       ),
       bs4Dash::column(7,
         bs4Dash::box(
-          title = with_literata("Methodology"),
+          title = with_literata(get_text("methodology", "title")),
           status = "primary",
           width = 12,
-          p2(txts$taxonomy$methodology)
+          p2(get_text("methodology", "content"))
         )
       )
     ),
     helpBox(
-      title = with_literata("Taxonomy"),
+      title = with_literata(get_text("scheme", "title")),
       help_id = ns("taxHelp"),
       status = "primary",
       width = 12,
@@ -133,19 +135,21 @@ mod_taxonomy_ui <- function(id) {
 
 mod_taxonomy_server <- function(id) {
   moduleServer(id, function(input, output, session) {
+    get_text <- dispatch_to_txt(session$ns(NULL))
+    
     popover2(
       id = "taxHelp",
-      title = with_literata("Explore GRETAs geo-taxonomy"),
-      content = txts$taxonomy$help$scheme
+      title = with_literata(get_text("help", "scheme", "title")),
+      content = get_text("help", "scheme", "content")
     )
 
-    for (name in names(txts$taxonomy$scheme)) {
+    for (name in setdiff(names(get_text("scheme")), "title")) {
       id <- paste0("greta-", name)
       bs4Dash::addTooltip(id, options = list(title = "Click to learn more"))
       popover2(
         id = id,
-        title = txts$taxonomy$scheme[[name]]$title,
-        content = txts$taxonomy$scheme[[name]]$content
+        title = get_text("scheme", name, "title"),
+        content = get_text("scheme", name, "content")
       )
     }
   })
