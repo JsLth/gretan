@@ -36,7 +36,7 @@ library(usethis)
 # then sort them
 sort_variables <- function(var) {
   x <- case_when( # id, d1 and d2 should always be first
-    var %in% "id" ~ "0_1",
+    var %in% "uuid" ~ "0_1",
     var %in% "d1" ~ "0_2",
     var %in% "d2" ~ "0_3",
     TRUE ~ var
@@ -211,7 +211,8 @@ survey <- haven::read_sav(
   "data-ext/greta_survey/final_dataset.sav",
   encoding = "utf-8"
 ) %>%
-  janitor::clean_names()
+  janitor::clean_names() %>%
+  rename(uuid = code)
 
 cat("Total respondents:", nrow(survey), "\n")
 
@@ -223,6 +224,8 @@ codebook <- readxl::read_xlsx(
   sheet = "Variables"
 ) %>%
   janitor::clean_names() %>%
+  mutate(variable = if_else(row_number() == 2, "uuid", variable)) %>%
+  filter(!variable %in% "code") %>%
   mutate(
     question = label,
     variable = janitor::make_clean_names(variable),
@@ -236,7 +239,7 @@ codebook <- readxl::read_xlsx(
   filter(!stringr::str_detect(question, "if applicable|<none>|all that apply")) %>% # filter weird optional questions with no proper label
   filter(!stringr::str_starts(variable, stringr::regex("p|b[0-9]"))) %>% # only citizen
   filter(variable %in% c(
-    "id", "d1", "d2", # filter technical columns
+    "uuid", "d1", "d2", # filter technical columns
     stringr::str_match_all(variable, "^c[0-9]{1,2}.*")
   )) %>%
   filter(!variable %in% c("c2", "c3")) %>% # filter geo questions
@@ -272,7 +275,7 @@ codebook <- readxl::read_xlsx(
     ~ length(attr(.x, "labels")) == 1
   )) %>%
   mutate(needs_dummy = !is_metric &
-    !variable == "id" &
+    !variable == "uuid" &
     !is_dummy &
     !is_pdummy &
     !is_likert) %>%
@@ -532,23 +535,23 @@ survey_local <- survey_local %>%
   select(all_of(cb_ext$variable))
 
 # Harmonize currencies
-not_euro <- countries[!countries$curr %in% "EUR", ]
-not_euro <- dplyr::left_join(nuts0, not_euro, by = c("nid" = "iso")) %>%
-  filter(!is.na(curr))
-survey_local <- survey_local %>%
-  mutate(c50 = dplyr::case_when(
-    sf::st_within(geometry, not_euro[1, ], sparse = FALSE)[, 1] ~
-      priceR::convert_currencies(c50, "DKK", "EUR", as.Date("2022-10-01")),
-    sf::st_within(geometry, not_euro[2, ], sparse = FALSE)[, 1] ~
-      priceR::convert_currencies(c50, "PLN", "EUR", as.Date("2022-10-01")),
-    sf::st_within(geometry, not_euro[3, ], sparse = FALSE)[, 1] ~
-      priceR::convert_currencies(c50, "RON", "EUR", as.Date("2022-10-01")),
-    sf::st_within(geometry, not_euro[4, ], sparse = FALSE)[, 1] ~
-      priceR::convert_currencies(c50, "CZK", "EUR", as.Date("2022-10-01")),
-    sf::st_within(geometry, not_euro[5, ], sparse = FALSE)[, 1] ~
-      priceR::convert_currencies(c50, "HUF", "EUR", as.Date("2022-10-01")),
-    TRUE ~ c50
-  ))
+# not_euro <- countries[!countries$curr %in% "EUR", ]
+# not_euro <- dplyr::left_join(nuts0, not_euro, by = c("nid" = "iso")) %>%
+#   filter(!is.na(curr))
+# survey_local <- survey_local %>%
+#   mutate(c50 = dplyr::case_when(
+#     sf::st_within(geometry, not_euro[1, ], sparse = FALSE)[, 1] ~
+#       priceR::convert_currencies(c50, "DKK", "EUR", as.Date("2022-10-01")),
+#     sf::st_within(geometry, not_euro[2, ], sparse = FALSE)[, 1] ~
+#       priceR::convert_currencies(c50, "PLN", "EUR", as.Date("2022-10-01")),
+#     sf::st_within(geometry, not_euro[3, ], sparse = FALSE)[, 1] ~
+#       priceR::convert_currencies(c50, "RON", "EUR", as.Date("2022-10-01")),
+#     sf::st_within(geometry, not_euro[4, ], sparse = FALSE)[, 1] ~
+#       priceR::convert_currencies(c50, "CZK", "EUR", as.Date("2022-10-01")),
+#     sf::st_within(geometry, not_euro[5, ], sparse = FALSE)[, 1] ~
+#       priceR::convert_currencies(c50, "HUF", "EUR", as.Date("2022-10-01")),
+#     TRUE ~ c50
+#   ))
 
 # link codebook to survey dataset
 for (x in names(survey_local)) {
@@ -568,19 +571,19 @@ cat("Final:", nrow(survey_local), "\n")
 saveRDS(survey_local, "data-ext/survey_local.rds")
 
 srv_nuts0 <- aggregate(
-  survey_local %>% select(-id, -nuts1, -nuts2),
+  survey_local %>% select(-uuid, -nuts1, -nuts2),
   nuts0,
   FUN = aggregate_survey
 ) %>%
   dplyr::as_tibble() %>%
   sf::st_as_sf()
 
-count_nuts0 <- aggregate(survey_local["id"], nuts0, FUN = length) %>%
-  dplyr::rename(sample = "id")
+count_nuts0 <- aggregate(survey_local["uuid"], nuts0, FUN = length) %>%
+  dplyr::rename(sample = "uuid")
 srv_nuts0 <- st_join(srv_nuts0, count_nuts0, st_equals)
 
 srv_nuts1 <- aggregate(
-  survey_local %>% select(-id, -nuts2),
+  survey_local %>% select(-uuid, -nuts2),
   nuts1,
   FUN = aggregate_survey
 ) %>%
@@ -588,12 +591,12 @@ srv_nuts1 <- aggregate(
   sf::st_as_sf() %>%
   filter(!is.na(nuts0))
 
-count_nuts1 <- aggregate(survey_local["id"], nuts1, FUN = length) %>%
-  dplyr::rename(sample = "id")
+count_nuts1 <- aggregate(survey_local["uuid"], nuts1, FUN = length) %>%
+  dplyr::rename(sample = "uuid")
 srv_nuts1 <- st_join(srv_nuts1, count_nuts1, st_equals)
 
 srv_nuts2 <- aggregate(
-  survey_local %>% select(-id),
+  survey_local %>% select(-uuid),
   nuts2,
   FUN = aggregate_survey
 ) %>%
@@ -601,20 +604,20 @@ srv_nuts2 <- aggregate(
   sf::st_as_sf() %>%
   filter(!is.na(nuts0))
 
-count_nuts2 <- aggregate(survey_local["id"], nuts2, FUN = length) %>%
-  dplyr::rename(sample = "id")
+count_nuts2 <- aggregate(survey_local["uuid"], nuts2, FUN = length) %>%
+  dplyr::rename(sample = "uuid")
 srv_nuts2 <- st_join(srv_nuts2, count_nuts2, st_equals)
 
 srv_grid <- aggregate(
-  survey_local %>% select(-id),
+  survey_local %>% select(-uuid),
   grid,
   FUN = aggregate_survey
 ) %>%
   as_tibble() %>%
   st_as_sf()
 
-count_grid <- aggregate(survey_local["id"], grid, FUN = length) %>%
-  rename(sample = "id")
+count_grid <- aggregate(survey_local["uuid"], grid, FUN = length) %>%
+  rename(sample = "uuid")
 srv_grid <- st_join(srv_grid, count_grid, st_equals)
 
 output <- list("cb_ext", "srv_nuts0", "srv_nuts1", "srv_nuts2", "srv_grid")
