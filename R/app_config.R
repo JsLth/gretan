@@ -21,6 +21,7 @@ add_external_resources <- function() {
   addResourcePath("www", app_sys("app/www"))
   tags$head(
     waiter::useWaiter(),
+    waiter::useWaitress(),
     shinyWidgets::useSweetAlert(theme = "bootstrap-4"),
     shinyjs::useShinyjs(),
     if (isTRUE(getGretaOption("console", FALSE))) keys::useKeys(),
