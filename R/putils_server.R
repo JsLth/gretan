@@ -17,7 +17,7 @@ as_likert <- function(x, scale = NULL) {
   ordered(values, levels = scale)
 }
 
-align_dl <- function(..., sep = " ", bold = TRUE, .list = NULL) {
+align_in_table <- function(..., sep = " ", bold = TRUE, .list = NULL) {
   .list <- .list %||% drop_nulls(list(...))
 
   lhs <- names(.list)
@@ -179,10 +179,20 @@ execute_safely <- function(expr,
                            message = NULL,
                            stopOperation = TRUE,
                            session = getDefaultReactiveDomain()) {
-  message <- message %||% paste(
-    "Something went wrong! If this keeps happening, consider",
-    "notifying the tool maintainer (jonas.lieth@gesis.org)."
-  )
+  if (getGretaOption("github_available", FALSE)) {
+    message <- message %||% HTML(paste0(
+      "Something went wrong! If this keeps happening, consider ",
+      "opening a <a href='https://github.com/JsLth/gretan/issues'>Github ",
+      "issue</a> or email the tool maintainer (",
+      "<a href = 'mailto:jonas.lieth@gesis.org'>jonas.lieth@gesis.org</a>)."
+    ))
+  } else {
+    message <- message %||% HTML(sprintf(
+      "Something went wront! If this keeps happening, consider notifying the
+      tool maintainer (%s).",
+      "<a href='mailto:jonas.lieth@gesis.org'>jonas.lieth@gesis.org</a>"
+    ))
+  }
 
   tryCatch(
     expr = expr,
@@ -200,6 +210,8 @@ execute_safely <- function(expr,
 
       # Send error message and then stop
       if (stopOperation) req(FALSE)
+      
+      return(e)
     }
   )
 }
@@ -334,9 +346,14 @@ srcloc <- function(idx = 1) {
 # Get ID of a Shiny module based on namespace
 get_module_id <- function(session = getDefaultReactiveDomain()) {
   if (!is.null(session)) {
-    ns <- strsplit(session$ns(""), "-")[[1]]
-    ns[length(ns)]
+    id <- session$ns("")
+    if (nzchar(id)) {
+      ns <- strsplit(session$ns(""), "-")[[1]]
+      id <- ns[length(ns)]
+    }
   }
+  
+  id
 }
 
 # Alternative to cat that prints line breaks
@@ -361,19 +378,19 @@ log_it <- function(log = NULL,
                    priority = FALSE,
                    session = getDefaultReactiveDomain()) {
   out <- getGretaOption("logging", "")
+  
   if (isFALSE(out)) {
     return(invisible())
   }
   type <- match.arg(type)
   time <- format(Sys.time(), "%F %T")
   ns <- get_module_id(session)
-
-  if (!dir.exists(out) && isTRUE(!ns %in% out)) {
+  valid_ns <- if (!nzchar(out)) ns else out
+  
+  if (!dir.exists(out) && isFALSE(ns %in% valid_ns)) {
     return(invisible())
   }
-
-  out <- ""
-
+  
   if (!nzchar(out) && interactive()) {
     col <- switch(type,
       info = "\033[32m[%s]\033[39m",
@@ -386,8 +403,14 @@ log_it <- function(log = NULL,
   }
   type <- sprintf(col, toupper(type))
   log <- log %||% srcloc(idx = 2L)
-
-  cat2(sprintf("%s %s {%s} %s", time, type, ns, log), file = out, append = TRUE)
+  
+  if (nzchar(ns)) {
+    ns <- sprintf(" {%s} ", ns)
+  } else {
+    ns <- " "
+  }
+  
+  cat2(sprintf("%s %s%s%s", time, type, ns, log), file = out, append = TRUE)
 
   if (!is.null(details)) {
     log_details(details)
@@ -402,6 +425,12 @@ log_details <- function(logs, session = getDefaultReactiveDomain()) {
 
 with_greta_options <- function(app, options) {
   app$appOptions$greta_options <- options
+  
+  log <- options$logging
+  if (!is.null(log) && file.exists(log)) {
+    cat2(sprintf("Saving logs to %s", substitute(log)))
+  }
+  
   app
 }
 
