@@ -9,7 +9,10 @@ app_server <- function(input, output, session) {
     stopApp()
   })
   
-  tabsel <- reactive(input$sidebar)
+  tabsel <- reactive({
+    log_it(sprintf("Changed active module to {%s}", input$sidebar))
+    input$sidebar
+  })
 
   # Hide help switch
   shinyjs::hideElement(selector = "ul.navbar-right")
