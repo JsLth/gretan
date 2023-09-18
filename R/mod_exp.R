@@ -63,12 +63,16 @@ mod_exp_ui <- function(id, titles) {
             selected = "Full contrast",
             inline = TRUE
           ),
-          shinyWidgets::materialSwitch(
+          shinyWidgets::prettyToggle(
             ns("mode"),
-            label = "Aggregate options",
-            value = FALSE,
-            status = "primary",
-            right = TRUE
+            label_on = "Show as most popular",
+            label_off = "Show as percentage",
+            icon_on = icon("fire"),
+            icon_off = icon("percent"),
+            status_on = "warning",
+            status_off = "warning",
+            bigger = TRUE,
+            value = FALSE
           )
         ),
         bs4Dash::box(
