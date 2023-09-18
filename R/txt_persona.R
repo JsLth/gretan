@@ -112,6 +112,14 @@ txts$main$persona <- list(
         better than others? What changes can you expect when moving to
         a different region?"
     ),
+    map_move = list(
+      title = "Effects of moving",
+      content = HTML("What happens if you travel between places? What effects does
+        moving have on energy citizenship in your area? Are people more
+        or less engaged with energy transition at your new home?<hr/>Find out
+        how energy citizenship compares between two places! Select a start
+        and a destination and see how both places compare:")
+    ),
     personas = list(
       list(
         name = "Indifferent",
