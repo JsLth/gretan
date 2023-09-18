@@ -139,7 +139,8 @@ send_info <- function(text,
     type = "info",
     html = TRUE,
     btn_colors = "#5E81AC",
-    btn_labels = "Got it!"
+    btn_labels = "Got it!",
+    closeOnClickOutside = FALSE
   )
 }
 
@@ -153,7 +154,8 @@ send_error <- function(text,
     type = "error",
     html = TRUE,
     btn_colors = "#BF616A",
-    btn_labels = "Got it!"
+    btn_labels = "Got it!",
+    closeOnClickOutside = FALSE
   )
 }
 
@@ -207,7 +209,14 @@ execute_safely <- function(expr,
         "Error details:", br(),
         rlang_error_to_html(e, warn = FALSE)
       ), session = session, title = title)
-
+      
+      log_it(
+        log = "An error occurred",
+        type = "error",
+        details = format(e),
+        priority = TRUE
+      )
+      
       # Send error message and then stop
       if (stopOperation) req(FALSE)
       
@@ -351,9 +360,9 @@ get_module_id <- function(session = getDefaultReactiveDomain()) {
       ns <- strsplit(session$ns(""), "-")[[1]]
       id <- ns[length(ns)]
     }
+    
+    id
   }
-  
-  id
 }
 
 # Alternative to cat that prints line breaks
@@ -377,6 +386,10 @@ log_it <- function(log = NULL,
                    details = NULL,
                    priority = FALSE,
                    session = getDefaultReactiveDomain()) {
+  if (is.null(session)) {
+    stop("log_it must be called within a Shiny session", call. = FALSE)
+  }
+  
   out <- getGretaOption("logging", "")
   
   if (isFALSE(out)) {
