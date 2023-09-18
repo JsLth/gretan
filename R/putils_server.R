@@ -221,6 +221,16 @@ execute_safely <- function(expr,
       if (stopOperation) req(FALSE)
       
       return(e)
+    },
+    warning = function(w) {
+      log_it(
+        log = "A warning was produced",
+        type = "warn",
+        details = format(w),
+        priority = TRUE
+      )
+      
+      return(w)
     }
   )
 }
