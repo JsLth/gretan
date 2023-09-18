@@ -171,19 +171,19 @@ mod_cs1_server <- function(id, tab) {
       placement = "top"
     )
 
-    observe({
+    observe(
       bs4Dash::updateAccordion("fig", selected = 0)
-    }) %>%
+    ) %>%
       bindEvent(input[["fig-link"]])
 
     # Data reading ----
-    buildings <- reactive({
-      sf::read_sf(app_sys("db/cs1italy.gpkg"), layer = "buildings")
-    })
+    buildings <- reactive(
+      sf::read_sf(app_sys("extdata/cs1italy.gpkg"), layer = "buildings")
+    )
 
-    fragility <- reactive({
-      sf::read_sf(app_sys("db/cs1italy.gpkg"), layer = "fragility")
-    })
+    fragility <- reactive(
+      sf::read_sf(app_sys("extdata/cs1italy.gpkg"), layer = "fragility")
+    )
 
     # Buildings ----
     output[["buildings-info-layer-desc"]] <- renderUI({
@@ -210,7 +210,7 @@ mod_cs1_server <- function(id, tab) {
         lab_values$`Electricity demand` <- paste(lab_values$`Electricity demand`, "kWh/m\u00b2")
         lab_values$`Heating demand` <- paste(lab_values$`Heating demand`, "kWh/m\u00b2")
         lab_values$`Installed PV capacity` <- paste(lab_values$`Installed PV capacity`, "kW")
-        blabels <<- do.call(align_dl, lab_values)
+        blabels <<- do.call(align_in_table, lab_values)
       }
 
       pal <- switch(layer,
@@ -364,7 +364,7 @@ mod_cs1_server <- function(id, tab) {
           )
           .
         }
-      labels <- do.call(align_dl, lab_values)
+      labels <- do.call(align_in_table, lab_values)
 
       pal <- leaflet::colorBin(
         palette = c("#000004FF", "#51127CFF", "#B63679FF", "#FB8861FF", "#FCFDBFFF"),

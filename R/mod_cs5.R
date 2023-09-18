@@ -104,7 +104,7 @@ mod_cs5_server <- function(id, tab) {
     )
     
     buildings <- reactive({
-      sf::read_sf(app_sys("db/cs5spain.gpkg"), layer = "buildings")
+      sf::read_sf(app_sys("extdata/cs5spain.gpkg"), layer = "buildings")
     })
     
     output[["buildings-info-layer-desc"]] <- renderUI({
@@ -131,7 +131,7 @@ mod_cs5_server <- function(id, tab) {
         lab_values$`Electricity demand` <- paste(lab_values$`Electricity demand`, "kWh/m\u00b2")
         lab_values$`Heating demand` <- paste(lab_values$`Heating demand`, "kWh/m\u00b2")
         lab_values$`Installed PV capacity` <- paste(lab_values$`Installed PV capacity`, "kW")
-        labels <<- do.call(align_dl, lab_values)
+        labels <<- do.call(align_in_table, lab_values)
       }
       
       pal <- switch(layer,

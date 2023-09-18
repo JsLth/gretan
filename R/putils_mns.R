@@ -121,7 +121,7 @@ get_mns_params <- function(invar, fixed, palette, aggr) {
     "Sample",
     "sep"
   )
-  labels <- do.call(align_dl, label_values)
+  labels <- do.call(align_in_table, label_values)
 
   poly <- sf::st_transform(poly, 4326)
 

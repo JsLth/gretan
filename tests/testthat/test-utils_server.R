@@ -12,9 +12,9 @@ test_that("as_likert works", {
   as_likert(1:3, c("Disagree", "Neutral", "Agree"))
 })
 
-test_that("align_dl works", {
-  expect_length(align_dl(a = c(1, 2, 3), b = c(1, 2)), 3)
-  expect_s3_class(align_dl(a = 1)[[1]], c("html", "character"))
+test_that("align_in_table works", {
+  expect_length(align_in_table(a = c(1, 2, 3), b = c(1, 2)), 3)
+  expect_s3_class(align_in_table(a = 1)[[1]], c("html", "character"))
 })
 
 test_that("align_td works", {
