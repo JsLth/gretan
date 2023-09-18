@@ -90,8 +90,10 @@ mod_persona_ui <- function(id) {
               bs4Dash::actionButton(
                 ns("move_go"),
                 label = "Go!",
+                width = "100px",
                 status = "success"
-              )
+              ),
+              br()
             ),
             ### Control panel ----
             leafletPanel(
@@ -279,26 +281,31 @@ mod_persona_server <- function(id) {
     # Server setup ----
     ns <- session$ns
     get_text <- dispatch_to_txt(session$ns(NULL))
-    
     itemToIdx <- function(x) as.integer(substr(x, 2, 2))
     
+    # Questionnaire
     page <- reactiveVal(1)
     prev_page <- reactiveVal(NULL)
     log_cache <- reactiveVal(list(from = NULL, to = 1))
+    
+    # Predict + map personas
     ready <- reactiveVal(0)
-
     waitress <- waiter::Waitress$new(
       selector = paste0("#", ns("submit")),
       infinite = TRUE,
-      theme = "line"#,
-      #color = "rgba(179, 221, 254, 1)"
+      theme = "line"
     )
-
+    
+    # Effects of moving
+    markers <- reactiveValues(start = FALSE, dest = FALSE)
+    markerloc <- reactiveValues(start = NULL, dest = NULL)
+    
     
     
     # Questionnaire ----
     ## Manage page flips ----
     observe({
+      warning("test warning")
       shinyjs::toggleState(
         id = "prevBtn",
         condition = page() > 1
@@ -327,14 +334,14 @@ mod_persona_server <- function(id) {
     
     
     ## Toggle containers ----
-    observe({
+    observe(execute_safely({
       shinyjs::toggleElement("surveybox", condition = ready() < 2)
       shinyjs::toggleElement("results", condition = ready() >= 2)
-    }, label = "Toggle containers")
+    }), label = "Toggle containers")
 
     
     ## Reset questionnaire ----
-    observe({
+    observe(execute_safely({
       shinyWidgets::updatePrettyToggle(inputId = ns("consent"), value = FALSE)
 
       for (i in seq(5)) {
@@ -354,39 +361,39 @@ mod_persona_server <- function(id) {
       prev_page(page())
       page(1)
       ready(0)
-    }, label = "Reset") %>%
+    }), label = "Reset") %>%
       bindEvent(input$reset)
 
     
     ## Go one page forward ----
-    observe({
+    observe(execute_safely({
       prev_page(page())
       page(page() + 1)
-    }, label = "Page forward") %>%
+    }), label = "Page forward") %>%
       bindEvent(input$nextBtn)
 
     
     ## Go one page backward ----
-    observe({
+    observe(execute_safely({
       prev_page(page())
       page(page() - 1)
-    }, label = "Page backward") %>%
+    }), label = "Page backward") %>%
       bindEvent(input$prevBtn)
 
     
     ## Determine missing answers ----
-    has_answered <- reactive({
+    has_answered <- reactive(execute_safely({
       vapply(
         FUN.VALUE = logical(1),
         seq(5),
         function(i) !is.na(input[[paste0("question", i)]])
       ) %>%
         stats::setNames(paste0("question", seq(5)))
-    }, label = "Response fail check")
+    }), label = "Response fail check")
     
     
     ## Render missing answers ----
-    output$required <- renderUI({
+    output$required <- renderUI(execute_safely({
       idx <- which(!has_answered())
       if (length(idx)) {
         div(
@@ -408,69 +415,67 @@ mod_persona_server <- function(id) {
       } else {
         div()
       }
-    })
+    }))
     
     
     
     # Predict persona ----
     ## Load model ----
-    model <- reactive(reticulate::py_load_object(system.file(
+    model <- reactive(execute_safely(reticulate::py_load_object(system.file(
       "extdata/persona_model.pkl",
       package = "gretan"
-    )), label = "Load persona_model.pkl")
+    ))), label = "Load persona_model.pkl")
     
     
     ## Collect responses ----
-    responses <- reactive(as.integer(c(
+    responses <- reactive(execute_safely(as.integer(c(
       input$question1, input$question2, input$question3,
       input$question4, input$question5
-    )), label = "Collect responses")
+    ))), label = "Collect responses")
     
     
     ## Predict top 3 personas ----
-    results <- reactive({
-      execute_safely({
-        waitress$start()
-        
-        # Load model
-        model <- isolate(model())
-        
-        # Reshape input data
-        features <- responses() %>%
-          reticulate::np_array() %>%
-          reticulate::array_reshape(c(1, -1))
-        
-        # Predict persona from input
-        pred <- c(model$predict(features))
-        
-        # Extract and order personas
-        top_personas <- which(order(pred, decreasing = TRUE) <= 3)
-        top_prob <- pred[top_personas]
-        top_order <- order(top_prob, decreasing = TRUE)
-        top_personas <- top_personas[top_order]
-        top_prob <- top_prob[top_order]
-        
-        waitress$close()
-        Sys.sleep(0.2)
-        
-        personas <- get_text("results", "personas")
-        lapply(seq(3), function(i) {
-          pers <- top_personas[i]
-          prob <- top_prob[i]
-          list(
-            name = personas[[pers]]$name,
-            p = round(prob, 4),
-            desc = personas[[pers]]$desc,
-            src = "www/personas/prototype.png"
-          )
-        })
+    results <- reactive(execute_safely({
+      waitress$start()
+      
+      # Load model
+      model <- isolate(model())
+      
+      # Reshape input data
+      features <- responses() %>%
+        reticulate::np_array() %>%
+        reticulate::array_reshape(c(1, -1))
+      
+      # Predict persona from input
+      pred <- c(model$predict(features))
+      
+      # Extract and order personas
+      top_personas <- which(order(pred, decreasing = TRUE) <= 3)
+      top_prob <- pred[top_personas]
+      top_order <- order(top_prob, decreasing = TRUE)
+      top_personas <- top_personas[top_order]
+      top_prob <- top_prob[top_order]
+      
+      waitress$close()
+      Sys.sleep(0.2)
+      
+      personas <- get_text("results", "personas")
+      lapply(seq(3), function(i) {
+        pers <- top_personas[i]
+        prob <- top_prob[i]
+        list(
+          name = personas[[pers]]$name,
+          p = round(prob, 4),
+          desc = personas[[pers]]$desc,
+          src = "www/personas/prototype.png"
+        )
       })
-    }, label = "Compute personas") %>%
+    }), label = "Compute personas") %>%
       bindEvent(input$submit)
     
     
     ## Render persona carousel ----
-    output$type <- renderUI({
+    output$type <- renderUI(execute_safely({
       items <- lapply(results(), function(x) {
         bs4Dash::carouselItem(
           fluidRow(
@@ -500,23 +505,23 @@ mod_persona_server <- function(id) {
         id = "type-carousel",
         .list = items
       )
-    }) %>%
+    })) %>%
       bindEvent(input$submit)
     
     
     
     # Map personas ----
     ## Load persona data ----
-    clusters <- reactive(readRDS(system.file(
+    clusters <- reactive(execute_safely(readRDS(system.file(
       "extdata/persona.rds",
       package = "gretan"
-    )), label = "Load persona.rds")
+    ))), label = "Load persona.rds")
     
     
     ## Switch mode ----
-    observe({
+    observe(execute_safely({
       is_mode <- isTRUE(input$mode)
-      shinyjs::toggleElement("option", condition = !is_mode)
+      shinyjs::toggleElement("option", condition = !is_mode, anim = TRUE)
       
       if (!is_mode) {
         if (identical(input$item, "cluster")) {
@@ -537,12 +542,12 @@ mod_persona_server <- function(id) {
           choices = choices
         )
       }
-    }, label = "Switch mode/percentage") %>%
+    }), label = "Switch mode/percentage") %>%
       bindEvent(input$mode, input$item)
     
     
     ## Render item ----
-    output[["item-text"]] <- renderUI({
+    output[["item-text"]] <- renderUI(execute_safely({
       if (identical(input$item, "cluster")) {
         HTML(paste(
           "<b>Persona:</b> The GRETA energy personas! Based on the",
@@ -554,104 +559,102 @@ mod_persona_server <- function(id) {
         question <- get_text("steps", idx + 1, "question")
         HTML(paste0(tags$b(paste("Question", idx)), ": ", question))
       }
-    })
+    }))
     
     
     ## Compute map parameters ----
-    params <- reactive({
-      execute_safely({
-        clusters <- isolate(clusters())
-        clusters <- clusters[[input$aggr]]
-        
-        is_dummy <- grepl("\\_[0-9]+$", names(clusters))
-        if (isTRUE(input$mode)) {
-          var <- input$item
-          clusters <- clusters[!is_dummy]
-          if (identical(input$item, "cluster")) {
-            choices <- vapply(
-              txts$main$persona$results$personas,
-              "[[",
-              "name",
-              FUN.VALUE = character(1)
-            )
-            t <- try(choices[clusters[[var]]])
-            if (inherits(t, "try-error")) browser()
-            clusters[[var]] <- factor(
-              choices[clusters[[var]]],
-              levels = choices
-            )
-          } else {
-            idx <- itemToIdx(input$item)
-            choices <- names(get_text("steps", idx + 1, "choices"))[-1]
-            choices <- choices[seq(length(choices))]
-            clusters[[var]] <- choices[clusters[[var]]]
-          }
+    params <- reactive(execute_safely({
+      clusters <- isolate(clusters())
+      clusters <- clusters[[input$aggr]]
+      
+      is_dummy <- grepl("\\_[0-9]+$", names(clusters))
+      if (isTRUE(input$mode)) {
+        var <- input$item
+        clusters <- clusters[!is_dummy]
+        if (identical(input$item, "cluster")) {
+          choices <- vapply(
+            txts$main$persona$results$personas,
+            "[[",
+            "name",
+            FUN.VALUE = character(1)
+          )
+          t <- try(choices[clusters[[var]]])
+          if (inherits(t, "try-error")) browser()
+          clusters[[var]] <- factor(
+            choices[clusters[[var]]],
+            levels = choices
+          )
         } else {
-          var <- paste0(input$item, "_", input$option)
-          clusters <- clusters[is_dummy | names(clusters) %in% c(
-            "uuid", "nuts0", "nuts1", "nuts2"
-          )]
-          clusters[[var]] <- clusters[[var]] * 100
+          idx <- itemToIdx(input$item)
+          choices <- names(get_text("steps", idx + 1, "choices"))[-1]
+          choices <- choices[seq(length(choices))]
+          clusters[[var]] <- choices[clusters[[var]]]
         }
-        
-        clusters <- clusters[c(
-          var,
-          if (input$aggr %in% c("nuts0", "nuts1", "nuts2")) "nuts0",
-          if (input$aggr %in% c("nuts1", "nuts2")) "nuts1",
-          if (input$aggr %in% "nuts2") "nuts2"
+      } else {
+        var <- paste0(input$item, "_", input$option)
+        clusters <- clusters[is_dummy | names(clusters) %in% c(
+          "uuid", "nuts0", "nuts1", "nuts2"
         )]
-        
-        if (isTRUE(input$mode)) {
-          if (identical(input$item, "cluster")) {
-            palette <- "Dark2"
-            clusters[[var]] <- factor(clusters[[var]], levels = choices)
-          } else {
-            palette <- "YlGn"
-            clusters[[var]] <- ordered(clusters[[var]], levels = choices)
-          }
-          pal <- leaflet::colorFactor(
-            palette = palette,
-            domain = clusters[[var]],
-            ordered = TRUE
-          )
-          values <- levels(clusters[[var]])
+        clusters[[var]] <- clusters[[var]] * 100
+      }
+      
+      clusters <- clusters[c(
+        var,
+        if (input$aggr %in% c("nuts0", "nuts1", "nuts2")) "nuts0",
+        if (input$aggr %in% c("nuts1", "nuts2")) "nuts1",
+        if (input$aggr %in% "nuts2") "nuts2"
+      )]
+      
+      if (isTRUE(input$mode)) {
+        if (identical(input$item, "cluster")) {
+          palette <- "Dark2"
+          clusters[[var]] <- factor(clusters[[var]], levels = choices)
         } else {
-          pal <- leaflet::colorNumeric(
-            palette = "Oranges",
-            domain = clusters[[var]]
-          )
-          values <- clusters[[var]]
+          palette <- "YlGn"
+          clusters[[var]] <- ordered(clusters[[var]], levels = choices)
         }
-        
-        unit <- ifelse(isTRUE(input$mode), "", " %")
-        lgd <- ifelse(isTRUE(input$mode), "Median", "Share")
-        
-        largs <- list(
-          if ("nuts0" %in% names(clusters)) clusters[["nuts0"]],
-          if ("nuts1" %in% names(clusters)) clusters[["nuts1"]],
-          if ("nuts2" %in% names(clusters)) clusters[["nuts2"]],
-          paste(clusters[[var]], unit)
+        pal <- leaflet::colorFactor(
+          palette = palette,
+          domain = clusters[[var]],
+          ordered = TRUE
         )
-        largs <- setNames(largs, c("NUTS-0", "NUTS-1", "NUTS-2", lgd))
-        labels <- do.call(align_in_table, largs)
-        
-        clusters <- sf::st_transform(clusters, 4326)
-        
-        list(
-          data = clusters,
-          var = var,
-          pal = pal,
-          labels = labels,
-          unit = unit,
-          lgd = lgd,
-          values = values
+        values <- levels(clusters[[var]])
+      } else {
+        pal <- leaflet::colorNumeric(
+          palette = "Oranges",
+          domain = clusters[[var]]
         )
-      })
-    }, label = "Construct map paramters")
+        values <- clusters[[var]]
+      }
+      
+      unit <- ifelse(isTRUE(input$mode), "", " %")
+      lgd <- ifelse(isTRUE(input$mode), "Median", "Share")
+      
+      largs <- list(
+        if ("nuts0" %in% names(clusters)) clusters[["nuts0"]],
+        if ("nuts1" %in% names(clusters)) clusters[["nuts1"]],
+        if ("nuts2" %in% names(clusters)) clusters[["nuts2"]],
+        paste(clusters[[var]], unit)
+      )
+      largs <- setNames(largs, c("NUTS-0", "NUTS-1", "NUTS-2", lgd))
+      labels <- do.call(align_in_table, largs)
+      
+      clusters <- sf::st_transform(clusters, 4326)
+      
+      list(
+        data = clusters,
+        var = var,
+        pal = pal,
+        labels = labels,
+        unit = unit,
+        lgd = lgd,
+        values = values
+      )
+    }), label = "Construct map paramters")
     
     
     ## Render Leaflet map ----
-    output$map <- leaflet::renderLeaflet({
+    output$map <- leaflet::renderLeaflet(execute_safely({
       params <- params()
       p <- leaflet::leaflet(params$data) %>%
         leaflet::addTiles() %>%
@@ -679,14 +682,30 @@ mod_persona_server <- function(id) {
             sizeModes = "A4Landscape"
           )
         )
+      
+      p$dependencies <- c(
+        p$dependencies,
+        list(structure(
+          class = "html_dependency",
+          list(
+            name = "Leaflet.rotatedMarker",
+            version = "0.1.2",
+            src = list(file = normalizePath(app_sys("app/www"))),
+            script = "leaflet.rotatedMarker.js",
+            meta = NULL, stylesheet = NULL, head = NULL,
+            attachment = NULL, package = NULL, all_files = TRUE
+          )
+        ))
+      )
+      
       ready(ready() + 1)
       p
-    }) %>%
+    })) %>%
       bindEvent(input$submit)
     
     
     ## Update Leaflet map ----
-    observe({
+    observe(execute_safely({
       params <- params()
       leaflet::leafletProxy("map", data = params$data) %>%
         leaflet::clearShapes() %>%
@@ -708,30 +727,29 @@ mod_persona_server <- function(id) {
           title = params$lgd,
           labFormat = leaflet::labelFormat(suffix = params$unit)
         )
-    }, label = "Update map parameters")
+    }), label = "Update map parameters")
 
     outputOptions(output, "type", suspendWhenHidden = FALSE, priority = 1)
     outputOptions(output, "map", suspendWhenHidden = FALSE, priority = 2)
     
     
     # Effects of moving ----
-    markers <- reactiveValues(start = FALSE, dest = FALSE)
-    
-    
     ## Capture place name ----
-    location <- reactive({
+    location <- reactive(execute_safely({
       click <- input$map_shape_click
       aggr <- input$aggr
       click <- sf::st_sfc(sf::st_point(c(click$lng, click$lat)), crs = 4326)
       click <- sf::st_transform(click, 3035)
-      nuts2 <- clusters()[[aggr]]
-      nuts2[sf::st_nearest_feature(click, nuts2), ][[aggr]]
-    }) %>%
+      df <- clusters()[[aggr]]
+      df <- df[sf::st_nearest_feature(click, df), ]
+      names(df)[names(df) %in% aggr] <- "place_name"
+      df
+    })) %>%
       bindEvent(input$map_shape_click)
     
     
     ## Remove marker on click ----
-    observe({
+    observe(execute_safely({
       id <- input$map_marker_click$id
       
       if (identical(id, session$ns("start"))) {
@@ -742,18 +760,43 @@ mod_persona_server <- function(id) {
       
       leaflet::leafletProxy("map") %>%
         leaflet::removeMarker(id)
-    }) %>%
+    })) %>%
       bindEvent(input$map_marker_click)
     
     
+    ## Reset markers on aggregation change ----
+    observe(execute_safely({
+      markers$start <- FALSE
+      markers$dest <- FALSE
+    })) %>%
+      bindEvent(input$aggr)
+    
+    
     ## Add marker on click ----
-    observe({
+    observe(execute_safely({
       pt <- input$map_shape_click
       
       add_start <- !isTRUE(markers$start)
       
       if (add_start) {
+        if (isTRUE(markers$start))
+          markers$start <- FALSE
         markers$start <- TRUE
+        leaflet::leafletProxy("map") %>%
+          leaflet::addMarkers(
+            lng = pt$lng,
+            lat = pt$lat,
+            layerId = session$ns("start"),
+            icon = leaflet::makeIcon(
+              "https://www.svgrepo.com/download/459977/home-alt-3.svg",
+              iconWidth = 25,
+              iconHeight = 25
+            )
+          )
+      } else {
+        if (isTRUE(markers$dest))
+          markers$dest <- FALSE
+        markers$dest <- TRUE
         leaflet::leafletProxy("map") %>%
           leaflet::addMarkers(
             lng = pt$lng,
@@ -767,61 +810,70 @@ mod_persona_server <- function(id) {
               iconAnchorX = 12.5
             )
           )
-      } else {
-        markers$dest <- TRUE
-        leaflet::leafletProxy("map") %>%
-          leaflet::addMarkers(
-            lng = pt$lng,
-            lat = pt$lat,
-            layerId = session$ns("start"),
-            icon = leaflet::makeIcon(
-              "https://www.svgrepo.com/download/459977/home-alt-3.svg",
-              iconWidth = 25,
-              iconHeight = 25,
-              iconAnchorY = 25,
-              iconAnchorX = 12.5
-            )
-          )
       }
-    }) %>%
+    })) %>%
       bindEvent(input$map_shape_click)
     
     
     ## Render start ----
-    output$move_from <- renderUI({
+    output$move_from <- renderUI(execute_safely({
       loc <- location()
       
       shinyjs::hide(id = "start-placeholder")
       
       if (isTRUE(markers$start)) {
-        tags$b(loc)
+        markerloc$start <- loc
+        tags$b(loc$place_name)
       } else {
         tags$i("None selected")
       }
-    })
+    })) %>%
+      bindEvent(markers$start)
     
     
     ## Render destination ----
-    output$move_to <- renderUI({
+    output$move_to <- renderUI(execute_safely({
       loc <- location()
       
       shinyjs::hide(id = "dest-placeholder")
       
       if (isTRUE(markers$dest)) {
-        tags$b(loc)
+        markerloc$dest <- loc
+        tags$b(loc$place_name)
       } else {
         tags$i("None selected")
       }
-    })
+    })) %>%
+      bindEvent(markers$dest)
     
     
-    observe({
-      # click <- 
-      # leaflet::leafletProxy("map") %>%
-      #   leaflet.extras2::addMovingMarker(
-      #     
-      #   )
-    }) %>%
+    ## Moving animation ----
+    observe(execute_safely({
+      loc <- sf::st_coordinates(rbind(markerloc$start, markerloc$dest))
+      lng <- loc[, "X"]
+      lat <- loc[, "Y"]
+      
+      leaflet::leafletProxy("map") %>%
+        leaflet.extras2::addMovingMarker(
+          lng = lng,
+          lat = lat,
+          layerId = session$ns("move"),
+          icon = leaflet::makeIcon(
+            "https://www.svgrepo.com/download/533567/truck.svg"
+          ),
+          options = leaflet::markerOptions(
+            rotationAngle = atan2(lat[2] - lat[1], lng[2] - lng[1])
+          ),
+          movingOptions = leaflet.extras2::movingMarkerOptions(autostart = TRUE)
+        )
+    }), priority = 1) %>%
+      bindEvent(input$move_go)
+    
+    observe(execute_safely({
+      Sys.sleep(2.1)
+      loc <- markerloc
+      browser()
+    }), priority = 2) %>%
       bindEvent(input$move_go)
   })
 }
