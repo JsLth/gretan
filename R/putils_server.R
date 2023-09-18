@@ -91,6 +91,7 @@ leaflet_text_on_click <- function(id, geom, texts, click, col = "name", tol = 1)
   texts[[target]]
 }
 
+
 #' Track Leaflet coordinates
 #' @description
 #' Adds a Javascript Hook to Leaflet map widget that creates a input value
@@ -233,6 +234,20 @@ execute_safely <- function(expr,
       return(w)
     }
   )
+}
+
+
+observe2 <- function(expr, ..., env = parent.frame(), quoted = FALSE) {
+  expr <- substitute(expr)
+  env <- parent.frame()
+  observe(execute_safely(eval(expr, envir = env)), ...)
+}
+
+
+reactive2 <- function(expr, ...) {
+  expr <- substitute(expr)
+  env <- parent.frame()
+  reactive(execute_safely(eval(expr, envir = env)), ...)
 }
 
 
