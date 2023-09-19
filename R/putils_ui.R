@@ -1,3 +1,8 @@
+style <- function(...) {
+  dots <- list(...)
+  paste0(paste(paste(names(dots), dots, sep = ": "), collapse = "; "), ";")
+}
+
 dispatch_to_txt <- function(id, session = getDefaultReactiveDomain()) {
   ids <- strsplit(id, shiny::ns.sep)[[1]]
   target <- txts
