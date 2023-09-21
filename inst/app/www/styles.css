@@ -412,3 +412,8 @@ a.logo {
   margin-top: -40px !important;
   margin-left: -10px !important;
 }
+
+
+.swal-hide-icon {
+  display: none !important;
+}
