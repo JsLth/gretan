@@ -96,9 +96,10 @@ agg_persona <- function(x) {
   } else if (is.numeric(x)) {
     as.integer(names(sort(table(x), decreasing = TRUE))[1]) %len% NA
   } else {
-    unique(x)
+    names(table(x))[1]
   }
 }
+
 
 srv_nuts0 <- aggregate(
   survey_local %>% select(-uuid, -nuts1, -nuts2),
