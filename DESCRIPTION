@@ -24,7 +24,7 @@ Imports:
     DT,
     viridisLite,
     waiter,
-    plotly,
+    ggplot2,
     fansi,
     shinipsum,
     reticulate
