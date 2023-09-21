@@ -133,6 +133,9 @@ rlang_error_to_html <- function(e, ...) {
 # Send info message
 send_info <- function(text,
                       title = "Info",
+                      btn_labels = "Got it!",
+                      closeOnClickOutside = FALSE,
+                      ...,
                       session = getDefaultReactiveDomain()) {
   shinyWidgets::sendSweetAlert(
     title = title,
@@ -140,14 +143,16 @@ send_info <- function(text,
     type = "info",
     html = TRUE,
     btn_colors = "#5E81AC",
-    btn_labels = "Got it!",
-    closeOnClickOutside = FALSE
+    btn_labels = btn_labels,
+    closeOnClickOutside = closeOnClickOutside,
+    ...
   )
 }
 
 # Send error message
 send_error <- function(text,
                        title = "Oops!",
+                       ...,
                        session = getDefaultReactiveDomain()) {
   shinyWidgets::sendSweetAlert(
     title = title,
@@ -156,7 +161,8 @@ send_error <- function(text,
     html = TRUE,
     btn_colors = "#BF616A",
     btn_labels = "Got it!",
-    closeOnClickOutside = FALSE
+    closeOnClickOutside = FALSE,
+    ...
   )
 }
 
@@ -272,21 +278,6 @@ highlight_opts <- leaflet::highlightOptions(
   sendToBack = TRUE
 )
 
-# plotly::config with custom defaults
-plotly_config_default <- function(p) {
-  plotly::config(
-    p,
-    modeBarButtonsToRemove = c(
-      "sendDataToCloud", "editInChartStudio", "drawclosedpath", "drawopenpath",
-      "drawline", "drawrect", "drawcircle", "eraseshape", "zoomIn2d", "zoomOut2d",
-      "autoScale2d", "resetScale2d", "hoverClosestCartesian",
-      "hoverCompareCartesian"
-    ),
-    scrollZoom = TRUE,
-    responsive = TRUE,
-    displaylogo = FALSE
-  )
-}
 
 # popover with custom defaults
 popover2 <- function(id,

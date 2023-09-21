@@ -38,7 +38,7 @@ mod_stakeholder_ui <- function(id) {
         side = "right",
         tabPanel(
           title = "Cycle dynamics",
-          plotly::plotlyOutput(ns("plot"), height = "600px")
+          plotOutput(ns("plot"), height = "600px")
         ),
         tabPanel(
           title = "Stability maps",
