@@ -79,7 +79,7 @@ plot_persona <- function(data, item = "cluster", diff = TRUE) {
     ggplot2::coord_flip() +
     ggplot2::labs(
       x = NULL,
-      y = "Difference (in %)",
+      y = if (isTRUE(diff)) "Difference (in %)" else "Proportion (in %)",
       subtitle = if (isFALSE(diff)) paste(
         "Which personas and characteristics are more and",
         "less pronounced at your travel destination?"
@@ -91,7 +91,7 @@ plot_persona <- function(data, item = "cluster", diff = TRUE) {
     ggplot2::scale_y_continuous(
       breaks = ybreaks,
       limits = ybreaks[c(1, length(ybreaks))],
-      labels = if (isFALSE(diff)) abs(ybreaks) else ybreaks
+      labels = if (isFALSE(diff)) abs(ybreaks) * 100 else ybreaks * 100
     ) +
     ggplot2::scale_fill_hue(
       name = "",
