@@ -6,8 +6,6 @@ mod_main_ui <- function(id) {
     as.list(unique(cb_ext[cb_ext$topic %in% x, ]$title))
   }), categories)
   
-
-
   shiny::div(
     mod_home_ui(ns("home")),
     mod_exp_ui(ns("exp"), titles),
