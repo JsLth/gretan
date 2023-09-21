@@ -115,6 +115,32 @@ app_server <- function(input, output, session) {
         bindEvent(input[[welcome_id]])
     })
   }
+  
+  
+  send_info(
+    text = tagList(
+      "Are you here for the persona quiz? If so, follow the link below
+      to jump straight to the quiz!",
+      br(), br(),
+      actionLink(
+        "persona-quiz-info",
+        label = "Click here to jump to the persona quiz!",
+        icon = icon("arrow-right")
+      ),
+      br(), br(),
+      "In any case, feel free to explore this webtool and discover some of the
+      interactive data analyses that the GRETA project has produced over
+      the last years!"
+    ),
+    title = "Welcome to the GRETA Analytics webtool!"
+  )
+  
+  observe({
+    shinyWidgets::closeSweetAlert()
+    bs4Dash::updateTabItems(inputId = "sidebar", selected = "persona")
+  }) %>%
+    bindEvent(input[["persona-quiz-info"]])
+  
 
   # observe({
   #   guide <- cicerone::Cicerone$new(
