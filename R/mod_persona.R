@@ -280,7 +280,6 @@ mod_persona_server <- function(id) {
     # Server setup ----
     ns <- session$ns
     get_text <- dispatch_to_txt(session$ns(NULL))
-    itemToIdx <- function(x) as.integer(substr(x, 2, 2))
     
     # Questionnaire
     page <- reactiveVal(1)
@@ -491,7 +490,11 @@ mod_persona_server <- function(id) {
               ),
               h1(x$name, style = "text-align: center;"),
               p(x$desc, style = style(`text-align` = "justify")),
-              div(x$tips, style = style(`margin-bottom` = "50px")),
+              x$tips,
+              div(
+                get_text("results", "campaign"),
+                style = "margin-bottom: 50px;"
+              ),
               style = style(
                 `margin-top` = "auto",
                 `margin-bottom` = "auto",
@@ -539,6 +542,7 @@ mod_persona_server <- function(id) {
         if (identical(input$item, "cluster")) {
           choices <- lapply(get_text("results", "personas"), "[[", "name")
           choices <- setNames(seq(8), choices)
+          sel <- choices[results()[[1]]$name]
         } else {
           idx <- itemToIdx(input$item) + 1
           choices <- setdiff(
@@ -546,12 +550,14 @@ mod_persona_server <- function(id) {
             "None selected"
           )
           choices <- setNames(seq_along(choices), choices)
+          sel <- responses()[idx - 1]
         }
         
         shinyWidgets::updatePickerInput(
           session = session,
           inputId = "option",
-          choices = choices
+          choices = choices,
+          selected = sel
         )
       }
     }, label = "Switch mode/percentage") %>%
@@ -560,19 +566,9 @@ mod_persona_server <- function(id) {
     
     ## Render item ----
     output[["item-text"]] <- renderUI(execute_safely({
-      if (identical(input$item, "cluster")) {
-        HTML(paste(
-          "<b>Persona:</b> The GRETA energy personas! Based on the",
-          "questionnaire, our models show that you are likely similar to the",
-          tags$b(results()[[1]]$name), "persona."
-        ))
-      } else {
-        idx <- itemToIdx(input$item)
-        question <- get_text("steps", idx + 1, "question")
-        HTML(paste0(tags$b(paste("Question", idx)), ": ", question))
-      }
+      render_persona_item(input$item, results(), responses())
     }))
-    
+
     
     ## Compute map parameters ----
     params <- reactive(execute_safely({
@@ -609,6 +605,9 @@ mod_persona_server <- function(id) {
         clusters[[var]] <- round(clusters[[var]] * 100, 2)
       }
       
+      nr <- c("I do not know", "Prefer not to say")
+      clusters[[var]][clusters[[var]] %in% nr] <- NA
+      
       clusters <- clusters[c(
         var,
         if (input$aggr %in% c("nuts0", "nuts1", "nuts2")) "nuts0",
@@ -624,18 +623,19 @@ mod_persona_server <- function(id) {
           palette <- "YlGn"
           clusters[[var]] <- ordered(clusters[[var]], levels = choices)
         }
+        
+        values <- levels(clusters[[var]])
         pal <- leaflet::colorFactor(
           palette = palette,
-          domain = clusters[[var]],
-          ordered = TRUE
+          domain = values,
+          reverse = TRUE
         )
-        values <- levels(clusters[[var]])
       } else {
+        values <- clusters[[var]]
         pal <- leaflet::colorNumeric(
           palette = "Oranges",
-          domain = clusters[[var]]
+          domain = values
         )
-        values <- clusters[[var]]
       }
       
       unit <- ifelse(isTRUE(input$mode), "", " %")
@@ -666,18 +666,6 @@ mod_persona_server <- function(id) {
     
     ## Render Leaflet map ----
     output$map <- leaflet::renderLeaflet(execute_safely({
-      registerPlugin <- function(map, plugin) {
-        map$dependencies <- c(map$dependencies, list(plugin))
-        map
-      }
-      
-      rotatedMarker <- htmltools::htmlDependency(
-          name = "Leaflet.rotatedMarker",
-          version = "0.1.2",
-          src = normalizePath(app_sys("app/www")),
-          script = "leaflet.rotatedMarker.js"
-      )
-      
       params <- params()
       p <- leaflet::leaflet(params$data) %>%
         leaflet::addTiles() %>%
@@ -698,29 +686,7 @@ mod_persona_server <- function(id) {
           opacity = 0.9,
           title = params$lgd,
           labFormat = leaflet::labelFormat(suffix = params$unit)
-        ) %>%
-        leaflet.extras2::addEasyprint(
-          options = leaflet.extras2::easyprintOptions(
-            exportOnly = TRUE,
-            sizeModes = "A4Landscape"
-          )
-        ) %>%
-        registerPlugin(rotatedMarker)
-      
-      # p$dependencies <- c(
-      #   p$dependencies,
-      #   list(structure(
-      #     class = "html_dependency",
-      #     list(
-      #       name = "Leaflet.rotatedMarker",
-      #       version = "0.1.2",
-      #       src = list(file = normalizePath(app_sys("app/www"))),
-      #       script = "leaflet.rotatedMarker.js",
-      #       meta = NULL, stylesheet = NULL, head = NULL,
-      #       attachment = NULL, package = NULL, all_files = TRUE
-      #     )
-      #   ))
-      # )
+        )
       
       ready(ready() + 1)
       p
@@ -902,7 +868,7 @@ mod_persona_server <- function(id) {
       lat <- loc[, "lat"]
       
       leaflet::leafletProxy("map", deferUntilFlush = FALSE) %>%
-        leaflet.extras2::addMovingMarker(
+        addMovingMarker(
           lng = lng,
           lat = lat,
           layerId = session$ns("move"),
@@ -916,7 +882,7 @@ mod_persona_server <- function(id) {
           options = leaflet::markerOptions(
             rotationAngle = atan2(lat[2] - lat[1], lng[2] - lng[1])
           ),
-          movingOptions = leaflet.extras2::movingMarkerOptions(autostart = TRUE)
+          movingOptions = list(autostart = TRUE)
         )
     }, priority = 2) %>%
       bindEvent(input$move_go)
@@ -931,24 +897,36 @@ mod_persona_server <- function(id) {
       )) req(FALSE)
       Sys.sleep(2.1)
       send_info(
-        tagList(
-          h3(with_literata("Effects of moving")),
-          shinyWidgets::pickerInput(
-            session$ns("move_item"),
-            label = h4("Item", style = style(`font-size` = "12px")),
-            choices = list(
-              "Persona" = "cluster",
-              "Question 1" = "q1",
-              "Question 2" = "q2",
-              "Question 3" = "q3",
-              "Question 4" = "q4",
-              "Question 5" = "q5"
+        div(
+          style = "overflow-x: hidden;",
+          span(
+            shinyWidgets::pickerInput(
+              session$ns("move_item"),
+              label = p("Item", style = style(`font-size` = "16px")),
+              options = shinyWidgets::pickerOptions(style = style(
+                position = "relative",
+                top = "25%"
+              )),
+              choices = list(
+                "Persona" = "cluster",
+                "Question 1" = "q1",
+                "Question 2" = "q2",
+                "Question 3" = "q3",
+                "Question 4" = "q4",
+                "Question 5" = "q5"
+              ),
+              inline = TRUE,
+              width = "fit"
             ),
-            inline = TRUE,
-            width = "fit"
+            uiOutput(session$ns("move_item_text"))
           ),
           hr(),
           fluidRow(
+            p(sprintf(
+              "Proportions (left) and differences (right) between %s and %s",
+              markerloc$start$data$place_name,
+              markerloc$dest$data$place_name
+            ), style = style(`margin-left` = "10px", `font-size` = "20px")),
             col_6(plotOutput(session$ns("move_prop"))),
             col_6(plotOutput(session$ns("move_diff")))
           )
@@ -965,18 +943,30 @@ mod_persona_server <- function(id) {
       bindEvent(input$move_go)
     
     
+    ## Render move item ----
+    output$move_item_text <- renderUI({
+      render_persona_item(
+        input$move_item,
+        results(),
+        style = style(`font-size` = "16px")
+      )
+    })
+    
+    
     ## Collect moving data ----
     move_data <- reactive(execute_safely({
+      req(modal_ready())
+      print("move_data reactive")
       rbind(
         sf::st_drop_geometry(markerloc$start$data),
         sf::st_drop_geometry(markerloc$dest$data)
       )
-    })) %>%
-      bindEvent(modal_ready())
+    }))
     
     
     ## Render effects of moving ----
     output$move_diff <- renderPlot({
+      print("move_diff output")
       data <- move_data()
       responses <- responses()
       results <- results()
