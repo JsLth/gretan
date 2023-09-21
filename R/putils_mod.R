@@ -1,14 +1,34 @@
 plot_persona <- function(data, item = "cluster", diff = TRUE) {
-  # Pivot longer
+  # Subset data
   data <- as.matrix(data[grepl(
     paste0(item, "*_[0-9]"),
     names(data)
   )])
+  
+  # Prevent cases in which values are equal to zero
+  data <- data + .Machine$double.xmin
+  
+  # Compute difference
   if (isTRUE(diff))
     data <- diff(data)
   else
     data[1, ] <- -data[1, ]
+  
+  # Pivot longer
   data <- utils::stack(data.frame(data))
+  
+  # Safely fail if values are NA
+  if (any(is.na(data$values))) {
+    edf <- data.frame(
+      x = 0.5,
+      y = 0.5,
+      text = "There is not enough information about start or\ndestination to create a fitting visualization"
+    )
+    p <- ggplot2::ggplot(edf) +
+      ggplot2::geom_text(ggplot2::aes(x, y, label = text)) +
+      ggplot2::theme_void()
+    return(p)
+  }
   
   # Format values
   nc <- nchar(as.character(data$ind))
@@ -27,7 +47,7 @@ plot_persona <- function(data, item = "cluster", diff = TRUE) {
     data <- data[order(data$values), ]
   }
 
-  
+  # Replace integers with meaninful strings
   if (identical(item, "cluster")) {
     question <- "Energy persona"
     choices <- vapply(
@@ -46,6 +66,7 @@ plot_persona <- function(data, item = "cluster", diff = TRUE) {
   data$ind <- choices
   data$item <- question
   
+  # Flexible value breaks
   ybreaks <- if (max(abs(data$values)) <= 0.15)
     seq(-0.25, 0.25, 0.05)
   else if (max(abs(data$values)) <= 0.4)
@@ -81,8 +102,7 @@ plot_persona <- function(data, item = "cluster", diff = TRUE) {
       x = NULL,
       y = if (isTRUE(diff)) "Difference (in %)" else "Proportion (in %)",
       subtitle = if (isFALSE(diff)) paste(
-        "Which personas and characteristics are more and",
-        "less pronounced at your travel destination?"
+        "Which characteristics are more pronounced at your destination?"
       )
       else
         "How much do personas change when moving to your destination?"
@@ -103,9 +123,102 @@ plot_persona <- function(data, item = "cluster", diff = TRUE) {
     ) +
     ggplot2::theme_minimal() +
     ggplot2::theme(
-      # axis.text = ggplot2::element_text(size = 7),
-      # title = ggplot2::element_text(size = 9),
+      axis.text = ggplot2::element_text(size = 14),
       panel.grid = ggplot2::element_blank(),
       legend.position = c(0.9, 0.1)
     )
+}
+
+
+itemToIdx <- function(x) as.integer(substr(x, 2, 2))
+
+
+render_persona_item <- function(item, results, responses, ...) {
+  if (identical(item, "cluster")) {
+    p(HTML(paste(
+      "<b>Persona:</b> The GRETA energy personas! Based on the",
+      "questionnaire, our models show that you are likely similar to the",
+      tags$b(results[[1]]$name), "persona."
+    )), ...)
+  } else {
+    idx <- itemToIdx(item)
+    steps <- txts$main$persona$steps
+    question <- steps[[idx + 1]]$question
+    choices <- names(steps[[idx + 1]]$choices)[-1]
+    p(HTML(paste0(
+      tags$b(paste("Question", idx)),
+      ": ",
+      question,
+      br(),
+      tags$b("Your choice: "),
+      choices[responses[idx]]
+    )), ...)
+  }
+}
+
+
+addMovingMarker <- function(map,
+                            lng = NULL,
+                            lat = NULL,
+                            layerId = NULL,
+                            group = NULL,
+                            duration = 2000,
+                            icon = NULL,
+                            popup = NULL,
+                            popupOptions = NULL,
+                            label = NULL,
+                            labelOptions = NULL,
+                            movingOptions = list(),
+                            options = leaflet::markerOptions(),
+                            data = leaflet::getMapData(map)) {
+  if (missing(labelOptions))
+    labelOptions <- leaflet::labelOptions()
+  
+  if (is.null(layerId))
+    layerId = paste0("_", as.numeric(Sys.time()))
+  
+  movingMarkerDependency <- list(structure(
+    list(
+      name = "lfx-movingmarker",
+      version = "1.0.0", 
+      src = list(file = normalizePath(file.path(app_sys("app/www/")))), 
+      meta = NULL,
+      script = c("MovingMarker.js", "lfx-movingmarker-bindings.js"),
+      stylesheet = NULL,
+      head = NULL,
+      attachment = NULL,
+      package = NULL,
+      all_files = TRUE
+    ),
+    class = "html_dependency"
+  ))
+  
+  pts <- leaflet::derivePoints(
+    data,
+    lng,
+    lat,
+    missing(lng),
+    missing(lat),
+    "addMovingMarker"
+  )
+  
+  duration <- leaflet::evalFormula(duration, data)
+  options <- leaflet::filterNULL(c(options, movingOptions))
+  map$dependencies <- c(map$dependencies, movingMarkerDependency)
+  leaflet::invokeMethod(
+    map,
+    data,
+    "addMovingMarker",
+    cbind(pts$lat, pts$lng),
+    duration,
+    icon,
+    layerId,
+    group,
+    options,
+    popup,
+    popupOptions,
+    leaflet::safeLabel(label, data),
+    labelOptions
+  ) %>%
+    leaflet::expandLimits(pts$lat, pts$lng)
 }
