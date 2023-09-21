@@ -1,7 +1,6 @@
 <!-- badges: start -->
 
-[![R-CMD-check](https://github.com/JsLth/greta-gis-tool/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/JsLth/greta-gis-tool/actions/workflows/R-CMD-check.yaml)
-[![electron-build](https://github.com/JsLth/greta-gis-tool/actions/workflows/electron-build.yaml/badge.svg)](https://github.com/JsLth/greta-gis-tool/actions/workflows/electron-build.yaml)
+[![R-CMD-check](https://github.com/JsLth/greta-gis-tool/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/JsLth/greta-gis-tool/actions/workflows/R-CMD-check.yaml) [![electron-build](https://github.com/JsLth/greta-gis-tool/actions/workflows/electron-build.yaml/badge.svg)](https://github.com/JsLth/greta-gis-tool/actions/workflows/electron-build.yaml) [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental) [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 <!-- badges: end -->
 
@@ -13,7 +12,7 @@ GRETA Analytics is the GIS tool of the GRETA project (GReen Energy Transition Ac
 
 ### Installation
 
-The app is deployed as an Electron app using [`electricShine`](https://github.com/chasemc/electricShine). Binaries are released in this repository and in the [OPCE database](https://zenodo.org/communities/greta/) of the GRETA project.
+The app is deployed as an Electron app using [`electricShine`](https://github.com/chasemc/electricShine). Binaries are released in the [OPCE database](https://zenodo.org/communities/greta/) of the GRETA project.
 
 ### Building from source
 
@@ -32,6 +31,6 @@ run_greta()
 
 ## Contact
 
-Jonas Lieth – [jonas.lieth\@gesis.org](mailto:jonas.lieth@gesis.org)
+Jonas Lieth -- [jonas.lieth@gesis.org](mailto:jonas.lieth@gesis.org)
 
-GRETA project – <https://projectgreta.eu/>
+GRETA project -- <https://projectgreta.eu/>
