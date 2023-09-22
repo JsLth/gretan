@@ -729,7 +729,6 @@ mod_persona_server <- function(id) {
       click <- input$map_shape_click
       aggr <- input$aggr
       click <- sf::st_sfc(sf::st_point(c(click$lng, click$lat)), crs = 4326)
-      click <- sf::st_transform(click, 3035)
       df <- clusters()[[aggr]]
       df <- df[sf::st_nearest_feature(click, df), ]
       names(df)[names(df) %in% aggr] <- "place_name"
@@ -956,7 +955,6 @@ mod_persona_server <- function(id) {
     ## Collect moving data ----
     move_data <- reactive(execute_safely({
       req(modal_ready())
-      print("move_data reactive")
       rbind(
         sf::st_drop_geometry(markerloc$start$data),
         sf::st_drop_geometry(markerloc$dest$data)
@@ -966,7 +964,6 @@ mod_persona_server <- function(id) {
     
     ## Render effects of moving ----
     output$move_diff <- renderPlot({
-      print("move_diff output")
       data <- move_data()
       responses <- responses()
       results <- results()
