@@ -88,6 +88,10 @@ app_ui <- function(theme = NULL,
         padding-bottom: 0em;
         padding-right: 0em
       }
+      
+      .main-footer {
+        padding: 0.5rem;
+      }
 
       /* Align tooltip text */
       .tooltip-inner {
@@ -222,6 +226,13 @@ app_ui <- function(theme = NULL,
       collapsed = TRUE,
       expandOnHover = FALSE,
       fixed = FALSE
+    ),
+    footer = bs4Dash::dashboardFooter(
+      right = div(
+        get_text("home", "disclaimer"),
+        style = "font-size: 0.9rem;"
+      ),
+      fixed = TRUE
     ),
     bs4Dash::dashboardBody(
       add_external_resources(),

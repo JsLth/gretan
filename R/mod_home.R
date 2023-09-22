@@ -11,7 +11,8 @@ mod_home_ui <- function(id) {
           title = with_literata(get_text("welcome", "title")),
           width = 12,
           status = "primary",
-          get_text("welcome", "content")
+          get_text("welcome", "content"),
+          get_text("disclaimer")
         ),
         bs4Dash::box(
           title = with_literata(get_text("about", "title")),

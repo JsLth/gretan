@@ -220,5 +220,10 @@ txts$main$home <- list(
   ),
   funding = "GRETA HAS RECEIVED FUNDING FROM THE EUROPEAN UNION'S HORIZON
     2020 RESEARCH AND INNOVATION PROGRAMME UNDER GRANT AGREEMENT
-    NO 101022317."
+    NO 101022317.",
+  disclaimer = HTML("GRETA Analytics is a
+    <a href='https://shiny.posit.co/'>Shiny app</a> developed by GESIS \u2013
+    Leibniz Institute for the Social Sciences in close collaboration with all
+    GRETA partners and maintained by
+    <a href='mailto:jonas.lieth@gesis.org'>Jonas Lieth</a>")
 )
