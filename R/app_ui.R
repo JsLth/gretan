@@ -39,8 +39,8 @@ app_ui <- function(theme = NULL,
       html = TRUE
     )
   }
-
-
+  
+  
   # Configure loading screen
   if (is.null(preloader)) {
     preloader <- list(
@@ -190,31 +190,31 @@ app_ui <- function(theme = NULL,
           icon = icon(get_text("taxonomy", "icon")),
           tabName = "taxonomy"
         ),
-        bs4Dash::menuItem(
-          text = get_text("stakeholder", "shortitle"),
-          icon = icon(get_text("stakeholder", "icon")),
-          tabName = "stakeholder"
-        ),
+        # bs4Dash::menuItem(
+        #   text = get_text("stakeholder", "shortitle"),
+        #   icon = icon(get_text("stakeholder", "icon")),
+        #   tabName = "stakeholder"
+        # ),
         bs4Dash::menuItem(
           text = get_text("persona", "shortitle"),
           icon = icon(get_text("persona", "icon")),
           tabName = "persona"
         ),
-        bs4Dash::menuItem(
-          text = get_text("enpov", "shortitle"),
-          icon = icon(get_text("enpov", "icon")),
-          tabName = "enpov"
-        ),
-        bs4Dash::menuItem(
-          text = get_text("attitudes", "shortitle"),
-          icon = icon(get_text("attitudes", "icon")),
-          tabName = "attitudes"
-        ),
-        bs4Dash::menuItem(
-          text = get_text("research", "shortitle"),
-          icon = icon(get_text("research", "icon")),
-          tabName = "research"
-        ),
+        # bs4Dash::menuItem(
+        #   text = get_text("enpov", "shortitle"),
+        #   icon = icon(get_text("enpov", "icon")),
+        #   tabName = "enpov"
+        # ),
+        # bs4Dash::menuItem(
+        #   text = get_text("attitudes", "shortitle"),
+        #   icon = icon(get_text("attitudes", "icon")),
+        #   tabName = "attitudes"
+        # ),
+        # bs4Dash::menuItem(
+        #   text = get_text("research", "shortitle"),
+        #   icon = icon(get_text("research", "icon")),
+        #   tabName = "research"
+        # ),
         flat = TRUE
       ),
       skin = "light",
