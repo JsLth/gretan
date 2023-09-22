@@ -4,6 +4,7 @@ electron
 library
 dev
 man
+site
 tests
 TODO
 .RData
