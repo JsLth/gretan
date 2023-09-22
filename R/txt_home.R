@@ -222,8 +222,8 @@ txts$main$home <- list(
     2020 RESEARCH AND INNOVATION PROGRAMME UNDER GRANT AGREEMENT
     NO 101022317.",
   disclaimer = HTML("GRETA Analytics is a
-    <a href='https://shiny.posit.co/'>Shiny app</a> developed by GESIS \u2013
-    Leibniz Institute for the Social Sciences in close collaboration with all
-    GRETA partners and maintained by
-    <a href='mailto:jonas.lieth@gesis.org'>Jonas Lieth</a>")
+    <a href='https://shiny.posit.co/' class='intext'>Shiny app</a> developed by
+    GESIS \u2013 Leibniz Institute for the Social Sciences in close
+    collaboration with all GRETA partners and maintained by
+    <a href='mailto:jonas.lieth@gesis.org' class='intext'>Jonas Lieth</a>")
 )

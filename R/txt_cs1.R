@@ -1,7 +1,7 @@
 txts$main$cs1 <- list(
   shortitle = "Pilastro-Roveri, Italy",
   title = "Case study: Reneweable energy district Pilastro-Roveri",
-  date = "2023-mm-dd",
+  date = "2023-07-20",
   icon = "map-pin",
   tags = c(
     "case", "study", "studies", "bologna", "pilastro", "roveri", "dummy",

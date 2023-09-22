@@ -3,9 +3,14 @@ txts$main$persona <- list(
   title = "Persona-based clustering of energy citizens",
   icon = "user-gear",
   tags = c("persona", "group", "cluster", "move", "multivariate"),
-  authors = c("Ajesh Kumar", "Toni Kuronen", "Annika Wolff"),
-  affil = "Lappeenranta-Lahti University of Technology LUT",
-  date = "DD-MM-YYYY",
+  authors = c("Ajesh Kumar", "Toni Kuronen", "Annika Wolff", "Jonas Lieth"),
+  affil = list(
+    "Ajesh Kumar" = "Lappeenranta-Lahti University of Technology LUT",
+    "Toni Kuronen" = "Lappeenranta-Lahti University of Technology LUT",
+    "Annika Wolff" = "Lappeenranta-Lahti University of Technology LUT",
+    "Jonas Lieth" = "GESIS - Leibniz Institute for the Social Sciences"
+  ),
+  date = "2023-09-22",
   steps = list(
     list(
       title = "Welcome to the persona quiz!",
@@ -122,7 +127,8 @@ txts$main$persona <- list(
     ),
     campaign = tags$a(
       "Visit our campaign site and read more about energy communities.",
-      href = "https://projectgreta.eu/"
+      href = "https://projectgreta.eu/",
+      class = "intext"
     ),
     personas = list(
       list(

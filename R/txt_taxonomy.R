@@ -5,7 +5,7 @@ txts$main$taxonomy <- list(
   tags = c("geo", "geographic", "levels", "taxonomy"),
   authors = c("Saveria Olga Murielle Boulanger", "Martina Massari"),
   affil = "University of Bologna",
-  date = "DD-MM-YYYY",
+  date = "24-07-2023",
   introduction = list(
     title = "Introduction",
     content = "The taxonomy of geographical levels and drivers for energy citizenship
