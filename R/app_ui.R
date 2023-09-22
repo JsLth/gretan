@@ -75,7 +75,7 @@ app_ui <- function(theme = NULL,
 
       /* remove coloring from some elements */
       .nav-pills .nav-link:not(.active):hover {
-        color: inherit
+        color: inherit;
       }
 
       a {
@@ -86,9 +86,10 @@ app_ui <- function(theme = NULL,
       .navbar {
         padding-top: 0em;
         padding-bottom: 0em;
-        padding-right: 0em
+        padding-right: 0em;
       }
       
+      /* Make footer smaller */
       .main-footer {
         padding: 0.5rem;
       }
@@ -96,6 +97,16 @@ app_ui <- function(theme = NULL,
       /* Align tooltip text */
       .tooltip-inner {
         text-align: left;
+      }
+      
+      /* Change carousel arrow color */
+      .carousel-control-prev-icon {
+        background-image: url(\"data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%2300000' viewBox='0 0 8 8'%3E%3Cpath d='M5.25 0l-4 4 4 4 1.5-1.5-2.5-2.5 2.5-2.5-1.5-1.5z'/%3E%3C/svg%3E\");
+        margin-right: 100px;
+      }
+      
+      .carousel-control-next-icon {
+        background-image: url(\"data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%2300000' viewBox='0 0 8 8'%3E%3Cpath d='M2.75 0l-1.5 1.5 2.5 2.5-2.5 2.5 1.5 1.5 4-4-4-4z'/%3E%3C/svg%3E\");
       }"),
       div(
         id = "greta-logo",
