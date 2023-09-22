@@ -204,11 +204,24 @@ execute_safely <- function(expr,
   }
 
   tryCatch(
-    expr = expr,
+    expr = {
+      # In case of warning, return expression
+      withCallingHandlers(
+        expr = expr,
+        warning = function(w) {
+          log_it(
+            log = "A warning was produced",
+            type = "warn",
+            details = w$message,
+            priority = TRUE
+          )
+        }
+      )
+    },
     error = function(e) {
       # Stop without error message
       if (inherits(e, "shiny.silent.error")) req(FALSE)
-
+      
       send_error(div(
         style = "text-align: left",
         message,
@@ -228,16 +241,6 @@ execute_safely <- function(expr,
       if (stopOperation) req(FALSE)
       
       return(e)
-    },
-    warning = function(w) {
-      log_it(
-        log = "A warning was produced",
-        type = "warn",
-        details = format(w),
-        priority = TRUE
-      )
-      
-      return(w)
     }
   )
 }
