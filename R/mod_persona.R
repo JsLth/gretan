@@ -597,6 +597,12 @@ mod_persona_server <- function(id) {
           choices <- choices[seq(length(choices))]
           clusters[[var]] <- choices[clusters[[var]]]
         }
+        
+        # Label non-responses as NA
+        nr <- c("I do not know", "Prefer not to say")
+        clusters[[var]][clusters[[var]] %in% nr] <- NA
+        choices[choices %in% nr] <- NA
+        browser()
       } else {
         var <- paste0(input$item, "_", input$option)
         clusters <- clusters[is_dummy | names(clusters) %in% c(
@@ -604,11 +610,6 @@ mod_persona_server <- function(id) {
         )]
         clusters[[var]] <- round(clusters[[var]] * 100, 2)
       }
-      
-      # Label non-responses as NA
-      nr <- c("I do not know", "Prefer not to say")
-      clusters[[var]][clusters[[var]] %in% nr] <- NA
-      choices[choices %in% nr] <- NA
       
       clusters <- clusters[c(
         var,
@@ -732,8 +733,8 @@ mod_persona_server <- function(id) {
       aggr <- input$aggr
       click <- sf::st_sfc(sf::st_point(c(click$lng, click$lat)), crs = 4326)
       df <- clusters()[[aggr]]
-      df <- df[sf::st_nearest_feature(click, df), ]
       click <- sf::st_transform(click, sf::st_crs(df))
+      df <- df[sf::st_nearest_feature(click, df), ]
       names(df)[names(df) %in% aggr] <- "place_name"
       df
     }) %>%
