@@ -145,13 +145,18 @@ render_persona_item <- function(item, results, responses, ...) {
     steps <- txts$main$persona$steps
     question <- steps[[idx + 1]]$question
     choices <- names(steps[[idx + 1]]$choices)[-1]
+    your_choice <- switch(as.character(responses[idx]),
+      "-2" = "Prefer not to say",
+      "-1" = "I do not know",
+      choices[responses[idx]]
+    )
     p(HTML(paste0(
       tags$b(paste("Question", idx)),
       ": ",
       question,
       br(),
       tags$b("Your choice: "),
-      choices[responses[idx]]
+      your_choice
     )), ...)
   }
 }

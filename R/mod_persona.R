@@ -37,6 +37,7 @@ mod_persona_ui <- function(id) {
             solidHeader = FALSE,
             collapsible = FALSE,
             boxToolSize = "lg",
+            height = "600px",
             bs4Dash::appButton(
               label = "Reset results",
               inputId = ns("reset"),
@@ -544,6 +545,7 @@ mod_persona_server <- function(id) {
           choices <- setNames(seq(8), choices)
           sel <- choices[results()[[1]]$name]
         } else {
+          responses <- responses()
           idx <- itemToIdx(input$item) + 1
           choices <- setdiff(
             names(get_text("steps")[[idx]]$choices),
@@ -551,8 +553,14 @@ mod_persona_server <- function(id) {
           )
           choices <- setNames(seq_along(choices), choices)
           sel <- responses()[idx - 1]
+          sel <- switch(as.character(sel),
+            "-1" = choices["I do not know"],
+            "-2" = choices["Prefer not to say"],
+            sel
+          )
         }
         
+        freezeReactiveValue(input, "option")
         shinyWidgets::updatePickerInput(
           session = session,
           inputId = "option",
@@ -602,7 +610,6 @@ mod_persona_server <- function(id) {
         nr <- c("I do not know", "Prefer not to say")
         clusters[[var]][clusters[[var]] %in% nr] <- NA
         choices[choices %in% nr] <- NA
-        browser()
       } else {
         var <- paste0(input$item, "_", input$option)
         clusters <- clusters[is_dummy | names(clusters) %in% c(
@@ -951,6 +958,7 @@ mod_persona_server <- function(id) {
       render_persona_item(
         input$move_item,
         results(),
+        responses(),
         style = style(`font-size` = "16px")
       )
     })
