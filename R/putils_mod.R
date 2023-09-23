@@ -268,3 +268,23 @@ addLegendLine <- function(map,
     ...
   )
 }
+
+
+as_likert <- function(x, scale = NULL) {
+  if (length(scale) > 7) {
+    stop(sprintf("Likert scale is too long (%s items)", length(x)))
+  }
+  
+  scale <- scale %||% c(
+    "Strongly disagree", "Disagree", "Somewhat disagree",
+    "Neutral",
+    "Somewhat agree", "Agree", "Strongly agree"
+  )
+  
+  if (is.factor(scale)) {
+    scale <- as.character(scale)
+  }
+  
+  values <- vapply(x, function(i) scale[i], FUN.VALUE = character(1))
+  ordered(values, levels = scale)
+}
