@@ -2,6 +2,7 @@
 #' @keywords internal
 #' @rdname mod_base
 app_server <- function(input, output, session) {
+  # Start setup ----
   log_it("Starting app")
 
   onSessionEnded(fun = function() {
@@ -9,21 +10,22 @@ app_server <- function(input, output, session) {
     stopApp()
   })
   
+  # Track tab selection ----
   tabsel <- reactive({
     log_it(sprintf("Changed active module to {%s}", input$sidebar))
     input$sidebar
-  })
+  }, label = "track tab selection")
 
   # Hide help switch
   shinyjs::hideElement(selector = "ul.navbar-right")
 
-  # Capture search term
+  # Capture search term ----
   searchbox_input <- reactive({
     search_input <- input$textSearch
     isTRUE(nzchar(search_input))
-  })
+  }, label = "capture search term")
   
-  # Change tab when search output is clicked
+  # Change tab after search ----
   for (x in names(txts)) {
     with_eval_args(
       shinyjs::onclick(paste0("suggestion-", x), expr = bs4Dash::updateTabItems(
@@ -34,14 +36,14 @@ app_server <- function(input, output, session) {
     )
   }
 
-  # Fix sidebar when search is triggered (otherwise search bar won't show)
+  # Fix sidebar on search ----
   shinyjs::onclick("textSearch", expr = {
     if (isFALSE(input$sidebarState)) {
       bs4Dash::updateSidebar("sidebarState")
     }
   })
 
-  # Search texts and determine which search items to show
+  # Search texts ----
   search_results <- reactive({
     req(searchbox_input())
     search_term <- input$textSearch
@@ -69,10 +71,9 @@ app_server <- function(input, output, session) {
       ))
     }
     do.call(div, c(options, class = "form-suggestions"))
-  })
+  }, label = "search texts")
 
-  # If no search term is provided, hide search results UI
-  # If a search term is provided, show it
+  # Show/hide search bar ----
   observe({
     has_input <- searchbox_input()
 
@@ -93,9 +94,10 @@ app_server <- function(input, output, session) {
         immediate = TRUE
       )
     }
-  })
+  }, label = "show/hide search bar")
 
 
+  # Forward from home section ----
   all_tabs <- c(
     "exp", "taxonomy", "cs1italy", "stakeholder",
     "persona", "enpov", "attitudes", "research"
@@ -117,6 +119,7 @@ app_server <- function(input, output, session) {
   }
   
   
+  # Situational info alerts ----
   send_info(
     text = tagList(
       "Are you here for the persona quiz? If so, follow the link below
@@ -140,40 +143,6 @@ app_server <- function(input, output, session) {
     bs4Dash::updateTabItems(inputId = "sidebar", selected = "persona")
   }) %>%
     bindEvent(input[["persona-quiz-info"]])
-  
-
-  # observe({
-  #   guide <- cicerone::Cicerone$new(
-  #     allow_close = FALSE,
-  #     stage_background = "transparent"
-  #   )$step(
-  #     el = "greta-logo",
-  #     title = "What is GRETA Analytics?",
-  #     description = "GRETA Analytics is a tool dedicated to interactively explore the results of the GRETA project on energy citizenship. The tool is filled with info material, figures, diagrams, plots, and tables \u2013 all of which can be interactively explored.",
-  #     position = "bottom"
-  #   )$step(
-  #     el = "sidebarItemExpanded",
-  #     title = "Select a subsection",
-  #     description = "GRETA Analytics features several tools, frameworks and analyses. The sidebar allows you to switch between them.",
-  #     position = "right"
-  #   )$step(
-  #     el = "mnsHighlight",
-  #     title = "Multinational survey",
-  #     description = "The subsection \u201cMultinational survey\u201d allows you to explore the results of GRETA's survey conducted among citizens in 16 EU countries.",
-  #     position = "right"
-  #   )$step(
-  #     el = "csHighlight",
-  #     title = "Case studies",
-  #     description = "In the context of GRETA, six case studies have been conducted. Here, you can explore the results of a selection of case studies.",
-  #     position = "right"
-  #   )$step(
-  #     el = "indHighlight",
-  #     title = "Individual analyses",
-  #     description = "Besides, the multinational survey and case studies, many more analyses have been performed in the context of GRETA tasks. Some of them are included in GRETA Analytics to explore.",
-  #     position = "right"
-  #   )$init()$start()
-  # }, priority = 0) %>%
-  #   bindEvent(input$tour)
 
   mod_main_server("main", tab = tabsel)
 }
