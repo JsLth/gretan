@@ -1,4 +1,5 @@
 mod_home_ui <- function(id) {
+  # UI setup ----
   ns <- NS(id)
   get_text <- dispatch_to_txt(id)
   
@@ -7,6 +8,7 @@ mod_home_ui <- function(id) {
     fluidRow(
       bs4Dash::column(
         width = 6,
+        # Welcome box ----
         bs4Dash::box(
           title = with_literata(get_text("welcome", "title")),
           width = 12,
@@ -14,6 +16,7 @@ mod_home_ui <- function(id) {
           get_text("welcome", "content"),
           get_text("disclaimer")
         ),
+        # About box ----
         bs4Dash::box(
           title = with_literata(get_text("about", "title")),
           width = 12,
@@ -23,7 +26,11 @@ mod_home_ui <- function(id) {
             style = "margin-top: 5%;",
             col_6(
               div(
-                style = "margin: auto; width: 70%; padding-top: 15%;",
+                style = style(
+                  margin = "auto",
+                  width = "70%",
+                  `padding-top` = "15%"
+                ),
                 tags$img(src = "www/greta_logo.svg")
               )
             ),
@@ -41,7 +48,10 @@ mod_home_ui <- function(id) {
                   ),
                   tags$p(
                     get_text("funding"),
-                    style = "float: right; margin-left: 15px;"
+                    style = style(
+                      float = "right",
+                      `margin-left` = "15px"
+                    )
                   )
                 )
               )
@@ -51,6 +61,7 @@ mod_home_ui <- function(id) {
       ),
       bs4Dash::column(
         width = 6,
+        # Geographical overview ----
         bs4Dash::box(
           title = with_literata("Geographical overview"),
           width = 12,
@@ -58,6 +69,7 @@ mod_home_ui <- function(id) {
           class = "tight-map-box",
           leaflet::leafletOutput(ns("map"), width = "100%", height = 450)
         ),
+        # Case study descriptions ----
         bs4Dash::box(
           title = with_literata("Case study descriptions"),
           width = 12,
@@ -72,6 +84,7 @@ mod_home_ui <- function(id) {
 
 mod_home_server <- function(id) {
   moduleServer(id, function(input, output, session) {
+    # Server setup ----
     get_text <- dispatch_to_txt(session$ns(NULL))
     
     cs_coords <- sf::st_sf(
@@ -86,6 +99,7 @@ mod_home_server <- function(id) {
       )
     )
     
+    # Render geographical overview ----
     output$map <- leaflet::renderLeaflet({
       leaflet::leaflet(cs_coords) %>%
         leaflet::addTiles() %>%
@@ -105,10 +119,8 @@ mod_home_server <- function(id) {
           weight = 1,
           color = "red"
         ) %>%
-        leaflegend::addLegendImage(
-          images = leaflegend::makeSymbol("line", width = 7, color = "red"),
-          labels = "Surveyed countries",
-          orientation = "vertical",
+        addLegendLine(
+          label = "Surveyed countries",
           position = "bottomleft",
           width = 10,
           height = 10,
@@ -116,6 +128,8 @@ mod_home_server <- function(id) {
         )
     })
     
+    
+    # Select case study ----
     observe({
       click <- input$map_marker_click
       target <- leaflet_select(
@@ -152,7 +166,8 @@ mod_home_server <- function(id) {
     }) %>%
       bindEvent(input$map_marker_click)
     
-    # Show case study description based on map clicks
+    
+    # Show selected case study ----
     output$desc <- renderUI({
       click <- input$map_marker_click
       

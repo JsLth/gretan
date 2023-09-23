@@ -227,3 +227,44 @@ addMovingMarker <- function(map,
   ) %>%
     leaflet::expandLimits(pts$lat, pts$lng)
 }
+
+
+addLegendLine <- function(map,
+                          label,
+                          labelStyle = style(
+                            `font-size` = "24px",
+                            `vertical-align` = "middle"
+                          ),
+                          width = 20,
+                          height = 20,
+                          className = "info legend leaflet-control",
+                          ...) {
+  marginWidth <- max(0, (max(width) - width) / 2)
+  imgStyle = style(
+    `vertical-align` = "middle",
+    margin = "5px",
+    `margin-right` = paste0(marginWidth, "px"),
+    `margin-left` = paste0(marginWidth, "px")
+  )
+  imgTag <- tags$img(
+    src = paste0(
+      "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2F",
+      "www.w3.org%2F2000%2Fsvg%22%20version%3D%221.1%22%20width%",
+      "3D%229%22%20height%3D%229%22%3E%0A%20%20%3Cline%20id%3D%",
+      "22line%22%20x1%3D%220%22%20x2%3D%229%22%20y1%3D%224.5%22",
+      "%20y2%3D%224.5%22%20stroke%3D%22red%22%20stroke-opacity%3",
+      "D%221%22%20fill-opacity%3D%221%22%3E%3C%2Fline%3E%0A%3C%",
+      "2Fsvg%3E"),
+    style = imgStyle,
+    height = height,
+    width = width
+  )
+  htmlElement <- div(imgTag, span(label, style = labelStyle))
+  
+  leaflet::addControl(
+    map,
+    html = tagList(htmlElement),
+    className = className,
+    ...
+  )
+}

@@ -14,7 +14,6 @@ Depends:
     utils
 Imports: 
     bs4Dash,
-    leaflegend,
     leaflet,
     jsonlite,
     sf,
