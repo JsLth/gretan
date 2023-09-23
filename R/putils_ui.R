@@ -130,14 +130,17 @@ groupRadioButtons <- function(widget,
                               index,
                               groups,
                               type = c("default", "pretty", "awesome"),
-                              style = style(
-                                `margin-bottom` = "10px",
-                                `font-size` = "16px",
-                                `font-weight` = "bold"
-                              )) {
+                              style = NULL) {
   stopifnot("shiny.tag" %in% class(widget))
   stopifnot(is.numeric(index))
   type <- match.arg(type)
+  if (is.null(style)) {
+    style <- style(
+      `margin-bottom` = "10px",
+      `font-size` = "16px",
+      `font-weight` = "bold"
+    )
+  }
   if (length(style) != length(groups)) style <- rep(style, length(groups))
   is_awesome <- type %in% "awesome"
   is_pretty <- type %in% "pretty"
