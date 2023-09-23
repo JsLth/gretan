@@ -184,11 +184,11 @@ app_ui <- function(theme = NULL,
           icon = icon(get_text("cs1", "icon")),
           tabName = "cs1italy"
         ),
-        bs4Dash::menuItem(
-          text = get_text("cs5", "shortitle"),
-          icon = icon(get_text("cs5", "icon")),
-          tabName = "cs5spain"
-        ),
+        # bs4Dash::menuItem(
+        #   text = get_text("cs5", "shortitle"),
+        #   icon = icon(get_text("cs5", "icon")),
+        #   tabName = "cs5spain"
+        # ),
         bs4Dash::menuItem(
           text = get_text("taxonomy", "shortitle"),
           icon = icon(get_text("taxonomy", "icon")),
