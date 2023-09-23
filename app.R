@@ -5,12 +5,12 @@
 pkgload::load_all(export_all = FALSE, helpers = FALSE, attach_testthat = FALSE)
 options("app.prod" = TRUE)
 
-cat("User:", Sys.info()[["user"]])
-cat("Reticulate Python:", Sys.getenv("RETICULATE_PYTHON"))
-cat("Python path:", Sys.getenv("PYTHON_PATH"))
-cat("venv name:", Sys.getenv("VIRTUALENV_NAME"))
-
 if (Sys.info()[["user"]] == "shiny") {
+  cat("User:", Sys.info()[["user"]])
+  cat("Reticulate Python:", Sys.getenv("RETICULATE_PYTHON"))
+  cat("Python path:", Sys.getenv("PYTHON_PATH"))
+  cat("venv name:", Sys.getenv("VIRTUALENV_NAME"))
+  
   envs <- reticulate::virtualenv_list()
   
   if (!"gretan" %in% envs) {
@@ -21,7 +21,5 @@ if (Sys.info()[["user"]] == "shiny") {
     reticulate::use_virtualenv(virtualenv = envdir,required = TRUE)
   }
 }
-
-
 
 gretan::run_app()
