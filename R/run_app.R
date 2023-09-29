@@ -56,7 +56,12 @@ run_app <- function(log = NULL,
   }
   
   with_greta_options(
-    shinyApp(ui = app_ui, server = app_server, options = options),
+    shinyApp(
+      ui = app_ui,
+      server = app_server,
+      options = options,
+      enableBookmarking = "disable"
+    ),
     options = list(logging = log, console = console, ...)
   )
 }

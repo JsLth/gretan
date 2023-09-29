@@ -119,30 +119,32 @@ app_server <- function(input, output, session) {
   }
   
   
-  # Situational info alerts ----
-  send_info(
-    text = tagList(
-      "Are you here for the persona quiz? If so, follow the link below
-      to jump straight to the quiz!",
-      br(), br(),
-      actionLink(
-        "persona-quiz-info",
-        label = "Click here to jump to the persona quiz!",
-        icon = icon("arrow-right")
-      ),
-      br(), br(),
-      "In any case, feel free to explore this webtool and discover some of the
-      interactive data analyses that the GRETA project has produced over
-      the last years!"
-    ),
-    title = "Welcome to the GRETA Analytics webtool!"
-  )
-  
+  # Change URL path to tab selection ----
   observe({
-    shinyWidgets::closeSweetAlert()
-    bs4Dash::updateTabItems(inputId = "sidebar", selected = "persona")
-  }) %>%
-    bindEvent(input[["persona-quiz-info"]])
-
+    tab <- tabsel()
+    cqstring <- getQueryString(session)$tab
+    pqstring <- paste0("?tab=", tab)
+    
+    if (is.null(cqstring) || !identical(cqstring, tab)) {
+      freezeReactiveValue(input, "sidebar")
+      updateQueryString(pqstring, mode = "push", session = session)
+    }
+  }, priority = 0) %>%
+    bindEvent(tabsel())
+  
+  
+  # Select tab from URL path ----
+  observe({
+    tab <- tabsel()
+    cqstring <- parseQueryString(session$clientData$url_search)$tab
+    
+    if (is.null(tab) || !is.null(cqstring) && !identical(cqstring, tab)) {
+      freezeReactiveValue(input, "sidebar")
+      bs4Dash::updateTabItems(session, "sidebar", cqstring)
+    }
+  }, priority = 1) %>%
+    bindEvent(getQueryString(session)$tab)
+  
+  
   mod_main_server("main", tab = tabsel)
 }
