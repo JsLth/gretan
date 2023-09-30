@@ -3,7 +3,13 @@
 #' @rdname mod_base
 app_server <- function(input, output, session) {
   # Start setup ----
-  log_it("Starting app")
+  gopts <- getGretaOption()
+  log_it("Starting app", priority = TRUE)
+  log_it(
+    "The following options are set:",
+    details = paste(names(gopts), gopts, sep = ": "),
+    priority = TRUE
+  )
 
   onSessionEnded(fun = function() {
     log_it("Shutting down app")
@@ -132,7 +138,7 @@ app_server <- function(input, output, session) {
   }, priority = 0) %>%
     bindEvent(tabsel())
   
-  
+
   # Select tab from URL path ----
   observe({
     tab <- tabsel()

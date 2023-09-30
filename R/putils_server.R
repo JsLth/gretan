@@ -450,6 +450,8 @@ with_greta_options <- function(app, options) {
 getGretaOption <- function(name, default = NULL) {
   opts <- getShinyOption("greta_options")
   
+  if (missing(name)) return(opts)
+  
   option <- if (!is.null(opts)) {
     opts[[name]] %||% default
   } else {
