@@ -13,25 +13,17 @@
 #' module IDs. In this case, logging is enabled only for these modules.
 #' @param reactlog Whether to enable logging using the reactlog package.
 #' For debugging purposes.
-#' @param set_python Python path to set before starting the app. This should
-#' preferably be done before running the function.
-#' @param console Whether to enable the in-app console. The console can be
-#' accessed by pressing Ctrl + Shift + D and is located in the main module.
-#' For debugging only!
 #' @param options Options for \code{\link[shiny]{shinyApp}}. Included for use
 #' in \code{electricShine}.
 #' @param ... Further options to be passed to the app. Can be accessed using
-#' \code{getGretaOption}.
+#' \code{getGretaOption}. Currently this includes the options \code{"console"},
+#' \code{"collect"} and \code{"github_available"}
 #'
 #' @export
 #' @import shiny
 #' @importFrom leaflet %>%
-run_app <- function(log = NULL,
-                    reactlog = FALSE,
-                    set_python = NULL,
-                    console = FALSE,
-                    options = list(),
-                    ...) {
+run_app <- function(log = NULL, reactlog = FALSE, options = list(), ...) {
+  .dots <- list(...)
   if (reactlog) {
     if (!requireNamespace("reactlog")) {
       stop("The package reactlog is required to enable logging.")
@@ -40,7 +32,7 @@ run_app <- function(log = NULL,
   }
   
   if (isTRUE(getOption("app.prod"))) {
-    if (missing(log)) {
+    if (missing(log) && Sys.info()[["user"]] != "shiny") {
       file.create("gretan.log")
       log <- "gretan.log"
     }
@@ -48,11 +40,8 @@ run_app <- function(log = NULL,
     if (missing(reactlog))
       reactlog <- FALSE
     
-    console <- FALSE
-  }
-
-  if (!is.null(set_python)) {
-    reticulate::use_python(set_python)
+    .dots$console <- FALSE
+    .dots$collect <- TRUE
   }
   
   with_greta_options(
@@ -62,7 +51,7 @@ run_app <- function(log = NULL,
       options = options,
       enableBookmarking = "disable"
     ),
-    options = list(logging = log, console = console, ...)
+    options = c(.dots, logging = log)
   )
 }
 

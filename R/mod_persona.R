@@ -312,6 +312,7 @@ mod_persona_server <- function(id) {
         id = "nextBtn",
         condition = page() < 7 && input$consent
       )
+      freezeReactiveValue(input, "submit")
       shinyjs::toggleState(
         id = "submit",
         condition = all(has_answered())
@@ -354,6 +355,7 @@ mod_persona_server <- function(id) {
         ))
       }
       
+      freezeReactiveValue(input, "submit")
       session$sendCustomMessage(
         "resetLoadingButton",
         message = list(inputId = session$ns("submit"))
@@ -424,17 +426,19 @@ mod_persona_server <- function(id) {
     
     # Predict persona ----
     ## Load model ----
-    model <- reactive(reticulate::py_load_object(system.file(
-      "extdata/persona_model.pkl",
-      package = "gretan"
+    model <- reactive(reticulate::py_load_object(app_sys(
+      "extdata/persona_model.pkl"
     )), label = "Load model")
     
     
     ## Collect responses ----
-    responses <- reactive(as.integer(c(
-      input$question1, input$question2, input$question3,
-      input$question4, input$question5
-    )), label = "Collect responses")
+    responses <- reactive(c(
+      q1 = input$question1,
+      q2 = input$question2,
+      q3 = input$question3,
+      q4 = input$question4,
+      q5 = input$question5
+    ), label = "Collect responses")
     
     
     ## Predict top 3 personas ----
@@ -476,6 +480,36 @@ mod_persona_server <- function(id) {
       })
     }), label = "Compute personas") %>%
       bindEvent(input$submit)
+    
+    
+    ## Preserve results ----
+    observe({
+      req(getGretaOption("collect", FALSE))
+      results <- results()
+      set.seed(as.integer(Sys.time()))
+      .data <- data.frame(
+        id = paste(sample(c(letters, LETTERS, 0:9), size = 10), collapse = ""),
+        time = Sys.time(),
+        as.data.frame(t(responses())),
+        res1_name = results[[1]]$name,
+        res1_p = results[[1]]$p,
+        res2_name = results[[2]]$name,
+        res2_p = results[[2]]$p,
+        res3_name = results[[3]]$name,
+        res3_p = results[[3]]$p
+      )
+      
+      outf <- app_sys("persona_data.csv")
+      write.table(
+        .data,
+        file = outf,
+        sep = ",",
+        col.names = !file.exists(outf),
+        append = TRUE,
+        row.names = FALSE
+      )
+    }) %>%
+      bindEvent(results())
     
     
     ## Render persona carousel ----
