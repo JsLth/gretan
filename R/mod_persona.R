@@ -317,6 +317,7 @@ mod_persona_server <- function(id) {
         id = "submit",
         condition = all(has_answered())
       )
+      
       shinyjs::hide(id = paste0("step", prev_page()))
       shinyjs::show(paste0("step", page()))
 
@@ -391,8 +392,13 @@ mod_persona_server <- function(id) {
       vapply(
         FUN.VALUE = logical(1),
         seq(5),
-        function(i) !is.na(input[[paste0("question", i)]])
-      ) %>%
+        function(i) {
+          answer <- input[[paste0("question", i)]]
+          if (!is.null(answer))
+            !is.na(input[[paste0("question", i)]])
+          else
+            FALSE
+      }) %>%
         stats::setNames(paste0("question", seq(5)))
     }, label = "Response fail check")
     
