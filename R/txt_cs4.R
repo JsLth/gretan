@@ -154,7 +154,7 @@ txts$main$cs4 <- list(
       h5(tags$b("Implications for policy-making")),
       named_to_dl(list(
         "Bottom-Up Approaches" = "Emphasize bottom-up approaches, fostering
-          collaboration among multiple actor types through co-creation 
+          collaboration among multiple actor types through co-creation
           sessions. Overcoming trust issues and tailoring plans to local
           needs are essential.",
         "Information Accessibility" = "Provide homeowners with more

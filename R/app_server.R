@@ -15,22 +15,28 @@ app_server <- function(input, output, session) {
     log_it("Shutting down app")
     stopApp()
   })
-  
+
   # Track tab selection ----
-  tabsel <- reactive({
-    log_it(sprintf("Changed active module to {%s}", input$sidebar))
-    input$sidebar
-  }, label = "track tab selection")
+  tabsel <- reactive(
+    {
+      log_it(sprintf("Changed active module to {%s}", input$sidebar))
+      input$sidebar
+    },
+    label = "track tab selection"
+  )
 
   # Hide help switch
   shinyjs::hideElement(selector = "ul.navbar-right")
 
   # Capture search term ----
-  searchbox_input <- reactive({
-    search_input <- input$textSearch
-    isTRUE(nzchar(search_input))
-  }, label = "capture search term")
-  
+  searchbox_input <- reactive(
+    {
+      search_input <- input$textSearch
+      isTRUE(nzchar(search_input))
+    },
+    label = "capture search term"
+  )
+
   # Change tab after search ----
   for (x in names(txts)) {
     with_eval_args(
@@ -50,57 +56,63 @@ app_server <- function(input, output, session) {
   })
 
   # Search texts ----
-  search_results <- reactive({
-    req(searchbox_input())
-    search_term <- input$textSearch
-    idx <- vapply(txts, function(x) {
-      x <- tag_to_text(x)
-      any(grepl(search_term, x, ignore.case = TRUE))
-    }, FUN.VALUE = logical(1))
-    idx <- names(txts)[idx]
-    options <- lapply(idx, function(x) {
-      opt <- txts[[x]]
-      opt <- span(
-        id = paste0("suggestion-", x),
-        class = "form-suggestion-row",
-        div(opt$icon, class = "form-suggestion-icon"),
-        div(opt$title)
-      )
-      id <- paste0("search_option_", x)
-      div(class = "form-suggestion", role = "option", opt)
-    })
-    if (!length(options)) {
-      options <- list(div(
-        class = "form-suggestion",
-        role = "option",
-        "No results"
-      ))
-    }
-    do.call(div, c(options, class = "form-suggestions"))
-  }, label = "search texts")
+  search_results <- reactive(
+    {
+      req(searchbox_input())
+      search_term <- input$textSearch
+      idx <- vapply(txts, function(x) {
+        x <- tag_to_text(x)
+        any(grepl(search_term, x, ignore.case = TRUE))
+      }, FUN.VALUE = logical(1))
+      idx <- names(txts)[idx]
+      options <- lapply(idx, function(x) {
+        opt <- txts[[x]]
+        opt <- span(
+          id = paste0("suggestion-", x),
+          class = "form-suggestion-row",
+          div(opt$icon, class = "form-suggestion-icon"),
+          div(opt$title)
+        )
+        id <- paste0("search_option_", x)
+        div(class = "form-suggestion", role = "option", opt)
+      })
+      if (!length(options)) {
+        options <- list(div(
+          class = "form-suggestion",
+          role = "option",
+          "No results"
+        ))
+      }
+      do.call(div, c(options, class = "form-suggestions"))
+    },
+    label = "search texts"
+  )
 
   # Show/hide search bar ----
-  observe({
-    has_input <- searchbox_input()
+  observe(
+    {
+      has_input <- searchbox_input()
 
-    if (has_input) {
-      insertUI(
-        selector = "#textSearch",
-        where = "afterEnd",
-        ui = div(
-          id = "listbox",
-          class = "form-results",
-          execute_safely(search_results())
+      if (has_input) {
+        insertUI(
+          selector = "#textSearch",
+          where = "afterEnd",
+          ui = div(
+            id = "listbox",
+            class = "form-results",
+            execute_safely(search_results())
+          )
         )
-      )
-    } else {
-      removeUI(
-        selector = "div:has(> .form-suggestions)",
-        multiple = TRUE,
-        immediate = TRUE
-      )
-    }
-  }, label = "show/hide search bar")
+      } else {
+        removeUI(
+          selector = "div:has(> .form-suggestions)",
+          multiple = TRUE,
+          immediate = TRUE
+        )
+      }
+    },
+    label = "show/hide search bar"
+  )
 
 
   # Forward from home section ----
@@ -121,39 +133,45 @@ app_server <- function(input, output, session) {
         bindEvent(input[[welcome_id]])
     })
   }
-  
+
   observe({
     bs4Dash::updateTabItems(session, "sidebar", "exp")
   }) %>%
     bindEvent(input[["main-cs4-exp_link"]])
-  
-  
+
+
   # Change URL path to tab selection ----
-  observe({
-    tab <- tabsel()
-    cqstring <- getQueryString(session)$tab
-    pqstring <- paste0("?tab=", tab)
-    
-    if (is.null(cqstring) || !identical(cqstring, tab)) {
-      freezeReactiveValue(input, "sidebar")
-      updateQueryString(pqstring, mode = "push", session = session)
-    }
-  }, priority = 0) %>%
+  observe(
+    {
+      tab <- tabsel()
+      cqstring <- getQueryString(session)$tab
+      pqstring <- paste0("?tab=", tab)
+
+      if (is.null(cqstring) || !identical(cqstring, tab)) {
+        freezeReactiveValue(input, "sidebar")
+        updateQueryString(pqstring, mode = "push", session = session)
+      }
+    },
+    priority = 0
+  ) %>%
     bindEvent(tabsel())
-  
+
 
   # Select tab from URL path ----
-  observe({
-    tab <- tabsel()
-    cqstring <- parseQueryString(session$clientData$url_search)$tab
-    
-    if (is.null(tab) || !is.null(cqstring) && !identical(cqstring, tab)) {
-      freezeReactiveValue(input, "sidebar")
-      bs4Dash::updateTabItems(session, "sidebar", cqstring)
-    }
-  }, priority = 1) %>%
+  observe(
+    {
+      tab <- tabsel()
+      cqstring <- parseQueryString(session$clientData$url_search)$tab
+
+      if (is.null(tab) || !is.null(cqstring) && !identical(cqstring, tab)) {
+        freezeReactiveValue(input, "sidebar")
+        bs4Dash::updateTabItems(session, "sidebar", cqstring)
+      }
+    },
+    priority = 1
+  ) %>%
     bindEvent(getQueryString(session)$tab)
-  
-  
+
+
   mod_main_server("main", tab = tabsel)
 }

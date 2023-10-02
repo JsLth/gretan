@@ -50,6 +50,6 @@ mod_cs4_ui <- function(id) {
 
 mod_cs4_server <- function(id, tab) {
   moduleServer(id, function(input, output, session) {
-    
+
   })
 }

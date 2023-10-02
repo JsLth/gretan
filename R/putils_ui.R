@@ -6,11 +6,11 @@ style <- function(...) {
 dispatch_to_txt <- function(id) {
   ids <- strsplit(id, shiny::ns.sep)[[1]]
   target <- txts
-  
+
   for (id in ids) {
     target <- target[[id]]
   }
-  
+
   function(...) {
     dots <- list(...)
     out <- target
@@ -294,7 +294,7 @@ make_header <- function(title,
       affil <- as.list(rep(affil, length(authors)))
       names(affil) <- authors
     }
-    
+
     aff_df <- data.frame(
       author = rep(authors, lengths(affil)),
       affil = unlist(affil),

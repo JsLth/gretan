@@ -80,7 +80,7 @@ mod_insp_server <- function(id) {
       if (length(input$option) > 0) {
         entries <- entries[entries$option %in% input$option, ]
       }
-      
+
       entries$variable
     }) %>%
       bindEvent(input$title, input$subitem, input$option)

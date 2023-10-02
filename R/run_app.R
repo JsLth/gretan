@@ -30,20 +30,21 @@ run_app <- function(log = NULL, reactlog = FALSE, options = list(), ...) {
     }
     reactlog::reactlog_enable()
   }
-  
+
   if (isTRUE(getOption("app.prod"))) {
     if (missing(log) && Sys.info()[["user"]] != "shiny") {
       file.create("gretan.log")
       log <- "gretan.log"
     }
-    
-    if (missing(reactlog))
+
+    if (missing(reactlog)) {
       reactlog <- FALSE
-    
+    }
+
     .dots$console <- FALSE
     .dots$collect <- TRUE
   }
-  
+
   with_greta_options(
     shinyApp(
       ui = app_ui,

@@ -96,13 +96,13 @@ mod_cmp_ui <- function(id, titles) {
 mod_cmp_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-    
+
     exp_params_left <- mod_exp_server("left", track = TRUE)
     exp_params_right <- mod_exp_server("right", track = TRUE)
-    
+
     null_indicator <- reactiveValues(left = TRUE, right = TRUE)
     indicator_label <- reactiveValues(left = NULL, right = NULL)
-    
+
     observe({
       mouse <- unlist(input[["right-explorer_shape_mouseout"]])
       if (is.null(mouse)) {
@@ -114,7 +114,7 @@ mod_cmp_server <- function(id) {
       null_indicator$left <- !any(has_mouse)
     }) %>%
       bindEvent(input[["right-explorer_shape_mouseout"]])
-    
+
     observe({
       mouse <- unlist(input[["left-explorer_shape_mouseout"]])
       if (is.null(mouse)) {
@@ -126,7 +126,7 @@ mod_cmp_server <- function(id) {
       null_indicator$right <- !any(has_mouse)
     }) %>%
       bindEvent(input[["left-explorer_shape_mouseout"]])
-    
+
     observe({
       mouse <- unlist(input[["right-explorer_shape_mouseover"]])
       req(!is.null(mouse))
@@ -137,7 +137,7 @@ mod_cmp_server <- function(id) {
       indicator_label$left <- params$labels[[country_idx]]
     }) %>%
       bindEvent(input[["right-explorer_shape_mouseover"]])
-    
+
     observe({
       mouse <- unlist(input[["left-explorer_shape_mouseover"]])
       req(!is.null(mouse))
@@ -148,12 +148,12 @@ mod_cmp_server <- function(id) {
       indicator_label$right <- params$labels[[country_idx]]
     }) %>%
       bindEvent(input[["left-explorer_shape_mouseover"]])
-    
+
     observe({
       hover <- input[["left-explorer_mousemove"]]
       label <- indicator_label$right
       outside <- null_indicator$right
-      
+
       if (is.null(hover) || is.null(label) || outside) {
         leaflet::leafletProxy("right-explorer") %>%
           leaflet::removeMarker(ns("right-indicator"))
@@ -168,12 +168,12 @@ mod_cmp_server <- function(id) {
           )
       }
     })
-    
+
     observe({
       hover <- input[["right-explorer_mousemove"]]
       label <- indicator_label$left
       outside <- null_indicator$left
-      
+
       if (is.null(hover) || is.null(label) || outside) {
         leaflet::leafletProxy("left-explorer") %>%
           leaflet::removeMarker(ns("left-indicator"))

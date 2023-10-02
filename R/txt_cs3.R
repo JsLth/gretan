@@ -130,14 +130,16 @@ txts$main$cs3 <- list(
       p2("Among others, the Earnest App case study highlights four relevant
       barriers and derived potential recommendations of policy and society."),
       tags$ol(
-        tags$li(tags$b("The lack of integrating local and community
+        tags$li(
+          tags$b("The lack of integrating local and community
           knowledge into policymaking hinders energy citizenship."),
           "Findings from the case study suggest that digital platforms,
           appealing to young citizens, could help collect and integrate
           community knowledge. To achieve this, funding could be provided
           to third parties to create user-friendly digital platforms for
           knowledge exchange between citizens and policymakers, particularly
-          targeting young people."),
+          targeting young people."
+        ),
         tags$li(tags$b("Complex policy landscapes are a barrier for both
           policymakers and citizens."), "To address this, regular
           communication between policymakers across different levels
@@ -154,12 +156,14 @@ txts$main$cs3 <- list(
           participation in energy transitions, incentives and compensation
           mechanisms should be established to recognize and monetarily
           value the time and engagement of energy citizens."),
-        tags$li("The case study focus on sustainable transportation options,
+        tags$li(
+          "The case study focus on sustainable transportation options,
           underscores the ", tags$b("importance of establishing good
           infrastructure as a foundation for sustainable mobility."),
           "Policymakers should prioritize timely, comprehensive, and
           affordable public transportation systems in both urban and
-          rural areas - for a just and sustainable energy transition.")
+          rural areas - for a just and sustainable energy transition."
+        )
       )
     )
   )

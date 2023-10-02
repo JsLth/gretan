@@ -18,8 +18,9 @@ undo_dummy <- function(df, col_prefix) {
     df[!base_level.idx, cols], 1, which.max
   )]
   df[cols] <- NULL
-  if (is_sf)
+  if (is_sf) {
     df <- st_sf(df, geometry = geom)
+  }
   df
 }
 
@@ -88,7 +89,7 @@ survey_local <- survey_local %>%
     q5 = if_else(q5 == 6, NA, q5)
   )
 
-"%len%" <- function(x, y) if (length(x)) x else y 
+"%len%" <- function(x, y) if (length(x)) x else y
 
 agg_persona <- function(x) {
   if (is.logical(x)) {

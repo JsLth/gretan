@@ -7,7 +7,7 @@ tax <- function(..., type = NULL) {
 
 mod_taxonomy_ui <- function(id) {
   ns <- NS(id)
-  
+
   get_text <- dispatch_to_txt(id)
 
   bs4Dash::tabItem(
@@ -19,7 +19,8 @@ mod_taxonomy_ui <- function(id) {
       date = get_text("date")
     ),
     fluidRow(
-      bs4Dash::column(5,
+      bs4Dash::column(
+        5,
         bs4Dash::box(
           title = with_literata(get_text("introduction", "title")),
           status = "primary",
@@ -27,7 +28,8 @@ mod_taxonomy_ui <- function(id) {
           p2(get_text("introduction", "content"))
         )
       ),
-      bs4Dash::column(7,
+      bs4Dash::column(
+        7,
         bs4Dash::box(
           title = with_literata(get_text("methodology", "title")),
           status = "primary",
@@ -136,7 +138,7 @@ mod_taxonomy_ui <- function(id) {
 mod_taxonomy_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     get_text <- dispatch_to_txt(session$ns(NULL))
-    
+
     popover2(
       id = "taxHelp",
       title = with_literata(get_text("help", "scheme", "title")),

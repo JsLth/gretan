@@ -2,7 +2,7 @@ txts$main$research <- list(
   shortitle = "Energy research",
   title = "Mapping the spatial turn in energy transition research",
   icon = "book-atlas",
-  tags =  c(
+  tags = c(
     "spatial", "turn", "computational", "NER", "topic", "modelling", "entity",
     "recognition", "geoparse"
   ),

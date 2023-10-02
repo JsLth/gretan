@@ -1,7 +1,7 @@
 mod_cs1_ui <- function(id) {
   ns <- NS(id)
   get_text <- dispatch_to_txt(id)
-  
+
   bs4Dash::tabItem(
     "cs1",
     # Header ----
@@ -147,7 +147,7 @@ mod_cs1_ui <- function(id) {
 mod_cs1_server <- function(id, tab) {
   moduleServer(id, function(input, output, session) {
     get_text <- dispatch_to_txt(session$ns(NULL))
-    
+
     # Waiter setup ----
     bwaiter <- waiter::Waiter$new(
       id = session$ns("buildings"),
@@ -159,7 +159,7 @@ mod_cs1_server <- function(id, tab) {
       html = tagList(waiter::spin_pulse(), h4("Loading figure...")),
       color = "rgba(179, 221, 254, 1)"
     )
-    
+
     popover2(
       "biblink-1",
       title = "",

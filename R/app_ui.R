@@ -39,8 +39,8 @@ app_ui <- function(theme = NULL,
       html = TRUE
     )
   }
-  
-  
+
+
   # Configure loading screen
   if (is.null(preloader)) {
     preloader <- list(
@@ -88,7 +88,7 @@ app_ui <- function(theme = NULL,
         padding-bottom: 0em;
         padding-right: 0em;
       }
-      
+
       /* Make footer smaller */
       .main-footer {
         padding: 0.5rem;
@@ -99,13 +99,13 @@ app_ui <- function(theme = NULL,
       .tooltip-inner {
         text-align: left;
       }
-      
+
       /* Change carousel arrow color */
       .carousel-control-prev-icon {
         background-image: url(\"data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%2300000' viewBox='0 0 8 8'%3E%3Cpath d='M5.25 0l-4 4 4 4 1.5-1.5-2.5-2.5 2.5-2.5-1.5-1.5z'/%3E%3C/svg%3E\");
         margin-right: 100px;
       }
-      
+
       .carousel-control-next-icon {
         background-image: url(\"data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%2300000' viewBox='0 0 8 8'%3E%3Cpath d='M2.75 0l-1.5 1.5 2.5 2.5-2.5 2.5 1.5 1.5 4-4-4-4z'/%3E%3C/svg%3E\");
       }"),
@@ -134,7 +134,8 @@ app_ui <- function(theme = NULL,
     ),
     bs4Dash::dashboardSidebar(
       id = "sidebarState",
-      tags$style(HTML("
+      tags$style(HTML(
+        "
         .layout-fixed .wrapper .sidebar {
           height: calc(95vh - (3.5rem + 1px));
         }" # TODO: quick workaround, maybe reconsider

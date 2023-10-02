@@ -59,25 +59,25 @@ txts$main$cs1 <- list(
         and the economy. This will help to identify areas where energy savings can
         be made or may be more favourable to implement certain actions or strategies.
         In this way, energy modelling can also be used to identify the suitability of
-        implementing energy policies and planning decisions in different locations."),
-        p2("In the GRETA project, the ENERKAD\u00ae{@1} tool has been used to generate the models.
+        implementing energy policies and planning decisions in different locations."
+      ),
+      p2("In the GRETA project, the ENERKAD\u00ae{@1} tool has been used to generate the models.
         ENERKAD\u00ae is a plugin for QGIS which evaluates urban energy scenarios at
         building, district and city scale and calculates the thermal energy demand
         and consumption per hour for each building in a district, using cadastral
         data, basic cartography and climatic information of the study area."),
-        p2("ENERKAD\u00ae foregoes the use of representative buildings and uses individual
+      p2("ENERKAD\u00ae foregoes the use of representative buildings and uses individual
         building information for its input data. It takes the basic mandatory
         parameters from the cadastre, which can be considered as its greatest
         advantage, since in many cases, detailed information of the buildings is not
         available and some of the information comes from different sources like energy
         performance certificates or municipal datasets."),
-        p2("The use of GIS software facilitates the representation of results, so that it
+      p2("The use of GIS software facilitates the representation of results, so that it
         is possible to analyse the actual state of energy demand in the city in a
         visual way and identify the areas with the greatest potential for savings or
         implementation of planned interventions, based on the energy demand but also
         in other non-energy related parameters such as socio-economic data or
-        behavioural aspects directly related to the citizens."
-      )
+        behavioural aspects directly related to the citizens.")
     )
   ),
   case_study = list(

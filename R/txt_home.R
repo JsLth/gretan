@@ -19,15 +19,15 @@ txts$main$home <- list(
           spatializing the data from the GRETA multinational survey and by studying
           their spillover, crossover, and cross-level interaction effects on the
           local, regional, national, and supranational levels. The tool facilitates
-          the geographic assessment of energy citizenship emergence."
-        ),
+          the geographic assessment of energy citizenship emergence."),
         p2("What can you find on GRETA Analytics?")
       ),
       tags$ul(
         tags$li(
           HTML(
             "Quickly and comfortably <b>explore, compare, inspect</b> and
-            download the data produced in GRETA's multinational survey."),
+            download the data produced in GRETA's multinational survey."
+          ),
           actionLink(
             "welcome-li-exp",
             label = "",
@@ -38,7 +38,8 @@ txts$main$home <- list(
         tags$li(
           HTML(
             "Find out about the findings and policy recommendations of five
-            of the six GRETA case studies"),
+            of the six GRETA case studies"
+          ),
           actionLink(
             "welcome-li-cs1",
             label = "",
@@ -146,7 +147,8 @@ txts$main$home <- list(
           cities and internationally. You can consult the case studies by clicking
           on one of the pins"
         ),
-        icon("map-pin", style = "vertical-align: center"), "on the map to the right."),
+        icon("map-pin", style = "vertical-align: center"), "on the map to the right."
+      ),
       p2(
         HTML(
           "GRETA also launched a first-of-its kind <b>EU-wide empirical citizen
@@ -158,7 +160,7 @@ txts$main$home <- list(
           in the GRETA project, you can consult the"
         ),
         a("deliverables", href = "https://projectgreta.eu/resources/", class = "intext"),
-          "published on the official website."
+        "published on the official website."
       )
     )
   ),

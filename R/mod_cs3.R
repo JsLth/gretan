@@ -1,7 +1,7 @@
 mod_cs3_ui <- function(id) {
   ns <- NS(id)
   get_text <- dispatch_to_txt(id)
-  
+
   bs4Dash::tabItem(
     "cs3",
     make_header(

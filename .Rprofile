@@ -3,7 +3,7 @@ if (Sys.info()[["user"]] == "shiny") {
   Sys.setenv(VIRTUALENV_NAME = "gretan")
   Sys.setenv(RETICULATE_PYTHON = "/home/shiny/.virtualenvs/gretan/bin/python")
   envs <- reticulate::virtualenv_list()
-  
+
   if (!"gretan" %in% envs) {
     envdir <- Sys.getenv("VIRTUALENV_NAME")
     deps <- c("numpy", "lightgbm")

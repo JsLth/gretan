@@ -1,7 +1,7 @@
 mod_cs2_ui <- function(id) {
   ns <- NS(id)
   get_text <- dispatch_to_txt(id)
-  
+
   bs4Dash::tabItem(
     "cs2",
     make_header(
@@ -33,7 +33,6 @@ mod_cs2_ui <- function(id) {
           get_text("objectives", "content")
         )
       )
-
     )
   )
 }

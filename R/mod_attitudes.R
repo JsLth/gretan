@@ -2,7 +2,7 @@ mod_attitudes_ui <- function(id) {
   ns <- NS(id)
 
   get_text <- dispatch_to_txt(id)
-  
+
   bs4Dash::tabItem(
     "attitudes",
     make_header(
@@ -19,8 +19,9 @@ mod_attitudes_server <- function(id, tab) {
   moduleServer(id, function(input, output, session) {
     observe({
       browser()
-      if (identical(tab(), "attitudes"))
+      if (identical(tab(), "attitudes")) {
         send_warning("Seems like there is no content yet! Please come back later.")
+      }
     }) %>%
       bindEvent(tab())
   })

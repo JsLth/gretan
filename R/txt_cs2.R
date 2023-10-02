@@ -51,7 +51,7 @@ txts$main$cs2 <- list(
       )
     )
   ),
-  objectives =  list(
+  objectives = list(
     title = "Objectives",
     content = tagList(
       h6(tags$b("Coop\u00e9rnico works to increase the number of citizens
@@ -71,8 +71,8 @@ txts$main$cs2 <- list(
       decarbonized and socially just society. To achieve this, it relies on
       <b>spillover and network effects</b> stemming from its growing customer base, and
       on its national lobbying and community engagement activities.<br><br>")),
-    h6(tags$b("Coop\u00e9rnico\u2019s objectives for a renewable energy transition")),
-    p2(HTML("Coop\u00e9rnico presented a short-term strategic plan for achieving the
+      h6(tags$b("Coop\u00e9rnico\u2019s objectives for a renewable energy transition")),
+      p2(HTML("Coop\u00e9rnico presented a short-term strategic plan for achieving the
       cooperative objectives until 2023 in its original Manifesto and Director
       Plan. However, during the course of the GRETA project, Coop\u00e9rnico
       stated mid- and long-term objectives for the cooperative (i.e., 2026-2030
@@ -92,9 +92,9 @@ txts$main$cs2 <- list(
       By 2050 Coop\u00e9rnico expects that the distribution network is once again
       in the hands of cooperatives or municipal companies (i.e., the non-profit
       sector of the economy).<br><br>")),
-    h6(tags$b("We studied how to lead already active energy citizens to bolder
+      h6(tags$b("We studied how to lead already active energy citizens to bolder
        community actions")),
-    p2(HTML("Our objective was to <b>explore the factors that encourage active energy
+      p2(HTML("Our objective was to <b>explore the factors that encourage active energy
       citizens</b> to escalate their involvement in community efforts toward a cleaner
       energy transition, potentially reaching an activism-like level of engagement
       (advocacy). To do this, we examined various structural and dynamic factors
@@ -141,18 +141,18 @@ txts$main$cs2 <- list(
         However, the legislator and the DSO have strained relationships with
         energy citizens and the cooperative."
       )),
-    p2("From a policy development perspective, this study is essential in
+      p2("From a policy development perspective, this study is essential in
       identifying the key shared needs among different stakeholders,
       including:"),
-    list_to_li(list(
-      "Establishing dedicated information agencies or desks at the
+      list_to_li(list(
+        "Establishing dedicated information agencies or desks at the
       governmental level to support citizens and companies in their
       clean energy transition efforts, such as aiding in the
       implementation of Renewable Energy Communities (RECs).",
-      "Simplifying licensing processes to expedite the transition.",
-      "Accelerating the transposition of citizen-centric European
+        "Simplifying licensing processes to expedite the transition.",
+        "Accelerating the transposition of citizen-centric European
       Directives to promote the clean energy transition."
-    ))
+      ))
     )
   )
 )
