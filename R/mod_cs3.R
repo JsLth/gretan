@@ -1,16 +1,44 @@
 mod_cs3_ui <- function(id) {
   ns <- NS(id)
-
+  get_text <- dispatch_to_txt(id)
+  
   bs4Dash::tabItem(
     "cs3",
     make_header(
-      title = "Case study 3: The Earnest App \u2013 a virtual community for sustainable mobility in Darmstadt",
-      authors = c("Prepared by: Author A", "Author B"),
-      affil = list(
-        "Author A" = "Fraunhofer Institute for Systems and Innovation Research",
-        "Author B" = "Fraunhofer Institute for Systems and Innovation Research"
+      title = get_text("title"),
+      authors = get_text("authors"),
+      affil = get_text("affil"),
+      date = get_text("date")
+    ),
+    fluidRow(
+      col_6(
+        bs4Dash::box(
+          title = with_literata(get_text("introduction", "title")),
+          status = "primary",
+          width = 12,
+          get_text("introduction", "content")
+        ),
+        bs4Dash::box(
+          title = with_literata(get_text("analysis", "title")),
+          status = "primary",
+          width = 12,
+          get_text("analysis", "content")
+        )
       ),
-      date = "2023-mm-dd"
+      col_6(
+        bs4Dash::box(
+          title = with_literata(get_text("how", "title")),
+          status = "primary",
+          width = 12,
+          get_text("how", "content")
+        ),
+        bs4Dash::box(
+          title = with_literata(get_text("findings", "title")),
+          status = "primary",
+          width = 12,
+          get_text("findings", "content")
+        )
+      )
     )
   )
 }

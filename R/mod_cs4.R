@@ -1,22 +1,55 @@
 mod_cs4_ui <- function(id) {
   ns <- NS(id)
+  get_text <- dispatch_to_txt(id)
 
   bs4Dash::tabItem(
     "cs4",
     make_header(
-      title = "Case study 4: Natural gas-free neighbourhoods",
-      authors = c("Prepared by: Author A", "Author B"),
-      affil = list(
-        "Author A" = "Netherlands Organisation for Applied Scientific Research",
-        "Author B" = "Netherlands Organisation for Applied Scientific Research"
+      title = get_text("title"),
+      authors = get_text("authors"),
+      affil = get_text("affil"),
+      date = get_text("date")
+    ),
+    fluidRow(
+      col_6(
+        bs4Dash::box(
+          title = with_literata(get_text("introduction", "title")),
+          status = "primary",
+          width = 12,
+          get_text("introduction", "content")
+        ),
+        bs4Dash::box(
+          title = with_literata(get_text("how", "title")),
+          status = "primary",
+          width = 12,
+          get_text("how", "content")
+        )
       ),
-      date = "2023-mm-dd"
+      col_6(
+        bs4Dash::box(
+          title = with_literata(get_text("analysis", "title")),
+          status = "primary",
+          width = 12,
+          get_text("analysis", "content"),
+          actionLink(
+            ns("exp_link"),
+            label = "Click here to learn more.",
+            class = "fancy"
+          )
+        ),
+        bs4Dash::box(
+          title = with_literata(get_text("findings", "title")),
+          status = "primary",
+          width = 12,
+          get_text("findings", "content")
+        )
+      )
     )
   )
 }
 
 mod_cs4_server <- function(id, tab) {
   moduleServer(id, function(input, output, session) {
-
+    
   })
 }

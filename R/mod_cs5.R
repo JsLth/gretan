@@ -4,7 +4,7 @@ mod_cs5_ui <- function(id) {
   get_text <- dispatch_to_txt(id)
   
   bs4Dash::tabItem(
-    "cs5spain",
+    "cs5",
     # Header ----
     make_header(
       title = get_text("title"),
@@ -116,7 +116,7 @@ mod_cs5_server <- function(id, tab) {
     
     ## Parameters ----
     params <- reactive({
-      req(identical(tab(), "cs5spain"))
+      req(identical(tab(), "cs5"))
       dt <- isolate(buildings())
       layer <- input$`buildings-layer`
       

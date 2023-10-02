@@ -1,10 +1,9 @@
 mod_cs1_ui <- function(id) {
   ns <- NS(id)
-  
   get_text <- dispatch_to_txt(id)
   
   bs4Dash::tabItem(
-    "cs1italy",
+    "cs1",
     # Header ----
     make_header(
       title = get_text("title"),
@@ -195,7 +194,7 @@ mod_cs1_server <- function(id, tab) {
 
     ## Parameters ----
     bparams <- reactive({
-      req(identical(tab(), "cs1italy"))
+      req(identical(tab(), "cs1"))
       dt <- isolate(buildings())
       layer <- input$`buildings-layer`
 
@@ -345,7 +344,7 @@ mod_cs1_server <- function(id, tab) {
 
     ## Parameters ----
     fparams <- reactive({
-      req(identical(tab(), "cs1italy"))
+      req(identical(tab(), "cs1"))
       dt <- isolate(fragility())
       layer <- input$fragility_layer
 

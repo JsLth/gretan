@@ -105,12 +105,10 @@ app_server <- function(input, output, session) {
 
   # Forward from home section ----
   all_tabs <- c(
-    "exp", "taxonomy", "cs1italy", "stakeholder",
+    "exp", "taxonomy", "cs1", "cs2", "cs3", "cs4", "cs5", "stakeholder",
     "persona", "enpov", "attitudes", "research"
   )
   for (tab in all_tabs) {
-    env <- new.env()
-    env[["tab"]] <- tab
     obs_label <- paste("forward to", tab)
     welcome_id <- paste0("welcome-li-", tab)
     with_eval_args({
@@ -123,6 +121,11 @@ app_server <- function(input, output, session) {
         bindEvent(input[[welcome_id]])
     })
   }
+  
+  observe({
+    bs4Dash::updateTabItems(session, "sidebar", "exp")
+  }) %>%
+    bindEvent(input[["main-cs4-exp_link"]])
   
   
   # Change URL path to tab selection ----

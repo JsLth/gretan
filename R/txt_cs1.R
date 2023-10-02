@@ -1,6 +1,6 @@
 txts$main$cs1 <- list(
   shortitle = "Pilastro-Roveri, Italy",
-  title = "Case study: Reneweable energy district Pilastro-Roveri",
+  title = "Case study: Renewable energy district Pilastro-Roveri",
   date = "2023-07-20",
   icon = "map-pin",
   tags = c(
@@ -117,7 +117,7 @@ txts$main$cs1 <- list(
       bs4Dash::accordion(
         id = "main-cs-cs1-fig",
         bs4Dash::accordionItem(
-          tags$img(src = "www/Figure2.png", width = "100%"),
+          tags$img(src = "www/img/cs1_img2.png", width = "100%"),
           title = "Figure: Electricity consumption vs. PV production by building use",
           status = "primary",
           solidHeader = FALSE
