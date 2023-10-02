@@ -92,6 +92,7 @@ app_ui <- function(theme = NULL,
       /* Make footer smaller */
       .main-footer {
         padding: 0.5rem;
+        margin-bottom: -15px;
       }
 
       /* Align tooltip text */
@@ -178,47 +179,63 @@ app_ui <- function(theme = NULL,
             tabName = "insp"
           )
         ),
-        bs4Dash::sidebarHeader("GRETA output"),
+        bs4Dash::sidebarHeader("Case study findings"),
         bs4Dash::menuItem(
-          text = get_text("cs1", "shortitle"),
-          icon = icon(get_text("cs1", "icon")),
-          tabName = "cs1italy"
+          text = "Case studies",
+          icon = icon("map-pin"),
+          tabName = "cs",
+          bs4Dash::menuSubItem(
+            text = get_text("cs1", "shortitle"),
+            tabName = "cs1"
+          ),
+          bs4Dash::menuSubItem(
+            text = get_text("cs2", "shortitle"),
+            tabName = "cs2"
+          ),
+          bs4Dash::menuSubItem(
+            text = get_text("cs3", "shortitle"),
+            tabName = "cs3"
+          ),
+          bs4Dash::menuSubItem(
+            text = get_text("cs4", "shortitle"),
+            tabName = "cs4"
+          ),
+          bs4Dash::menuSubItem(
+            text = get_text("cs5", "shortitle"),
+            tabName = "cs5"
+          )
         ),
-        # bs4Dash::menuItem(
-        #   text = get_text("cs5", "shortitle"),
-        #   icon = icon(get_text("cs5", "icon")),
-        #   tabName = "cs5spain"
-        # ),
+        bs4Dash::sidebarHeader("GRETA analyses"),
         bs4Dash::menuItem(
           text = get_text("taxonomy", "shortitle"),
           icon = icon(get_text("taxonomy", "icon")),
           tabName = "taxonomy"
         ),
-        # bs4Dash::menuItem(
-        #   text = get_text("stakeholder", "shortitle"),
-        #   icon = icon(get_text("stakeholder", "icon")),
-        #   tabName = "stakeholder"
-        # ),
+        bs4Dash::menuItem(
+          text = get_text("stakeholder", "shortitle"),
+          icon = icon(get_text("stakeholder", "icon")),
+          tabName = "stakeholder"
+        ),
         bs4Dash::menuItem(
           text = get_text("persona", "shortitle"),
           icon = icon(get_text("persona", "icon")),
           tabName = "persona"
         ),
-        # bs4Dash::menuItem(
-        #   text = get_text("enpov", "shortitle"),
-        #   icon = icon(get_text("enpov", "icon")),
-        #   tabName = "enpov"
-        # ),
-        # bs4Dash::menuItem(
-        #   text = get_text("attitudes", "shortitle"),
-        #   icon = icon(get_text("attitudes", "icon")),
-        #   tabName = "attitudes"
-        # ),
-        # bs4Dash::menuItem(
-        #   text = get_text("research", "shortitle"),
-        #   icon = icon(get_text("research", "icon")),
-        #   tabName = "research"
-        # ),
+        bs4Dash::menuItem(
+          text = get_text("enpov", "shortitle"),
+          icon = icon(get_text("enpov", "icon")),
+          tabName = "enpov"
+        ),
+        bs4Dash::menuItem(
+          text = get_text("attitudes", "shortitle"),
+          icon = icon(get_text("attitudes", "icon")),
+          tabName = "attitudes"
+        ),
+        bs4Dash::menuItem(
+          text = get_text("research", "shortitle"),
+          icon = icon(get_text("research", "icon")),
+          tabName = "research"
+        ),
         flat = TRUE
       ),
       skin = "light",

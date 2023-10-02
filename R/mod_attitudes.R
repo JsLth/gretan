@@ -15,8 +15,13 @@ mod_attitudes_ui <- function(id) {
 }
 
 
-mod_attitudes_server <- function(id) {
+mod_attitudes_server <- function(id, tab) {
   moduleServer(id, function(input, output, session) {
-
+    observe({
+      browser()
+      if (identical(tab(), "attitudes"))
+        send_warning("Seems like there is no content yet! Please come back later.")
+    }) %>%
+      bindEvent(tab())
   })
 }
