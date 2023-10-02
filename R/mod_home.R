@@ -14,7 +14,7 @@ mod_home_ui <- function(id) {
           width = 12,
           status = "primary",
           get_text("welcome", "content"),
-          get_text("disclaimer")
+          tagAppendAttributes(get_text("disclaimer"), class = "fancy")
         ),
         # About box ----
         bs4Dash::box(
@@ -127,7 +127,6 @@ mod_home_server <- function(id) {
           labelStyle = "font-size: 12px; vertical-align: middle;"
         )
     })
-    
     
     # Select case study ----
     observe({

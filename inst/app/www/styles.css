@@ -5,19 +5,19 @@
   src: url('https://use.typekit.net/af/e6380d/00000000000000007735a1cc/30/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n4&v=3')
 }
 
-a.intext {
+p.fancy > a {
   color: #000;
   border-bottom: 1px solid black;
 }
 
-a.intext:hover {
+p.fancy > a:hover {
   color: #000;
   text-shadow: 0 0 0.01px black;
   border-bottom: 2px solid black;
 }
 
 /* Paragraph indent for paragraphs */
-p.running-text {
+p.fancy {
   text-align: justify;
   text-justify: inter-word;
 }
@@ -423,4 +423,8 @@ a.logo {
 
 .swal-hide-icon {
   display: none !important;
+}
+
+.home-arrow {
+  margin-left: 10px;
 }
