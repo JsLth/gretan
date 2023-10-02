@@ -148,6 +148,23 @@ send_error <- function(text,
 }
 
 
+send_warning <- function(text,
+                         title = "Attention!",
+                         ...,
+                         session = getDefaultReactiveDomain()) {
+  shinyWidgets::sendSweetAlert(
+    title = title,
+    text = text,
+    type = "warning",
+    html = TRUE,
+    btn_colors = "#FFCA2B",
+    btn_labels = "Got it!",
+    closeOnClickOutside = FALSE,
+    ...
+  )
+}
+
+
 #' Execute expression safely in server
 #' @description
 #' Errors in a server environment usually lead to the Shiny app crashing. To
