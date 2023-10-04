@@ -76,7 +76,7 @@ txts$main$cs4 <- list(
           informed the development of a client journey for
           residents, highlighting their drivers and barriers at
           different stages of the transition.")),
-        p2(HTML("<i>Klösters, M., de Koning, N., Kort, J., Kooger, R. (2020).
+        p2(HTML("<i>Kl\u00f6sters, M., de Koning, N., Kort, J., Kooger, R. (2020).
           De kracht van het collectief. Report P12079. TNO: The Hague,
           The Netherlands.</i><br>
           This research involved desk research and interviews with
@@ -90,8 +90,8 @@ txts$main$cs4 <- list(
       p2(HTML("In the summer of 2022, a multinational survey was conducted
         to gather data that could validate and quantify some of the
         identified determinants of energy citizenship in the context
-        of natural gas-free living. Focusing on three key actors –
-        citizens, policy-makers, and businesses – the study centered
+        of natural gas-free living. Focusing on three key actors \u2013
+        citizens, policy-makers, and businesses \u2013 the study centered
         on natural gas-free living as one of six surveyed goals."))
     )
   ),

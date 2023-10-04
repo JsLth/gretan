@@ -1,7 +1,7 @@
 txts$main$cs3 <- list(
   shortitle = "Darmstadt, Germany",
-  title = "Case study: The Earnest App – a virtual community for sustainable mobility in Darmstadt, Germany",
-  authors = c("Anne Kantel", "Sabine Preuß", "Maria Stadler", "Iska Brunzema"),
+  title = "Case study: The Earnest App \u2013 a virtual community for sustainable mobility in Darmstadt, Germany",
+  authors = c("Anne Kantel", "Sabine Preu\u00df", "Maria Stadler", "Iska Brunzema"),
   date = "2023-09-29",
   icon = "map-pin",
   tags = c(
@@ -23,7 +23,7 @@ txts$main$cs3 <- list(
       examined how being part of a virtual energy community, united by their
       use of the app, influences citizens' awareness and behavior regarding
       their daily mobility and energy consumption choices. In addition,
-      community members might influence others and act as role models –
+      community members might influence others and act as role models \u2013
       leading not only to a more active type of energy citizen but also to
       spreading the knowledge and starting to create a socially normative
       pro-environmental behaviour.<br><br>

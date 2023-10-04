@@ -602,7 +602,7 @@ mod_persona_server <- function(id) {
         if (!is_mode) {
           if (identical(input$item, "cluster")) {
             choices <- lapply(get_text("results", "personas"), "[[", "name")
-            choices <- setNames(seq(8), choices)
+            choices <- stats::setNames(seq(8), choices)
             sel <- choices[results()[[1]]$name]
           } else {
             responses <- responses()
@@ -611,7 +611,7 @@ mod_persona_server <- function(id) {
               names(get_text("steps")[[idx]]$choices),
               "None selected"
             )
-            choices <- setNames(seq_along(choices), choices)
+            choices <- stats::setNames(seq_along(choices), choices)
             sel <- responses()[idx - 1]
             sel <- switch(as.character(sel),
               "-1" = choices["I do not know"],
