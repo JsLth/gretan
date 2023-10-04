@@ -5,8 +5,21 @@ mod_main_ui <- function(id) {
   titles <- stats::setNames(lapply(categories, function(x) {
     as.list(unique(cb_ext[cb_ext$topic %in% x, ]$title))
   }), categories)
-  
+
   shiny::div(
+    shinydisconnect::disconnectMessage(
+      text = "Something went wrong! Try refreshing the page.",
+      refresh = "Refresh",
+      background = "#FFFFFF",
+      colour = "#444444",
+      refreshColour = "#337AB7",
+      overlayColour = "#000000",
+      overlayOpacity = 0.6,
+      width = 450,
+      top = "center",
+      size = 22,
+      css = ""
+    ),
     mod_home_ui(ns("home")),
     mod_exp_ui(ns("exp"), titles),
     mod_cmp_ui(ns("cmp"), titles),
@@ -18,9 +31,13 @@ mod_main_ui <- function(id) {
     mod_attitudes_ui(ns("attitudes")),
     mod_research_ui(ns("research")),
     mod_cs1_ui(ns("cs1")),
+    mod_cs2_ui(ns("cs2")),
+    mod_cs3_ui(ns("cs3")),
+    mod_cs4_ui(ns("cs4")),
     mod_cs5_ui(ns("cs5")),
-    if (isTRUE(getGretaOption("console", FALSE)))
-      keys::keysInput(ns("debug"), "ctrl+shift+d"),
+    if (isTRUE(getGretaOption("console", FALSE))) {
+      keys::keysInput(ns("debug"), "ctrl+shift+d")
+    },
     class = "tab-content"
   )
 }
@@ -29,19 +46,22 @@ mod_main_ui <- function(id) {
 mod_main_server <- function(id, tab) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-    
+
     mod_home_server("home")
     exp_params <- mod_exp_server("exp")
     mod_cmp_server("cmp")
     mod_insp_server("insp")
     mod_cs1_server("cs1", tab = tab)
+    mod_cs2_server("cs2", tab = tab)
+    mod_cs3_server("cs3", tab = tab)
+    mod_cs4_server("cs4", tab = tab)
     mod_cs5_server("cs5", tab = tab)
     mod_taxonomy_server("taxonomy")
     mod_stakeholder_server("stakeholder")
     mod_persona_server("persona")
-    mod_enpov_server("enpov")
-    mod_attitudes_server("attitudes")
-    mod_research_server("research")
+    mod_enpov_server("enpov", tab = tab)
+    mod_attitudes_server("attitudes", tab = tab)
+    mod_research_server("research", tab = tab)
 
     output[["exp-download"]] <- downloadHandler(
       filename = function() {
@@ -78,7 +98,7 @@ mod_main_server <- function(id, tab) {
         sf::st_write(poly, file, layer_options = c(desc, "WRITE_NAME=NO"))
       }
     )
-    
+
     if (isTRUE(getGretaOption("console", FALSE))) {
       observe({
         send_info(
@@ -86,22 +106,22 @@ mod_main_server <- function(id, tab) {
           text = tagList(
             shinyAce::aceEditor(
               ns("runcode_expr"),
-              mode = "r", 
+              mode = "r",
               value = "",
               height = "200px",
-              theme = "github", 
+              theme = "github",
               fontSize = 16
             ),
             bs4Dash::actionButton(
-              ns("runcode_run"), 
+              ns("runcode_run"),
               "Run",
               class = "btn-success"
             ),
             shinyjs::hidden(
               div(
-                id = ns("runcode_error"), 
+                id = ns("runcode_error"),
                 style = "color: red; font-weight: bold;",
-                tags$code("Oops, that resulted in an error! Try again."), 
+                tags$code("Oops, that resulted in an error! Try again."),
                 div(
                   "Error: ",
                   br(),
@@ -116,7 +136,7 @@ mod_main_server <- function(id, tab) {
         )
       }) %>%
         bindEvent(input$debug)
-      
+
       shinyjs::runcodeServer()
     }
   })

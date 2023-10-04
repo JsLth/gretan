@@ -2,7 +2,7 @@ mod_home_ui <- function(id) {
   # UI setup ----
   ns <- NS(id)
   get_text <- dispatch_to_txt(id)
-  
+
   bs4Dash::tabItem(
     "home",
     fluidRow(
@@ -14,7 +14,7 @@ mod_home_ui <- function(id) {
           width = 12,
           status = "primary",
           get_text("welcome", "content"),
-          get_text("disclaimer")
+          tagAppendAttributes(get_text("disclaimer"), class = "fancy")
         ),
         # About box ----
         bs4Dash::box(
@@ -86,7 +86,7 @@ mod_home_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     # Server setup ----
     get_text <- dispatch_to_txt(session$ns(NULL))
-    
+
     cs_coords <- sf::st_sf(
       name = setdiff(names(get_text("csdesc")), "none"),
       geometry = sf::st_sfc(
@@ -98,7 +98,7 @@ mod_home_server <- function(id) {
         crs = 4326
       )
     )
-    
+
     # Render geographical overview ----
     output$map <- leaflet::renderLeaflet({
       leaflet::leaflet(cs_coords) %>%
@@ -127,8 +127,7 @@ mod_home_server <- function(id) {
           labelStyle = "font-size: 12px; vertical-align: middle;"
         )
     })
-    
-    
+
     # Select case study ----
     observe({
       click <- input$map_marker_click
@@ -137,7 +136,7 @@ mod_home_server <- function(id) {
         geom = cs_coords,
         action = click
       )
-      
+
       if (!is.null(target)) {
         cc <- cs_coords[!cs_coords$name %in% target$name, ]
         leaflet::leafletProxy("map") %>%
@@ -165,12 +164,12 @@ mod_home_server <- function(id) {
       }
     }) %>%
       bindEvent(input$map_marker_click)
-    
-    
+
+
     # Show selected case study ----
     output$desc <- renderUI({
       click <- input$map_marker_click
-      
+
       leaflet_text_on_click(
         id = "map",
         geom = cs_coords,

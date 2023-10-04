@@ -3,22 +3,18 @@ style <- function(...) {
   paste0(paste(paste(names(dots), dots, sep = ": "), collapse = "; "), ";")
 }
 
-dispatch_to_txt <- function(id, session = getDefaultReactiveDomain()) {
+dispatch_to_txt <- function(id) {
   ids <- strsplit(id, shiny::ns.sep)[[1]]
   target <- txts
-  
+
   for (id in ids) {
     target <- target[[id]]
   }
-  
+
   function(...) {
     dots <- list(...)
     out <- target
-    
-    for (name in dots) {
-      out <- out[[name]]
-    }
-    
+    for (name in dots) out <- out[[name]]
     out
   }
 }
@@ -357,7 +353,7 @@ invert <- function(x) {
   stats::setNames(names(x), unname(x))
 }
 
-p2 <- function(...) p(..., class = "running-text")
+p2 <- function(...) p(..., class = "fancy")
 
 noWS <- function(.f) function(...) .f(..., .noWS = c("inside", "outside"))
 
@@ -412,105 +408,15 @@ list_palettes <- function(type = NULL) {
 #' @examples
 #' list_to_li(c("a", "b"))
 list_to_li <- function(list, class = NULL) {
-  if (is.null(class)) {
-    tagList(
-      lapply(
-        list,
-        tags$li
-      )
-    )
-  } else {
-    res <- lapply(
-      list,
-      tags$li
-    )
-    res <- lapply(
-      res,
-      function(x) {
-        tagAppendAttributes(
-          x,
-          class = class
-        )
-      }
-    )
-    tagList(res)
-  }
-}
-#' Turn an R list into corresponding HTML paragraph tags
-#'
-#' @param list an R list
-#' @param class a class for the paragraph tags
-#'
-#' @return An HTML tag
-#' @noRd
-#'
-#' @examples
-#' list_to_p(c("This is the first paragraph", "this is the second paragraph"))
-list_to_p <- function(list, class = NULL) {
-  if (is.null(class)) {
-    tagList(
-      lapply(
-        list,
-        tags$p
-      )
-    )
-  } else {
-    res <- lapply(
-      list,
-      tags$p
-    )
-    res <- lapply(
-      res,
-      function(x) {
-        tagAppendAttributes(
-          x,
-          class = class
-        )
-      }
-    )
-    tagList(res)
-  }
+  tags$ul(lapply(list, tags$li))
 }
 
-named_to_li <- function(list, class = NULL) {
-  if (is.null(class)) {
-    res <- mapply(
-      function(x, y) {
-        tags$li(
-          HTML(
-            sprintf("<b>%s:</b> %s", y, x)
-          )
-        )
-      },
-      list,
-      names(list),
-      SIMPLIFY = FALSE
-    )
-    tagList(res)
-  } else {
-    res <- mapply(
-      function(x, y) {
-        tags$li(
-          HTML(
-            sprintf("<b>%s:</b> %s", y, x)
-          )
-        )
-      },
-      list,
-      names(list),
-      SIMPLIFY = FALSE
-    )
-    res <- lapply(
-      res,
-      function(x) {
-        tagAppendAttributes(
-          x,
-          class = class
-        )
-      }
-    )
-    tagList(res)
-  }
+
+
+named_to_dl <- function(.list) {
+  dt <- lapply(names(.list), \(x) protect_html(tags$dt(x)))
+  dd <- lapply(.list, \(x) protect_html(tags$dd(x)))
+  tags$dl(riffle(dt, dd))
 }
 
 

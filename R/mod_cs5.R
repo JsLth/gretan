@@ -1,10 +1,10 @@
 mod_cs5_ui <- function(id) {
   ns <- NS(id)
-  
+
   get_text <- dispatch_to_txt(id)
-  
+
   bs4Dash::tabItem(
-    "cs5spain",
+    "cs5",
     # Header ----
     make_header(
       title = get_text("title"),
@@ -96,30 +96,30 @@ mod_cs5_ui <- function(id) {
 mod_cs5_server <- function(id, tab) {
   moduleServer(id, function(input, output, session) {
     get_text <- dispatch_to_txt(session$ns(NULL))
-    
+
     waiter <- waiter::Waiter$new(
       id = session$ns("buildings"),
       html = tagList(waiter::spin_pulse(), h4("Loading figure...")),
       color = "rgba(179, 221, 254, 1)"
     )
-    
+
     buildings <- reactive({
       sf::read_sf(app_sys("extdata/cs5spain.gpkg"), layer = "buildings")
     })
-    
+
     output[["buildings-info-layer-desc"]] <- renderUI({
       layer <- input$`buildings-layer`
       p(get_text("dict", layer))
     })
-    
+
     labels <- NULL
-    
+
     ## Parameters ----
     params <- reactive({
-      req(identical(tab(), "cs5spain"))
+      req(identical(tab(), "cs5"))
       dt <- isolate(buildings())
       layer <- input$`buildings-layer`
-      
+
       # Only create labels once and then save them to the server module for
       # re-use
       if (is.null(labels)) {
@@ -133,7 +133,7 @@ mod_cs5_server <- function(id, tab) {
         lab_values$`Installed PV capacity` <- paste(lab_values$`Installed PV capacity`, "kW")
         labels <<- do.call(align_in_table, lab_values)
       }
-      
+
       pal <- switch(layer,
         substation = leaflet::colorFactor(
           palette = c(
@@ -155,14 +155,14 @@ mod_cs5_server <- function(id, tab) {
           domain = dt$a_heat_dem_m2
         )
       )
-      
+
       list(data = dt, layer = layer, pal = pal, labels = labels)
     })
-    
+
     ## Render ----
     output$buildings <- leaflet::renderLeaflet({
       params <- isolate(params())
-      
+
       leaflet::leaflet() %>%
         leaflet::setView(lng = -1.994929, lat = 43.302187, zoom = 17) %>%
         leaflet::addProviderTiles(leaflet::providers$OpenStreetMap) %>%
@@ -193,10 +193,10 @@ mod_cs5_server <- function(id, tab) {
           )
         )
     })
-    
+
     ## Select layer ----
     updates <- 0
-    
+
     observe({
       # Only show loading screen on first two updates
       # First one on startup
@@ -206,7 +206,7 @@ mod_cs5_server <- function(id, tab) {
         updates <<- updates + 1
         on.exit(waiter$hide())
       }
-      
+
       params <- params()
       leaflet::leafletProxy("buildings") %>%
         leaflet::clearShapes() %>%
@@ -238,14 +238,14 @@ mod_cs5_server <- function(id, tab) {
           )
         )
     })
-    
+
     ## Basemap ----
     observe({
       basemap <- switch(input$`buildings-basemap`,
         "OpenStreetMap" = leaflet::providers$OpenStreetMap,
         "Satellite" = leaflet::providers$Esri.WorldImagery
       )
-      
+
       leaflet::leafletProxy("buildings") %>%
         leaflet::clearTiles() %>%
         leaflet::addProviderTiles(basemap)

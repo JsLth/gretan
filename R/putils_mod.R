@@ -6,19 +6,20 @@ plot_persona <- function(data, item = "cluster", diff = TRUE) {
     paste0(item, "*_[0-9]"),
     names(data)
   )])
-  
+
   # Prevent cases in which values are equal to zero
   data <- data + .Machine$double.xmin
-  
+
   # Compute difference
-  if (isTRUE(diff))
+  if (isTRUE(diff)) {
     data <- diff(data)
-  else
+  } else {
     data[1, ] <- -data[1, ]
-  
+  }
+
   # Pivot longer
   data <- utils::stack(data.frame(data))
-  
+
   # Safely fail if values are NA
   if (any(is.na(data$values))) {
     edf <- data.frame(
@@ -31,13 +32,13 @@ plot_persona <- function(data, item = "cluster", diff = TRUE) {
       ggplot2::theme_void()
     return(p)
   }
-  
+
   # Format values
   nc <- nchar(as.character(data$ind))
   data$item <- substr(data$ind, 1, nc - 2)
   data$ind <- as.integer(substr(data$ind, nc, nc))
   data$grp <- factor((data$values >= 0) + 1)
-  
+
   # Sort within
   if (isFALSE(diff)) {
     data <- tapply(data, list(data$grp), function(x) {
@@ -64,18 +65,19 @@ plot_persona <- function(data, item = "cluster", diff = TRUE) {
     question <- gsub("[[:space:]]+", " ", step$question)
     choices <- chs[data$ind]
   }
-  
+
   data$ind <- choices
   data$item <- question
-  
+
   # Flexible value breaks
-  ybreaks <- if (max(abs(data$values)) <= 0.15)
+  ybreaks <- if (max(abs(data$values)) <= 0.15) {
     seq(-0.25, 0.25, 0.05)
-  else if (max(abs(data$values)) <= 0.4)
+  } else if (max(abs(data$values)) <= 0.4) {
     seq(-0.5, 0.5, 0.1)
-  else
+  } else {
     seq(-1, 1, 0.25)
-  
+  }
+
   lims <- if (isTRUE(diff)) {
     rev(data$ind)
   } else {
@@ -103,11 +105,13 @@ plot_persona <- function(data, item = "cluster", diff = TRUE) {
     ggplot2::labs(
       x = NULL,
       y = if (isTRUE(diff)) "Difference (in %)" else "Proportion (in %)",
-      subtitle = if (isFALSE(diff)) paste(
-        "Which characteristics are more pronounced at your destination?"
-      )
-      else
+      subtitle = if (isFALSE(diff)) {
+        paste(
+          "Which characteristics are more pronounced at your destination?"
+        )
+      } else {
         "How much do personas change when moving to your destination?"
+      }
     ) +
     ggplot2::scale_x_discrete(limits = lims) +
     ggplot2::scale_y_continuous(
@@ -118,10 +122,11 @@ plot_persona <- function(data, item = "cluster", diff = TRUE) {
     ggplot2::scale_fill_hue(
       name = "",
       direction = -1,
-      labels = if (isFALSE(diff))
+      labels = if (isFALSE(diff)) {
         c("1" = "Start", "2" = "Destination")
-      else
+      } else {
         c("1" = "Decline", "2" = "Increase")
+      }
     ) +
     ggplot2::theme_minimal() +
     ggplot2::theme(
@@ -178,17 +183,19 @@ addMovingMarker <- function(map,
                             movingOptions = list(),
                             options = leaflet::markerOptions(),
                             data = leaflet::getMapData(map)) {
-  if (missing(labelOptions))
+  if (missing(labelOptions)) {
     labelOptions <- leaflet::labelOptions()
-  
-  if (is.null(layerId))
-    layerId = paste0("_", as.numeric(Sys.time()))
-  
+  }
+
+  if (is.null(layerId)) {
+    layerId <- paste0("_", as.numeric(Sys.time()))
+  }
+
   movingMarkerDependency <- list(structure(
     list(
       name = "lfx-movingmarker",
-      version = "1.0.0", 
-      src = list(file = normalizePath(file.path(app_sys("app/www/")))), 
+      version = "1.0.0",
+      src = list(file = normalizePath(file.path(app_sys("app/www/")))),
       meta = NULL,
       script = c("MovingMarker.js", "movingmarker-bindings.js"),
       stylesheet = NULL,
@@ -199,7 +206,7 @@ addMovingMarker <- function(map,
     ),
     class = "html_dependency"
   ))
-  
+
   pts <- leaflet::derivePoints(
     data,
     lng,
@@ -208,7 +215,7 @@ addMovingMarker <- function(map,
     missing(lat),
     "addMovingMarker"
   )
-  
+
   duration <- leaflet::evalFormula(duration, data)
   options <- leaflet::filterNULL(c(options, movingOptions))
   map$dependencies <- c(map$dependencies, movingMarkerDependency)
@@ -242,7 +249,7 @@ addLegendLine <- function(map,
                           className = "info legend leaflet-control",
                           ...) {
   marginWidth <- max(0, (max(width) - width) / 2)
-  imgStyle = style(
+  imgStyle <- style(
     `vertical-align` = "middle",
     margin = "5px",
     `margin-right` = paste0(marginWidth, "px"),
@@ -256,13 +263,14 @@ addLegendLine <- function(map,
       "22line%22%20x1%3D%220%22%20x2%3D%229%22%20y1%3D%224.5%22",
       "%20y2%3D%224.5%22%20stroke%3D%22red%22%20stroke-opacity%3",
       "D%221%22%20fill-opacity%3D%221%22%3E%3C%2Fline%3E%0A%3C%",
-      "2Fsvg%3E"),
+      "2Fsvg%3E"
+    ),
     style = imgStyle,
     height = height,
     width = width
   )
   htmlElement <- div(imgTag, span(label, style = labelStyle))
-  
+
   leaflet::addControl(
     map,
     html = tagList(htmlElement),
@@ -276,17 +284,17 @@ as_likert <- function(x, scale = NULL) {
   if (length(scale) > 7) {
     stop(sprintf("Likert scale is too long (%s items)", length(x)))
   }
-  
+
   scale <- scale %||% c(
     "Strongly disagree", "Disagree", "Somewhat disagree",
     "Neutral",
     "Somewhat agree", "Agree", "Strongly agree"
   )
-  
+
   if (is.factor(scale)) {
     scale <- as.character(scale)
   }
-  
+
   values <- vapply(x, function(i) scale[i], FUN.VALUE = character(1))
   ordered(values, levels = scale)
 }

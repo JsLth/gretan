@@ -75,5 +75,6 @@ txts$main$insp <- list(
   shortitle = "Inspect data",
   tags = c(
     "inspect", "data", "multinational", "survey",
-    "table", "transpose", "download")
+    "table", "transpose", "download"
+  )
 )

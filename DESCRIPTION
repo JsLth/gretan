@@ -25,7 +25,8 @@ Imports:
     waiter,
     ggplot2,
     fansi,
-    reticulate
+    reticulate,
+    shinydisconnect
 Suggests: 
     spelling,
     testthat (>= 3.0.0),

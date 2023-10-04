@@ -1,16 +1,38 @@
 mod_cs2_ui <- function(id) {
   ns <- NS(id)
+  get_text <- dispatch_to_txt(id)
 
   bs4Dash::tabItem(
     "cs2",
     make_header(
-      title = "Case study 2: Coop\u00e9rnico \u2013 renewable energy-driven cooperative",
-      authors = c("Prepared by: Author A", "Author B"),
-      affil = list(
-        "Author A" = "Cleanwatts",
-        "Author B" = "Cleanwatts"
+      title = get_text("title"),
+      authors = get_text("authors"),
+      date = get_text("date"),
+      affil = get_text("affil")
+    ),
+    fluidRow(
+      col_6(
+        bs4Dash::box(
+          title = with_literata(get_text("introduction", "title")),
+          status = "primary",
+          width = 12,
+          get_text("introduction", "content")
+        ),
+        bs4Dash::box(
+          title = with_literata(get_text("findings", "title")),
+          status = "primary",
+          width = 12,
+          get_text("findings", "content")
+        )
       ),
-      date = "2023-mm-dd"
+      col_6(
+        bs4Dash::box(
+          title = with_literata(get_text("objectives", "title")),
+          status = "primary",
+          width = 12,
+          get_text("objectives", "content")
+        )
+      )
     )
   )
 }

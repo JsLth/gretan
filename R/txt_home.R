@@ -19,51 +19,93 @@ txts$main$home <- list(
           spatializing the data from the GRETA multinational survey and by studying
           their spillover, crossover, and cross-level interaction effects on the
           local, regional, national, and supranational levels. The tool facilitates
-          the geographic assessment of energy citizenship emergence."
-        ),
+          the geographic assessment of energy citizenship emergence."),
         p2("What can you find on GRETA Analytics?")
       ),
       tags$ul(
         tags$li(
           HTML(
             "Quickly and comfortably <b>explore, compare, inspect</b> and
-            download the data produced in GRETA's multinational survey.\u2800"),
-          actionLink("welcome-li-exp", label = "", icon = icon("arrow-right"))
+            download the data produced in GRETA's multinational survey."
+          ),
+          actionLink(
+            "welcome-li-exp",
+            label = "",
+            icon = icon("arrow-right"),
+            class = "home-arrow"
+          )
+        ),
+        tags$li(
+          HTML(
+            "Find out about the findings and policy recommendations of five
+            of the six GRETA case studies"
+          ),
+          actionLink(
+            "welcome-li-cs1",
+            label = "",
+            icon = icon("arrow-right"),
+            class = "home-arrow"
+          )
         ),
         tags$li(
           HTML("Understand how GRETA taxonomises the geographical composition
-               of energy citizenship across levels and domains.\u2800"),
-          actionLink("welcome-li-taxonomy", label = "", icon = icon("arrow-right"))
-        ),
-        tags$li(
-          HTML("Explore the energy landscapes and energy fragility in
-               the Pilastro-Roveri district of Bologna, Italy.\u2800"),
-          actionLink("welcome-li-cs1italy", label = "", icon = icon("arrow-right"))
+               of energy citizenship across levels and domains."),
+          actionLink(
+            "welcome-li-taxonomy",
+            label = "",
+            icon = icon("arrow-right"),
+            class = "home-arrow"
+          )
         ),
         tags$li(
           HTML("Comprehend the interactions between citizens, policymakers,
-               and businesses in a cross-country comparison.\u2800"),
-          actionLink("welcome-li-stakeholder", label = "", icon = icon("arrow-right"))
+               and businesses in a cross-country comparison."),
+          actionLink(
+            "welcome-li-stakeholder",
+            label = "",
+            icon = icon("arrow-right"),
+            class = "home-arrow"
+          )
         ),
         tags$li(
           HTML("Learn about your own role as a citizen in the energy
-               transition and how geography can impact it.\u2800"),
-          actionLink("welcome-li-persona", label = "", icon = icon("arrow-right"))
+               transition and how geography can impact it."),
+          actionLink(
+            "welcome-li-persona",
+            label = "",
+            icon = icon("arrow-right"),
+            class = "home-arrow"
+          )
         ),
         tags$li(
           HTML("Understand the multi-dimensional vulnerability to energy
-               poverty and how it compares across the EU.\u2800"),
-          actionLink("welcome-li-enpov", label = "", icon = icon("arrow-right"))
+               poverty and how it compares across the EU."),
+          actionLink(
+            "welcome-li-enpov",
+            label = "",
+            icon = icon("arrow-right"),
+            class = "home-arrow"
+          )
         ),
         tags$li(
           HTML("Find out how living environments steer the public social media
-               discourse on energy transition and environmental change.\u2800"),
-          actionLink("welcome-li-attitudes", label = "", icon = icon("arrow-right"))
+               discourse on energy transition and environmental change."),
+          actionLink(
+            "welcome-li-attitudes",
+            label = "",
+            icon = icon("arrow-right"),
+            class = "home-arrow"
+          )
         ),
         tags$li(
           HTML("Learn about the uneven geographies of energy research and
                its thematic versatility.\u2800"),
-          actionLink("welcome-li-research", label = "", icon = icon("arrow-right"))
+          actionLink(
+            "welcome-li-research",
+            label = "",
+            icon = icon("arrow-right"),
+            class = "home-arrow"
+          )
         )
       ),
       p2(
@@ -105,7 +147,8 @@ txts$main$home <- list(
           cities and internationally. You can consult the case studies by clicking
           on one of the pins"
         ),
-        icon("map-pin", style = "vertical-align: center"), "on the map to the right."),
+        icon("map-pin", style = "vertical-align: center"), "on the map to the right."
+      ),
       p2(
         HTML(
           "GRETA also launched a first-of-its kind <b>EU-wide empirical citizen
@@ -117,7 +160,7 @@ txts$main$home <- list(
           in the GRETA project, you can consult the"
         ),
         a("deliverables", href = "https://projectgreta.eu/resources/", class = "intext"),
-          "published on the official website."
+        "published on the official website."
       )
     )
   ),
@@ -221,9 +264,9 @@ txts$main$home <- list(
   funding = "GRETA HAS RECEIVED FUNDING FROM THE EUROPEAN UNION'S HORIZON
     2020 RESEARCH AND INNOVATION PROGRAMME UNDER GRANT AGREEMENT
     NO 101022317.",
-  disclaimer = HTML("GRETA Analytics is a
+  disclaimer = p(HTML("GRETA Analytics is a
     <a href='https://shiny.posit.co/'>Shiny app</a> developed by
     GESIS \u2013 Leibniz Institute for the Social Sciences in close
     collaboration with all GRETA partners and maintained by
-    <a href='mailto:jonas.lieth@gesis.org'>Jonas Lieth</a>")
+    <a href='mailto:jonas.lieth@gesis.org'>Jonas Lieth</a>"))
 )

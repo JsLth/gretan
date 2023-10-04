@@ -18,19 +18,19 @@ The app is deployed as an Electron app using [`electricShine`](https://github.co
 
 The app is built under the golem framework and installs like an R package:
 
-```         
+```r
 devtools::install_github("JsLth/gretan")
 library(gretan)
 ```
 
 The Shiny app can then be run using the following command:
 
-```         
+```r
 run_greta()
 ```
 
 ## Contact
 
-Jonas Lieth -- [jonas.lieth@gesis.org](mailto:jonas.lieth@gesis.org)
+Jonas Lieth – [jonas.lieth@gesis.org](mailto:jonas.lieth@gesis.org)
 
-GRETA project -- <https://projectgreta.eu/>
+GRETA project – <https://projectgreta.eu/>

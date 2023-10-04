@@ -1,7 +1,7 @@
 mod_exp_ui <- function(id, titles) {
   ns <- NS(id)
   cb <- cb_ext
-  
+
   get_text <- dispatch_to_txt(id)
 
   bs4Dash::tabItem(
@@ -116,7 +116,7 @@ mod_exp_server <- function(id, track = FALSE) {
   moduleServer(id, function(input, output, session) {
     cb <- cb_ext
     get_text <- dispatch_to_txt(session$ns(NULL))
-    
+
     popover2(
       "databoxHelp",
       title = "Select a topic",

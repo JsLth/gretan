@@ -73,16 +73,17 @@ mod_insp_server <- function(id) {
     invar <- reactive({
       entries <- cb_ext[cb_ext$title %in% input$title, ]
 
-      if (length(input$subitem) > 2) {
+      if (length(input$subitem) > 0) {
         entries <- entries[entries$subitem %in% input$subitem, ]
       }
 
-      if (length(input$option) > 2) {
+      if (length(input$option) > 0) {
         entries <- entries[entries$option %in% input$option, ]
       }
+
       entries$variable
     }) %>%
-      bindEvent(input$title, input$subitem, input$options)
+      bindEvent(input$title, input$subitem, input$option)
 
     observe({
       entry <- cb_ext[cb_ext$variable %in% invar(), ]
@@ -145,7 +146,14 @@ mod_insp_server <- function(id) {
       if (length(invar) > 0) {
         poly <- subset_mns(poly, invar)
       }
-      mns_pivot_longer(poly)
+      poly <- mns_pivot_longer(poly)
+      poly[["gid"]] <- NULL
+      for (col in colnames(poly)) {
+        if (is.character(poly[[col]]) && !col %in% "question") {
+          poly[[col]] <- as.factor(poly[[col]])
+        }
+      }
+      poly
     })
 
     dt <- reactive({

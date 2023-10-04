@@ -2,7 +2,7 @@ mod_enpov_ui <- function(id) {
   ns <- NS(id)
 
   get_text <- dispatch_to_txt(id)
-  
+
   bs4Dash::tabItem(
     "enpov",
     make_header(
@@ -15,8 +15,13 @@ mod_enpov_ui <- function(id) {
 }
 
 
-mod_enpov_server <- function(id) {
+mod_enpov_server <- function(id, tab) {
   moduleServer(id, function(input, output, session) {
-
+    observe({
+      if (identical(tab(), "enpov")) {
+        send_warning("Seems like there is no content yet! Please come back later.")
+      }
+    }) %>%
+      bindEvent(tab())
   })
 }

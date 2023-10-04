@@ -2,7 +2,7 @@ mod_stakeholder_ui <- function(id) {
   ns <- NS(id)
 
   get_text <- dispatch_to_txt(id)
-  
+
   bs4Dash::tabItem(
     "stakeholder",
     make_header(
