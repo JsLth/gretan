@@ -47,65 +47,37 @@ mod_stakeholder_ui <- function(id) {
       )
     ),
     fluidRow(
-      col_4(
-        div(style = "margin: auto", sliderInput(
-          ns("slider1"),
-          label = "Slider 1",
-          min = 0,
-          max = 100,
-          value = 20,
-          step = 1
-        ))
-      ),
-      col_4(
-        div(style = "margin: auto", sliderInput(
-          ns("slider2"),
-          label = "Slider 2",
-          min = 0,
-          max = 100,
-          value = 50,
-          step = 1
-        ))
-      ),
-      col_4(
-        div(style = "margin: auto", sliderInput(
-          ns("slider3"),
-          label = "Slider 3",
-          min = 0,
-          max = 100,
-          value = 20,
-          step = 1
-        ))
-      ),
-      col_4(
-        div(style = "margin: auto", sliderInput(
-          ns("slider4"),
-          label = "Slider 4",
-          min = 0,
-          max = 100,
-          value = 10,
-          step = 1
-        ))
-      ),
-      col_4(
-        div(style = "margin: auto", sliderInput(
-          ns("slider5"),
-          label = "Slider 5",
-          min = 0,
-          max = 100,
-          value = 50,
-          step = 1
-        ))
-      ),
-      col_4(
-        div(style = "margin: auto", sliderInput(
-          ns("slider6"),
-          label = "Slider 6",
-          min = 0,
-          max = 100,
-          value = 90,
-          step = 1
-        ))
+      bs4Dash::tabBox(
+        width = 12,
+        type = "tabs",
+        solidHeader = FALSE,
+        status = "primary",
+        tabPanel(
+          title = "Initial Yes values",
+          h4(with_literata("Product")),
+          fluidRow(
+            col_3(# autonomous_cars, sustainable_transport, cooperative_self_generation
+              shinyWidgets::noUiSliderInput(
+                ns("initial_yes__autonomous_-")
+              )
+            ),
+            col_3(
+              
+            ),
+            col_3(
+              
+            ),
+            col_3(
+              
+            )
+          )
+        ),
+        tabPanel(
+          title = "Intention weights"
+        ),
+        tabPanel(
+          title = "Survey topics"
+        )
       )
     )
   )

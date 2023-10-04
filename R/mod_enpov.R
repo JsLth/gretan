@@ -10,6 +10,40 @@ mod_enpov_ui <- function(id) {
       authors = get_text("authors"),
       affil = get_text("affil"),
       date = get_text("date")
+    ),
+    fluidRow(
+      col_6(
+        bs4Dash::box(
+          title = get_text("introduction", "title"),
+          status = "primary",
+          width = 12,
+          get_text("introduction", "content")
+        )
+      ),
+      col_6(
+        bs4Dash::tabBox(
+          title = get_text("how", "approach", "title"),
+          status = "primary",
+          width = 12,
+          solidHeader = FALSE,
+          type = "tabs",
+          side = "right",
+          tabPanel(
+            title = "Approach",
+            get_text("how", "approach", "content")
+          ),
+          tabPanel(
+            title = get_text("how", "variables", "title"),
+            DT::dataTableOutput(ns("variables"), height = "100%", width = "auto")
+          )
+        ),
+        bs4Dash::box(
+          title = get_text("references", "title"),
+          status = "primary",
+          width = 12,
+          get_text("references", "content")
+        )
+      )
     )
   )
 }
@@ -17,11 +51,32 @@ mod_enpov_ui <- function(id) {
 
 mod_enpov_server <- function(id, tab) {
   moduleServer(id, function(input, output, session) {
-    observe({
-      if (identical(tab(), "enpov")) {
-        send_warning("Seems like there is no content yet! Please come back later.")
-      }
-    }) %>%
-      bindEvent(tab())
+    get_text <- dispatch_to_txt(session$ns(NULL))
+    
+    output$variables <- DT::renderDataTable(
+      DT::datatable(
+        get_text("how", "variables", "content"),
+        class = c("compact", "order-column"),
+        extensions = c("RowGroup"),
+        style = "bootstrap4",
+        rownames = FALSE,
+        options = list(
+          autoWidth = TRUE,
+          columnDefs = list(list(targets = 0, visible = FALSE)),
+          pageLength = 5,
+          paging = FALSE,
+          searching = FALSE,
+          ordering = FALSE,
+          scrollY = 400,
+          rowGroup = list(
+            dataSrc = 0,
+            emptyDataGroup = NULL,
+            startRender = DT::JS("function(rows, group, level) {
+              return 'Subindex: ' + group
+            }")
+          )
+        )
+      )
+    )
   })
 }
