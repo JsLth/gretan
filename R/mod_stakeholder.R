@@ -56,20 +56,14 @@ mod_stakeholder_ui <- function(id) {
           title = "Initial Yes values",
           h4(with_literata("Product")),
           fluidRow(
-            col_3(# autonomous_cars, sustainable_transport, cooperative_self_generation
+            col_3( # autonomous_cars, sustainable_transport, cooperative_self_generation
               shinyWidgets::noUiSliderInput(
                 ns("initial_yes__autonomous_-")
               )
             ),
-            col_3(
-              
-            ),
-            col_3(
-              
-            ),
-            col_3(
-              
-            )
+            col_3(),
+            col_3(),
+            col_3()
           )
         ),
         tabPanel(

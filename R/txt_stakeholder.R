@@ -19,8 +19,8 @@ txts$main$stakeholder <- list(
   ),
   params = list(
     countries = c(
-      "EU", "Austria", "Belgium", "Denmark", "Germany", "Netherlands", 
-      "Poland", "Portugal", "Spain", "Romania", "Czechia", "Finland", 
+      "EU", "Austria", "Belgium", "Denmark", "Germany", "Netherlands",
+      "Poland", "Portugal", "Spain", "Romania", "Czechia", "Finland",
       "Hungary", "Greece", "France", "Ireland", "Italy"
     ),
     product = list(

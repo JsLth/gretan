@@ -52,7 +52,7 @@ mod_enpov_ui <- function(id) {
 mod_enpov_server <- function(id, tab) {
   moduleServer(id, function(input, output, session) {
     get_text <- dispatch_to_txt(session$ns(NULL))
-    
+
     output$variables <- DT::renderDataTable(
       DT::datatable(
         get_text("how", "variables", "content"),

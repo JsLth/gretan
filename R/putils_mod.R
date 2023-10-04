@@ -1,6 +1,6 @@
 plot_persona <- function(data, item = "cluster", diff = TRUE) {
   x <- y <- text <- ind <- values <- grp <- NULL
-  
+
   # Subset data
   data <- as.matrix(data[grepl(
     paste0(item, "*_[0-9]"),
