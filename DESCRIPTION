@@ -25,7 +25,6 @@ Imports:
     waiter,
     ggplot2,
     fansi,
-    shinipsum,
     reticulate
 Suggests: 
     spelling,

@@ -129,7 +129,7 @@ mod_persona_ui <- function(id) {
               shinyWidgets::pickerInput(
                 ns("option"),
                 label = "Option",
-                choices = as.list(setNames(
+                choices = as.list(stats::setNames(
                   seq(8),
                   names(get_text("steps", 2, "choices"))[-1]
                 ))
@@ -500,7 +500,7 @@ mod_persona_server <- function(id) {
       )
       
       outf <- app_sys("persona_data.csv")
-      write.table(
+      utils::write.table(
         .data,
         file = outf,
         sep = ",",
@@ -576,7 +576,7 @@ mod_persona_server <- function(id) {
       if (!is_mode) {
         if (identical(input$item, "cluster")) {
           choices <- lapply(get_text("results", "personas"), "[[", "name")
-          choices <- setNames(seq(8), choices)
+          choices <- stats::setNames(seq(8), choices)
           sel <- choices[results()[[1]]$name]
         } else {
           responses <- responses()
@@ -585,7 +585,7 @@ mod_persona_server <- function(id) {
             names(get_text("steps")[[idx]]$choices),
             "None selected"
           )
-          choices <- setNames(seq_along(choices), choices)
+          choices <- stats::setNames(seq_along(choices), choices)
           sel <- responses()[idx - 1]
           sel <- switch(as.character(sel),
             "-1" = choices["I do not know"],
@@ -691,7 +691,7 @@ mod_persona_server <- function(id) {
         if ("nuts2" %in% names(clusters)) clusters[["nuts2"]],
         paste(clusters[[var]], unit)
       )
-      largs <- setNames(largs, c("NUTS-0", "NUTS-1", "NUTS-2", lgd))
+      largs <- stats::setNames(largs, c("NUTS-0", "NUTS-1", "NUTS-2", lgd))
       labels <- do.call(align_in_table, largs)
       
       clusters <- sf::st_transform(clusters, 4326)

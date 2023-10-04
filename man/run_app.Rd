@@ -5,14 +5,7 @@
 \alias{run_greta}
 \title{Run GRETA Analytics}
 \usage{
-run_app(
-  log = NULL,
-  reactlog = FALSE,
-  set_python = NULL,
-  console = FALSE,
-  options = list(),
-  ...
-)
+run_app(log = NULL, reactlog = FALSE, options = list(), ...)
 
 run_greta(...)
 }
@@ -25,18 +18,12 @@ module IDs. In this case, logging is enabled only for these modules.}
 \item{reactlog}{Whether to enable logging using the reactlog package.
 For debugging purposes.}
 
-\item{set_python}{Python path to set before starting the app. This should
-preferably be done before running the function.}
-
-\item{console}{Whether to enable the in-app console. The console can be
-accessed by pressing Ctrl + Shift + D and is located in the main module.
-For debugging only!}
-
 \item{options}{Options for \code{\link[shiny]{shinyApp}}. Included for use
 in \code{electricShine}.}
 
 \item{...}{Further options to be passed to the app. Can be accessed using
-\code{getGretaOption}.}
+\code{getGretaOption}. Currently this includes the options \code{"console"},
+\code{"collect"} and \code{"github_available"}}
 }
 \description{
 Run GRETA Analytics
