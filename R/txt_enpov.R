@@ -40,7 +40,7 @@ txts$main$enpov <- list(
       content = p2(HTML("Measuring energy vulnerability is not easy and much work
         has been dedicated to finding reasonable approaches to derive relevant
         indicators. As energy vulnerability is inherently multi-dimensional
-        and subject to behavioral intricacies such as ‘hidden energy poverty’,
+        and subject to behavioral intricacies such as \u2018hidden energy poverty\u2019,
         there is no single indicator that can reasonably describe this
         phenomenon. As part of the GRETA multinational survey involving close
         to 10,000 citizens of the EU, countless indicators were gathered
