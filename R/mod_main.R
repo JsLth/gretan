@@ -43,7 +43,7 @@ mod_main_ui <- function(id) {
 }
 
 
-mod_main_server <- function(id, tab) {
+mod_main_server <- function(id, tab, changed) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -57,7 +57,7 @@ mod_main_server <- function(id, tab) {
     mod_cs4_server("cs4", tab = tab)
     mod_cs5_server("cs5", tab = tab)
     mod_taxonomy_server("taxonomy")
-    mod_stakeholder_server("stakeholder")
+    mod_stakeholder_server("stakeholder", tab = tab, changed = changed)
     mod_persona_server("persona")
     mod_enpov_server("enpov", tab = tab)
     mod_attitudes_server("attitudes", tab = tab)
