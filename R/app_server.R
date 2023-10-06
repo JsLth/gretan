@@ -5,12 +5,14 @@ app_server <- function(input, output, session) {
   # Start setup ----
   gopts <- getGretaOption()
   log_it("Starting app", priority = TRUE)
-  log_it(
-    "The following options are set:",
-    details = paste(names(gopts), gopts, sep = ": "),
-    priority = TRUE
-  )
-
+  if (length(gopts)) {
+    log_it(
+      "The following options are set:",
+      details = paste(names(gopts), gopts, sep = ": "),
+      priority = TRUE
+    )
+  }
+  
   onSessionEnded(fun = function() {
     log_it("Shutting down app")
     stopApp()
@@ -24,6 +26,15 @@ app_server <- function(input, output, session) {
     },
     label = "track tab selection"
   )
+  
+  changed <- reactive({
+    req(
+      !startsWith(input$changed, "."),
+      !endsWith(input$changed, "hidden"),
+      !startsWith(input$changed, "waiter")
+    )
+    input$changed
+  })
 
   # Hide help switch
   shinyjs::hideElement(selector = "ul.navbar-right")
@@ -173,5 +184,5 @@ app_server <- function(input, output, session) {
     bindEvent(getQueryString(session)$tab)
 
 
-  mod_main_server("main", tab = tabsel)
+  mod_main_server("main", tab = tabsel, changed = changed)
 }
