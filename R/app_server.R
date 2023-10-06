@@ -12,7 +12,7 @@ app_server <- function(input, output, session) {
       priority = TRUE
     )
   }
-  
+
   onSessionEnded(fun = function() {
     log_it("Shutting down app")
     stopApp()
@@ -26,7 +26,7 @@ app_server <- function(input, output, session) {
     },
     label = "track tab selection"
   )
-  
+
   changed <- reactive({
     req(
       !startsWith(input$changed, "."),

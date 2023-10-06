@@ -77,7 +77,7 @@ mod_stakeholder_server <- function(id, tab, changed) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     get_text <- dispatch_to_txt(ns(NULL))
-    
+
     observe({
       if (identical(input$control, "Initial yes")) {
         mod_stakeholder_initialyes_server("initialyes", get_text, tab, changed)
@@ -95,7 +95,7 @@ mod_stakeholder_server <- function(id, tab, changed) {
 
 mod_stakeholder_initialyes_ui <- function(id, get_text) {
   ns <- NS(id)
-  
+
   bs4Dash::tabsetPanel(
     vertical = TRUE,
     .list = lapply(
@@ -123,7 +123,7 @@ mod_stakeholder_initialyes_ui <- function(id, get_text) {
 
 mod_stakeholder_intentionweight_ui <- function(id, get_text) {
   ns <- NS(id)
-  
+
   bs4Dash::tabsetPanel(
     vertical = TRUE,
     .list = lapply(
@@ -163,7 +163,7 @@ mod_stakeholder_intentionweight_ui <- function(id, get_text) {
 
 mod_stakeholder_surveytopic_ui <- function(id, get_text) {
   ns <- NS(id)
-  
+
   bs4Dash::tabsetPanel(
     vertical = TRUE,
     .list = lapply(
@@ -230,7 +230,7 @@ mod_stakeholder_surveytopic_ui <- function(id, get_text) {
 mod_stakeholder_initialyes_server <- function(id, get_text, tab, changed) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-    
+
     lapply(get_text("params", "countries"), function(country) {
       out_id <- paste0("control__", country)
       output[[out_id]] <- renderUI({
@@ -306,12 +306,12 @@ mod_stakeholder_initialyes_server <- function(id, get_text, tab, changed) {
         )
       })
     })
-    
+
     platypus <- reactive({
       req(identical(isolate(get_tab()), "stakeholder"))
       reticulate::import("pLAtYpus_TNO")$GRETA_tool
     })
-    
+
     observe({
       changed <- changed()
       req(startsWith(changed, ns("initial_yes")))
@@ -323,7 +323,6 @@ mod_stakeholder_initialyes_server <- function(id, get_text, tab, changed) {
       )
       # plat$update_from_slider(changed, input[[changed]], parameters)
       # plat$get_output_tables(product, parameters)
-
     }) %>%
       bindEvent(changed())
   })
@@ -333,7 +332,7 @@ mod_stakeholder_initialyes_server <- function(id, get_text, tab, changed) {
 mod_stakeholder_intentionweight_server <- function(id, get_text, tab) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-    
+
     iw_topics <- get_text("params", "survey_topic", "intention_weight")
     lapply(iw_topics, function(category) {
       out_id <- paste0("control__", category)
