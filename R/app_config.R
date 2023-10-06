@@ -27,6 +27,13 @@ add_external_resources <- function() {
     if (isTRUE(getGretaOption("console", FALSE))) keys::useKeys(),
     tags$script(src = "www/textsearch.js"),
     tags$script(src = "www/loadingbutton.js"),
+    tags$script(
+      "$(document).on('shiny:inputchanged', function(event) {
+          if (event.name != 'changed') {
+            Shiny.setInputValue('changed', event.name);
+          }
+        });"
+    ),
     includeCSS(app_sys("app/www/styles.css")),
     tags$link(rel = "shortcut icon", href = "www/favicon.ico")
   )
