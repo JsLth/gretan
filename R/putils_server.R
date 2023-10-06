@@ -382,6 +382,14 @@ get_module_id <- function(session = getDefaultReactiveDomain()) {
   }
 }
 
+
+get_tab <- function(session = getDefaultReactiveDomain()) {
+  if (!is.null(session)) {
+    parseQueryString(session$clientData$url_search)$tab
+  }
+}
+
+
 # Alternative to cat that prints line breaks
 cat2 <- function(...) {
   cat(..., "\n")
