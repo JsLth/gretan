@@ -1,6 +1,6 @@
 <!-- badges: start -->
 
-[![R-CMD-check](https://github.com/JsLth/greta-gis-tool/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/JsLth/greta-gis-tool/actions/workflows/R-CMD-check.yaml) [![electron-build](https://github.com/JsLth/greta-gis-tool/actions/workflows/electron-build.yaml/badge.svg)](https://github.com/JsLth/greta-gis-tool/actions/workflows/electron-build.yaml) [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental) [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![R-CMD-check](https://github.com/JsLth/greta-gis-tool/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/JsLth/greta-gis-tool/actions/workflows/R-CMD-check.yaml) [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental) [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 <!-- badges: end -->
 
