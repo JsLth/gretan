@@ -49,7 +49,7 @@ app_server <- function(input, output, session) {
   )
 
   # Change tab after search ----
-  for (x in names(txts)) {
+  for (x in names(txts$main)) {
     with_eval_args(
       shinyjs::onclick(paste0("suggestion-", x), expr = bs4Dash::updateTabItems(
         session,
@@ -70,19 +70,20 @@ app_server <- function(input, output, session) {
   search_results <- reactive(
     {
       req(searchbox_input())
+      main <- txts$main
       search_term <- input$textSearch
-      idx <- vapply(txts, function(x) {
+      idx <- vapply(main, function(x) {
         x <- tag_to_text(x)
         any(grepl(search_term, x, ignore.case = TRUE))
       }, FUN.VALUE = logical(1))
-      idx <- names(txts)[idx]
+      idx <- names(main)[idx]
       options <- lapply(idx, function(x) {
-        opt <- txts[[x]]
+        opt <- main[[x]]
         opt <- span(
           id = paste0("suggestion-", x),
           class = "form-suggestion-row",
-          div(opt$icon, class = "form-suggestion-icon"),
-          div(opt$title)
+          div(icon(opt$icon), class = "form-suggestion-icon"),
+          div(opt$shortitle)
         )
         id <- paste0("search_option_", x)
         div(class = "form-suggestion", role = "option", opt)
@@ -103,7 +104,13 @@ app_server <- function(input, output, session) {
   observe(
     {
       has_input <- searchbox_input()
-
+      
+      removeUI(
+        selector = "div:has(> .form-suggestions)",
+        multiple = TRUE,
+        immediate = TRUE
+      )
+      
       if (has_input) {
         insertUI(
           selector = "#textSearch",
@@ -113,12 +120,6 @@ app_server <- function(input, output, session) {
             class = "form-results",
             execute_safely(search_results())
           )
-        )
-      } else {
-        removeUI(
-          selector = "div:has(> .form-suggestions)",
-          multiple = TRUE,
-          immediate = TRUE
         )
       }
     },
