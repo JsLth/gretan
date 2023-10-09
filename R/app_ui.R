@@ -242,7 +242,7 @@ app_ui <- function(theme = NULL,
       skin = "light",
       minified = TRUE,
       collapsed = TRUE,
-      expandOnHover = FALSE,
+      expandOnHover = TRUE,
       fixed = FALSE
     ),
     footer = bs4Dash::dashboardFooter(
