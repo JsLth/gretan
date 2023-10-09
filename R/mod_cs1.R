@@ -50,9 +50,9 @@ mod_cs1_ui <- function(id) {
             ## Info panel ----
             leafletPanel(
               ns("buildings-info"),
-              title = with_literata("Buildings in Pilastro-Roveri"),
+              title = with_literata(get_text("buildings_info", "title")),
               position = "topleft",
-              p(get_text("buildings_info")),
+              p(get_text("buildings_info", "content")),
               hr(),
               htmlOutput(ns("buildings-info-layer-desc")),
               hr(),
@@ -96,9 +96,9 @@ mod_cs1_ui <- function(id) {
             ## Info panel ----
             leafletPanel(
               inputId = ns("fragility-info"),
-              title = with_literata("Fragility in Pilastro-Roveri"),
+              title = with_literata(get_text("fragility_info", "title")),
               position = "topleft",
-              with_gothic(get_text("fragility_info")),
+              with_gothic(get_text("fragility_info", "content")),
               hr(),
               helpText(with_gothic("Data source: UNIBO, Tecnalia"))
             ),
@@ -144,7 +144,7 @@ mod_cs1_ui <- function(id) {
 }
 
 
-mod_cs1_server <- function(id, tab) {
+mod_cs1_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     get_text <- dispatch_to_txt(session$ns(NULL))
 
@@ -194,7 +194,7 @@ mod_cs1_server <- function(id, tab) {
 
     ## Parameters ----
     bparams <- reactive({
-      req(identical(tab(), "cs1"))
+      req(identical(get_tab(), "cs1"))
       dt <- isolate(buildings())
       layer <- input$`buildings-layer`
 
@@ -249,7 +249,7 @@ mod_cs1_server <- function(id, tab) {
     ## Render ----
     output$buildings <- leaflet::renderLeaflet({
       params <- isolate(bparams())
-
+      
       leaflet::leaflet() %>%
         leaflet::setView(lng = 11.399926, lat = 44.507145, zoom = 15) %>%
         leaflet::addProviderTiles(leaflet::providers$OpenStreetMap) %>%
@@ -279,7 +279,8 @@ mod_cs1_server <- function(id, tab) {
             suffix = get_text("dict", "buildings", params$layer, "lab")
           )
         )
-    })
+    }) %>%
+      bindEvent(bparams())
 
     ## Select layer ----
     updates <- 0
@@ -344,7 +345,7 @@ mod_cs1_server <- function(id, tab) {
 
     ## Parameters ----
     fparams <- reactive({
-      req(identical(tab(), "cs1"))
+      req(identical(get_tab(), "cs1"))
       dt <- isolate(fragility())
       layer <- input$fragility_layer
 
@@ -377,7 +378,7 @@ mod_cs1_server <- function(id, tab) {
     ## Render ----
     output$fragility <- leaflet::renderLeaflet({
       params <- isolate(fparams())
-
+      
       leaflet::leaflet() %>%
         leaflet::setView(lng = 11.399926, lat = 44.507145, zoom = 15) %>%
         leaflet::addProviderTiles(leaflet::providers$OpenStreetMap) %>%
@@ -407,7 +408,8 @@ mod_cs1_server <- function(id, tab) {
             suffix = get_text("dict", "fragility", params$layer, "lab")
           )
         )
-    })
+    }) %>%
+      bindEvent(fparams())
 
     ## Select layer ----
     fupdates <- 0
@@ -423,7 +425,7 @@ mod_cs1_server <- function(id, tab) {
       }
 
       params <- fparams()
-
+      
       leaflet::leafletProxy("fragility") %>%
         leaflet::clearShapes() %>%
         leaflet::clearControls() %>%

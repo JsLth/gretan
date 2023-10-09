@@ -43,7 +43,7 @@ mod_cs3_ui <- function(id) {
   )
 }
 
-mod_cs3_server <- function(id, tab) {
+mod_cs3_server <- function(id) {
   moduleServer(id, function(input, output, session) {
 
   })

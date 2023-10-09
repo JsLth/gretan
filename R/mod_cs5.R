@@ -93,7 +93,7 @@ mod_cs5_ui <- function(id) {
 }
 
 
-mod_cs5_server <- function(id, tab) {
+mod_cs5_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     get_text <- dispatch_to_txt(session$ns(NULL))
 
@@ -109,14 +109,14 @@ mod_cs5_server <- function(id, tab) {
 
     output[["buildings-info-layer-desc"]] <- renderUI({
       layer <- input$`buildings-layer`
-      p(get_text("dict", layer))
+      p(get_text("dict", "buildings", layer))
     })
 
     labels <- NULL
 
     ## Parameters ----
     params <- reactive({
-      req(identical(tab(), "cs5"))
+      req(identical(get_tab(), "cs5"))
       dt <- isolate(buildings())
       layer <- input$`buildings-layer`
 
@@ -192,7 +192,8 @@ mod_cs5_server <- function(id, tab) {
             suffix = get_text("dict", "buildings", params$layer, "lab")
           )
         )
-    })
+    }) %>%
+      bindEvent(params())
 
     ## Select layer ----
     updates <- 0

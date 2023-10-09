@@ -15,13 +15,13 @@ mod_research_ui <- function(id) {
 }
 
 
-mod_research_server <- function(id, tab) {
+mod_research_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     observe({
-      if (identical(tab(), "research")) {
+      if (identical(get_tab(), "research")) {
         send_warning("Seems like there is no content yet! Please come back later.")
       }
     }) %>%
-      bindEvent(tab())
+      bindEvent(get_tab())
   })
 }

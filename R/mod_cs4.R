@@ -48,7 +48,7 @@ mod_cs4_ui <- function(id) {
   )
 }
 
-mod_cs4_server <- function(id, tab) {
+mod_cs4_server <- function(id) {
   moduleServer(id, function(input, output, session) {
 
   })

@@ -49,7 +49,7 @@ mod_enpov_ui <- function(id) {
 }
 
 
-mod_enpov_server <- function(id, tab) {
+mod_enpov_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     get_text <- dispatch_to_txt(session$ns(NULL))
 
