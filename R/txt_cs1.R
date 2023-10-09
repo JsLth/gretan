@@ -155,7 +155,7 @@ txts$main$cs1 <- list(
       uses (See \u201cUse\u201d layer description) are excluded from the
       simulation and show a 0 value."
     ),
-    heat_demand_m2 = HTML(
+    heating_demand_m2 = HTML(
       "The <b>heating demand</b> layer shows the heat demand of the buildings, which
       includes the needs for heating and domestic hot water, calculated in the
       ENERKAD\u00ae Tool simulation. Some of the building uses (See \u201cUse\u201d
@@ -167,15 +167,15 @@ txts$main$cs1 <- list(
       in tertiary buildings"
     )
   ),
-  fragility_info = list(
-    title = "Fragility",
+  buildings_info = list(
+    title = "Buildings in Pilastro-Roveri",
     content = "This map presents the energy models for buildings in,
       Pilastro-Roveri. Hover over individual buildings to learn more
       about their energy-related properties. Using the controls on
       the right side of the map you can also switch between layers"
   ),
-  buildings_info = list(
-    title = "Buildings",
+  fragility_info = list(
+    title = "Fragility in Pilastro-Roveri",
     content = "This map depicts the fragility index in Pilastro-Roveri
       consisting of a demographic, social and economic dimension.
       On the right you can also select additional
