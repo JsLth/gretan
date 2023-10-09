@@ -73,18 +73,18 @@ mod_stakeholder_ui <- function(id) {
 }
 
 
-mod_stakeholder_server <- function(id, tab, changed) {
+mod_stakeholder_server <- function(id, changed) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     get_text <- dispatch_to_txt(ns(NULL))
 
     observe({
       if (identical(input$control, "Initial yes")) {
-        mod_stakeholder_initialyes_server("initialyes", get_text, tab, changed)
+        mod_stakeholder_initialyes_server("initialyes", get_text, changed)
       } else if (identical(input$control, "Intention weights")) {
-        mod_stakeholder_intentionweight_server("intentionweight", get_text, tab)
+        mod_stakeholder_intentionweight_server("intentionweight", get_text)
       } else if (identical(input$control, "Survey topic")) {
-        mod_stakeholder_surveytopic_server("surveytopic", get_text, tab)
+        mod_stakeholder_surveytopic_server("surveytopic", get_text)
       }
     }) %>%
       bindEvent(input$control)
@@ -227,7 +227,7 @@ mod_stakeholder_surveytopic_ui <- function(id, get_text) {
 
 
 
-mod_stakeholder_initialyes_server <- function(id, get_text, tab, changed) {
+mod_stakeholder_initialyes_server <- function(id, get_text, changed) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -309,7 +309,10 @@ mod_stakeholder_initialyes_server <- function(id, get_text, tab, changed) {
 
     platypus <- reactive({
       req(identical(isolate(get_tab()), "stakeholder"))
-      reticulate::import("pLAtYpus_TNO")$GRETA_tool
+      if (FALSE)
+        reticulate::import("pLAtYpus_TNO")$GRETA_tool
+      else
+        reticulate::import_from_path("GRETA_tool", app_sys("extdata/pLAtYpus_TNO"))
     })
 
     observe({
@@ -319,17 +322,18 @@ mod_stakeholder_initialyes_server <- function(id, get_text, tab, changed) {
       changed <- substr(changed, nchar(ns(NULL)) + 2, nchar(changed))
       product <- strsplit(changed, "__")[[1]][2]
       parameters <- plat$cook$parameters_from_TOML(
-        app_sys("extdata/platypus-1.0/src/pLAtYpus/pLAtYpus.toml")
+        app_sys("extdata/pLAtYpus_TNO/pLAtYpus.toml")
       )
+      browser()
       # plat$update_from_slider(changed, input[[changed]], parameters)
       # plat$get_output_tables(product, parameters)
     }) %>%
-      bindEvent(changed())
+      bindEvent(changed(), ignoreInit = TRUE)
   })
 }
 
 
-mod_stakeholder_intentionweight_server <- function(id, get_text, tab) {
+mod_stakeholder_intentionweight_server <- function(id, get_text) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -414,7 +418,7 @@ mod_stakeholder_intentionweight_server <- function(id, get_text, tab) {
 }
 
 
-mod_stakeholder_surveytopic_server <- function(id, get_text, tab) {
+mod_stakeholder_surveytopic_server <- function(id, get_text) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     st_topics <- get_text("params", "survey_topic", "survey_topic")
