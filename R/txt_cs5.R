@@ -1,7 +1,7 @@
 txts$main$cs5 <- list(
   shortitle = "UR Beroa, Spain",
   title = "Case study: UR BEROA \u2013 energy efficiency-driven cooperative",
-  date = "2023-mm-dd",
+  date = "2023-10-04",
   icon = "map-pin",
   tags = c(
     "case", "study", "studies", "UR Beroa", "San Sebastian", "Basque", "Spain",
@@ -18,6 +18,34 @@ txts$main$cs5 <- list(
       number_of_dw = list(title = "Number of dwellings", lab = ""),
       a_heat_dem_m2 = list(title = "Heating demand", lab = " kWh/m\u00b2")
     )
+  ),
+  introduction = list(
+    title = "Introduction",
+    content = p2(HTML(
+      "The case study analyses UR BEROA, an energy cooperative located in
+      Spain, focusing on the different factors affecting citizens'
+      preferences and engagement to join an energy cooperative. More
+      precisely, the case study analyses how different factors and the
+      interactions among actors affect the emergence of energy citizenship
+      and the level of engagement to energy citizenship in the case of
+      UR BEROA.<br>
+      UR BEROA is an energy cooperative providing energy to its 550
+      members living at Bera Bera neighbourhood in Donostia-San Sebastian,
+      Spain. The cooperative was established in 1985 for the purpose of
+      providing district heating and hot water for the residents of the
+      neighbourhood.<br>
+      Over the years, UR BEROA has successfully implemented solutions to
+      produce cleaner energy and currently, the facilities consist of
+      three natural gas boilers, a cogeneration engine, a biomass boiler,
+      and solar panels. UR BEROA is currently taking another step towards
+      decarbonisation with the installation of photovoltaic (PV) system
+      providing electricity to around 100 households.<br>
+      Overall, the goal of the cooperative is to drive a shift towards
+      higher level of decarbonisation and energy efficiency. The
+      cooperative aims to significantly grow its member base, increase
+      the energy services it provides, and implement collective renewable
+      energy-based self-consumption."
+    ))
   ),
   energy_model = list(
     title = "Energy modelling",
