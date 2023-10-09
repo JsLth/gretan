@@ -104,13 +104,13 @@ app_server <- function(input, output, session) {
   observe(
     {
       has_input <- searchbox_input()
-      
+
       removeUI(
         selector = "div:has(> .form-suggestions)",
         multiple = TRUE,
         immediate = TRUE
       )
-      
+
       if (has_input) {
         insertUI(
           selector = "#textSearch",

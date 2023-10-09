@@ -249,7 +249,7 @@ mod_cs1_server <- function(id) {
     ## Render ----
     output$buildings <- leaflet::renderLeaflet({
       params <- isolate(bparams())
-      
+
       leaflet::leaflet() %>%
         leaflet::setView(lng = 11.399926, lat = 44.507145, zoom = 15) %>%
         leaflet::addProviderTiles(leaflet::providers$OpenStreetMap) %>%
@@ -378,7 +378,7 @@ mod_cs1_server <- function(id) {
     ## Render ----
     output$fragility <- leaflet::renderLeaflet({
       params <- isolate(fparams())
-      
+
       leaflet::leaflet() %>%
         leaflet::setView(lng = 11.399926, lat = 44.507145, zoom = 15) %>%
         leaflet::addProviderTiles(leaflet::providers$OpenStreetMap) %>%
@@ -425,7 +425,7 @@ mod_cs1_server <- function(id) {
       }
 
       params <- fparams()
-      
+
       leaflet::leafletProxy("fragility") %>%
         leaflet::clearShapes() %>%
         leaflet::clearControls() %>%

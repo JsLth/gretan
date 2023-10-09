@@ -309,10 +309,11 @@ mod_stakeholder_initialyes_server <- function(id, get_text, changed) {
 
     platypus <- reactive({
       req(identical(isolate(get_tab()), "stakeholder"))
-      if (FALSE)
+      if (FALSE) {
         reticulate::import("pLAtYpus_TNO")$GRETA_tool
-      else
+      } else {
         reticulate::import_from_path("GRETA_tool", app_sys("extdata/pLAtYpus_TNO"))
+      }
     })
 
     observe({
