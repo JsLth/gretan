@@ -77,14 +77,58 @@ mod_stakeholder_server <- function(id, changed) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     get_text <- dispatch_to_txt(ns(NULL))
-
+    
+    platypus <- reactive({
+      req(identical(isolate(get_tab()), "stakeholder"))
+      if (TRUE)
+        reticulate::import_from_path(
+          "GRETA_tool",
+          app_sys("extdata/stakeholder/src")
+        )
+      #reticulate::import("pLAtYpus_TNO")$GRETA_tool
+    })
+    
+    parameters <- reactive({
+      plat <- platypus()
+      params <- plat$cook$parameters_from_TOML(
+        app_sys("extdata/stakeholder/pLAtYpus.toml")
+      )
+      input_dir <- app_sys("extdata/stakeholder/input")
+      output_dir <- app_sys("extdata/stakeholder/output")
+      params$files$output_folder <- output_dir
+      params$survey$data$output$output_folder <- input_dir
+      params$survey$data$source$source_folder <- input_dir
+      params$survey$data
+      if (!dir.exists(input_dir)) dir.create(input_dir)
+      if (!dir.exists(output_dir)) dir.create(output_dir)
+      params
+    })
+    
     observe({
       if (identical(input$control, "Initial yes")) {
-        mod_stakeholder_initialyes_server("initialyes", get_text, changed)
+        mod_stakeholder_initialyes_server(
+          "initialyes",
+          get_text = get_text,
+          changed = changed,
+          plat = platypus,
+          params = parameters
+        )
       } else if (identical(input$control, "Intention weights")) {
-        mod_stakeholder_intentionweight_server("intentionweight", get_text)
+        mod_stakeholder_intentionweight_server(
+          "intentionweight",
+          get_text,
+          changed = changed,
+          plat = platypus,
+          params = parameters
+        )
       } else if (identical(input$control, "Survey topic")) {
-        mod_stakeholder_surveytopic_server("surveytopic", get_text)
+        mod_stakeholder_surveytopic_server(
+          "surveytopic",
+          get_text,
+          changed = changed,
+          plat = platypus,
+          params = parameters
+        )
       }
     }) %>%
       bindEvent(input$control)
@@ -227,7 +271,7 @@ mod_stakeholder_surveytopic_ui <- function(id, get_text) {
 
 
 
-mod_stakeholder_initialyes_server <- function(id, get_text, changed) {
+mod_stakeholder_initialyes_server <- function(id, get_text, changed, plat, params) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -306,35 +350,27 @@ mod_stakeholder_initialyes_server <- function(id, get_text, changed) {
         )
       })
     })
-
-    platypus <- reactive({
-      req(identical(isolate(get_tab()), "stakeholder"))
-      if (FALSE) {
-        reticulate::import("pLAtYpus_TNO")$GRETA_tool
-      } else {
-        reticulate::import_from_path("GRETA_tool", app_sys("extdata/pLAtYpus_TNO"))
-      }
-    })
-
-    observe({
+    
+    reactive({
       changed <- changed()
       req(startsWith(changed, ns("initial_yes")))
-      plat <- platypus()
+      plat <- isolate(plat())
+      params <- isolate(params())
       changed <- substr(changed, nchar(ns(NULL)) + 2, nchar(changed))
       product <- strsplit(changed, "__")[[1]][2]
-      parameters <- plat$cook$parameters_from_TOML(
-        app_sys("extdata/pLAtYpus_TNO/pLAtYpus.toml")
-      )
-      browser()
-      # plat$update_from_slider(changed, input[[changed]], parameters)
-      # plat$get_output_tables(product, parameters)
+      
+      plat$reset_to_survey(params)
+      plat$update_from_slider(changed, input[[changed]], params)
+      tables <- plat$get_output_tables(product, params)
+      
+      list(aggr = tables[[1]], by_country = tables[[2]])
     }) %>%
       bindEvent(changed(), ignoreInit = TRUE)
   })
 }
 
 
-mod_stakeholder_intentionweight_server <- function(id, get_text) {
+mod_stakeholder_intentionweight_server <- function(id, get_text, changed, plat, params) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -419,7 +455,7 @@ mod_stakeholder_intentionweight_server <- function(id, get_text) {
 }
 
 
-mod_stakeholder_surveytopic_server <- function(id, get_text) {
+mod_stakeholder_surveytopic_server <- function(id, get_text, changed, plat, params) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     st_topics <- get_text("params", "survey_topic", "survey_topic")
