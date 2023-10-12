@@ -68,7 +68,7 @@ mod_stakeholder_ui <- function(id) {
         status = "primary",
         width = 6,
         class = "tight-map-box",
-        #style = "margin-bottom: -10px;",
+        # style = "margin-bottom: -10px;",
         leaflet::leafletOutput(ns("map"), height = 600, width = "100%")
       )
     ),
@@ -113,25 +113,25 @@ mod_stakeholder_server <- function(id, tab) {
     reset <- reactiveVal(FALSE)
     changed <- reactive(input$changed)
     init <- reactiveValues(sliders = list())
-    
+
     init_waiter <- waiter::Waiter$new(
       id = ns(c("plot", "map")),
       html = tagList(waiter::spin_pulse(), h4("Updating database...")),
       color = "rgba(179, 221, 254, 1)"
     )
-    
+
     waiter <- waiter::Waiter$new(
       id = ns(c("plot", "map")),
       html = tagList(waiter::spin_pulse(), h4("Loading figure...")),
       color = "rgba(179, 221, 254, 1)"
     )
-    
+
     # Import platypus ----
     platypus <- reactive({
       req(identical(get_tab(), "stakeholder"))
       reticulate::import("pLAtYpus_TNO", convert = FALSE)$GRETA_tool
     })
-    
+
     # Load parameters ----
     parameters <- reactive({
       plat <- platypus()
@@ -147,7 +147,7 @@ mod_stakeholder_server <- function(id, tab) {
       if (!dir.exists(output_dir)) dir.create(output_dir)
       params
     })
-    
+
     # Handle reset ----
     observe({
       input$reset
@@ -159,7 +159,7 @@ mod_stakeholder_server <- function(id, tab) {
       reset(reset() + 1)
     }) %>%
       bindEvent(tab(), input$reset)
-    
+
     # Dispatch to submodules ----
     init_ctrl <- rep(FALSE, 3)
     observe({
@@ -196,8 +196,8 @@ mod_stakeholder_server <- function(id, tab) {
       }
     }) %>%
       bindEvent(input$control)
-    
-    
+
+
     # Collect output tables ----
     tables <- reactive({
       plat <- isolate(platypus())
@@ -215,8 +215,8 @@ mod_stakeholder_server <- function(id, tab) {
         input$plot_control_product,
         input$plot_control_stakeholder
       )
-    
-    
+
+
     # Render engagement plot ----
     init_plot <- FALSE
     output$plot <- plotly::renderPlotly({
@@ -227,14 +227,14 @@ mod_stakeholder_server <- function(id, tab) {
       req(startsWith(changed(), ns(allowed)), cancelOutput = TRUE)
       waiter$show()
       on.exit(waiter$hide())
-      
+
       tables <- execute_safely(tables())
       country <- input$plot_control_country
       table <- reticulate::py_to_r(tables[[2]][[input$plot_control_country]])
       names(table) <- c("Time", "Citizens", "Business", "Government")
       table <- cbind(Time = table$Time, stack(table, select = names(table)[-1]))
       names(table) <- c("Time", "Engagement level", "Stakeholder")
-      
+
       p <- ggplot2::ggplot(data = table) +
         ggplot2::aes(
           x = Time,
@@ -257,7 +257,7 @@ mod_stakeholder_server <- function(id, tab) {
             colour = "white"
           )
         )
-      
+
       plotly::ggplotly(p, tooltip = c("x", "y", "group")) %>%
         plotly::config(displayModeBar = FALSE) %>%
         plotly::layout(
@@ -266,18 +266,18 @@ mod_stakeholder_server <- function(id, tab) {
           yaxis = list(fixedrange = TRUE)
         )
     })
-    
-    
+
+
     # Render engagement map ----
     output$map <- leaflet::renderLeaflet({
       allowed <- c(
-        "initialyes", "intentionweight", "surveytopic", 
+        "initialyes", "intentionweight", "surveytopic",
         "plot_control_stakeholder", "plot_control_product", "reset"
       )
       req(startsWith(changed(), ns(allowed)), cancelOutput = TRUE)
       waiter$show()
       on.exit(waiter$hide())
-      
+
       tables <- execute_safely(tables())
       table <- tables[[1]]
       table <- merge(
@@ -287,7 +287,7 @@ mod_stakeholder_server <- function(id, tab) {
         by.y = "nuts0"
       )
       table <- sf::st_transform(sf::st_as_sf(table), 4326)
-      
+
       stakeholder <- input$plot_control_stakeholder
       pal <- leaflet::colorNumeric("Oranges", domain = table[[stakeholder]])
       leaflet::leaflet(
@@ -297,7 +297,7 @@ mod_stakeholder_server <- function(id, tab) {
         leaflet::addTiles() %>%
         leaflet::setView(lng = 8, lat = 55, zoom = 3.5) %>%
         leaflet::addPolygons(
-          fillColor = ~pal(table[[stakeholder]]),
+          fillColor = ~ pal(table[[stakeholder]]),
           fillOpacity = 0.7,
           weight = 1,
           color = "black",
@@ -317,7 +317,7 @@ mod_stakeholder_server <- function(id, tab) {
           title = "Long term<br>engagement"
         )
     })
-    
+
     outputOptions(output, "map", suspendWhenHidden = FALSE)
     outputOptions(output, "plot", suspendWhenHidden = FALSE)
   })
@@ -543,8 +543,8 @@ mod_stakeholder_initialyes_server <- function(id,
         )
       })
     })
-    
-    
+
+
     observe({
       changed <- changed()
       req(startsWith(changed, ns("initial_yes")))
@@ -563,7 +563,7 @@ mod_stakeholder_initialyes_server <- function(id,
 }
 
 
-mod_stakeholder_intentionweight_server <- function(id, 
+mod_stakeholder_intentionweight_server <- function(id,
                                                    get_text,
                                                    changed,
                                                    plat,
@@ -649,8 +649,8 @@ mod_stakeholder_intentionweight_server <- function(id,
         )
       }))
     })
-    
-    
+
+
     observe({
       changed <- changed()
       req(startsWith(changed, ns("intention_weight")))
@@ -676,7 +676,7 @@ mod_stakeholder_surveytopic_server <- function(id,
                                                init) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-    
+
     st_topics <- get_text("params", "survey_topic", "survey_topic")
     countries <- get_text("params", "countries")
     decisions <- c("adopt", "leave")
@@ -760,8 +760,8 @@ mod_stakeholder_surveytopic_server <- function(id,
         })
       })
     })
-    
-    
+
+
     observe({
       changed <- changed()
       req(startsWith(changed, ns("surveytopic")))
