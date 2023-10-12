@@ -26,15 +26,7 @@ app_server <- function(input, output, session) {
     },
     label = "track tab selection"
   )
-
-  changed <- reactive({
-    req(
-      !startsWith(input$changed, "."),
-      !endsWith(input$changed, "hidden"),
-      !startsWith(input$changed, "waiter")
-    )
-    input$changed
-  })
+  
 
   # Hide help switch
   shinyjs::hideElement(selector = "ul.navbar-right")
@@ -185,5 +177,5 @@ app_server <- function(input, output, session) {
     bindEvent(getQueryString(session)$tab)
 
 
-  mod_main_server("main", tab = tabsel, changed = changed)
+  mod_main_server("main", tab = tabsel)
 }
