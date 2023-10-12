@@ -5,6 +5,10 @@
   src: url('https://use.typekit.net/af/e6380d/00000000000000007735a1cc/30/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n4&v=3')
 }
 
+html.shiny-busy .container-fluid {
+  cursor: wait;
+}
+
 p.fancy > a {
   color: #000;
   border-bottom: 1px solid black;
@@ -165,6 +169,11 @@ a.logo {
 
 #main-persona-mapbox .card-body, #main-persona-mapbox .card-header {
   padding: 0em;
+}
+
+#main-stakeholder-results_box .card-body {
+  padding: 0em;
+  margin-bottom: -10px;
 }
 
 .tight-map-box {
