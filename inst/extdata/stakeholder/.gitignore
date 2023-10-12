@@ -1,0 +1,4 @@
+input
+src/__pycache__
+output/*.csv
+output/*.pkl
