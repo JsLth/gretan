@@ -24,6 +24,7 @@ Imports:
     viridisLite,
     waiter,
     ggplot2,
+    plotly,
     fansi,
     reticulate,
     shinydisconnect
