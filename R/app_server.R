@@ -26,7 +26,7 @@ app_server <- function(input, output, session) {
     },
     label = "track tab selection"
   )
-  
+
 
   # Hide help switch
   shinyjs::hideElement(selector = "ul.navbar-right")
