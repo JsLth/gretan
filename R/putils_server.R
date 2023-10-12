@@ -490,6 +490,10 @@ getGretaOption <- function(name, default = NULL) {
 
 protect_html <- function(x) HTML(as.character(x))
 
+quietly <- function(x) capture.output(
+  return(suppressMessages(suppressWarnings(x)))
+)
+
 #' Riffle-merges two vectors, possibly of different lengths
 #'
 #' Takes two vectors and interleaves the elements.  If one vector is longer than
