@@ -496,6 +496,17 @@ quietly <- function(x) {
   )
 }
 
+match_regex <- function(pattern, text, ...) {
+  regmatches(text, regexec(pattern, text, ...))
+}
+
+to_title <- function(x) {
+  substr(x, 1, 1) <- toupper(substr(x, 1, 1))
+  x
+}
+
+rm_ns <- function(id, ns) substr(id, nchar(ns(NULL)) + 2, nchar(id))
+
 #' Riffle-merges two vectors, possibly of different lengths
 #'
 #' Takes two vectors and interleaves the elements.  If one vector is longer than
