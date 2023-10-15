@@ -10,7 +10,7 @@ if (Sys.info()[["user"]] == "shiny") {
     reticulate::virtualenv_create(envname = envdir, python = Sys.getenv("PYTHON_PATH"))
     reticulate::virtualenv_install(envdir, packages = deps, ignore_installed = TRUE)
   }
-  
+
   reticulate::use_virtualenv(virtualenv = envdir, required = TRUE)
 }
 
