@@ -24,7 +24,7 @@ The app is deployed as an Electron app using [`{electricShine}`](https://github.
 
 ### Running in R
 
-The app is built under the [`{golem}`] framework and installs like an R package:
+The app is built under the `{golem}` framework and installs like an R package:
 
 ```r
 devtools::install_github("JsLth/gretan")
