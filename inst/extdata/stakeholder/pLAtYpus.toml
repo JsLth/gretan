@@ -5,6 +5,7 @@
 [files]
 output_folder = 'output'
 groupfile_name = 'pLAtYpus'
+groupfile_name_only_survey = 'pLAtYpus_only_survey'
 survey_topics_table_name = 'survey_topics'
 
 
@@ -13,9 +14,9 @@ dpi = 240
 # Indicate below if you want to save your (Matplotlib) figures
 # In the given formats, and the dpi you want to use (common for all)
 [files.figures.outputs]
-png = true
+png = false
 pdf = false
-svg = true
+svg = false
 eps = false
 
 
