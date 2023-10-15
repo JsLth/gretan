@@ -15,11 +15,11 @@ mod_stakeholder_ui <- function(id) {
       #main-stakeholder-control .irs-min {
         visibility: hidden !important;
       }
-      
+
       #main-stakeholder-control .js-irs-0 .irs .irs-min:after {
         content: '0' !important;
       }
-      
+
       #main-stakeholder-control .irs-min:after {
         visibility: visibile !important;
         display: block;
@@ -191,7 +191,7 @@ mod_stakeholder_server <- function(id, tab) {
       reset(TRUE)
     }) %>%
       bindEvent(input$reset)
-    
+
     observe({
       req(identical(tab(), "stakeholder"))
       shinyjs::click("reset")
@@ -308,7 +308,7 @@ mod_stakeholder_server <- function(id, tab) {
       )
 
 
-    
+
     # Render engagement map ----
     output$map <- leaflet::renderLeaflet({
       allowed <- c(
@@ -316,12 +316,12 @@ mod_stakeholder_server <- function(id, tab) {
         "surveytopic-survey_topic",
         "plot_control_stakeholder", "plot_control_product"
       )
-      
+
       is_valid_input <- any(startsWith(changed(), ns(allowed)))
       is_init <- !identical(input[[rm_ns(changed(), ns)]], "N/A")
       is_reset <- isTRUE(reset())
       req((is_valid_input && is_init) || is_reset, cancelOutput = TRUE)
-      
+
       reset(FALSE)
       mwaiter$show()
 
