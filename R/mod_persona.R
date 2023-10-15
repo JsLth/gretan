@@ -480,9 +480,12 @@ mod_persona_server <- function(id) {
 
       # Predict persona from input
       pred <- c(model$predict(features))
+      names(pred) <- unlist(
+        lapply(get_text("results", "personas"), "[[", "name")
+      )
 
       # Extract and order personas
-      top_personas <- which(order(pred, decreasing = TRUE) <= 3)
+      top_personas <- order(pred, decreasing = TRUE)[1:3]
       top_prob <- pred[top_personas]
       top_order <- order(top_prob, decreasing = TRUE)
       top_personas <- top_personas[top_order]
@@ -539,21 +542,29 @@ mod_persona_server <- function(id) {
 
     ## Render persona carousel ----
     output$type <- renderUI(execute_safely({
-      items <- lapply(results(), function(x) {
+      results <- results()
+      items <- lapply(seq_along(results), function(i) {
+        x <- results[[i]]
         bs4Dash::carouselItem(
           fluidRow(
             col_1(),
             col_5(
               h4(
-                sprintf("With a chance of %s %% you are...", x$p * 100),
+                switch(
+                  i,
+                  "Our models show that you are most likely to be...",
+                  "It is also possible that you are...",
+                  "Although less likely, you could also be..."
+                ),
                 style = style(`text-align` = "center")
               ),
               h1(x$name, style = "text-align: center;"),
               p(x$desc, style = style(`text-align` = "justify")),
               x$tips,
-              div(
+              p(
                 get_text("results", "campaign"),
-                style = "margin-bottom: 50px;"
+                style = "margin-bottom: 50px;",
+                class = "fancy"
               ),
               style = style(
                 `margin-top` = "auto",
