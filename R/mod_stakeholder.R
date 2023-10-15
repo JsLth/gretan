@@ -11,6 +11,32 @@ mod_stakeholder_ui <- function(id) {
       affil = get_text("affil"),
       date = get_text("date")
     ),
+    tags$style("
+      #main-stakeholder-control .irs-min {
+        visibility: hidden !important;
+      }
+      
+      #main-stakeholder-control .js-irs-0 .irs .irs-min:after {
+        content: '0' !important;
+      }
+      
+      #main-stakeholder-control .irs-min:after {
+        visibility: visibile !important;
+        display: block;
+        background: rgba(0, 0, 0, 0.1) none repeat scroll 0 0;
+        border-radius: 3px;
+        color: #333;
+        font-size: 10px;
+        line-height: 1.333;
+        padding: 1px 3px;
+        text-shadow: none;
+        top: 0;
+        cursor: default;
+        display: block;
+        left: 0;
+        position: absolute;
+      }
+    "),
     fluidRow(
       col_6(
         bs4Dash::box(
@@ -112,7 +138,7 @@ mod_stakeholder_server <- function(id, tab) {
     get_text <- dispatch_to_txt(ns(NULL))
     reset <- reactiveVal(FALSE)
     changed <- reactive(input$changed)
-    init <- reactiveValues(sliders = list())
+    init_ctrl <- rep(FALSE, 3)
 
     init_waiter <- waiter::Waiter$new(
       id = ns(c("plot", "map")),
@@ -128,7 +154,6 @@ mod_stakeholder_server <- function(id, tab) {
 
     # Import platypus ----
     platypus <- reactive({
-      req(identical(get_tab(), "stakeholder"))
       reticulate::import("pLAtYpus_TNO", convert = FALSE)$GRETA_tool
     })
 
@@ -150,19 +175,25 @@ mod_stakeholder_server <- function(id, tab) {
 
     # Handle reset ----
     observe({
-      input$reset
-      req(identical(tab(), "stakeholder"))
       init_waiter$show()
       on.exit(init_waiter$hide())
       log_it("Resetting database to survey")
       quietly(platypus()$reset_to_survey(parameters()))
-      reset(reset() + 1)
+      init_ctrl <<- rep(FALSE, 3)
+      reset(TRUE)
     }) %>%
-      bindEvent(tab(), input$reset)
+      bindEvent(input$reset)
+    
+    observe({
+      req(identical(tab(), "stakeholder"))
+      shinyjs::click("reset")
+    }) %>%
+      bindEvent(tab())
 
     # Dispatch to submodules ----
-    init_ctrl <- rep(FALSE, 3)
     observe({
+      print(reset())
+      print(init_ctrl)
       if (identical(input$control, "Initial yes") && !init_ctrl[1]) {
         mod_stakeholder_initialyes_server(
           "initialyes",
@@ -195,7 +226,7 @@ mod_stakeholder_server <- function(id, tab) {
         init_ctrl[3] <<- TRUE
       }
     }) %>%
-      bindEvent(input$control)
+      bindEvent(input$control, reset())
 
 
     # Collect output tables ----
@@ -207,14 +238,7 @@ mod_stakeholder_server <- function(id, tab) {
       ))
       tables <- reticulate::py_to_r(tables)
       list(aggr = tables[[1]], by_country = tables[[2]])
-    }) %>%
-      bindEvent(
-        changed(),
-        reset(),
-        input$plot_control_country,
-        input$plot_control_product,
-        input$plot_control_stakeholder
-      )
+    })
 
 
     # Render engagement plot ----
@@ -224,7 +248,12 @@ mod_stakeholder_server <- function(id, tab) {
         "initialyes", "intentionweight", "surveytopic",
         "plot_control_country", "plot_control_product", "reset"
       )
-      req(startsWith(changed(), ns(allowed)), cancelOutput = TRUE)
+
+      is_valid_input <- any(startsWith(changed(), ns(allowed)))
+      is_init <- !identical(input[[rm_ns(changed(), ns)]], "N/A")
+      is_reset <- isTRUE(reset())
+      req((is_valid_input && is_init) || is_reset, cancelOutput = TRUE)
+      
       waiter$show()
       on.exit(waiter$hide())
 
@@ -265,16 +294,30 @@ mod_stakeholder_server <- function(id, tab) {
           xaxis = list(fixedrange = TRUE),
           yaxis = list(fixedrange = TRUE)
         )
-    })
+    }) %>%
+      bindEvent(
+        changed(),
+        reset(),
+        input$plot_control_country,
+        input$plot_control_product,
+        input$plot_control_stakeholder
+      )
 
 
+    
     # Render engagement map ----
     output$map <- leaflet::renderLeaflet({
       allowed <- c(
         "initialyes", "intentionweight", "surveytopic",
-        "plot_control_stakeholder", "plot_control_product", "reset"
+        "plot_control_stakeholder", "plot_control_product"
       )
-      req(startsWith(changed(), ns(allowed)), cancelOutput = TRUE)
+      
+      is_valid_input <- any(startsWith(changed(), ns(allowed)))
+      is_init <- !identical(input[[rm_ns(changed(), ns)]], "N/A")
+      is_reset <- isTRUE(reset())
+      req((is_valid_input && is_init) || is_reset, cancelOutput = TRUE)
+      
+      reset(FALSE)
       waiter$show()
       on.exit(waiter$hide())
 
@@ -316,10 +359,17 @@ mod_stakeholder_server <- function(id, tab) {
           opacity = 0.9,
           title = "Long term<br>engagement"
         )
-    })
+    }) %>%
+      bindEvent(
+        changed(),
+        reset(),
+        input$plot_control_country,
+        input$plot_control_product,
+        input$plot_control_stakeholder
+      )
 
-    outputOptions(output, "map", suspendWhenHidden = FALSE)
-    outputOptions(output, "plot", suspendWhenHidden = FALSE)
+    outputOptions(output, "map", suspendWhenHidden = FALSE, priority = 0)
+    outputOptions(output, "plot", suspendWhenHidden = FALSE, priority = 1)
   })
 }
 
@@ -463,80 +513,47 @@ mod_stakeholder_initialyes_server <- function(id,
                                               get_text,
                                               changed,
                                               plat,
-                                              params,
-                                              init) {
+                                              params) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
     lapply(get_text("params", "countries"), function(country) {
       out_id <- paste0("control__", country)
+      products <- get_text("params", "product")
+      stakeholders <- get_text("params", "stakeholder")
+      input_ids <- lapply(products, function(p) {
+        lapply(stakeholders, function(s) {
+          id <- ns(sprintf("initial_yes__%s__%s__%s", p, s, country))
+          # enable_id <- paste0(id, "__container")
+          # shinyjs::onclick(
+          #   enable_id,
+          #   shinyjs::removeCssClass(enable_id, "sliders-disable", asis = TRUE)
+          # )
+          id
+        })
+      })
       output[[out_id]] <- renderUI({
         fluidRow(
           col_1(),
           col_10(
             h5("Product: Autonomous cars"),
             fluidRow(
-              col_4(
-                sliderInput(
-                  ns(paste0("initial_yes__autonomous_cars__citizens__", country)),
-                  label = "Citizens", min = 0, max = 1, value = 0.5
-                )
-              ),
-              col_4(
-                sliderInput(
-                  ns(paste0("initial_yes__autonomous_cars__business__", country)),
-                  label = "Business", min = 0, max = 1, value = 0.5
-                )
-              ),
-              col_4(
-                sliderInput(
-                  ns(paste0("initial_yes__autonomous_cars__government__", country)),
-                  label = "Government", min = 0, max = 1, value = 0.5
-                )
-              )
+              col_4(interactionSlider(input_ids[[1]][[1]])),
+              col_4(interactionSlider(input_ids[[1]][[2]])),
+              col_4(interactionSlider(input_ids[[1]][[3]]))
             ),
             h5("Product: Sustainable transport"),
             fluidRow(
-              col_4(
-                sliderInput(
-                  ns(paste0("initial_yes__sustainable_transport__citizens__", country)),
-                  label = "Citizens", min = 0, max = 1, value = 0.5
-                )
-              ),
-              col_4(
-                sliderInput(
-                  ns(paste0("initial_yes__sustainable_transport__business__", country)),
-                  label = "Business", min = 0, max = 1, value = 0.5
-                )
-              ),
-              col_4(
-                sliderInput(
-                  ns(paste0("initial_yes__sustainable_transport__government__", country)),
-                  label = "Government", min = 0, max = 1, value = 0.5
-                )
-              )
+              col_4(interactionSlider(input_ids[[2]][[1]])),
+              col_4(interactionSlider(input_ids[[2]][[2]])),
+              col_4(interactionSlider(input_ids[[2]][[3]]))
             ),
             hr(),
             h5("Product: Cooperative self-generation"),
             fluidRow(
-              col_4(
-                sliderInput(
-                  ns(paste0("initial_yes__cooperative_self_generation__citizens__", country)),
-                  label = "Citizens", min = 0, max = 1, value = 0.5
-                )
-              ),
-              col_4(
-                sliderInput(
-                  ns(paste0("initial_yes__cooperative_self_generation__business__", country)),
-                  label = "Business", min = 0, max = 1, value = 0.5
-                )
-              ),
-              col_4(
-                sliderInput(
-                  ns(paste0("initial_yes__cooperative_self_generation__government__", country)),
-                  label = "Government", min = 0, max = 1, value = 0.5
-                )
-              )
+              col_4(interactionSlider(input_ids[[3]][[1]])),
+              col_4(interactionSlider(input_ids[[3]][[2]])),
+              col_4(interactionSlider(input_ids[[3]][[3]]))
             )
           ),
           col_1()
@@ -548,14 +565,11 @@ mod_stakeholder_initialyes_server <- function(id,
     observe({
       changed <- changed()
       req(startsWith(changed, ns("initial_yes")))
-      if (!changed %in% init$sliders) {
-        init$sliders <- c(init$sliders, changed)
-        freezeReactiveValue(init, "sliders")
-        req(FALSE)
-      }
+      is_init <- !"N/A" %in% input[[rm_ns(changed, ns)]]
+      req(is_init)
       plat <- isolate(plat())
       params <- isolate(params())
-      changed <- substr(changed, nchar(ns(NULL)) + 2, nchar(changed))
+      changed <- rm_ns(changed, ns)
       plat$update_from_slider(changed, input[[changed]], params())
     }) %>%
       bindEvent(changed())
@@ -654,10 +668,8 @@ mod_stakeholder_intentionweight_server <- function(id,
     observe({
       changed <- changed()
       req(startsWith(changed, ns("intention_weight")))
-      if (!changed %in% init$sliders) {
-        init$sliders <- c(init$sliders, changed)
-        req(FALSE)
-      }
+      is_init <- !"N/A" %in% input[[rm_ns(changed, ns)]]
+      req(is_init)
       plat <- isolate(plat())
       params <- isolate(params())
       changed <- substr(changed, nchar(ns(NULL)) + 2, nchar(changed))
@@ -765,10 +777,8 @@ mod_stakeholder_surveytopic_server <- function(id,
     observe({
       changed <- changed()
       req(startsWith(changed, ns("surveytopic")))
-      if (!changed %in% init$sliders) {
-        init$sliders <- c(init$sliders, changed)
-        req(FALSE)
-      }
+      is_init <- !"N/A" %in% input[[rm_ns(changed, ns)]]
+      req(is_init)
       plat <- isolate(plat())
       params <- isolate(params())
       changed <- substr(changed, nchar(ns(NULL)) + 2, nchar(changed))
