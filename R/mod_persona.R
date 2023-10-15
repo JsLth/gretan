@@ -550,8 +550,7 @@ mod_persona_server <- function(id) {
             col_1(),
             col_5(
               h4(
-                switch(
-                  i,
+                switch(i,
                   "Our models show that you are most likely to be...",
                   "It is also possible that you are...",
                   "Although less likely, you could also be..."
