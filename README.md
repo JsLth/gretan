@@ -16,7 +16,7 @@ The package is licensed under Apache 2.0.
 
 ### Deployment
 
-The app is deployed on [shinyapps.io](shinyapps.io) and can be accessed using the following link: https://projectgreta.shinyapps.io/.
+The app is deployed on [shinyapps.io](shinyapps.io) and can be accessed using the following link: https://projectgreta.shinyapps.io/greta-analytics.
 
 ### Binaries
 
