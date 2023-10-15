@@ -147,13 +147,13 @@ mod_stakeholder_server <- function(id, tab) {
       html = tagList(waiter::spin_pulse(), h4("Updating database...")),
       color = "rgba(179, 221, 254, 1)"
     )
-    
+
     pwaiter <- waiter::Waiter$new(
       id = ns("plot"),
       html = tagList(waiter::spin_pulse(), h4("Loading figure...")),
       color = "rgba(179, 221, 254, 1)"
     )
-    
+
     mwaiter <- waiter::Waiter$new(
       id = ns("map"),
       html = tagList(waiter::spin_pulse(), h4("Loading figure...")),
@@ -258,7 +258,7 @@ mod_stakeholder_server <- function(id, tab) {
       is_reset <- isTRUE(reset())
       print(changed())
       req((is_valid_input && is_init) || is_reset, cancelOutput = TRUE)
-      
+
       pwaiter$show()
 
       tables <- execute_safely(tables())
