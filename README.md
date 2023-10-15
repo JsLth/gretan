@@ -4,9 +4,9 @@
 
 <!-- badges: end -->
 
-<img style="float:right; width:20rem; margin-right:1rem" src="man/figures/logo.png">
 
-# GRETA Analytics
+
+# GRETA Analytics <a href="https://zenodo.org/communities/greta/"><img align="right" height="138.5" src="man/figures/logo.png"></a>
 
 GRETA Analytics (package name: `{gretan}`) is the GIS tool of the GRETA project (GReen Energy Transition Actions). The tool serves to present and visualize the research output of the project in an interactive fashion. It is specialized on spatial analysis and visualization, but hosts a variety of other information from the project. The package/app is built using the R [Shiny](https://github.com/rstudio/shiny) and [golemverse](https://golemverse.org/) frameworks and the UI framework [`{bs4Dash}`](https://rinterface.github.io/bs4Dash/)/[`AdminLTE3`](https://github.com/ColorlibHQ/AdminLTE).
 
@@ -58,6 +58,6 @@ GRETA Analytics was mainly developed by [Jonas Lieth](mailto:jonas.lieth@gesis.o
 - [Kaskas Media](https://kaskas.fi/en/)
   - Minor editing and design template
 
-<img style="float:left; width:10rem; margin-right:1rem" src="inst/app/www/eu_flag.jpg">
+<img width="100rem" align="left" src="inst/app/www/eu_flag.jpg">
 
 GRETA Analystics was developed as part of the [GRETA project](https://projectgreta.eu/), which has received funding from the European Union's HORIZON 2020 Research and Innovation programme under grant agreement N°101022317.
