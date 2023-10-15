@@ -1,3 +1,16 @@
+interactionSlider <- function(id) {
+  params <- strsplit(id, "__")[[1]]
+  stakeholder <- params[params %in% c("citizens", "business", "government")]
+  
+  shinyWidgets::sliderTextInput(
+    inputId = id, label = to_title(stakeholder),
+    choices = c("N/A", seq(0, 1, 0.05)),
+    selected = "N/A",
+    grid = TRUE
+  )
+}
+
+
 plot_persona <- function(data, item = "cluster", diff = TRUE) {
   x <- y <- text <- ind <- values <- grp <- NULL
 
