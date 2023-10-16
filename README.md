@@ -41,23 +41,52 @@ run_greta()
 
 GRETA Analytics was mainly developed by [Jonas Lieth](mailto:jonas.lieth@gesis.org) from [GESIS - Leibniz Institute for the Social Sciences](https://www.gesis.org/en/). The package and Shiny app was made possible thanks to the valuable contributions from various institutions including:
 
-- [Lappeenranta-Lahti University of Technology](https://www.lut.fi/en)
-  - [Persona quiz based on energy citizen clusters](https://projectgreta.eu/wp-content/uploads/2023/09/GRETA_D2.4_Energy-citizen-empowerment-through-energy-data-interactions.pdf)
-- [Dutch Organization for Applied Scientific Research (TNO)](https://www.tno.nl/en/)
-  - [pLAtYpus model for stakeholder interaction modelling](https://github.com/TNO/pLAtYpus)
-  - [Case study "Natural gas-free neighborhoods" wrap-up](https://projectgreta.eu/wp-content/uploads/2023/01/GRETA_D3_2_Case-study-2-report_v1_0.pdf)
-- [Tecnalia Research & Innovation](https://www.tecnalia.com/en/home)
-  - [Energy assessment using the Enerkad tool](https://www.enerkad.net/)
-- [University of Bologna](https://www.unibo.it/)
-  - [Case study "Pilastro-Roveri" wrap-up](https://projectgreta.eu/wp-content/uploads/2023/01/GRETA_D3_1_Case-study-1-report_v1_0.pdf)
-  - Fragility index
-- [Fraunhofer Institute for Systems and Innovation Research (ISI)](https://www.isi.fraunhofer.de/)
-  - [Case study "Earnest app" wrap-up](https://projectgreta.eu/wp-content/uploads/2023/01/GRETA_D3_5_Case-study-5-report_v1_0.pdf)
-- [Cleanwatts Digital](https://cleanwatts.energy/)
-  - [Case study "Coopérnico" wrap-up](https://projectgreta.eu/wp-content/uploads/2023/01/GRETA_D3_3_Case-study-3-report_v1_0.pdf)
-- [Kaskas Media](https://kaskas.fi/en/)
-  - Minor editing and design template
-
+<table>
+<thead>
+  <tr>
+    <th>Institution</th>
+    <th>Contribution</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td><a href="https://www.lut.fi/en">Lappeenranta-Lahti University of Technology</a><br></td>
+    <td><a href="https://projectgreta.eu/wp-content/uploads/2023/09/GRETA_D2.4_Energy-citizen-empowerment-through-energy-data-interactions.pdf">Persona quiz based on energy citizen clusters</a><br></td>
+  </tr>
+  <tr>
+    <td rowspan="2"><a href="https://www.tno.nl/en/">Dutch Organization for Applied Scientific Research (TNO)</<><br></td>
+    <td><a href="https://github.com/TNO/pLAtYpus">pLAtYpus model for stakeholder interaction modelling</a></td>
+  </tr>
+  <tr>
+    <td><a href="https://projectgreta.eu/wp-content/uploads/2023/01/GRETA_D3_2_Case-study-2-report_v1_0.pdf">Case study "Natural gas-free neighborhoods" wrap-up</a></td>
+  </tr>
+  <tr>
+    <td rowspan="2"><a href="https://www.tecnalia.com/en/home">Tecnalia Research & Innovation</a><br></td>
+    <td><a href="https://www.enerkad.net/">Energy assessment using the Enerkad tool</a><br></td>
+  </tr>
+  <tr>
+    <td><a href="https://projectgreta.eu/wp-content/uploads/2023/01/GRETA_D3_4_Case-study-4-report_v1_0.pdf">Case study "UR Beroa" wrap-up</a>
+  <tr>
+    <td rowspan="2"><a href="https://www.unibo.it/">University of Bologna</a></td>
+    <td><a href="https://projectgreta.eu/wp-content/uploads/2023/01/GRETA_D3_1_Case-study-1-report_v1_0.pdf">Case study "Pilastro-Roveri" wrap-up</a></td>
+  </tr>
+  <tr>
+    <td>Fragility index</td>
+  </tr>
+  <tr>
+    <td><a href="https://www.isi.fraunhofer.de/">Fraunhofer Institute for Systems and Innovation Research (ISI)</a><br></td>
+    <td><a href="https://projectgreta.eu/wp-content/uploads/2023/01/GRETA_D3_5_Case-study-5-report_v1_0.pdf">Case study "Earnest app" wrap-up</a></td>
+  </tr>
+  <tr>
+    <td><a href="https://cleanwatts.energy/">Cleanwatts Digital</a><br></td>
+    <td><a href="https://projectgreta.eu/wp-content/uploads/2023/01/GRETA_D3_3_Case-study-3-report_v1_0.pdf">Case study "Coopérnico" wrap-up</a><br></td>
+  </tr>
+  <tr>
+    <td><a href="https://kaskas.fi/en/">Kaskas Media</a></td>
+    <td>Minor editing and design template</td>
+  </tr>
+</tbody>
+</table>
 <img width="100rem" align="left" src="inst/app/www/eu_flag.jpg">
 
 GRETA Analystics was developed as part of the [GRETA project](https://projectgreta.eu/), which has received funding from the European Union's HORIZON 2020 Research and Innovation programme under grant agreement N°101022317.
