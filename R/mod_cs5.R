@@ -125,7 +125,7 @@ mod_cs5_server <- function(id) {
       html = tagList(waiter::spin_pulse(), h4("Loading figure...")),
       color = "rgba(179, 221, 254, 1)"
     )
-    
+
     popover2(
       "biblink-2",
       title = "",
@@ -144,7 +144,7 @@ mod_cs5_server <- function(id) {
       layer <- input$`buildings-layer`
       p(get_text("desc", layer))
     })
-    
+
     ## Parameters ----
     labels <- NULL
     params <- reactive({
