@@ -190,7 +190,7 @@ mod_stakeholder_server <- function(id, tab) {
       init_ctrl <<- rep(FALSE, 3)
       reset(TRUE)
     }) %>%
-      bindEvent(input$reset)
+      bindEvent(input$reset, ignoreInit = TRUE)
 
     observe({
       req(identical(tab(), "stakeholder"))
@@ -256,7 +256,6 @@ mod_stakeholder_server <- function(id, tab) {
       is_valid_input <- any(startsWith(changed(), ns(allowed)))
       is_init <- !identical(input[[rm_ns(changed(), ns)]], "N/A")
       is_reset <- isTRUE(reset())
-      print(changed())
       req((is_valid_input && is_init) || is_reset, cancelOutput = TRUE)
 
       pwaiter$show()
