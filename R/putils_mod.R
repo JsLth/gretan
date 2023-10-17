@@ -168,7 +168,7 @@ render_persona_item <- function(item, results, responses, ...) {
     your_choice <- switch(as.character(responses[idx]),
       "-2" = "Prefer not to say",
       "-1" = "I do not know",
-      choices[responses[idx]]
+      choices[as.numeric(responses[idx])]
     )
     p(HTML(paste0(
       tags$b(paste("Question", idx)),
