@@ -237,10 +237,6 @@ col_2 <- function(...) bs4Dash::column(2, ...)
 col_1 <- function(...) bs4Dash::column(1, ...)
 
 
-match_regex <- function(string, pattern, perl = FALSE, fixed = FALSE) {
-  regmatches(string, regexec(pattern, string, perl = perl, fixed = fixed))
-}
-
 
 #' Converts a shiny.tag object to unformatted raw text
 #'
@@ -432,73 +428,4 @@ named_to_dl <- function(.list) {
 #' rep_br(5)
 rep_br <- function(times = 1) {
   HTML(rep("<br/>", times = times))
-}
-
-
-
-#' Make the current tag behave like an action button
-#'
-#' Only works with compatible tags like button or links
-#'
-#' @param tag Any compatible tag.
-#' @param inputId Unique id. This will host the input value to be used
-#' on the server side.
-#'
-#' @return The modified tag with an extra id and the action button class.
-#' @noRd
-#'
-#' @examples
-#' if (interactive()) {
-#'   library(shiny)
-#'
-#'   link <- a(href = "#", "My super link", style = "color: lightblue;")
-#'
-#'   ui <- fluidPage(
-#'     make_action_button(link, inputId = "mylink")
-#'   )
-#'
-#'   server <- function(input, output, session) {
-#'     observeEvent(input$mylink, {
-#'       showNotification("Pouic!")
-#'     })
-#'   }
-#'
-#'   shinyApp(ui, server)
-#' }
-make_action_button <- function(tag, inputId = NULL) {
-  # some obvious checks
-  if (!inherits(tag, "shiny.tag")) stop("Must provide a shiny tag.")
-  if (!is.null(tag$attribs$class)) {
-    if (any(grepl("action-button", tag$attribs$class))) {
-      stop("tag is already an action button")
-    }
-  }
-  if (is.null(inputId) && is.null(tag$attribs$id)) {
-    stop("tag does not have any id. Please use inputId to be able to
-           access it on the server side.")
-  }
-
-  # handle id
-  if (!is.null(inputId)) {
-    if (!is.null(tag$attribs$id)) {
-      warning(
-        paste(
-          "tag already has an id. Please use input$",
-          tag$attribs$id,
-          "to access it from the server side. inputId will be ignored."
-        )
-      )
-    } else {
-      tag$attribs$id <- inputId
-    }
-  }
-
-  # handle class
-  if (is.null(tag$attribs$class)) {
-    tag$attribs$class <- "action-button"
-  } else {
-    tag$attribs$class <- paste(tag$attribs$class, "action-button")
-  }
-  # return tag
-  tag
 }
