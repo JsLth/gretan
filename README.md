@@ -83,7 +83,7 @@ GRETA Analytics was mainly developed by [Jonas Lieth](mailto:jonas.lieth@gesis.o
   </tr>
   <tr>
     <td><a href="https://kaskas.fi/en/">Kaskas Media</a></td>
-    <td>Minor editing and design template</td>
+    <td>Minor editing and design inspiration</td>
   </tr>
 </tbody>
 </table>
