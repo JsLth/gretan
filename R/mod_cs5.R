@@ -17,20 +17,20 @@ mod_cs5_ui <- function(id) {
         width = 6,
         # Box 1 ----
         bs4Dash::box(
-          title = with_literata(get_text("energy_model", "title")),
+          title = with_literata(get_text("introduction", "title")),
           width = 12,
           status = "primary",
-          get_text("energy_model", "content")
+          get_text("introduction", "content")
         )
       ),
       bs4Dash::column(
         width = 6,
         # Box 2 ----
         bs4Dash::box(
-          title = with_literata(get_text("case_study", "title")),
+          title = with_literata(get_text("how", "title")),
           width = 12,
           status = "primary",
-          get_text("case_study", "content")
+          with_supref(get_text("how", "content"))
         )
       )
     ),
@@ -78,7 +78,7 @@ mod_cs5_ui <- function(id) {
                 "[[",
                 "title"
               )),
-              selected = "substation"
+              selected = "year_constr"
             )
           ),
           # bring leaflet panels to front when selected
@@ -88,6 +88,28 @@ mod_cs5_ui <- function(id) {
             });"))
         )
       )
+    ),
+    fluidRow(
+      bs4Dash::column(
+        width = 6,
+        # Box 3 ----
+        bs4Dash::box(
+          title = with_literata(get_text("analysis", "title")),
+          width = 12,
+          status = "primary",
+          get_text("analysis", "content")
+        )
+      ),
+      bs4Dash::column(
+        width = 6,
+        # Box 4 ----
+        bs4Dash::box(
+          title = with_literata(get_text("findings", "title")),
+          width = 12,
+          status = "primary",
+          get_text("findings", "content")
+        )
+      )
     )
   )
 }
@@ -95,12 +117,23 @@ mod_cs5_ui <- function(id) {
 
 mod_cs5_server <- function(id) {
   moduleServer(id, function(input, output, session) {
+    # Server setup ----
     get_text <- dispatch_to_txt(session$ns(NULL))
 
     waiter <- waiter::Waiter$new(
       id = session$ns("buildings"),
       html = tagList(waiter::spin_pulse(), h4("Loading figure...")),
       color = "rgba(179, 221, 254, 1)"
+    )
+    
+    popover2(
+      "biblink-2",
+      title = "",
+      content = "Tecnalia Innovation & Research (2019)<br>
+        ENERKAD. More information: <a href='https://www.enerkad.net/'>
+        https://www.enerkad.net/</a>",
+      trigger = "click",
+      placement = "top"
     )
 
     buildings <- reactive({
@@ -109,12 +142,11 @@ mod_cs5_server <- function(id) {
 
     output[["buildings-info-layer-desc"]] <- renderUI({
       layer <- input$`buildings-layer`
-      p(get_text("dict", "buildings", layer))
+      p(get_text("desc", layer))
     })
-
-    labels <- NULL
-
+    
     ## Parameters ----
+    labels <- NULL
     params <- reactive({
       req(identical(get_tab(), "cs5"))
       dt <- isolate(buildings())
@@ -128,9 +160,7 @@ mod_cs5_server <- function(id) {
           as.list() %>%
           stats::setNames(sapply(get_text("dict", "buildings"), "[[", "title")) %>%
           lapply(\(x) if (is.numeric(x)) round(x, 2) else x)
-        lab_values$`Electricity demand` <- paste(lab_values$`Electricity demand`, "kWh/m\u00b2")
         lab_values$`Heating demand` <- paste(lab_values$`Heating demand`, "kWh/m\u00b2")
-        lab_values$`Installed PV capacity` <- paste(lab_values$`Installed PV capacity`, "kW")
         labels <<- do.call(align_in_table, lab_values)
       }
 
