@@ -489,8 +489,7 @@ force_store_googledrive <- function(logs, ...) {
     uperr <- try_gdrive_upload(media = path, name = file_name)
   }
   
-  log_it("Shutting down app")
-  stopApp()
+  shutdown()
 }
 
 
