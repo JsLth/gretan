@@ -23,7 +23,7 @@ eps = false
 # Indicate below if you want to save your Pandas DataFrames in the
 # listed formats (put a true if you want to do so, false if you don't)
 [files.dataframe_outputs]
-csv = true
+csv = false
 json = false
 html = false
 latex = false
@@ -34,8 +34,8 @@ hdf = false
 feather = false
 parquet = false
 stata = false
-pickle = true
-sql = true
+pickle = false
+sql = false
 
 
 [colors]
