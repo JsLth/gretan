@@ -22,3 +22,4 @@ $run_dev.*
 ^.sass_cache_keys$
 ^\.github$
 ^site$
+.Renviron

@@ -16,5 +16,3 @@ ocm_all_stations.json
 ocm_all_stations.rds
 electron.R
 shiny-run.R
-inst/extdata/stakeholder/output/pLAtYpus.sqlite3
-inst/extdata/stakeholder/output/pLAtYpus_only_survey.sqlite3
