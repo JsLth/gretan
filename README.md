@@ -88,8 +88,7 @@ GRETA Analytics was mainly developed by [Jonas Lieth](mailto:jonas.lieth@gesis.o
   </tr>
 </tbody>
 </table>
-<img width="100rem" align="left" src="inst/app/www/eu_flag.jpg">
 
 <img width="100rem" align="left" src="inst/app/www/eu_flag.jpg">
 
-GRETA Analystics was developed as part of the [GRETA project](https://projectgreta.eu/), which has received funding from the European Union's HORIZON 2020 Research and Innovation programme under grant agreement N°101022317.GRETA Analystics was developed as part of the [GRETA project](https://projectgreta.eu/), which has received funding from the European Union's HORIZON 2020 Research and Innovation programme under grant agreement N°101022317.
+GRETA Analystics was developed as part of the [GRETA project](https://projectgreta.eu/), which has received funding from the European Union's HORIZON 2020 Research and Innovation programme under grant agreement N°101022317.
