@@ -1,7 +1,7 @@
 mod_cs1_ui <- function(id) {
   ns <- NS(id)
   get_text <- dispatch_to_txt(id)
-
+  
   bs4Dash::tabItem(
     "cs1",
     # Header ----
@@ -147,7 +147,7 @@ mod_cs1_ui <- function(id) {
 mod_cs1_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     get_text <- dispatch_to_txt(session$ns(NULL))
-
+    
     # Waiter setup ----
     bwaiter <- waiter::Waiter$new(
       id = session$ns("buildings"),
@@ -159,7 +159,7 @@ mod_cs1_server <- function(id) {
       html = tagList(waiter::spin_pulse(), h4("Loading figure...")),
       color = "rgba(179, 221, 254, 1)"
     )
-
+    
     popover2(
       "biblink-1",
       title = "",
@@ -169,35 +169,35 @@ mod_cs1_server <- function(id) {
       trigger = "click",
       placement = "top"
     )
-
+    
     observe(
       bs4Dash::updateAccordion("fig", selected = 0)
     ) %>%
       bindEvent(input[["fig-link"]])
-
+    
     # Data reading ----
     buildings <- reactive(
       sf::read_sf(app_sys("extdata/cs1italy.gpkg"), layer = "buildings")
     )
-
+    
     fragility <- reactive(
       sf::read_sf(app_sys("extdata/cs1italy.gpkg"), layer = "fragility")
     )
-
+    
     # Buildings ----
     output[["buildings-info-layer-desc"]] <- renderUI({
       layer <- input$`buildings-layer`
       p(get_text("desc", layer))
     })
-
+    
     blabels <- NULL
-
+    
     ## Parameters ----
     bparams <- reactive({
       req(identical(get_tab(), "cs1"))
       dt <- isolate(buildings())
       layer <- input$`buildings-layer`
-
+      
       # Only create labels once and then save them to the server module for
       # re-use
       if (is.null(blabels)) {
@@ -211,45 +211,45 @@ mod_cs1_server <- function(id) {
         lab_values$`Installed PV capacity` <- paste(lab_values$`Installed PV capacity`, "kW")
         blabels <<- do.call(align_in_table, lab_values)
       }
-
+      
       pal <- switch(layer,
-        use = leaflet::colorFactor(
-          palette = c(
-            "#AA0DFE", "#3283FE", "#85660D", "#782AB6", "#565656", "#1C8356",
-            "#16FF32", "#F7E1A0", "#E2E2E2", "#1CBE4F", "#C4451C", "#DEA0FD",
-            "#FE00FA", "#325A9B", "#FEAF16", "#F8A19F", "#90AD1C"
-          ),
-          domain = dt$use
-        ),
-        year_constr = leaflet::colorBin(
-          palette = "Greens",
-          domain = dt$year_constr
-        ),
-        property = leaflet::colorFactor(
-          palette = c("#ECECEC", "#e627c6", "#1E24CE", "#DB9A77"),
-          domain = dt$property
-        ),
-        electricity_demand_m2 = leaflet::colorNumeric(
-          palette = "Reds",
-          domain = dt$electricity_demand_m2
-        ),
-        heating_demand_m2 = leaflet::colorNumeric(
-          palette = "Blues",
-          domain = dt$heating_demand_m2
-        ),
-        installed_pv_capacity_k_w = leaflet::colorNumeric(
-          palette = "Purples",
-          domain = dt$installed_pv_capacity_k_w
-        )
+                    use = leaflet::colorFactor(
+                      palette = c(
+                        "#AA0DFE", "#3283FE", "#85660D", "#782AB6", "#565656", "#1C8356",
+                        "#16FF32", "#F7E1A0", "#E2E2E2", "#1CBE4F", "#C4451C", "#DEA0FD",
+                        "#FE00FA", "#325A9B", "#FEAF16", "#F8A19F", "#90AD1C"
+                      ),
+                      domain = dt$use
+                    ),
+                    year_constr = leaflet::colorBin(
+                      palette = "Greens",
+                      domain = dt$year_constr
+                    ),
+                    property = leaflet::colorFactor(
+                      palette = c("#ECECEC", "#e627c6", "#1E24CE", "#DB9A77"),
+                      domain = dt$property
+                    ),
+                    electricity_demand_m2 = leaflet::colorNumeric(
+                      palette = "Reds",
+                      domain = dt$electricity_demand_m2
+                    ),
+                    heating_demand_m2 = leaflet::colorNumeric(
+                      palette = "Blues",
+                      domain = dt$heating_demand_m2
+                    ),
+                    installed_pv_capacity_k_w = leaflet::colorNumeric(
+                      palette = "Purples",
+                      domain = dt$installed_pv_capacity_k_w
+                    )
       )
-
+      
       list(data = dt, layer = layer, pal = pal, labels = blabels)
     })
-
+    
     ## Render ----
     output$buildings <- leaflet::renderLeaflet({
       params <- isolate(bparams())
-
+      
       leaflet::leaflet() %>%
         leaflet::setView(lng = 11.399926, lat = 44.507145, zoom = 15) %>%
         leaflet::addProviderTiles(leaflet::providers$OpenStreetMap) %>%
@@ -281,10 +281,10 @@ mod_cs1_server <- function(id) {
         )
     }) %>%
       bindEvent(bparams())
-
+    
     ## Select layer ----
     updates <- 0
-
+    
     observe({
       # Only show loading screen on first two updates
       # First one on startup
@@ -294,9 +294,9 @@ mod_cs1_server <- function(id) {
         updates <<- updates + 1
         on.exit(bwaiter$hide())
       }
-
+      
       params <- bparams()
-
+      
       leaflet::leafletProxy("buildings") %>%
         leaflet::clearShapes() %>%
         leaflet::clearControls() %>%
@@ -327,28 +327,28 @@ mod_cs1_server <- function(id) {
           )
         )
     })
-
+    
     ## Basemap ----
     observe({
       basemap <- switch(input$`buildings-basemap`,
-        "OpenStreetMap" = leaflet::providers$OpenStreetMap,
-        "Satellite" = leaflet::providers$Esri.WorldImagery
+                        "OpenStreetMap" = leaflet::providers$OpenStreetMap,
+                        "Satellite" = leaflet::providers$Esri.WorldImagery
       )
-
+      
       leaflet::leafletProxy("buildings") %>%
         leaflet::clearTiles() %>%
         leaflet::addProviderTiles(basemap)
     })
-
-
+    
+    
     # Fragility ----
-
+    
     ## Parameters ----
     fparams <- reactive({
       req(identical(get_tab(), "cs1"))
       dt <- isolate(fragility())
       layer <- input$fragility_layer
-
+      
       lab_values <- dt[c("area_stati", "nomezona", layer)] %>%
         sf::st_drop_geometry() %>%
         as.list() %>%
@@ -365,20 +365,20 @@ mod_cs1_server <- function(id) {
           .
         }
       labels <- do.call(align_in_table, lab_values)
-
+      
       pal <- leaflet::colorBin(
         palette = c("#000004FF", "#51127CFF", "#B63679FF", "#FB8861FF", "#FCFDBFFF"),
         domain = dt[[layer]],
         na.color = NA
       )
-
+      
       list(data = dt, layer = layer, palette = pal, labels = labels)
     })
-
+    
     ## Render ----
     output$fragility <- leaflet::renderLeaflet({
       params <- isolate(fparams())
-
+      
       leaflet::leaflet() %>%
         leaflet::setView(lng = 11.399926, lat = 44.507145, zoom = 15) %>%
         leaflet::addProviderTiles(leaflet::providers$OpenStreetMap) %>%
@@ -410,10 +410,10 @@ mod_cs1_server <- function(id) {
         )
     }) %>%
       bindEvent(fparams())
-
+    
     ## Select layer ----
     fupdates <- 0
-
+    
     observe({
       # Only show loading screen on first two updates
       # First one on startup
@@ -423,9 +423,9 @@ mod_cs1_server <- function(id) {
         fupdates <<- fupdates + 1
         on.exit(fwaiter$hide())
       }
-
+      
       params <- fparams()
-
+      
       leaflet::leafletProxy("fragility") %>%
         leaflet::clearShapes() %>%
         leaflet::clearControls() %>%

@@ -1,11 +1,11 @@
 mod_main_ui <- function(id) {
   ns <- NS(id)
-
+  
   categories <- unique(cb_ext$topic[!is.na(cb_ext$topic)])
   titles <- stats::setNames(lapply(categories, function(x) {
     as.list(unique(cb_ext[cb_ext$topic %in% x, ]$title))
   }), categories)
-
+  
   shiny::div(
     shinydisconnect::disconnectMessage(
       text = "Something went wrong! Try refreshing the page.",
@@ -46,7 +46,7 @@ mod_main_ui <- function(id) {
 mod_main_server <- function(id, tab) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-
+    
     mod_home_server("home")
     exp_params <- mod_exp_server("exp")
     mod_cmp_server("cmp")
@@ -62,7 +62,7 @@ mod_main_server <- function(id, tab) {
     mod_enpov_server("enpov")
     mod_attitudes_server("attitudes")
     mod_research_server("research")
-
+    
     output[["exp-download"]] <- downloadHandler(
       filename = function() {
         params <- exp_params()
@@ -79,26 +79,27 @@ mod_main_server <- function(id, tab) {
         var <- params$invar
         values <- params$values
         is_mode <- is.factor(values)
+        cb_ext <- getFromNamespace("cb_ext", as.environment("package:gretan"))
         cb_entry <- cb_ext[cb_ext$variable %in% var, ]
-
+        
         question <- cb_entry$question
         subitem <- cb_entry$subitem
         option <- cb_entry$option
         if (is_mode) {
           option <- paste(levels(values), collapse = ", ")
         }
-
+        
         desc <- sprintf(
           "DESCRIPTION=Question: %s - Subitem: %s - Option%s: %s",
           question, subitem, ifelse(is_mode, "s", ""), option
         )
-
+        
         names(poly)[ncol(poly) - 1] <- "value"
-
+        
         sf::st_write(poly, file, layer_options = c(desc, "WRITE_NAME=NO"))
       }
     )
-
+    
     if (isTRUE(getGretaOption("console", FALSE))) {
       observe({
         send_info(
@@ -136,7 +137,7 @@ mod_main_server <- function(id, tab) {
         )
       }) %>%
         bindEvent(input$debug)
-
+      
       shinyjs::runcodeServer()
     }
   })

@@ -15,36 +15,53 @@
 #' For debugging purposes.
 #' @param options Options for \code{\link[shiny]{shinyApp}}. Included for use
 #' in \code{electricShine}.
+#' @param prompt Whether to show a confirmation prompt before downloading
+#' data dependencies.
 #' @param ... Further options to be passed to the app. Can be accessed using
-#' \code{getGretaOption}. Currently this includes the options \code{"console"},
-#' \code{"collect"} and \code{"github_available"}
+#' \code{getGretaOption}. This includes the following (mostly internal)
+#' arguments:
+#' \itemize{
+#'   \item{\code{console}}{Enables internal live console to execute R
+#'   command within the app. Strictly for internal use. Console can be
+#'   accessed by pressing Ctrl + Shift + D}
+#'   \item{\code{track}}{Enables user metrics tracking. Requires a valid
+#'   key to upload collected data to Google Drive.} 
+#' }
 #'
 #' @export
 #' @import shiny
 #' @importFrom leaflet %>%
-run_app <- function(log = NULL, reactlog = FALSE, options = list(), ...) {
+run_app <- function(log = NULL,
+                    reactlog = FALSE,
+                    options = list(),
+                    prompt = interactive(),
+                    ...) {
   .dots <- list(...)
+  
+  download_dependencies(prompt = prompt)
+  
   if (reactlog) {
     if (!requireNamespace("reactlog")) {
       stop("The package reactlog is required to enable logging.")
     }
     reactlog::reactlog_enable()
   }
-
+  
   if (isTRUE(getOption("app.prod"))) {
     if (missing(log) && Sys.info()[["user"]] != "shiny") {
       file.create("gretan.log")
       log <- "gretan.log"
     }
-
+    
     if (missing(reactlog)) {
       reactlog <- FALSE
     }
-
+    
     .dots$console <- FALSE
     .dots$collect <- TRUE
+    .dots$track <- TRUE
   }
-
+  
   with_greta_options(
     shinyApp(
       ui = app_ui,

@@ -31,7 +31,7 @@ app_ui <- function(theme = NULL,
                    footer = NULL) {
   all_pals <- list_palettes()
   get_text <- dispatch_to_txt("main")
-
+  
   if (!is.null(theme)) {
     theme <- structure(
       paste(readLines(app_sys("app/www/theme.css"))),
@@ -39,8 +39,8 @@ app_ui <- function(theme = NULL,
       html = TRUE
     )
   }
-
-
+  
+  
   # Configure loading screen
   if (is.null(preloader)) {
     preloader <- list(
@@ -48,7 +48,7 @@ app_ui <- function(theme = NULL,
       color = "#B3DDFE"
     )
   }
-
+  
   bs4Dash::dashboardPage(
     bs4Dash::dashboardHeader(
       tags$style("

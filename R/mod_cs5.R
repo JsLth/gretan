@@ -1,8 +1,8 @@
 mod_cs5_ui <- function(id) {
   ns <- NS(id)
-
+  
   get_text <- dispatch_to_txt(id)
-
+  
   bs4Dash::tabItem(
     "cs5",
     # Header ----
@@ -119,13 +119,13 @@ mod_cs5_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     # Server setup ----
     get_text <- dispatch_to_txt(session$ns(NULL))
-
+    
     waiter <- waiter::Waiter$new(
       id = session$ns("buildings"),
       html = tagList(waiter::spin_pulse(), h4("Loading figure...")),
       color = "rgba(179, 221, 254, 1)"
     )
-
+    
     popover2(
       "biblink-2",
       title = "",
@@ -135,23 +135,23 @@ mod_cs5_server <- function(id) {
       trigger = "click",
       placement = "top"
     )
-
+    
     buildings <- reactive({
       sf::read_sf(app_sys("extdata/cs5spain.gpkg"), layer = "buildings")
     })
-
+    
     output[["buildings-info-layer-desc"]] <- renderUI({
       layer <- input$`buildings-layer`
       p(get_text("desc", layer))
     })
-
+    
     ## Parameters ----
     labels <- NULL
     params <- reactive({
       req(identical(get_tab(), "cs5"))
       dt <- isolate(buildings())
       layer <- input$`buildings-layer`
-
+      
       # Only create labels once and then save them to the server module for
       # re-use
       if (is.null(labels)) {
@@ -163,36 +163,36 @@ mod_cs5_server <- function(id) {
         lab_values$`Heating demand` <- paste(lab_values$`Heating demand`, "kWh/m\u00b2")
         labels <<- do.call(align_in_table, lab_values)
       }
-
+      
       pal <- switch(layer,
-        substation = leaflet::colorFactor(
-          palette = c(
-            "#ccb15a", "#cb2b29", "#d520a8", "#32de60",
-            "#9a56df", "#9adf5a", "#61e0e2"
-          ),
-          domain = dt$substation
-        ),
-        year_constr = leaflet::colorBin(
-          palette = "Greens",
-          domain = dt$year_constr
-        ),
-        number_of_dw = leaflet::colorNumeric(
-          palette = "Reds",
-          domain = dt$number_of_dw
-        ),
-        a_heat_dem_m2 = leaflet::colorNumeric(
-          palette = "Blues",
-          domain = dt$a_heat_dem_m2
-        )
+                    substation = leaflet::colorFactor(
+                      palette = c(
+                        "#ccb15a", "#cb2b29", "#d520a8", "#32de60",
+                        "#9a56df", "#9adf5a", "#61e0e2"
+                      ),
+                      domain = dt$substation
+                    ),
+                    year_constr = leaflet::colorBin(
+                      palette = "Greens",
+                      domain = dt$year_constr
+                    ),
+                    number_of_dw = leaflet::colorNumeric(
+                      palette = "Reds",
+                      domain = dt$number_of_dw
+                    ),
+                    a_heat_dem_m2 = leaflet::colorNumeric(
+                      palette = "Blues",
+                      domain = dt$a_heat_dem_m2
+                    )
       )
-
+      
       list(data = dt, layer = layer, pal = pal, labels = labels)
     })
-
+    
     ## Render ----
     output$buildings <- leaflet::renderLeaflet({
       params <- isolate(params())
-
+      
       leaflet::leaflet() %>%
         leaflet::setView(lng = -1.994929, lat = 43.302187, zoom = 17) %>%
         leaflet::addProviderTiles(leaflet::providers$OpenStreetMap) %>%
@@ -224,10 +224,10 @@ mod_cs5_server <- function(id) {
         )
     }) %>%
       bindEvent(params())
-
+    
     ## Select layer ----
     updates <- 0
-
+    
     observe({
       # Only show loading screen on first two updates
       # First one on startup
@@ -237,7 +237,7 @@ mod_cs5_server <- function(id) {
         updates <<- updates + 1
         on.exit(waiter$hide())
       }
-
+      
       params <- params()
       leaflet::leafletProxy("buildings") %>%
         leaflet::clearShapes() %>%
@@ -269,14 +269,14 @@ mod_cs5_server <- function(id) {
           )
         )
     })
-
+    
     ## Basemap ----
     observe({
       basemap <- switch(input$`buildings-basemap`,
-        "OpenStreetMap" = leaflet::providers$OpenStreetMap,
-        "Satellite" = leaflet::providers$Esri.WorldImagery
+                        "OpenStreetMap" = leaflet::providers$OpenStreetMap,
+                        "Satellite" = leaflet::providers$Esri.WorldImagery
       )
-
+      
       leaflet::leafletProxy("buildings") %>%
         leaflet::clearTiles() %>%
         leaflet::addProviderTiles(basemap)

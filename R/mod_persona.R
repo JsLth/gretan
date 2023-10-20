@@ -2,7 +2,7 @@ mod_persona_ui <- function(id) {
   # UI setup ----
   ns <- NS(id)
   get_text <- dispatch_to_txt(id)
-
+  
   persona_step <- function(..., step, format = TRUE) {
     shinyjs::hidden(div(
       id = ns(paste0("step", step)),
@@ -10,7 +10,7 @@ mod_persona_ui <- function(id) {
       ...
     ))
   }
-
+  
   bs4Dash::tabItem(
     "persona",
     # Header ----
@@ -280,12 +280,12 @@ mod_persona_server <- function(id) {
     # Server setup ----
     ns <- session$ns
     get_text <- dispatch_to_txt(session$ns(NULL))
-
+    
     # Questionnaire
     page <- reactiveVal(1)
     prev_page <- reactiveVal(NULL)
     log_cache <- reactiveVal(list(from = NULL, to = 1))
-
+    
     # Predict + map personas
     ready <- reactiveVal(0)
     waitress <- waiter::Waitress$new(
@@ -293,13 +293,13 @@ mod_persona_server <- function(id) {
       infinite = TRUE,
       theme = "line"
     )
-
+    
     # Effects of moving
     markers <- reactiveValues(start = FALSE, dest = FALSE)
     markerloc <- reactiveValues(start = NULL, dest = NULL)
-
-
-
+    
+    
+    
     # Questionnaire ----
     ## Manage page flips ----
     observe(
@@ -317,10 +317,10 @@ mod_persona_server <- function(id) {
           id = "submit",
           condition = all(has_answered())
         )
-
+        
         shinyjs::hide(id = paste0("step", prev_page()))
         shinyjs::show(paste0("step", page()))
-
+        
         pgs <- list(from = prev_page(), to = page())
         if (!identical(pgs, log_cache())) {
           log_cache(pgs)
@@ -333,8 +333,8 @@ mod_persona_server <- function(id) {
       },
       label = "Page manager"
     )
-
-
+    
+    
     ## Toggle containers ----
     observe(
       {
@@ -343,8 +343,8 @@ mod_persona_server <- function(id) {
       },
       label = "Toggle containers"
     )
-
-
+    
+    
     ## Reset questionnaire ----
     observe(
       {
@@ -352,22 +352,22 @@ mod_persona_server <- function(id) {
         markers$dest <- FALSE
         markerloc$start <- NULL
         markerloc$dest <- NULL
-
+        
         shinyWidgets::updatePrettyToggle(inputId = ns("consent"), value = FALSE)
-
+        
         for (i in seq(5)) {
           with_eval_args(shinyWidgets::updateAwesomeRadio(
             inputId = ns(paste0("question", i)),
             selected = "None selected"
           ))
         }
-
+        
         freezeReactiveValue(input, "submit")
         session$sendCustomMessage(
           "resetLoadingButton",
           message = list(inputId = session$ns("submit"))
         )
-
+        
         shinyjs::hide("results")
         shinyjs::show("surveybox")
         prev_page(page())
@@ -377,8 +377,8 @@ mod_persona_server <- function(id) {
       label = "Reset"
     ) %>%
       bindEvent(input$reset)
-
-
+    
+    
     ## Go one page forward ----
     observe(
       {
@@ -388,8 +388,8 @@ mod_persona_server <- function(id) {
       label = "Page forward"
     ) %>%
       bindEvent(input$nextBtn)
-
-
+    
+    
     ## Go one page backward ----
     observe(
       {
@@ -399,8 +399,8 @@ mod_persona_server <- function(id) {
       label = "Page backward"
     ) %>%
       bindEvent(input$prevBtn)
-
-
+    
+    
     ## Determine missing answers ----
     has_answered <- reactive(
       {
@@ -420,8 +420,8 @@ mod_persona_server <- function(id) {
       },
       label = "Response fail check"
     )
-
-
+    
+    
     ## Render missing answers ----
     output$required <- renderUI(execute_safely({
       idx <- which(!has_answered())
@@ -446,16 +446,16 @@ mod_persona_server <- function(id) {
         div()
       }
     }))
-
-
-
+    
+    
+    
     # Predict persona ----
     ## Load model ----
     model <- reactive(reticulate::py_load_object(app_sys(
       "extdata/persona_model.pkl"
     )), label = "Load model")
-
-
+    
+    
     ## Collect responses ----
     responses <- reactive(c(
       q1 = input$question1,
@@ -464,36 +464,36 @@ mod_persona_server <- function(id) {
       q4 = input$question4,
       q5 = input$question5
     ), label = "Collect responses")
-
-
+    
+    
     ## Predict top 3 personas ----
     results <- reactive(execute_safely({
       waitress$start()
-
+      
       # Load model
       model <- isolate(model())
-
+      
       # Reshape input data
       features <- responses() %>%
         reticulate::np_array() %>%
         reticulate::array_reshape(c(1, -1))
-
+      
       # Predict persona from input
       pred <- c(model$predict(features))
       names(pred) <- unlist(
         lapply(get_text("results", "personas"), "[[", "name")
       )
-
+      
       # Extract and order personas
       top_personas <- order(pred, decreasing = TRUE)[1:3]
       top_prob <- pred[top_personas]
       top_order <- order(top_prob, decreasing = TRUE)
       top_personas <- top_personas[top_order]
       top_prob <- top_prob[top_order]
-
+      
       waitress$close()
       Sys.sleep(0.2)
-
+      
       personas <- get_text("results", "personas")
       lapply(seq(3), function(i) {
         pers <- top_personas[i]
@@ -508,8 +508,8 @@ mod_persona_server <- function(id) {
       })
     }), label = "Compute personas") %>%
       bindEvent(input$submit)
-
-
+    
+    
     ## Preserve results ----
     observe({
       req(getGretaOption("collect", FALSE))
@@ -526,7 +526,7 @@ mod_persona_server <- function(id) {
         res3_name = results[[3]]$name,
         res3_p = results[[3]]$p
       )
-
+      
       outf <- app_sys("persona_data.csv")
       utils::write.table(
         .data,
@@ -538,8 +538,8 @@ mod_persona_server <- function(id) {
       )
     }) %>%
       bindEvent(results())
-
-
+    
+    
     ## Render persona carousel ----
     output$type <- renderUI(execute_safely({
       results <- results()
@@ -551,9 +551,9 @@ mod_persona_server <- function(id) {
             col_5(
               h4(
                 switch(i,
-                  "Our models show that you are most likely to be...",
-                  "It is also possible that you are...",
-                  "Although less likely, you could also be..."
+                       "Our models show that you are most likely to be...",
+                       "It is also possible that you are...",
+                       "Although less likely, you could also be..."
                 ),
                 style = style(`text-align` = "center")
               ),
@@ -592,23 +592,23 @@ mod_persona_server <- function(id) {
       )
     })) %>%
       bindEvent(input$submit)
-
-
-
+    
+    
+    
     # Map personas ----
     ## Load persona data ----
     clusters <- reactive(readRDS(system.file(
       "extdata/persona.rds",
       package = "gretan"
     )), label = "Load persona.rds")
-
-
+    
+    
     ## Switch mode ----
     observe(
       {
         is_mode <- isTRUE(input$mode)
         shinyjs::toggleElement("option", condition = !is_mode, anim = TRUE)
-
+        
         if (!is_mode) {
           if (identical(input$item, "cluster")) {
             choices <- lapply(get_text("results", "personas"), "[[", "name")
@@ -624,12 +624,12 @@ mod_persona_server <- function(id) {
             choices <- stats::setNames(seq_along(choices), choices)
             sel <- responses()[idx - 1]
             sel <- switch(as.character(sel),
-              "-1" = choices["I do not know"],
-              "-2" = choices["Prefer not to say"],
-              sel
+                          "-1" = choices["I do not know"],
+                          "-2" = choices["Prefer not to say"],
+                          sel
             )
           }
-
+          
           freezeReactiveValue(input, "option")
           shinyWidgets::updatePickerInput(
             session = session,
@@ -642,19 +642,19 @@ mod_persona_server <- function(id) {
       label = "Switch mode/percentage"
     ) %>%
       bindEvent(input$mode, input$item)
-
-
+    
+    
     ## Render item ----
     output[["item-text"]] <- renderUI(execute_safely({
       render_persona_item(input$item, results(), responses())
     }))
-
-
+    
+    
     ## Compute map parameters ----
     params <- reactive(execute_safely({
       clusters <- isolate(clusters())
       clusters <- clusters[[input$aggr]]
-
+      
       is_dummy <- grepl("\\_[0-9]+$", names(clusters))
       if (isTRUE(input$mode)) {
         var <- input$item
@@ -677,7 +677,7 @@ mod_persona_server <- function(id) {
           choices <- choices[seq(length(choices))]
           clusters[[var]] <- choices[clusters[[var]]]
         }
-
+        
         # Label non-responses as NA
         nr <- c("I do not know", "Prefer not to say")
         clusters[[var]][clusters[[var]] %in% nr] <- NA
@@ -689,14 +689,14 @@ mod_persona_server <- function(id) {
         )]
         clusters[[var]] <- round(clusters[[var]] * 100, 2)
       }
-
+      
       clusters <- clusters[c(
         var,
         if (input$aggr %in% c("nuts0", "nuts1", "nuts2")) "nuts0",
         if (input$aggr %in% c("nuts1", "nuts2")) "nuts1",
         if (input$aggr %in% "nuts2") "nuts2"
       )]
-
+      
       if (isTRUE(input$mode)) {
         if (identical(input$item, "cluster")) {
           palette <- "Dark2"
@@ -705,7 +705,7 @@ mod_persona_server <- function(id) {
           palette <- "YlGn"
           clusters[[var]] <- ordered(clusters[[var]], levels = choices)
         }
-
+        
         values <- levels(clusters[[var]])
         pal <- leaflet::colorFactor(
           palette = palette,
@@ -719,10 +719,10 @@ mod_persona_server <- function(id) {
           domain = values
         )
       }
-
+      
       unit <- ifelse(isTRUE(input$mode), "", " %")
       lgd <- ifelse(isTRUE(input$mode), "Median", "Share")
-
+      
       largs <- list(
         if ("nuts0" %in% names(clusters)) clusters[["nuts0"]],
         if ("nuts1" %in% names(clusters)) clusters[["nuts1"]],
@@ -731,9 +731,9 @@ mod_persona_server <- function(id) {
       )
       largs <- stats::setNames(largs, c("NUTS-0", "NUTS-1", "NUTS-2", lgd))
       labels <- do.call(align_in_table, largs)
-
+      
       clusters <- sf::st_transform(clusters, 4326)
-
+      
       list(
         data = clusters,
         var = var,
@@ -744,8 +744,8 @@ mod_persona_server <- function(id) {
         values = values
       )
     }), label = "Construct map paramters")
-
-
+    
+    
     ## Render Leaflet map ----
     output$map <- leaflet::renderLeaflet(execute_safely({
       params <- params()
@@ -769,13 +769,13 @@ mod_persona_server <- function(id) {
           title = params$lgd,
           labFormat = leaflet::labelFormat(suffix = params$unit)
         )
-
+      
       ready(ready() + 1)
       p
     })) %>%
       bindEvent(input$submit)
-
-
+    
+    
     ## Update Leaflet map ----
     observe(
       {
@@ -803,11 +803,11 @@ mod_persona_server <- function(id) {
       },
       label = "Update map parameters"
     )
-
+    
     outputOptions(output, "type", suspendWhenHidden = FALSE, priority = 1)
     outputOptions(output, "map", suspendWhenHidden = FALSE, priority = 2)
-
-
+    
+    
     # Effects of moving ----
     ## Capture place name ----
     location <- reactive({
@@ -821,38 +821,38 @@ mod_persona_server <- function(id) {
       df
     }) %>%
       bindEvent(input$map_shape_click)
-
-
+    
+    
     ## Remove marker on click ----
     observe({
       id <- input$map_marker_click$id
-
+      
       if (identical(id, session$ns("start"))) {
         markers$start <- FALSE
       } else if (identical(id, session$ns("dest"))) {
         markers$dest <- FALSE
       }
-
+      
       leaflet::leafletProxy("map") %>%
         leaflet::removeMarker(id)
     }) %>%
       bindEvent(input$map_marker_click)
-
-
+    
+    
     ## Reset markers on aggregation change ----
     observe({
       markers$start <- FALSE
       markers$dest <- FALSE
     }) %>%
       bindEvent(input$aggr)
-
-
+    
+    
     ## Add marker on click ----
     observe({
       pt <- input$map_shape_click
-
+      
       add_start <- !isTRUE(markers$start)
-
+      
       if (add_start) {
         if (isTRUE(markers$start)) {
           markers$start <- FALSE
@@ -890,14 +890,14 @@ mod_persona_server <- function(id) {
       }
     }) %>%
       bindEvent(input$map_shape_click)
-
-
+    
+    
     ## Render start ----
     output$move_from <- renderUI(execute_safely({
       loc <- location()
-
+      
       shinyjs::hide(id = "start-placeholder")
-
+      
       if (isTRUE(markers$start)) {
         markerloc$start <- list(
           coord = unlist(input$map_shape_click[c("lng", "lat")]),
@@ -909,14 +909,14 @@ mod_persona_server <- function(id) {
       }
     })) %>%
       bindEvent(markers$start)
-
-
+    
+    
     ## Render destination ----
     output$move_to <- renderUI(execute_safely({
       loc <- location()
-
+      
       shinyjs::hide(id = "dest-placeholder")
-
+      
       if (isTRUE(markers$dest)) {
         markerloc$dest <- list(
           coord = unlist(input$map_shape_click[c("lng", "lat")]),
@@ -928,8 +928,8 @@ mod_persona_server <- function(id) {
       }
     })) %>%
       bindEvent(markers$dest)
-
-
+    
+    
     ## Moving animation ----
     observe(
       {
@@ -937,11 +937,11 @@ mod_persona_server <- function(id) {
           send_error(
             "Please select both a start and a
           destination before starting the journey!",
-            width = "600px"
+          width = "600px"
           )
           req(FALSE)
         }
-
+        
         if (identical(
           markerloc$start$data$place_name,
           markerloc$dest$data$place_name
@@ -949,12 +949,12 @@ mod_persona_server <- function(id) {
           send_error("Please select two different places!", width = "600px")
           req(FALSE)
         }
-
-
+        
+        
         loc <- rbind(markerloc$start$coord, markerloc$dest$coord)
         lng <- loc[, "lng"]
         lat <- loc[, "lat"]
-
+        
         leaflet::leafletProxy("map", deferUntilFlush = FALSE) %>%
           addMovingMarker(
             lng = lng,
@@ -976,7 +976,7 @@ mod_persona_server <- function(id) {
       priority = 2
     ) %>%
       bindEvent(input$move_go)
-
+    
     modal_ready <- reactiveVal(FALSE)
     ## Create modal window ----
     observe(
@@ -1036,8 +1036,8 @@ mod_persona_server <- function(id) {
       priority = 1
     ) %>%
       bindEvent(input$move_go)
-
-
+    
+    
     ## Render move item ----
     output$move_item_text <- renderUI({
       render_persona_item(
@@ -1047,8 +1047,8 @@ mod_persona_server <- function(id) {
         style = style(`font-size` = "16px")
       )
     })
-
-
+    
+    
     ## Collect moving data ----
     move_data <- reactive(execute_safely({
       req(modal_ready())
@@ -1057,36 +1057,36 @@ mod_persona_server <- function(id) {
         sf::st_drop_geometry(markerloc$dest$data)
       )
     }))
-
-
+    
+    
     ## Render effects of moving ----
     output$move_diff <- renderPlot({
       data <- move_data()
       responses <- responses()
       results <- results()
       item <- input$move_item
-
+      
       persona <- which(vapply(
         FUN.VALUE = logical(1),
         get_text("results", "personas"),
         function(x) x$name %in% results[[1]]$name
       ))
-
+      
       plot_persona(data, item, diff = TRUE)
     })
-
+    
     output$move_prop <- renderPlot({
       data <- move_data()
       responses <- responses()
       results <- results()
       item <- input$move_item
-
+      
       persona <- which(vapply(
         FUN.VALUE = logical(1),
         get_text("results", "personas"),
         function(x) x$name %in% results[[1]]$name
       ))
-
+      
       plot_persona(data, item, diff = FALSE)
     })
   })
