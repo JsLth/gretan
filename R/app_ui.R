@@ -227,16 +227,6 @@ app_ui <- function(theme = NULL,
           icon = icon(get_text("enpov", "icon")),
           tabName = "enpov"
         ),
-        bs4Dash::menuItem(
-          text = get_text("attitudes", "shortitle"),
-          icon = icon(get_text("attitudes", "icon")),
-          tabName = "attitudes"
-        ),
-        bs4Dash::menuItem(
-          text = get_text("research", "shortitle"),
-          icon = icon(get_text("research", "icon")),
-          tabName = "research"
-        ),
         flat = TRUE
       ),
       skin = "light",

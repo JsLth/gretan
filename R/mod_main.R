@@ -28,8 +28,6 @@ mod_main_ui <- function(id) {
     mod_stakeholder_ui(ns("stakeholder")),
     mod_persona_ui(ns("persona")),
     mod_enpov_ui(ns("enpov")),
-    mod_attitudes_ui(ns("attitudes")),
-    mod_research_ui(ns("research")),
     mod_cs1_ui(ns("cs1")),
     mod_cs2_ui(ns("cs2")),
     mod_cs3_ui(ns("cs3")),
@@ -60,8 +58,6 @@ mod_main_server <- function(id, tab) {
     mod_stakeholder_server("stakeholder", tab = tab)
     mod_persona_server("persona")
     mod_enpov_server("enpov")
-    mod_attitudes_server("attitudes")
-    mod_research_server("research")
     
     output[["exp-download"]] <- downloadHandler(
       filename = function() {
