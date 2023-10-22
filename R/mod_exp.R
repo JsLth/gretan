@@ -1,4 +1,5 @@
 mod_exp_ui <- function(id, titles) {
+  # Setup UI ----
   ns <- NS(id)
   cb <- cb_ext
 
@@ -9,6 +10,7 @@ mod_exp_ui <- function(id, titles) {
     fluidRow(
       bs4Dash::column(
         width = 3,
+        # Data selection ----
         helpBox(
           title = "Data selection",
           id = ns("databox"),
@@ -17,6 +19,7 @@ mod_exp_ui <- function(id, titles) {
           solidHeader = FALSE,
           collapsible = TRUE,
           status = "primary",
+          ## Title ----
           shinyWidgets::pickerInput(
             ns("title"),
             "Topic",
@@ -29,10 +32,12 @@ mod_exp_ui <- function(id, titles) {
           ),
           htmlOutput(ns("question")),
           tags$br(),
+          ## Subitem and option ----
           shinyWidgets::pickerInput(ns("subitem"), "Subitem", character()),
           shinyWidgets::pickerInput(ns("option"), "Option", character())
         ),
         helpBox(
+          # Map config ----
           title = "Map configuration",
           id = ns("config"),
           help_id = ns("configHelp"),
@@ -40,6 +45,7 @@ mod_exp_ui <- function(id, titles) {
           solidHeader = FALSE,
           collapsible = TRUE,
           status = "primary",
+          ## Aggregation level ----
           shinyWidgets::pickerInput(
             ns("aggr"),
             "Aggregation level",
@@ -51,11 +57,13 @@ mod_exp_ui <- function(id, titles) {
             ),
             selected = "nuts0"
           ),
+          ## Palette ----
           shinyWidgets::pickerInput(
             ns("pal"),
             "Color palette",
             choices = list_palettes(c("seq", "viridis", "qual"))
           ),
+          ## Fixed ----
           shinyWidgets::prettyRadioButtons(
             ns("fixed"),
             "Legend values",
@@ -63,6 +71,7 @@ mod_exp_ui <- function(id, titles) {
             selected = "Full contrast",
             inline = TRUE
           ),
+          ## Mode ----
           shinyWidgets::prettyToggle(
             ns("mode"),
             label_on = "Show as most popular",
@@ -75,6 +84,7 @@ mod_exp_ui <- function(id, titles) {
             value = FALSE
           )
         ),
+        # About ----
         bs4Dash::box(
           title = "About",
           width = 12,
@@ -97,6 +107,7 @@ mod_exp_ui <- function(id, titles) {
           )
         )
       ),
+      # Explorer map ----
       bs4Dash::column(
         width = 9,
         bs4Dash::box(
@@ -114,6 +125,7 @@ mod_exp_ui <- function(id, titles) {
 
 mod_exp_server <- function(id, track = FALSE) {
   moduleServer(id, function(input, output, session) {
+    # Server setup ----
     cb <- cb_ext
     get_text <- dispatch_to_txt(session$ns(NULL))
 
@@ -128,18 +140,13 @@ mod_exp_server <- function(id, track = FALSE) {
       content = get_text("help", "confbox")
     )
 
-    # Show question
+    # Show question ----
     output$question <- renderUI({
       render_question(input$title, input$subitem, input$option)
     })
-
-    # Hide or show selectors for subitems or options depending on the question
-    # Input pickers are updated to show the correct options and subitems for the
-    # active question. This triggers and event, which would lead to double
-    # reactivity as both changing the title and updating the subitem/option would
-    # lead trigger the recalculation of the input variable. To prevent this, the
-    # update flags are sets after updating. Update flags need to be FALSE for
-    # the input variable to be re-calculated.
+    
+    
+    # Show/hide subitems/options ----
     observe(
       {
         varsel <- cb[cb$title %in% input$title, ]$variable
@@ -184,12 +191,13 @@ mod_exp_server <- function(id, track = FALSE) {
       label = "show or hide options/subitems"
     )
 
-    # Determine the variable based on combination of topic, subitem and option
+    # Get MNS variable ----
     invar <- reactive(
       get_mns_variable(input$title, input$subitem, input$option, input$mode),
       label = "select input variable"
     )
 
+    # Handle palette updates ----
     # Hide options depending on whether they are displayed individually or as mode
     # Three cases are defined:
     # 1. No options are available: Hide options and change to sequential palettes
@@ -218,6 +226,7 @@ mod_exp_server <- function(id, track = FALSE) {
       label = "update palettes"
     )
 
+    # Disable/enable fixed ----
     # Disable options to fix legend values when input variable is anything else
     # than percentages. If they are metric values (e.g. age), then we can't fix
     # legend values because the value range is not limited in theory. If they are
@@ -236,6 +245,7 @@ mod_exp_server <- function(id, track = FALSE) {
       label = "disable or enable fixed"
     )
 
+    # Get palette ----
     pal <- reactive({
       pal <- input$pal
       palettes <- list_palettes("viridis")
@@ -244,8 +254,8 @@ mod_exp_server <- function(id, track = FALSE) {
       }
       pal
     })
-
-    # Compile all parameters into a list
+    
+    # Compile parameters ----
     exp_params <- reactive(
       {
         log_it("Attempting to change map parameters")
@@ -260,14 +270,15 @@ mod_exp_server <- function(id, track = FALSE) {
       label = "compile parameters"
     )
 
-    # Render initial leaflet map. Isolate reactives so they are only called once.
+    # Render initial map ----
+    # Isolate reactives so they are only called once.
     output$explorer <- leaflet::renderLeaflet({
       params <- isolate(exp_params())
       log_it("Initializing explorer")
       map_mns(params, track = track)
     })
 
-    # Continuously update leaflet map
+    # Update leaflet map ----
     observe(
       {
         params <- exp_params()
@@ -276,7 +287,7 @@ mod_exp_server <- function(id, track = FALSE) {
       },
       label = "update explorer"
     )
-
+    
     return(exp_params)
   })
 }
