@@ -254,7 +254,7 @@ tag_to_text <- function(x, ...) {
 #' @export
 tag_to_text.default <- function(x, ...) {
   if (!is.null(x) && !length(intersect(class(x), c("html_dependency")))) {
-    as.character(x, ...)
+    paste(as.character(x, ...))
   } else {
     ""
   }
