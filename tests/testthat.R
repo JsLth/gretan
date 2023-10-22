@@ -7,6 +7,8 @@
 # * https://testthat.r-lib.org/reference/test_package.html#special-files
 
 library(testthat)
+library(shiny)
+library(shinyjs)
 library(gretan)
 
 test_check("gretan")
