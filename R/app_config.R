@@ -7,12 +7,12 @@
 #' @noRd
 app_sys <- function(...) {
   path <- system.file(..., package = "gretan")
-  
+
   # for rsconnect
   if (!nchar(path)) {
     path <- file.path("inst", ...)
   }
-  
+
   path
 }
 
@@ -36,45 +36,52 @@ add_external_resources <- function() {
 
 
 download_dependencies <- function(prompt = interactive()) {
-  if (!dir.exists(app_sys("extdata/stakeholder/output")))
+  if (!dir.exists(app_sys("extdata/stakeholder/output"))) {
     dir.create(app_sys("extdata/stakeholder/output"))
-  
+  }
+
   plat_db_dest <- app_sys("extdata/stakeholder/output/pLAtYpus.sqlite3")
   plat_alt_dest <- app_sys("extdata/stakeholder/output/pLAtYpus_only_survey.sqlite3")
   needed <- c(
     !file.exists(plat_db_dest),
     !file.exists(plat_alt_dest)
   )
-  
-  if (!any(needed)) return(invisible())
-  
+
+  if (!any(needed)) {
+    return(invisible())
+  }
+
   if (isTRUE(prompt)) {
     sizes <- c(28.7, 28.7)[needed]
     answer <- readline(sprintf(
       "Install dependencies? This will download %s MB of data. [y/N] ",
       sum(sizes)
     ))
-    
+
     if (!identical(answer, "y")) {
       stop("Dependencies needed to start the Shiny app")
     }
   }
-  
+
   plat_db_url <- "https://github.com/TNO/pLAtYpus/raw/main/output/pLAtYpus.sqlite3"
   plat_alt_url <- "https://github.com/TNO/pLAtYpus/raw/main/output/pLAtYpus_only_survey.sqlite3"
-  
-  if (needed[1])
+
+  if (needed[1]) {
     curl::curl_download(plat_db_url, plat_db_dest, quiet = FALSE)
-  
-  if (needed[2])
+  }
+
+  if (needed[2]) {
     curl::curl_download(plat_alt_url, destfile = plat_alt_dest, quiet = FALSE)
-  
+  }
+
   plat_db_dest <- app_sys("extdata/stakeholder/output/pLAtYpus.sqlite3")
   plat_alt_dest <- app_sys("extdata/stakeholder/output/pLAtYpus_only_survey.sqlite3")
-  
-  if (!file.exists(plat_db_dest)) 
+
+  if (!file.exists(plat_db_dest)) {
     download.file(stk_db, destfile = plat_db_dest)
-  
-  if (!file.exists(plat_alt_dest))
+  }
+
+  if (!file.exists(plat_alt_dest)) {
     download.file(stk_alt, destfile = plat_alt_dest)
+  }
 }

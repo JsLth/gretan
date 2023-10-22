@@ -1,6 +1,6 @@
 align_in_table <- function(..., sep = " ", bold = TRUE, .list = NULL) {
   .list <- .list %||% drop_nulls(list(...))
-  
+
   lhs <- names(.list)
   labels <- mapply(
     align_td,
@@ -10,7 +10,7 @@ align_in_table <- function(..., sep = " ", bold = TRUE, .list = NULL) {
     bold = bold,
     SIMPLIFY = FALSE
   )
-  
+
   lapply(
     do.call(paste, labels),
     function(x) protect_html(tags$table(HTML(x)))
@@ -49,7 +49,7 @@ align_td <- function(x, y, char = " ", bold = TRUE) {
 leaflet_select <- function(id, geom, action, tol = 1) {
   if (!is.null(action)) {
     marker <- sf::st_sfc(sf::st_point(c(action$lng, action$lat)), crs = 4326)
-    
+
     target <- geom[sf::st_is_within_distance(
       geom,
       marker,
@@ -62,13 +62,13 @@ leaflet_select <- function(id, geom, action, tol = 1) {
 # Selects a text in `txts` that corresponds to a selected Leaflet element
 leaflet_text_on_click <- function(id, geom, texts, click, col = "name", tol = 1) {
   target <- leaflet_select(id, geom, click, tol = tol)
-  
+
   if (is.null(target)) {
     target <- "none"
   } else {
     target <- target[[col]]
   }
-  
+
   texts[[target]]
 }
 
@@ -101,7 +101,7 @@ track_coordinates <- function(map, id) {
       data = NULL
     ))
   )
-  
+
   map
 }
 
@@ -192,7 +192,7 @@ execute_safely <- function(expr,
     "issue</a> or email the tool maintainer (",
     "<a href = 'mailto:jonas.lieth@gesis.org'>jonas.lieth@gesis.org</a>)."
   ))
-  
+
   tryCatch(
     expr = {
       # In case of warning, return expression
@@ -211,11 +211,11 @@ execute_safely <- function(expr,
     error = function(e) {
       # Stop without error message
       if (inherits(e, "shiny.silent.error")) req(FALSE)
-      
+
       if (any(startsWith(class(e), "python"))) {
         e <- reticulate::py_last_error()$message
       }
-      
+
       send_error(div(
         style = "text-align: left",
         message,
@@ -223,17 +223,17 @@ execute_safely <- function(expr,
         "Error details:", br(),
         rlang_error_to_html(e, warn = FALSE)
       ), session = session, title = title)
-      
+
       log_it(
         log = "An error occurred",
         type = "error",
         details = format(e),
         priority = TRUE
       )
-      
+
       # Send error message and then stop
       if (stopOperation) req(FALSE)
-      
+
       return(e)
     }
   )
@@ -373,7 +373,7 @@ get_module_id <- function(session = getDefaultReactiveDomain()) {
       ns <- strsplit(session$ns(""), "-")[[1]]
       id <- ns[length(ns)]
     }
-    
+
     id
   }
 }
@@ -410,9 +410,9 @@ log_it <- function(log = NULL,
   if (is.null(session)) {
     stop("log_it must be called within a Shiny session", call. = FALSE)
   }
-  
+
   out <- getGretaOption("logging", "")
-  
+
   if (isFALSE(out)) {
     return(invisible())
   }
@@ -420,32 +420,32 @@ log_it <- function(log = NULL,
   time <- format(Sys.time(), "%F %T")
   ns <- get_module_id(session)
   valid_ns <- if (!nzchar(out)) ns else out
-  
+
   if (!dir.exists(out) && isFALSE(ns %in% valid_ns)) {
     return(invisible())
   }
-  
+
   if (!nzchar(out) && interactive()) {
     col <- switch(type,
-                  info = "\033[32m[%s]\033[39m",
-                  warn = "\033[33m[%s]\033[39m",
-                  error = "\033[31m[%s]\033[39m",
-                  success = "\033[34m[%s]\033[39m"
+      info = "\033[32m[%s]\033[39m",
+      warn = "\033[33m[%s]\033[39m",
+      error = "\033[31m[%s]\033[39m",
+      success = "\033[34m[%s]\033[39m"
     )
   } else {
     col <- "[%s]"
   }
   type <- sprintf(col, toupper(type))
   log <- log %||% srcloc(idx = 2L)
-  
+
   if (nzchar(ns)) {
     ns <- sprintf(" {%s} ", ns)
   } else {
     ns <- " "
   }
-  
+
   cat2(sprintf("%s %s%s%s", time, type, ns, log), file = out, append = TRUE)
-  
+
   if (!is.null(details)) {
     log_details(details)
   }
@@ -480,43 +480,43 @@ force_store_googledrive <- function(logs, ...) {
   path <- normalizePath(tempfile(fileext = ".json"), "/", mustWork = FALSE)
   jsonlite::write_json(logs, path = path, auto_unbox = TRUE, pretty = TRUE)
   timestamp <- format(as.numeric(Sys.time()) * 1e4, scientific = FALSE)
-  file_name = paste0("log_gretan_", timestamp, ".json")
-  
+  file_name <- paste0("log_gretan_", timestamp, ".json")
+
   log_it("Uploading user metrics")
-  
+
   uperr <- try_gdrive_upload(media = path, name = file_name)
   while (inherits(uperr, "try-error")) {
     uperr <- try_gdrive_upload(media = path, name = file_name)
   }
-  
+
   shutdown()
 }
 
 
 with_greta_options <- function(app, options) {
   app$appOptions$greta_options <- options
-  
+
   log <- options$logging
   if (!is.null(log) && file.exists(log)) {
     cat2(sprintf("Saving logs to %s", substitute(log)))
   }
-  
+
   app
 }
 
 getGretaOption <- function(name, default = NULL) {
   opts <- getShinyOption("greta_options")
-  
+
   if (missing(name)) {
     return(opts)
   }
-  
+
   option <- if (!is.null(opts)) {
     opts[[name]] %||% default
   } else {
     default
   }
-  
+
   option
 }
 
@@ -553,16 +553,16 @@ riffle <- function(a, b) {
   len_b <- length(b)
   len_comm <- pmin(len_a, len_b)
   len_tail <- abs(len_a - len_b)
-  
+
   if (len_a < 1) stop("First vector has length less than 1")
   if (len_b < 1) stop("Second vector has length less than 1")
-  
+
   riffle_common <- c(rbind(a[1:len_comm], b[1:len_comm]))
-  
+
   if (len_tail == 0) {
     return(riffle_common)
   }
-  
+
   if (len_a > len_b) {
     return(c(riffle_common, a[(len_comm + 1):len_a]))
   } else {

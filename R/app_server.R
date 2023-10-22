@@ -12,39 +12,39 @@ app_server <- function(input, output, session) {
       priority = TRUE
     )
   }
-  
-  
+
+
   # Track user metrics ----
   if (isTRUE(getGretaOption("track"))) {
     required <- NULL
     required[1] <- requireNamespace("googledrive", quietly = TRUE)
     required[2] <- requireNamespace("gargle", quietly = TRUE)
     required[3] <- requireNamespace("shinylogs", quietly = TRUE)
-    
+
     if (!all(required)) {
       stop(paste0(
         "Packages googledrive, gargle and shinylogs",
         "are needed to track user metrics."
       ))
     }
-    
+
     if (is.null(Sys.getenv("GDRIVE_KEY"))) {
       stop("A valid auth key must be provided to track user metrics.")
     }
-    
+
     googledrive::drive_auth(
       path = gargle::secret_decrypt_json(
         app_sys("app/greta-analytics-6a4bb2fe4e5f.json"),
         key = "GDRIVE_KEY"
       )
     )
-    
+
     # exclude internal inputs
     exclude <- c(
       "^\\.", "^waiter", "^plotly", "box$", "font$", "config$", "zoom$",
       "mouseover$", "mouseout$", "center$", "bounds$"
     )
-    
+
     shinylogs::track_usage(
       shinylogs::store_custom(force_store_googledrive),
       exclude_input_regex = paste(exclude, collapse = "|"),
@@ -53,8 +53,8 @@ app_server <- function(input, output, session) {
   } else {
     onSessionEnded(fun = shutdown)
   }
-  
-  
+
+
   # Track tab selection ----
   tabsel <- reactive(
     {
@@ -63,11 +63,11 @@ app_server <- function(input, output, session) {
     },
     label = "track tab selection"
   )
-  
-  
+
+
   # Hide help switch
   shinyjs::hideElement(selector = "ul.navbar-right")
-  
+
   # Capture search term ----
   searchbox_input <- reactive(
     {
@@ -76,7 +76,7 @@ app_server <- function(input, output, session) {
     },
     label = "capture search term"
   )
-  
+
   # Change tab after search ----
   for (x in names(txts$main)) {
     with_eval_args(
@@ -87,14 +87,14 @@ app_server <- function(input, output, session) {
       ))
     )
   }
-  
+
   # Fix sidebar on search ----
   shinyjs::onclick("textSearch", expr = {
     if (isFALSE(input$sidebarState)) {
       bs4Dash::updateSidebar("sidebarState")
     }
   })
-  
+
   # Search texts ----
   search_results <- reactive(
     {
@@ -128,18 +128,18 @@ app_server <- function(input, output, session) {
     },
     label = "search texts"
   )
-  
+
   # Show/hide search bar ----
   observe(
     {
       has_input <- searchbox_input()
-      
+
       removeUI(
         selector = "div:has(> .form-suggestions)",
         multiple = TRUE,
         immediate = TRUE
       )
-      
+
       if (has_input) {
         insertUI(
           selector = "#textSearch",
@@ -154,8 +154,8 @@ app_server <- function(input, output, session) {
     },
     label = "show/hide search bar"
   )
-  
-  
+
+
   # Forward from home section ----
   all_tabs <- c(
     "exp", "taxonomy", "cs1", "cs2", "cs3", "cs4", "cs5", "stakeholder",
@@ -174,20 +174,20 @@ app_server <- function(input, output, session) {
         bindEvent(input[[welcome_id]])
     })
   }
-  
+
   observe({
     bs4Dash::updateTabItems(session, "sidebar", "exp")
   }) %>%
     bindEvent(input[["main-cs4-exp_link"]])
-  
-  
+
+
   # Change URL path to tab selection ----
   observe(
     {
       tab <- tabsel()
       cqstring <- getQueryString(session)$tab
       pqstring <- paste0("?tab=", tab)
-      
+
       if (is.null(cqstring) || !identical(cqstring, tab)) {
         freezeReactiveValue(input, "sidebar")
         updateQueryString(pqstring, mode = "push", session = session)
@@ -196,14 +196,14 @@ app_server <- function(input, output, session) {
     priority = 0
   ) %>%
     bindEvent(tabsel())
-  
-  
+
+
   # Select tab from URL path ----
   observe(
     {
       tab <- tabsel()
       cqstring <- parseQueryString(session$clientData$url_search)$tab
-      
+
       if (is.null(tab) || !is.null(cqstring) && !identical(cqstring, tab)) {
         freezeReactiveValue(input, "sidebar")
         bs4Dash::updateTabItems(session, "sidebar", cqstring)
@@ -212,7 +212,7 @@ app_server <- function(input, output, session) {
     priority = 1
   ) %>%
     bindEvent(getQueryString(session)$tab)
-  
-  
+
+
   mod_main_server("main", tab = tabsel)
 }
