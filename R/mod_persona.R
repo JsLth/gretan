@@ -310,7 +310,7 @@ mod_persona_server <- function(id) {
         )
         shinyjs::toggleState(
           id = "nextBtn",
-          condition = page() < 7 && input$consent
+          condition = page() < 7 && input$consent %||% FALSE
         )
         freezeReactiveValue(input, "submit")
         shinyjs::toggleState(
@@ -616,17 +616,18 @@ mod_persona_server <- function(id) {
             sel <- choices[results()[[1]]$name]
           } else {
             responses <- responses()
-            idx <- itemToIdx(input$item) + 1
+            idx <- itemToIdx(input$item %||% 1) + 1
             choices <- setdiff(
               names(get_text("steps")[[idx]]$choices),
               "None selected"
             )
             choices <- stats::setNames(seq_along(choices), choices)
-            sel <- responses()[idx - 1]
-            sel <- switch(as.character(sel),
-                          "-1" = choices["I do not know"],
-                          "-2" = choices["Prefer not to say"],
-                          sel
+            sel <- responses()[idx - 1] %||% 1
+            sel <- switch(
+              as.character(sel),
+              "-1" = choices["I do not know"],
+              "-2" = choices["Prefer not to say"],
+              sel
             )
           }
           
@@ -653,7 +654,7 @@ mod_persona_server <- function(id) {
     ## Compute map parameters ----
     params <- reactive(execute_safely({
       clusters <- isolate(clusters())
-      clusters <- clusters[[input$aggr]]
+      clusters <- clusters[[input$aggr %||% "nuts0"]]
       
       is_dummy <- grepl("\\_[0-9]+$", names(clusters))
       if (isTRUE(input$mode)) {

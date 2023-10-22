@@ -238,6 +238,7 @@ mns_pivot_longer <- function(df) {
   df <- sf::st_drop_geometry(df)
   do_stack <- intersect(names(df), cb_ext$variable[-1])
   dont_stack <- setdiff(names(df), do_stack)
+  if (!length(do_stack)) return(df)
   pivot <- utils::stack(df, select = do_stack)[2:1]
   entries <- merge(
     pivot,
@@ -252,7 +253,9 @@ mns_pivot_longer <- function(df) {
   type <- rep("%", nrow(entries))
   type[entries$is_metric] <- "mean"
   type[entries$is_likert] <- "median"
-
+  
+  if (is.numeric(pivot$value)) pivot$value <- round(pivot$value, 4)
+  
   data.frame(
     variable = entries$og_var,
     question = entries$question,

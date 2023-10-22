@@ -330,9 +330,11 @@ mod_cs1_server <- function(id) {
     
     ## Basemap ----
     observe({
-      basemap <- switch(input$`buildings-basemap`,
-                        "OpenStreetMap" = leaflet::providers$OpenStreetMap,
-                        "Satellite" = leaflet::providers$Esri.WorldImagery
+      basemap <- input$`buildings-basemap` %||% "OpenStreetMap"
+      basemap <- switch(
+        basemap,
+        "OpenStreetMap" = leaflet::providers$OpenStreetMap,
+        "Satellite" = leaflet::providers$Esri.WorldImagery
       )
       
       leaflet::leafletProxy("buildings") %>%

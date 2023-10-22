@@ -142,10 +142,10 @@ mod_insp_server <- function(id) {
 
     table <- reactive({
       invar <- invar()
-      poly <- get(paste0("srv_", input$aggr))
-      if (length(invar) > 0) {
-        poly <- subset_mns(poly, invar)
-      }
+      aggr <- input$aggr
+      if (is.null(input$aggr)) aggr <- "nuts0"
+      poly <- get(paste0("srv_", aggr))
+      poly <- subset_mns(poly, invar)
       poly <- mns_pivot_longer(poly)
       poly[["gid"]] <- NULL
       for (col in colnames(poly)) {

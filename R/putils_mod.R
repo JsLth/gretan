@@ -161,11 +161,11 @@ render_persona_item <- function(item, results, responses, ...) {
       tags$b(results[[1]]$name), "persona."
     )), ...)
   } else {
-    idx <- itemToIdx(item)
+    idx <- itemToIdx(item %||% 1)
     steps <- txts$main$persona$steps
     question <- steps[[idx + 1]]$question
     choices <- names(steps[[idx + 1]]$choices)[-1]
-    your_choice <- switch(as.character(responses[idx]),
+    your_choice <- switch(as.character(responses[idx] %||% 1),
                           "-2" = "Prefer not to say",
                           "-1" = "I do not know",
                           choices[as.numeric(responses[idx])]
