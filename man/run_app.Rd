@@ -5,9 +5,21 @@
 \alias{run_greta}
 \title{Run GRETA Analytics}
 \usage{
-run_app(log = NULL, reactlog = FALSE, options = list(), ...)
+run_app(
+  log = NULL,
+  reactlog = FALSE,
+  options = list(),
+  prompt = interactive(),
+  ...
+)
 
-run_greta(...)
+run_greta(
+  log = NULL,
+  reactlog = FALSE,
+  options = list(),
+  prompt = interactive(),
+  ...
+)
 }
 \arguments{
 \item{log}{Where to output app logs. Accepts a directory path where a log
@@ -21,9 +33,20 @@ For debugging purposes.}
 \item{options}{Options for \code{\link[shiny]{shinyApp}}. Included for use
 in \code{electricShine}.}
 
+\item{prompt}{Whether to show a confirmation prompt before downloading
+data dependencies.}
+
 \item{...}{Further options to be passed to the app. Can be accessed using
-\code{getGretaOption}. Currently this includes the options \code{"console"},
-\code{"collect"} and \code{"github_available"}}
+\code{getGretaOption}. This includes the following (mostly internal)
+arguments:
+\describe{
+  \item{\code{console}}{Enables internal live console to execute R
+  commands within the app. Strictly for internal use. Console can be
+  accessed by pressing Ctrl + Shift + D}
+  \item{\code{track}}{Enables user metrics tracking. Requires a valid
+  key to upload collected data to Google Drive stored in the environment
+  variable \code{GDRIVE_KEY}.} 
+}}
 }
 \description{
 Run GRETA Analytics

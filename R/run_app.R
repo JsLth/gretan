@@ -20,12 +20,13 @@
 #' @param ... Further options to be passed to the app. Can be accessed using
 #' \code{getGretaOption}. This includes the following (mostly internal)
 #' arguments:
-#' \itemize{
+#' \describe{
 #'   \item{\code{console}}{Enables internal live console to execute R
-#'   command within the app. Strictly for internal use. Console can be
+#'   commands within the app. Strictly for internal use. Console can be
 #'   accessed by pressing Ctrl + Shift + D}
 #'   \item{\code{track}}{Enables user metrics tracking. Requires a valid
-#'   key to upload collected data to Google Drive.} 
+#'   key to upload collected data to Google Drive stored in the environment
+#'   variable \code{GDRIVE_KEY}.} 
 #' }
 #'
 #' @export
@@ -76,8 +77,18 @@ run_app <- function(log = NULL,
 
 #' @rdname run_app
 #' @export
-run_greta <- function(...) {
-  run_app(...)
+run_greta <- function(log = NULL,
+                      reactlog = FALSE,
+                      options = list(),
+                      prompt = interactive(),
+                      ...) {
+  run_app(
+    log = log,
+    reactlog = reactlog,
+    options = options,
+    prompt = prompt,
+    ...
+  )
 }
 
 
