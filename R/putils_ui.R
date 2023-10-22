@@ -357,6 +357,8 @@ p2 <- function(...) p(..., class = "fancy")
 
 noWS <- function(.f) function(...) .f(..., .noWS = c("inside", "outside"))
 
+pbib <- function(...) p(..., class = "bib")
+
 list_palettes <- function(type = NULL) {
   if (missing(type)) {
     type <- c("seq", "viridis")
