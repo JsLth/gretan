@@ -36,18 +36,6 @@ txts$main$home <- list(
           )
         ),
         tags$li(
-          HTML(
-            "Find out about the findings and policy recommendations of five
-            of the six GRETA case studies"
-          ),
-          actionLink(
-            "welcome-li-cs1",
-            label = "",
-            icon = icon("arrow-right"),
-            class = "home-arrow"
-          )
-        ),
-        tags$li(
           HTML("Understand how GRETA taxonomises the geographical composition
                of energy citizenship across levels and domains."),
           actionLink(
@@ -188,7 +176,11 @@ txts$main$home <- list(
         "Agriculture and Food Center of Bologna\u2019s (CAAB) food and",
         "agriculture theme park (FICO) with its industrial partners, which",
         "has the largest solar power plant on industrial roofs within the EU."
-      )), style = "margin-bottom: 0.5cm;")
+      )), style = "margin-bottom: 0.5cm;"),
+      p2(actionLink(
+        "welcome-li-cs1",
+        label = "Learn more about Pilastro-Roveri by exploring the case study wrap-up!"
+      ))
     )),
     Portugal = HTML(paste(
       h2("Coop\u00e9rnico \u2013 renewable energy-driven cooperative"),
@@ -199,6 +191,10 @@ txts$main$home <- list(
         "enterprises, and municipalities all over Portugal. Its mission is",
         "to involve its members in reshaping the energy sector to be more",
         "renewable, socially just and collaborative."
+      )),
+      p2(actionLink(
+        "welcome-li-cs2",
+        label = "Learn more about Coop\u00e9rnico by exploring the case study wrap-up!"
       ))
     )),
     Germany = HTML(paste(
@@ -213,6 +209,10 @@ txts$main$home <- list(
         "community \u2013 connected by the shared experience of using an app \u2013",
         "affects citizens\u2019 awareness and behaviour in regard to their",
         "mobility and energy consumption choices in everyday life."
+      )),
+      p2(actionLink(
+        "welcome-li-cs3",
+        label = "Learn more about the Earnest app by exploring the case study wrap-up!"
       ))
     )),
     `The Netherlands` = HTML(paste(
@@ -226,6 +226,10 @@ txts$main$home <- list(
         "of this, the Netherlands has decided that all its neighbourhoods",
         "will become natural gas-free by 2050. The case study examines the",
         "transition towards natural gas-free homes in the Netherlands."
+      )),
+      p2(actionLink(
+        "welcome-li-cs4",
+        label = "Learn more about natural gas-free neighborhoods by exploring the case study wrap-up!"
       ))
     )),
     Spain = HTML(paste(
@@ -239,6 +243,10 @@ txts$main$home <- list(
         "successfully introduced cleaner energy sources and ways to measure",
         "the energy consumption of each household. Now, the cooperative is",
         "slowly making its way toward decarbonisation."
+      )),
+      p2(actionLink(
+        "welcome-li-cs5",
+        label = "Learn more about UR Beroa by exploring the case study wrap-up!"
       ))
     )),
     none = HTML(paste(
