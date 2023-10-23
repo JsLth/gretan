@@ -33,7 +33,7 @@ helpBox <- function(..., help_id = NULL, tabBox = FALSE) {
   )
   
   dots <- list(...)
-  if (isFALSE(dots$collapsible) && !c("collapsible", "maximizable" %in% dots)) {
+  if (isFALSE(dots$collapsible) && !"maximizable" %in% names(dots)) {
     bx$children[[1]]$children[[1]]$children[[2]] <- div(
       class = "card-tools float-right",
       help
@@ -254,7 +254,7 @@ tag_to_text <- function(x, ...) {
 #' @export
 tag_to_text.default <- function(x, ...) {
   if (!is.null(x) && !length(intersect(class(x), c("html_dependency")))) {
-    paste(as.character(x, ...))
+    paste(as.character(x, ...), collapse = " ")
   } else {
     ""
   }
@@ -262,9 +262,6 @@ tag_to_text.default <- function(x, ...) {
 
 #' @export
 tag_to_text.shiny.tag <- function(x, ...) {
-  if (identical(class(x), "html_dependency")) {
-    return("")
-  }
   if (x$name %in% c("script", "head", "meta", "style")) {
     return("")
   }
@@ -277,6 +274,15 @@ tag_to_text.shiny.tag <- function(x, ...) {
     text <- text[!vapply(text, is.null, logical(1))]
     trimws(paste(text, collapse = "\n"))
   }
+}
+
+#' @export
+tag_to_text.html <- function(x, ...) {
+  x <- gsub("\\s+", " ", x)
+  x <- gsub("<br/?>", "\n", x)
+  x <- gsub("<.*?>", "", x)
+  attr(x, "html") <- NULL
+  unclass(x)
 }
 
 #' @export
@@ -419,19 +425,4 @@ named_to_dl <- function(.list) {
   dt <- lapply(names(.list), \(x) protect_html(tags$dt(x)))
   dd <- lapply(.list, \(x) protect_html(tags$dd(x)))
   tags$dl(riffle(dt, dd))
-}
-
-
-
-#' Repeat tags$br
-#'
-#' @param times the number of br to return
-#'
-#' @return the number of br specified in times
-#' @noRd
-#'
-#' @examples
-#' rep_br(5)
-rep_br <- function(times = 1) {
-  HTML(rep("<br/>", times = times))
 }
