@@ -59,7 +59,6 @@ run_app <- function(log = NULL,
     }
 
     .dots$console <- FALSE
-    .dots$collect <- TRUE
     .dots$track <- TRUE
   }
 

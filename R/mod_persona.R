@@ -511,33 +511,33 @@ mod_persona_server <- function(id) {
 
 
     ## Preserve results ----
-    observe({
-      req(getGretaOption("collect", FALSE))
-      results <- results()
-      set.seed(as.integer(Sys.time()))
-      .data <- data.frame(
-        id = paste(sample(c(letters, LETTERS, 0:9), size = 10), collapse = ""),
-        time = Sys.time(),
-        as.data.frame(t(responses())),
-        res1_name = results[[1]]$name,
-        res1_p = results[[1]]$p,
-        res2_name = results[[2]]$name,
-        res2_p = results[[2]]$p,
-        res3_name = results[[3]]$name,
-        res3_p = results[[3]]$p
-      )
-
-      outf <- app_sys("persona_data.csv")
-      utils::write.table(
-        .data,
-        file = outf,
-        sep = ",",
-        col.names = !file.exists(outf),
-        append = TRUE,
-        row.names = FALSE
-      )
-    }) %>%
-      bindEvent(results())
+    # observe({
+    #   req(getGretaOption("collect", FALSE))
+    #   results <- results()
+    #   set.seed(as.integer(Sys.time()))
+    #   .data <- data.frame(
+    #     id = paste(sample(c(letters, LETTERS, 0:9), size = 10), collapse = ""),
+    #     time = Sys.time(),
+    #     as.data.frame(t(responses())),
+    #     res1_name = results[[1]]$name,
+    #     res1_p = results[[1]]$p,
+    #     res2_name = results[[2]]$name,
+    #     res2_p = results[[2]]$p,
+    #     res3_name = results[[3]]$name,
+    #     res3_p = results[[3]]$p
+    #   )
+    # 
+    #   outf <- app_sys("persona_data.csv")
+    #   utils::write.table(
+    #     .data,
+    #     file = outf,
+    #     sep = ",",
+    #     col.names = !file.exists(outf),
+    #     append = TRUE,
+    #     row.names = FALSE
+    #   )
+    # }) %>%
+    #   bindEvent(results())
 
 
     ## Render persona carousel ----
