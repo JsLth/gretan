@@ -144,8 +144,8 @@ mod_exp_server <- function(id, track = FALSE) {
     output$question <- renderUI({
       render_question(input$title, input$subitem, input$option)
     })
-    
-    
+
+
     # Show/hide subitems/options ----
     observe(
       {
@@ -254,7 +254,7 @@ mod_exp_server <- function(id, track = FALSE) {
       }
       pal
     })
-    
+
     # Compile parameters ----
     exp_params <- reactive(
       {
@@ -287,7 +287,7 @@ mod_exp_server <- function(id, track = FALSE) {
       },
       label = "update explorer"
     )
-    
+
     return(exp_params)
   })
 }

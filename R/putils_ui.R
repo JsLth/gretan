@@ -6,11 +6,11 @@ style <- function(...) {
 dispatch_to_txt <- function(id) {
   ids <- strsplit(id, shiny::ns.sep)[[1]]
   target <- txts
-  
+
   for (id in ids) {
     target <- target[[id]]
   }
-  
+
   function(...) {
     dots <- list(...)
     out <- target
@@ -24,14 +24,14 @@ helpBox <- function(..., help_id = NULL, tabBox = FALSE) {
   if (is.null(help_id)) {
     return(bx)
   }
-  
+
   help <- tags$button(
     id = help_id,
     class = "btn btn-tool btn-sm action-button",
     type = "button",
     icon("question", lib = "font-awesome")
   )
-  
+
   dots <- list(...)
   if (isFALSE(dots$collapsible) && !"maximizable" %in% names(dots)) {
     bx$children[[1]]$children[[1]]$children[[2]] <- div(
@@ -43,9 +43,9 @@ helpBox <- function(..., help_id = NULL, tabBox = FALSE) {
       children[[1]]$
       children[[2]]$
       children[[2]] <- c(list(help), bx$children[[1]]$
-                           children[[1]]$
-                           children[[2]]$
-                           children[[2]])
+      children[[1]]$
+      children[[2]]$
+      children[[2]])
   }
   bx
 }
@@ -76,8 +76,8 @@ leafletPanel <- function(inputId,
       gaps <- list(left = NULL, right = 10, top = NULL, bottom = 150)
     }
   }
-  
-  
+
+
   div(
     class = paste0("leaflet-", position),
     absolutePanel(
@@ -140,13 +140,13 @@ groupRadioButtons <- function(widget,
   if (length(style) != length(groups)) style <- rep(style, length(groups))
   is_awesome <- type %in% "awesome"
   is_pretty <- type %in% "pretty"
-  
+
   for (i in seq_along(index)) {
     idx <- index[i]
     grp <- groups[i]
     sty <- style[i]
     fidx <- ifelse(is_awesome, 3, 2)
-    
+
     if (is_pretty) {
       if (idx == 1) {
         widget$children[[2]]$children[[1]]$children <- grp
@@ -163,7 +163,7 @@ groupRadioButtons <- function(widget,
       )
     }
   }
-  
+
   widget
 }
 
@@ -177,9 +177,9 @@ loadingButton <- function(inputId,
     label = label, loadingLabel = loadingLabel,
     loadingSpinner = loadingSpinner
   )
-  
+
   opts <- jsonlite::toJSON(opts, auto_unbox = TRUE)
-  
+
   span(
     class = "sf-loading-button",
     id = paste0("sf-loading-button", inputId),
@@ -266,7 +266,7 @@ tag_to_text.shiny.tag <- function(x, ...) {
     return("")
   }
   x <- x$children
-  
+
   if (!length(x)) {
     ""
   } else {
@@ -300,7 +300,7 @@ make_header <- function(title,
       affil <- as.list(rep(affil, length(authors)))
       names(affil) <- authors
     }
-    
+
     aff_df <- data.frame(
       author = rep(authors, lengths(affil)),
       affil = unlist(affil),
@@ -316,12 +316,12 @@ make_header <- function(title,
         collapse = ","
       ))
     })
-    
+
     affil <- lapply(unique(aff_df$num), function(x) {
       unique(paste0(tags$sup(x), aff_df[aff_df$num == x, ]$affil))
     })
   }
-  
+
   div(
     id = "header",
     h2(with_literata(HTML(title)), class = "title toc-ignore"),
@@ -347,7 +347,7 @@ corp_logo <- function(inst) {
     cleanwatts = "https://www.cleanwatts.energy/",
     isi = "https://www.isi.fraunhofer.de/"
   )
-  
+
   div(class = "logo", a(
     class = "logo",
     href = web[[inst]],
@@ -369,7 +369,7 @@ list_palettes <- function(type = NULL) {
   if (missing(type)) {
     type <- c("seq", "viridis")
   }
-  
+
   type <- vapply(
     type,
     switch,
@@ -379,7 +379,7 @@ list_palettes <- function(type = NULL) {
     viridis = "Colorblind",
     FUN.VALUE = character(1)
   )
-  
+
   pal <- list(
     Sequential = c(
       "Blues", "BuGn", "BuPu", "GnBu", "Greens", "Greys", "Oranges", "OrRd",
@@ -399,7 +399,7 @@ list_palettes <- function(type = NULL) {
       "Turbo"
     )
   )
-  
+
   pal[type]
 }
 

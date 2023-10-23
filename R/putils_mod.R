@@ -1,7 +1,7 @@
 interactionSlider <- function(id) {
   params <- strsplit(id, "__")[[1]]
   stakeholder <- params[params %in% c("citizens", "business", "government")]
-  
+
   shinyWidgets::sliderTextInput(
     inputId = id, label = to_title(stakeholder),
     choices = c("N/A", seq(0, 1, 0.05)),
@@ -13,26 +13,26 @@ interactionSlider <- function(id) {
 
 plot_persona <- function(data, item = "cluster", diff = TRUE) {
   x <- y <- text <- ind <- values <- grp <- NULL
-  
+
   # Subset data
   data <- as.matrix(data[grepl(
     paste0(item, "*_[0-9]"),
     names(data)
   )])
-  
+
   # Prevent cases in which values are equal to zero
   data <- data + .Machine$double.xmin
-  
+
   # Compute difference
   if (isTRUE(diff)) {
     data <- diff(data)
   } else {
     data[1, ] <- -data[1, ]
   }
-  
+
   # Pivot longer
   data <- utils::stack(data.frame(data))
-  
+
   # Safely fail if values are NA
   if (any(is.na(data$values))) {
     edf <- data.frame(
@@ -45,13 +45,13 @@ plot_persona <- function(data, item = "cluster", diff = TRUE) {
       ggplot2::theme_void()
     return(p)
   }
-  
+
   # Format values
   nc <- nchar(as.character(data$ind))
   data$item <- substr(data$ind, 1, nc - 2)
   data$ind <- as.integer(substr(data$ind, nc, nc))
   data$grp <- factor((data$values >= 0) + 1)
-  
+
   # Sort within
   if (isFALSE(diff)) {
     data <- tapply(data, list(data$grp), function(x) {
@@ -62,7 +62,7 @@ plot_persona <- function(data, item = "cluster", diff = TRUE) {
   } else {
     data <- data[order(data$values), ]
   }
-  
+
   # Replace integers with meaninful strings
   if (identical(item, "cluster")) {
     question <- "Energy persona"
@@ -78,10 +78,10 @@ plot_persona <- function(data, item = "cluster", diff = TRUE) {
     question <- gsub("[[:space:]]+", " ", step$question)
     choices <- chs[data$ind]
   }
-  
+
   data$ind <- choices
   data$item <- question
-  
+
   # Flexible value breaks
   ybreaks <- if (max(abs(data$values)) <= 0.15) {
     seq(-0.25, 0.25, 0.05)
@@ -90,13 +90,13 @@ plot_persona <- function(data, item = "cluster", diff = TRUE) {
   } else {
     seq(-1, 1, 0.25)
   }
-  
+
   lims <- if (isTRUE(diff)) {
     rev(data$ind)
   } else {
     rev(data[data$values <= 0, ]$ind)
   }
-  
+
   p <- ggplot2::ggplot(data, ggplot2::aes(ind, values))
   p <- if (isTRUE(diff)) {
     p + ggplot2::geom_bar(
@@ -166,9 +166,9 @@ render_persona_item <- function(item, results, responses, ...) {
     question <- steps[[idx + 1]]$question
     choices <- names(steps[[idx + 1]]$choices)[-1]
     your_choice <- switch(as.character(responses[idx] %||% 1),
-                          "-2" = "Prefer not to say",
-                          "-1" = "I do not know",
-                          choices[as.numeric(responses[idx])]
+      "-2" = "Prefer not to say",
+      "-1" = "I do not know",
+      choices[as.numeric(responses[idx])]
     )
     p(HTML(paste0(
       tags$b(paste("Question", idx)),
@@ -199,11 +199,11 @@ addMovingMarker <- function(map,
   if (missing(labelOptions)) {
     labelOptions <- leaflet::labelOptions()
   }
-  
+
   if (is.null(layerId)) {
     layerId <- paste0("_", as.numeric(Sys.time()))
   }
-  
+
   movingMarkerDependency <- list(structure(
     list(
       name = "lfx-movingmarker",
@@ -219,7 +219,7 @@ addMovingMarker <- function(map,
     ),
     class = "html_dependency"
   ))
-  
+
   pts <- leaflet::derivePoints(
     data,
     lng,
@@ -228,7 +228,7 @@ addMovingMarker <- function(map,
     missing(lat),
     "addMovingMarker"
   )
-  
+
   duration <- leaflet::evalFormula(duration, data)
   options <- leaflet::filterNULL(c(options, movingOptions))
   map$dependencies <- c(map$dependencies, movingMarkerDependency)
@@ -283,7 +283,7 @@ addLegendLine <- function(map,
     width = width
   )
   htmlElement <- div(imgTag, span(label, style = labelStyle))
-  
+
   leaflet::addControl(
     map,
     html = tagList(htmlElement),
@@ -297,17 +297,17 @@ as_likert <- function(x, scale = NULL) {
   if (length(scale) > 7) {
     stop(sprintf("Likert scale is too long (%s items)", length(x)))
   }
-  
+
   scale <- scale %||% c(
     "Strongly disagree", "Disagree", "Somewhat disagree",
     "Neutral",
     "Somewhat agree", "Agree", "Strongly agree"
   )
-  
+
   if (is.factor(scale)) {
     scale <- as.character(scale)
   }
-  
+
   values <- vapply(x, function(i) scale[i], FUN.VALUE = character(1))
   ordered(values, levels = scale)
 }

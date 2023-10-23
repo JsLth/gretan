@@ -26,7 +26,7 @@
 #'   accessed by pressing Ctrl + Shift + D}
 #'   \item{\code{track}}{Enables user metrics tracking. Requires a valid
 #'   key to upload collected data to Google Drive stored in the environment
-#'   variable \code{GDRIVE_KEY}.} 
+#'   variable \code{GDRIVE_KEY}.}
 #' }
 #'
 #' @export
@@ -38,31 +38,31 @@ run_app <- function(log = NULL,
                     prompt = interactive(),
                     ...) {
   .dots <- list(...)
-  
+
   download_dependencies(prompt = prompt)
-  
+
   if (reactlog) {
     if (!requireNamespace("reactlog")) {
       stop("The package reactlog is required to enable logging.")
     }
     reactlog::reactlog_enable()
   }
-  
+
   if (isTRUE(getOption("app.prod"))) {
     if (missing(log) && Sys.info()[["user"]] != "shiny") {
       file.create("gretan.log")
       log <- "gretan.log"
     }
-    
+
     if (missing(reactlog)) {
       reactlog <- FALSE
     }
-    
+
     .dots$console <- FALSE
     .dots$collect <- TRUE
     .dots$track <- TRUE
   }
-  
+
   with_greta_options(
     shinyApp(
       ui = app_ui,
