@@ -35,19 +35,24 @@ add_external_resources <- function() {
 }
 
 
-download_dependencies <- function(prompt = interactive()) {
-  if (!dir.exists(app_sys("extdata/stakeholder/output"))) {
-    dir.create(app_sys("extdata/stakeholder/output"))
-  }
-
+has_dependencies <- function() {
   plat_db_dest <- app_sys("extdata/stakeholder/output/pLAtYpus.sqlite3")
   plat_alt_dest <- app_sys("extdata/stakeholder/output/pLAtYpus_only_survey.sqlite3")
   needed <- c(
     !file.exists(plat_db_dest),
     !file.exists(plat_alt_dest)
   )
+  
+  !any(needed)
+}
 
-  if (!any(needed)) {
+
+download_dependencies <- function(prompt = interactive()) {
+  if (!dir.exists(app_sys("extdata/stakeholder/output"))) {
+    dir.create(app_sys("extdata/stakeholder/output"))
+  }
+
+  if (has_dependencies()) {
     return(invisible())
   }
 
