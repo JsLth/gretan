@@ -35,6 +35,26 @@
         <script type="application/json" data-for="testbox">{"title":"test title","status":"primary","solidHeader":true,"background":"primary","width":2,"height":"400px","collapsible":true,"closable":true,"maximizable":true,"gradient":true}</script>
       </div>
 
+---
+
+    Code
+      helpBox(help_id = "test", collapsible = FALSE)
+    Output
+      <div class="col-sm-6">
+        <div class="card bs4Dash">
+          <div class="card-header">
+            <h3 class="card-title"></h3>
+            <div class="card-tools float-right">
+              <button id="test" class="btn btn-tool btn-sm action-button" type="button">
+                <i class="fas fa-question" role="presentation" aria-label="question icon"></i>
+              </button>
+            </div>
+          </div>
+          <div class="card-body"></div>
+        </div>
+        <script type="application/json">{"solidHeader":true,"width":6,"collapsible":false,"closable":false,"maximizable":false,"gradient":false}</script>
+      </div>
+
 # leafletPanel works
 
     Code
@@ -54,6 +74,94 @@
             </span>
           </div>
           <div class="collapse show leaflet-info-body" id="test">this is a panel</div>
+        </div>
+        <script>$(".draggable").draggable();</script>
+      </div>
+
+---
+
+    Code
+      leafletPanel("test", position = "topleft")
+    Output
+      <div class="leaflet-topleft">
+        <div class="leaflet-info draggable" style="top:150px;left:10px;width:350px;position:absolute;cursor:move;">
+          <div class="leaflet-info-header">
+            <span>
+              <h5 style="display: inline-block; margin: 0.2rem;"></h5>
+              <div class="card-tools float-right">
+                <button class="btn btn-tool btn-sm" data-toggle="collapse" data-target="#test" type="button">
+                  <i class="fas fa-minus" role="presentation" aria-label="minus icon"></i>
+                </button>
+              </div>
+            </span>
+          </div>
+          <div class="collapse show leaflet-info-body" id="test"></div>
+        </div>
+        <script>$(".draggable").draggable();</script>
+      </div>
+
+---
+
+    Code
+      leafletPanel("test", position = "bottomleft")
+    Output
+      <div class="leaflet-bottomleft">
+        <div class="leaflet-info draggable" style="left:10px;bottom:150px;width:350px;position:absolute;cursor:move;">
+          <div class="leaflet-info-header">
+            <span>
+              <h5 style="display: inline-block; margin: 0.2rem;"></h5>
+              <div class="card-tools float-right">
+                <button class="btn btn-tool btn-sm" data-toggle="collapse" data-target="#test" type="button">
+                  <i class="fas fa-minus" role="presentation" aria-label="minus icon"></i>
+                </button>
+              </div>
+            </span>
+          </div>
+          <div class="collapse show leaflet-info-body" id="test"></div>
+        </div>
+        <script>$(".draggable").draggable();</script>
+      </div>
+
+---
+
+    Code
+      leafletPanel("test", position = "topright")
+    Output
+      <div class="leaflet-topright">
+        <div class="leaflet-info draggable" style="top:150px;right:10px;width:350px;position:absolute;cursor:move;">
+          <div class="leaflet-info-header">
+            <span>
+              <h5 style="display: inline-block; margin: 0.2rem;"></h5>
+              <div class="card-tools float-right">
+                <button class="btn btn-tool btn-sm" data-toggle="collapse" data-target="#test" type="button">
+                  <i class="fas fa-minus" role="presentation" aria-label="minus icon"></i>
+                </button>
+              </div>
+            </span>
+          </div>
+          <div class="collapse show leaflet-info-body" id="test"></div>
+        </div>
+        <script>$(".draggable").draggable();</script>
+      </div>
+
+---
+
+    Code
+      leafletPanel("test", position = "bottomright")
+    Output
+      <div class="leaflet-bottomright">
+        <div class="leaflet-info draggable" style="right:10px;bottom:150px;width:350px;position:absolute;cursor:move;">
+          <div class="leaflet-info-header">
+            <span>
+              <h5 style="display: inline-block; margin: 0.2rem;"></h5>
+              <div class="card-tools float-right">
+                <button class="btn btn-tool btn-sm" data-toggle="collapse" data-target="#test" type="button">
+                  <i class="fas fa-minus" role="presentation" aria-label="minus icon"></i>
+                </button>
+              </div>
+            </span>
+          </div>
+          <div class="collapse show leaflet-info-body" id="test"></div>
         </div>
         <script>$(".draggable").draggable();</script>
       </div>
@@ -167,4 +275,47 @@
           button
         </button>
       </span>
+
+# make_header works
+
+    Code
+      make_header("title", c("author 1", "author 2"), affil = "institution")
+    Output
+      <div id="header" align="center">
+        <h2 class="title toc-ignore">
+          <p style="font-family: Literata; margin-bottom: 0px;">title</p>
+        </h2>
+        <h5 class="author">Prepared by: author 1<sup>1</sup>, author 2<sup>1</sup></h5>
+        <h5 class="date">2023-10-24</h5>
+        <h6 class="affil"><sup>1</sup>institution</h6>
+      </div>
+
+---
+
+    Code
+      make_header("title", c("author 1", "author 2"), affil = c(`author 1` = "institution 1",
+        `author 2` = "institution 2"))
+    Output
+      <div id="header" align="center">
+        <h2 class="title toc-ignore">
+          <p style="font-family: Literata; margin-bottom: 0px;">title</p>
+        </h2>
+        <h5 class="author">Prepared by: author 1<sup>1</sup>, author 2<sup>2</sup></h5>
+        <h5 class="date">2023-10-24</h5>
+        <h6 class="affil"><sup>1</sup>institution 1; <sup>2</sup>institution 2</h6>
+      </div>
+
+---
+
+    Code
+      make_header("title", c("author 1", "author 2"))
+    Output
+      <div id="header" align="center">
+        <h2 class="title toc-ignore">
+          <p style="font-family: Literata; margin-bottom: 0px;">title</p>
+        </h2>
+        <h5 class="author">Prepared by: author 1, author 2</h5>
+        <h5 class="date">2023-10-24</h5>
+        <h6 class="affil"></h6>
+      </div>
 
