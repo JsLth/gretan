@@ -36,6 +36,7 @@ app_server <- function(input, output, session) {
     }
     
     reticulate::use_virtualenv(virtualenv = envdir, required = TRUE)
+    print(reticulate::py_version())
   }
 
 
