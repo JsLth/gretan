@@ -18,9 +18,9 @@ test_that("helpBox works", {
     headerBorder = FALSE,
     id = "testbox"
   ))
-  
+
   expect_identical(helpBox(), bs4Dash::box())
-  
+
   expect_snapshot(helpBox(help_id = "test", collapsible = FALSE))
 })
 
@@ -33,7 +33,7 @@ test_that("leafletPanel works", {
     width = 400,
     top = 10
   ))
-  
+
   expect_snapshot(leafletPanel("test", position = "topleft"))
   expect_snapshot(leafletPanel("test", position = "bottomleft"))
   expect_snapshot(leafletPanel("test", position = "topright"))
