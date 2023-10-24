@@ -1,12 +1,12 @@
-interactionSlider <- function(id) {
+interactionSlider <- function(id, value) {
+  if (!length(value) || is.null(value) || is.na(value)) return(div())
+  
   params <- strsplit(id, "__")[[1]]
   stakeholder <- params[params %in% c("citizens", "business", "government")]
-
-  shinyWidgets::sliderTextInput(
+  
+  sliderInput(
     inputId = id, label = to_title(stakeholder),
-    choices = c("N/A", seq(0, 1, 0.05)),
-    selected = "N/A",
-    grid = TRUE
+    min = 0, max = 1, value = value, step = 0.01
   )
 }
 
