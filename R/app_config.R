@@ -42,7 +42,7 @@ has_dependencies <- function() {
     !file.exists(plat_db_dest),
     !file.exists(plat_alt_dest)
   )
-  
+
   !any(needed)
 }
 

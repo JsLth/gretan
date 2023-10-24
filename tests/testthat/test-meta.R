@@ -16,18 +16,18 @@ test_that("add_external_resources works", {
 
 test_that("run_app works", {
   skip_if_not(has_dependencies())
-  
+
   expect_s3_class(run_app(), "shiny.appobj")
-  
+
   app <- run_greta(console = TRUE, track = TRUE)
   expect_named(app$appOptions$greta_options, c("console", "track"))
-  
+
   options(app.prod = TRUE)
   app <- run_greta()
-  #expect_named(app$appOptions$greta_options, c("console", "track", "logging"))
+  # expect_named(app$appOptions$greta_options, c("console", "track", "logging"))
   expect_false(app$appOptions$greta_options$console)
   options(app.prod = NULL)
-  
+
   app <- run_greta(reactlog = TRUE)
   expect_true(getOption("shiny.reactlog"))
 })
