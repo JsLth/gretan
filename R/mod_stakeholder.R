@@ -141,6 +141,7 @@ mod_stakeholder_server <- function(id, tab) {
     reset <- reactiveVal(FALSE)
     changed <- reactive(input$changed)
     init_ctrl <- rep(FALSE, 3)
+    init_slider <- reactiveVal()
 
     init_waiter <- waiter::Waiter$new(
       id = ns(c("plot", "map")),
@@ -206,7 +207,8 @@ mod_stakeholder_server <- function(id, tab) {
           get_text = get_text,
           changed = changed,
           plat = platypus,
-          params = parameters
+          params = parameters,
+          init = init_slider
         )
         init_ctrl[1] <<- TRUE
       } else if (identical(input$control, "Intention weights") && !init_ctrl[2]) {
@@ -215,7 +217,8 @@ mod_stakeholder_server <- function(id, tab) {
           get_text,
           changed = changed,
           plat = platypus,
-          params = parameters
+          params = parameters,
+          init = init_slider
         )
         init_ctrl[2] <<- TRUE
       } else if (identical(input$control, "Survey topic") && !init_ctrl[3]) {
@@ -224,7 +227,8 @@ mod_stakeholder_server <- function(id, tab) {
           get_text,
           changed = changed,
           plat = platypus,
-          params = parameters
+          params = parameters,
+          init = init_slider
         )
         init_ctrl[3] <<- TRUE
       }
@@ -247,16 +251,19 @@ mod_stakeholder_server <- function(id, tab) {
     # Render engagement plot ----
     init_plot <- FALSE
     output$plot <- plotly::renderPlotly({
-      allowed <- c(
+      allowed_slider <- c(
         "initialyes-initial_yes", "intentionweight-intention_weight",
-        "surveytopic-survey_topic",
-        "plot_control_country", "plot_control_product", "reset"
+        "surveytopic-survey_topic"
       )
+      allowed_ctrl <- c("plot_control_country", "plot_control_product", "reset")
 
-      is_valid_input <- any(startsWith(changed(), ns(allowed)))
-      is_init <- !identical(input[[rm_ns(changed(), ns)]], "N/A")
+      is_control <- any(startsWith(changed(), ns(allowed_ctrl)))
+      is_slider <- any(startsWith(changed(), ns(allowed_slider)))
+      is_valid <- is_control || is_slider
+      is_init <- changed() %in% isolate(init_slider()) || is_control
       is_reset <- isTRUE(reset())
-      req((is_valid_input && is_init) || is_reset, cancelOutput = TRUE)
+      
+      req((is_valid && is_init) || is_reset, cancelOutput = TRUE)
 
       pwaiter$show()
 
@@ -310,17 +317,22 @@ mod_stakeholder_server <- function(id, tab) {
 
     # Render engagement map ----
     output$map <- leaflet::renderLeaflet({
-      allowed <- c(
+      allowed_slider <- c(
         "initialyes-initial_yes", "intentionweight-intention_weight",
-        "surveytopic-survey_topic",
-        "plot_control_stakeholder", "plot_control_product"
+        "surveytopic-survey_topic"
       )
-
-      is_valid_input <- any(startsWith(changed(), ns(allowed)))
-      is_init <- !identical(input[[rm_ns(changed(), ns)]], "N/A")
+      allowed_ctrl <- c(
+        "plot_control_stakeholder", "plot_control_product", "reset"
+      )
+      
+      is_control <- any(startsWith(changed(), ns(allowed_ctrl)))
+      is_slider <- any(startsWith(changed(), ns(allowed_slider)))
+      is_valid <- is_control || is_slider
+      is_init <- changed() %in% isolate(init_slider()) || is_control
       is_reset <- isTRUE(reset())
-      req((is_valid_input && is_init) || is_reset, cancelOutput = TRUE)
-
+      
+      req((is_valid && is_init) || is_reset, cancelOutput = TRUE)
+      
       reset(FALSE)
       mwaiter$show()
 
@@ -371,8 +383,8 @@ mod_stakeholder_server <- function(id, tab) {
         input$plot_control_stakeholder
       )
 
-    outputOptions(output, "map", suspendWhenHidden = FALSE, priority = 0)
-    outputOptions(output, "plot", suspendWhenHidden = FALSE, priority = 1)
+    outputOptions(output, "map", priority = 1)
+    outputOptions(output, "plot", priority = 1)
   })
 }
 
@@ -516,42 +528,85 @@ mod_stakeholder_initialyes_server <- function(id,
                                               get_text,
                                               changed,
                                               plat,
-                                              params) {
+                                              params,
+                                              init) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-
+    
     lapply(get_text("params", "countries"), function(country) {
       out_id <- paste0("control__", country)
       products <- get_text("params", "product")
       stakeholders <- get_text("params", "stakeholder")
-      input_ids <- lapply(products, function(p) {
+      plat <- plat()
+      con <- plat$sqlite3$connect(
+        app_sys("extdata/stakeholder/output/pLAtYpus.sqlite3")
+      )
+      query <- "SELECT %s FROM 'Initial Yes %s' WHERE Country='%s'"
+      meta <- lapply(products, function(p) {
         lapply(stakeholders, function(s) {
           id <- ns(sprintf("initial_yes__%s__%s__%s", p, s, country))
-          id
+          if (!country %in% "EU") {
+            query <- sprintf(query, s, p, country)
+            value <- plat$pd$read_sql_query(query, con)
+            value <- reticulate::py_to_r(value)
+            value <- unlist(value, use.names = FALSE)
+          } else {
+            value <- 0.06
+          }
+
+          list(id = id, value = value)
         })
       })
+      
       output[[out_id]] <- renderUI({
         fluidRow(
           col_1(),
           col_10(
             h5("Product: Autonomous cars"),
             fluidRow(
-              col_4(interactionSlider(input_ids[[1]][[1]])),
-              col_4(interactionSlider(input_ids[[1]][[2]])),
-              col_4(interactionSlider(input_ids[[1]][[3]]))
+              col_4(interactionSlider(
+                meta[[1]][[1]]$id,
+                meta[[1]][[1]]$value
+              )),
+              col_4(interactionSlider(
+                meta[[1]][[2]]$id,
+                meta[[1]][[2]]$value
+              )),
+              col_4(interactionSlider(
+                meta[[1]][[3]]$id,
+                meta[[1]][[3]]$value
+              ))
             ),
             h5("Product: Sustainable transport"),
             fluidRow(
-              col_4(interactionSlider(input_ids[[2]][[1]])),
-              col_4(interactionSlider(input_ids[[2]][[2]])),
-              col_4(interactionSlider(input_ids[[2]][[3]]))
+              col_4(interactionSlider(
+                meta[[2]][[1]]$id,
+                meta[[2]][[1]]$value
+              )),
+              col_4(interactionSlider(
+                meta[[2]][[2]]$id,
+                meta[[2]][[2]]$value
+              )),
+              col_4(interactionSlider(
+                meta[[2]][[3]]$id,
+                meta[[2]][[3]]$value
+              ))
             ),
             hr(),
             h5("Product: Cooperative self-generation"),
             fluidRow(
-              col_4(interactionSlider(input_ids[[3]][[1]])),
-              col_4(interactionSlider(input_ids[[3]][[2]])),
-              col_4(interactionSlider(input_ids[[3]][[3]]))
+              col_4(interactionSlider(
+                meta[[3]][[1]]$id,
+                meta[[3]][[1]]$value
+              )),
+              col_4(interactionSlider(
+                meta[[3]][[2]]$id,
+                meta[[3]][[2]]$value
+              )),
+              col_4(interactionSlider(
+                meta[[3]][[3]]$id,
+                meta[[3]][[3]]$value
+              ))
             )
           ),
           col_1()
@@ -563,7 +618,8 @@ mod_stakeholder_initialyes_server <- function(id,
     observe({
       changed <- changed()
       req(startsWith(changed, ns("initial_yes")))
-      is_init <- !"N/A" %in% input[[rm_ns(changed, ns)]]
+      is_init <- changed %in% isolate(init())
+      isolate(init(c(init(), changed())))
       req(is_init)
       execute_safely({
         plat <- isolate(plat())
@@ -583,7 +639,8 @@ mod_stakeholder_intentionweight_server <- function(id,
                                                    get_text,
                                                    changed,
                                                    plat,
-                                                   params) {
+                                                   params,
+                                                   init) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -592,35 +649,72 @@ mod_stakeholder_intentionweight_server <- function(id,
       out_id <- paste0("control__", category)
       products <- get_text("params", "product")
       stakeholders <- get_text("params", "stakeholder")
-      input_ids <- lapply(products, function(p) {
+      plat <- plat()
+      con <- plat$sqlite3$connect(
+        app_sys("extdata/stakeholder/output/pLAtYpus.sqlite3")
+      )
+      query <- "SELECT %s FROM 'Intention Weights %s' WHERE Category='%s'"
+      meta <- lapply(products, function(p) {
         lapply(stakeholders, function(s) {
           id <- ns(sprintf("intention_weight__%s__%s__EU__%s", p, s, category))
-          id
+          query <- sprintf(query, s, p, category)
+          value <- plat$pd$read_sql_query(query, con)
+          value <- reticulate::py_to_r(value)
+          value <- unlist(value, use.names = FALSE)
+          list(id = id, value = value)
         })
       })
+      
       output[[out_id]] <- renderUI({
         fluidRow(
           col_1(),
           col_10(
             h5("Product: Autonomous cars"),
             fluidRow(
-              col_4(interactionSlider(input_ids[[1]][[1]])),
-              col_4(interactionSlider(input_ids[[1]][[2]])),
-              col_4(interactionSlider(input_ids[[1]][[3]]))
+              col_4(interactionSlider(
+                meta[[1]][[1]]$id,
+                meta[[1]][[1]]$value
+              )),
+              col_4(interactionSlider(
+                meta[[1]][[2]]$id,
+                meta[[1]][[2]]$value
+              )),
+              col_4(interactionSlider(
+                meta[[1]][[3]]$id,
+                meta[[1]][[3]]$value
+              ))
             ),
             hr(),
             h5("Product: Sustainable transport"),
             fluidRow(
-              col_4(interactionSlider(input_ids[[1]][[1]])),
-              col_4(interactionSlider(input_ids[[2]][[2]])),
-              col_4(interactionSlider(input_ids[[2]][[3]]))
+              col_4(interactionSlider(
+                meta[[2]][[1]]$id,
+                meta[[2]][[1]]$value
+              )),
+              col_4(interactionSlider(
+                meta[[2]][[2]]$id,
+                meta[[2]][[2]]$value
+              )),
+              col_4(interactionSlider(
+                meta[[2]][[3]]$id,
+                meta[[2]][[3]]$value
+              ))
             ),
             hr(),
             h5("Product: Cooperative self-generation"),
             fluidRow(
-              col_4(interactionSlider(input_ids[[3]][[1]])),
-              col_4(interactionSlider(input_ids[[3]][[2]])),
-              col_4(interactionSlider(input_ids[[3]][[3]]))
+              col_4(interactionSlider(
+                meta[[3]][[1]]$id,
+                meta[[3]][[1]]$value
+              )),
+              col_4(interactionSlider(
+                meta[[3]][[2]]$id,
+                meta[[3]][[2]]$value
+              )),
+              col_4(interactionSlider(
+                meta[[3]][[3]]$id,
+                meta[[3]][[3]]$value
+              ))
             )
           ),
           col_1()
@@ -632,7 +726,8 @@ mod_stakeholder_intentionweight_server <- function(id,
     observe({
       changed <- changed()
       req(startsWith(changed, ns("intention_weight")))
-      is_init <- !"N/A" %in% input[[rm_ns(changed, ns)]]
+      is_init <- changed %in% isolate(init())
+      isolate(init(c(init(), changed())))
       req(is_init)
       execute_safely({
         plat <- isolate(plat())
@@ -652,7 +747,8 @@ mod_stakeholder_surveytopic_server <- function(id,
                                                get_text,
                                                changed,
                                                plat,
-                                               params) {
+                                               params,
+                                               init) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -674,29 +770,89 @@ mod_stakeholder_surveytopic_server <- function(id,
               id
             })
           })
+          
+          plat <- plat()
+          con <- plat$sqlite3$connect(
+            app_sys("extdata/stakeholder/output/pLAtYpus.sqlite3")
+          )
+          query <- paste(
+            "SELECT %s FROM 'survey_topics'",
+            "WHERE Country='%s' AND Stakeholder='%s'",
+            "AND Component='%s' AND Product='%s'"
+          )
+          query <- "SELECT * FROM 'survey_topics'"
+          stdf <- reticulate::py_to_r(plat$pd$read_sql_query(query, con))
+          meta <- lapply(products, function(p) {
+            lapply(stakeholders, function(s) {
+              id <- ns(sprintf(
+                "survey_topic__%s__%s__%s__%s__%s",
+                p, s, country, topic, decision
+              ))
+              #query <- sprintf(query, to_title(decision), country, s, topic, p)
+              #value <- plat$pd$read_sql_query(query, con)
+              #value <- reticulate::py_to_r(value)
+              #value <- unlist(value, use.names = FALSE)
+              value <- as.numeric(stdf[
+                stdf$Country %in% country &
+                stdf$Stakeholder %in% s &
+                stdf$Component %in% topic &
+                stdf$Product %in% p,
+              ][[to_title(decision)]])
+              
+              list(id = id, value = value)
+            })
+          })
+          
           output[[out_id]] <- renderUI({
             fluidRow(
               col_1(),
               col_10(
                 h5("Product: Autonomous cars"),
                 fluidRow(
-                  col_4(interactionSlider(input_ids[[1]][[1]])),
-                  col_4(interactionSlider(input_ids[[1]][[2]])),
-                  col_4(interactionSlider(input_ids[[1]][[3]])),
+                  col_4(interactionSlider(
+                    meta[[1]][[1]]$id,
+                    meta[[1]][[1]]$value
+                  )),
+                  col_4(interactionSlider(
+                    meta[[1]][[2]]$id,
+                    meta[[1]][[2]]$value
+                  )),
+                  col_4(interactionSlider(
+                    meta[[1]][[3]]$id,
+                    meta[[1]][[3]]$value
+                  )),
                 ),
                 hr(),
                 h5("Product: Sustainable transport"),
                 fluidRow(
-                  col_4(interactionSlider(input_ids[[2]][[1]])),
-                  col_4(interactionSlider(input_ids[[2]][[2]])),
-                  col_4(interactionSlider(input_ids[[2]][[3]])),
+                  col_4(interactionSlider(
+                    meta[[2]][[1]]$id,
+                    meta[[2]][[1]]$value
+                  )),
+                  col_4(interactionSlider(
+                    meta[[2]][[2]]$id,
+                    meta[[2]][[2]]$value
+                  )),
+                  col_4(interactionSlider(
+                    meta[[2]][[3]]$id,
+                    meta[[2]][[3]]$value
+                  )),
                 ),
                 hr(),
                 h5("Product: Cooperative self-generation"),
                 fluidRow(
-                  col_4(interactionSlider(input_ids[[3]][[1]])),
-                  col_4(interactionSlider(input_ids[[3]][[2]])),
-                  col_4(interactionSlider(input_ids[[3]][[3]])),
+                  col_4(interactionSlider(
+                    meta[[3]][[1]]$id,
+                    meta[[3]][[1]]$value
+                  )),
+                  col_4(interactionSlider(
+                    meta[[3]][[2]]$id,
+                    meta[[3]][[2]]$value
+                  )),
+                  col_4(interactionSlider(
+                    meta[[3]][[3]]$id,
+                    meta[[3]][[3]]$value
+                  )),
                 )
               ),
               col_1()
@@ -710,7 +866,8 @@ mod_stakeholder_surveytopic_server <- function(id,
     observe({
       changed <- changed()
       req(startsWith(changed, ns("surveytopic")))
-      is_init <- !"N/A" %in% input[[rm_ns(changed, ns)]]
+      is_init <- changed %in% isolate(init())
+      isolate(init(c(init(), changed())))
       req(is_init)
       execute_safely({
         plat <- isolate(plat())
