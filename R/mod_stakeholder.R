@@ -262,7 +262,7 @@ mod_stakeholder_server <- function(id, tab) {
       is_valid <- is_control || is_slider
       is_init <- changed() %in% isolate(init_slider()) || is_control
       is_reset <- isTRUE(reset())
-      
+
       req((is_valid && is_init) || is_reset, cancelOutput = TRUE)
 
       pwaiter$show()
@@ -322,15 +322,15 @@ mod_stakeholder_server <- function(id, tab) {
         "surveytopic-survey_topic"
       )
       allowed_ctrl <- c("plot_control_stakeholder", "plot_control_product")
-      
+
       is_control <- any(startsWith(changed(), ns(allowed_ctrl)))
       is_slider <- any(startsWith(changed(), ns(allowed_slider)))
       is_valid <- is_control || is_slider
       is_init <- changed() %in% isolate(init_slider()) || is_control
       is_reset <- isTRUE(reset())
-      
+
       req((is_valid && is_init) || is_reset, cancelOutput = TRUE)
-      
+
       reset(FALSE)
       mwaiter$show()
 
@@ -530,7 +530,7 @@ mod_stakeholder_initialyes_server <- function(id,
                                               init) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-    
+
     lapply(get_text("params", "countries"), function(country) {
       out_id <- paste0("control__", country)
       products <- get_text("params", "product")
@@ -555,7 +555,7 @@ mod_stakeholder_initialyes_server <- function(id,
           list(id = id, value = value)
         })
       })
-      
+
       output[[out_id]] <- renderUI({
         fluidRow(
           col_1(),
@@ -662,7 +662,7 @@ mod_stakeholder_intentionweight_server <- function(id,
           list(id = id, value = value)
         })
       })
-      
+
       output[[out_id]] <- renderUI({
         fluidRow(
           col_1(),
@@ -749,19 +749,18 @@ mod_stakeholder_surveytopic_server <- function(id,
                                                init) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-    
+
     plat <- plat()
     con <- plat$sqlite3$connect(
       app_sys("extdata/stakeholder/output/pLAtYpus.sqlite3")
     )
     query <- "SELECT * FROM 'survey_topics'"
     stdf <- reticulate::py_to_r(plat$pd$read_sql_query(query, con))
-    
+
     st_topics <- get_text("params", "survey_topic", "survey_topic")
     countries <- get_text("params", "countries")
     decisions <- c("adopt", "leave")
     lapply(countries, function(country) {
-
       lapply(st_topics, function(topic) {
         lapply(decisions, function(decision) {
           out_id <- sprintf("control__%s__%s__%s", country, topic, decision)
@@ -775,15 +774,15 @@ mod_stakeholder_surveytopic_server <- function(id,
               ))
               value <- as.numeric(stdf[
                 stdf$Country %in% country &
-                stdf$Stakeholder %in% s &
-                stdf$Component %in% topic &
-                stdf$Product %in% p,
+                  stdf$Stakeholder %in% s &
+                  stdf$Component %in% topic &
+                  stdf$Product %in% p,
               ][[to_title(decision)]])
-              
+
               list(id = id, value = value)
             })
           })
-          
+
           output[[out_id]] <- renderUI({
             fluidRow(
               col_1(),
