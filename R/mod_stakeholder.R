@@ -255,7 +255,7 @@ mod_stakeholder_server <- function(id, tab) {
         "initialyes-initial_yes", "intentionweight-intention_weight",
         "surveytopic-survey_topic"
       )
-      allowed_ctrl <- c("plot_control_country", "plot_control_product", "reset")
+      allowed_ctrl <- c("plot_control_country", "plot_control_product")
 
       is_control <- any(startsWith(changed(), ns(allowed_ctrl)))
       is_slider <- any(startsWith(changed(), ns(allowed_slider)))
@@ -321,9 +321,7 @@ mod_stakeholder_server <- function(id, tab) {
         "initialyes-initial_yes", "intentionweight-intention_weight",
         "surveytopic-survey_topic"
       )
-      allowed_ctrl <- c(
-        "plot_control_stakeholder", "plot_control_product", "reset"
-      )
+      allowed_ctrl <- c("plot_control_stakeholder", "plot_control_product")
       
       is_control <- any(startsWith(changed(), ns(allowed_ctrl)))
       is_slider <- any(startsWith(changed(), ns(allowed_slider)))
@@ -751,47 +749,30 @@ mod_stakeholder_surveytopic_server <- function(id,
                                                init) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-
+    
+    plat <- plat()
+    con <- plat$sqlite3$connect(
+      app_sys("extdata/stakeholder/output/pLAtYpus.sqlite3")
+    )
+    query <- "SELECT * FROM 'survey_topics'"
+    stdf <- reticulate::py_to_r(plat$pd$read_sql_query(query, con))
+    
     st_topics <- get_text("params", "survey_topic", "survey_topic")
     countries <- get_text("params", "countries")
     decisions <- c("adopt", "leave")
     lapply(countries, function(country) {
+
       lapply(st_topics, function(topic) {
         lapply(decisions, function(decision) {
           out_id <- sprintf("control__%s__%s__%s", country, topic, decision)
           products <- get_text("params", "product")
           stakeholders <- get_text("params", "stakeholder")
-          input_ids <- lapply(products, function(p) {
-            lapply(stakeholders, function(s) {
-              id <- ns(sprintf(
-                "survey_topic__%s__%s__%s__%s__%s",
-                p, s, country, topic, decision
-              ))
-              id
-            })
-          })
-          
-          plat <- plat()
-          con <- plat$sqlite3$connect(
-            app_sys("extdata/stakeholder/output/pLAtYpus.sqlite3")
-          )
-          query <- paste(
-            "SELECT %s FROM 'survey_topics'",
-            "WHERE Country='%s' AND Stakeholder='%s'",
-            "AND Component='%s' AND Product='%s'"
-          )
-          query <- "SELECT * FROM 'survey_topics'"
-          stdf <- reticulate::py_to_r(plat$pd$read_sql_query(query, con))
           meta <- lapply(products, function(p) {
             lapply(stakeholders, function(s) {
               id <- ns(sprintf(
                 "survey_topic__%s__%s__%s__%s__%s",
                 p, s, country, topic, decision
               ))
-              #query <- sprintf(query, to_title(decision), country, s, topic, p)
-              #value <- plat$pd$read_sql_query(query, con)
-              #value <- reticulate::py_to_r(value)
-              #value <- unlist(value, use.names = FALSE)
               value <- as.numeric(stdf[
                 stdf$Country %in% country &
                 stdf$Stakeholder %in% s &
