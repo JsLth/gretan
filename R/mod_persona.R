@@ -526,7 +526,7 @@ mod_persona_server <- function(id) {
     #     res3_name = results[[3]]$name,
     #     res3_p = results[[3]]$p
     #   )
-    # 
+    #
     #   outf <- app_sys("persona_data.csv")
     #   utils::write.table(
     #     .data,
