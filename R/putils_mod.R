@@ -1,9 +1,11 @@
 interactionSlider <- function(id, value) {
-  if (!length(value) || is.null(value) || is.na(value)) return(div())
-  
+  if (!length(value) || is.null(value) || is.na(value)) {
+    return(div())
+  }
+
   params <- strsplit(id, "__")[[1]]
   stakeholder <- params[params %in% c("citizens", "business", "government")]
-  
+
   sliderInput(
     inputId = id, label = to_title(stakeholder),
     min = 0, max = 1, value = value, step = 0.01
