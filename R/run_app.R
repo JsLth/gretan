@@ -13,7 +13,7 @@
 #' module IDs. In this case, logging is enabled only for these modules.
 #' @param reactlog Whether to enable logging using the reactlog package.
 #' For debugging purposes.
-#' @param python Path to a Python binary. Generally, run_app requires a
+#' @param python Path to a Python binary. Generally, \code{run_app()} requires a
 #' Python version of 3.8 or higher and depends on the modules \code{numpy},
 #' \code{lightgbm}, and \code{pLAtYpus_TNO}.
 #' @param options Options for \code{\link[shiny]{shinyApp}}. Included for use

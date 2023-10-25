@@ -8,6 +8,7 @@
 run_app(
   log = NULL,
   reactlog = FALSE,
+  python = NULL,
   options = list(),
   prompt = interactive(),
   ...
@@ -30,6 +31,10 @@ module IDs. In this case, logging is enabled only for these modules.}
 \item{reactlog}{Whether to enable logging using the reactlog package.
 For debugging purposes.}
 
+\item{python}{Path to a Python binary. Generally, \code{run_app()} requires a
+Python version of 3.8 or higher and depends on the modules \code{numpy},
+\code{lightgbm}, and \code{pLAtYpus_TNO}.}
+
 \item{options}{Options for \code{\link[shiny]{shinyApp}}. Included for use
 in \code{electricShine}.}
 
@@ -45,7 +50,7 @@ arguments:
   accessed by pressing Ctrl + Shift + D}
   \item{\code{track}}{Enables user metrics tracking. Requires a valid
   key to upload collected data to Google Drive stored in the environment
-  variable \code{GDRIVE_KEY}.} 
+  variable \code{GDRIVE_KEY}.}
 }}
 }
 \description{
