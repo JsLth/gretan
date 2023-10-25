@@ -28,7 +28,7 @@ test_that("rlang_error_to_html works", {
   e <- tryCatch(expr = rlang::abort("test"), error = function(e) {
     return(e)
   })
-  expect_snapshot(rlang_error_to_html(e))
+  expect_snapshot(rlang_error_to_html(e, warn = FALSE))
 })
 
 test_that("with_eval_args works", {
