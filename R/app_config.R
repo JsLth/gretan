@@ -64,7 +64,7 @@ download_dependencies <- function(prompt = interactive()) {
   if (!dir.exists(app_sys("extdata/stakeholder/output"))) {
     dir.create(app_sys("extdata/stakeholder/output"))
   }
-  
+
   needed <- !has_dependencies(vec = TRUE)
 
   if (all(!needed)) {
