@@ -158,13 +158,23 @@ test_that("tag_to_text works", {
 
 
 test_that("make_header works", {
-  expect_snapshot(make_header("title", c("author 1", "author 2"), affil = "institution"))
   expect_snapshot(make_header(
     "title",
     c("author 1", "author 2"),
-    affil = c("author 1" = "institution 1", "author 2" = "institution 2")
+    affil = "institution",
+    date = "YYYY/MM/DD"
   ))
-  expect_snapshot(make_header("title", c("author 1", "author 2")))
+  expect_snapshot(make_header(
+    "title",
+    c("author 1", "author 2"),
+    affil = c("author 1" = "institution 1", "author 2" = "institution 2"),
+    date = "YYYY/MM/DD"
+  ))
+  expect_snapshot(make_header(
+    "title",
+    c("author 1", "author 2"),
+    date = "YYYY/MM/DD"
+  ))
 })
 
 

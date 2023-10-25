@@ -279,14 +279,14 @@
 # make_header works
 
     Code
-      make_header("title", c("author 1", "author 2"), affil = "institution")
+      make_header("title", c("author 1", "author 2"), affil = "institution", date = "YYYY/MM/DD")
     Output
       <div id="header" align="center">
         <h2 class="title toc-ignore">
           <p style="font-family: Literata; margin-bottom: 0px;">title</p>
         </h2>
         <h5 class="author">Prepared by: author 1<sup>1</sup>, author 2<sup>1</sup></h5>
-        <h5 class="date">2023-10-24</h5>
+        <h5 class="date">YYYY/MM/DD</h5>
         <h6 class="affil"><sup>1</sup>institution</h6>
       </div>
 
@@ -294,28 +294,28 @@
 
     Code
       make_header("title", c("author 1", "author 2"), affil = c(`author 1` = "institution 1",
-        `author 2` = "institution 2"))
+        `author 2` = "institution 2"), date = "YYYY/MM/DD")
     Output
       <div id="header" align="center">
         <h2 class="title toc-ignore">
           <p style="font-family: Literata; margin-bottom: 0px;">title</p>
         </h2>
         <h5 class="author">Prepared by: author 1<sup>1</sup>, author 2<sup>2</sup></h5>
-        <h5 class="date">2023-10-24</h5>
+        <h5 class="date">YYYY/MM/DD</h5>
         <h6 class="affil"><sup>1</sup>institution 1; <sup>2</sup>institution 2</h6>
       </div>
 
 ---
 
     Code
-      make_header("title", c("author 1", "author 2"))
+      make_header("title", c("author 1", "author 2"), date = "YYYY/MM/DD")
     Output
       <div id="header" align="center">
         <h2 class="title toc-ignore">
           <p style="font-family: Literata; margin-bottom: 0px;">title</p>
         </h2>
         <h5 class="author">Prepared by: author 1, author 2</h5>
-        <h5 class="date">2023-10-24</h5>
+        <h5 class="date">YYYY/MM/DD</h5>
         <h6 class="affil"></h6>
       </div>
 
