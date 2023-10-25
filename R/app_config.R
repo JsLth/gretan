@@ -35,15 +35,28 @@ add_external_resources <- function() {
 }
 
 
-has_dependencies <- function() {
-  plat_db_dest <- app_sys("extdata/stakeholder/output/pLAtYpus.sqlite3")
-  plat_alt_dest <- app_sys("extdata/stakeholder/output/pLAtYpus_only_survey.sqlite3")
+gretan_deps <- function() {
+  list(
+    plat_db = list(
+      src = "https://github.com/TNO/pLAtYpus/raw/main/output/pLAtYpus.sqlite3",
+      dest = app_sys("extdata/stakeholder/output/pLAtYpus.sqlite3")
+    ),
+    plat_alt = list(
+      src = "https://github.com/TNO/pLAtYpus/raw/main/output/pLAtYpus_only_survey.sqlite3",
+      dest = app_sys("extdata/stakeholder/output/pLAtYpus_only_survey.sqlite3")
+    )
+  )
+}
+
+
+has_dependencies <- function(vec = FALSE) {
+  deps <- gretan_deps()
   needed <- c(
-    !file.exists(plat_db_dest),
-    !file.exists(plat_alt_dest)
+    !file.exists(deps$plat_db$dest),
+    !file.exists(deps$plat_alt$dest)
   )
 
-  !any(needed)
+  if (vec) !needed else !any(needed)
 }
 
 
@@ -51,8 +64,10 @@ download_dependencies <- function(prompt = interactive()) {
   if (!dir.exists(app_sys("extdata/stakeholder/output"))) {
     dir.create(app_sys("extdata/stakeholder/output"))
   }
+  
+  needed <- !has_dependencies(vec = TRUE)
 
-  if (has_dependencies()) {
+  if (all(!needed)) {
     return(invisible())
   }
 
@@ -68,25 +83,21 @@ download_dependencies <- function(prompt = interactive()) {
     }
   }
 
-  plat_db_url <- "https://github.com/TNO/pLAtYpus/raw/main/output/pLAtYpus.sqlite3"
-  plat_alt_url <- "https://github.com/TNO/pLAtYpus/raw/main/output/pLAtYpus_only_survey.sqlite3"
+  deps <- gretan_deps()
 
   if (needed[1]) {
-    curl::curl_download(plat_db_url, plat_db_dest, quiet = FALSE)
+    curl::curl_download(
+      url = deps$plat_db$src,
+      destfile = deps$plat_db$dest,
+      quiet = FALSE
+    )
   }
 
   if (needed[2]) {
-    curl::curl_download(plat_alt_url, destfile = plat_alt_dest, quiet = FALSE)
-  }
-
-  plat_db_dest <- app_sys("extdata/stakeholder/output/pLAtYpus.sqlite3")
-  plat_alt_dest <- app_sys("extdata/stakeholder/output/pLAtYpus_only_survey.sqlite3")
-
-  if (!file.exists(plat_db_dest)) {
-    download.file(stk_db, destfile = plat_db_dest)
-  }
-
-  if (!file.exists(plat_alt_dest)) {
-    download.file(stk_alt, destfile = plat_alt_dest)
+    curl::curl_download(
+      url = deps$plat_alt$src,
+      destfile = deps$plat_alt$dest,
+      quiet = FALSE
+    )
   }
 }
