@@ -42,7 +42,7 @@ run_app <- function(log = NULL,
                     prompt = interactive(),
                     ...) {
   .dots <- list(...)
-  
+
   if (!is.null(python)) {
 
   }

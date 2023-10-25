@@ -108,10 +108,10 @@ download_dependencies <- function(prompt = interactive()) {
 check_python <- function(python = NULL, prompt = interactive()) {
   if (!is.null(python)) {
     reticulate::use_python(python, required = TRUE)
-    
+
     if (prompt) {
       pkgs <- reticulate::py_list_packages(python = python)$package
-      
+
       if (!all(c("numpy", "lightgbm", "pLAtYpus_TNO") %in% pkgs)) {
         cat(
           "GRETA Analytics requires the following Python dependencies,",
@@ -121,9 +121,11 @@ check_python <- function(python = NULL, prompt = interactive()) {
           "  - pLAtYpus_TNO\n"
         )
         answer <- readline("Install Python dependencies? [y/N]")
-        
-        if (!identical(answer, "y")) return(invisible())
-        
+
+        if (!identical(answer, "y")) {
+          return(invisible())
+        }
+
         reticulate::py_install(
           packages = c("numpy", "lightgbm", "pLAtYpus_TNO")
         )
