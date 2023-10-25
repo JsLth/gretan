@@ -23,3 +23,6 @@ $run_dev.*
 ^\.github$
 ^site$
 .Renviron
+^inst/extdata/stakeholder/\.rscignore$
+^inst/extdata/stakeholder/output$
+^gretan\.log$
