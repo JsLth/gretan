@@ -39,11 +39,11 @@ gretan_deps <- function() {
   list(
     plat_db = list(
       src = "https://github.com/TNO/pLAtYpus/raw/main/output/pLAtYpus.sqlite3",
-      dest = app_sys("extdata/stakeholder/output/pLAtYpus.sqlite3")
+      dest = file.path(app_sys("extdata/stakeholder"), "output/pLAtYpus.sqlite3")
     ),
     plat_alt = list(
       src = "https://github.com/TNO/pLAtYpus/raw/main/output/pLAtYpus_only_survey.sqlite3",
-      dest = app_sys("extdata/stakeholder/output/pLAtYpus_only_survey.sqlite3")
+      dest = file.path(app_sys("extdata/stakeholder"), "output/pLAtYpus_only_survey.sqlite3")
     )
   )
 }
@@ -61,8 +61,8 @@ has_dependencies <- function(vec = FALSE) {
 
 
 download_dependencies <- function(prompt = interactive()) {
-  if (!dir.exists(app_sys("extdata/stakeholder/output"))) {
-    dir.create(app_sys("extdata/stakeholder/output"))
+  if (!dir.exists(file.path(app_sys("extdata/stakeholder"), "output"))) {
+    dir.create(file.path(app_sys("extdata/stakeholder"), "output"))
   }
   
   needed <- !has_dependencies(vec = TRUE)
@@ -86,6 +86,7 @@ download_dependencies <- function(prompt = interactive()) {
   deps <- gretan_deps()
 
   if (needed[1]) {
+    cat("Downloading pLAtYpus model database\n")
     curl::curl_download(
       url = deps$plat_db$src,
       destfile = deps$plat_db$dest,
@@ -94,10 +95,48 @@ download_dependencies <- function(prompt = interactive()) {
   }
 
   if (needed[2]) {
+    cat("Downloading pLAtYpus reset database\n")
     curl::curl_download(
       url = deps$plat_alt$src,
       destfile = deps$plat_alt$dest,
       quiet = FALSE
     )
+  }
+}
+
+
+check_python <- function(python = NULL, prompt = interactive()) {
+  if (!is.null(python)) {
+    reticulate::use_python(python, required = TRUE)
+    
+    if (prompt) {
+      pkgs <- reticulate::py_list_packages(python = python)$package
+      
+      if (!all(c("numpy", "lightgbm", "pLAtYpus_TNO") %in% pkgs)) {
+        cat(
+          "GRETA Analytics requires the following Python dependencies,",
+          "not all of which are currently installed:\n",
+          "  - numpy\n",
+          "  - lightgbm\n",
+          "  - pLAtYpus_TNO\n"
+        )
+        answer <- readline("Install Python dependencies? [y/N]")
+        
+        if (!identical(answer, "y")) return(invisible())
+        
+        reticulate::py_install(
+          packages = c("numpy", "lightgbm", "pLAtYpus_TNO")
+        )
+      }
+    }
+  } else {
+    stop(paste0(
+      "The gretan package needs a working installation ",
+      "of Python 3.8 or higher.\nPython can be downloaded under ",
+      "\033]8;;https://www.python.org/downloads/\ahttps://www.",
+      "python.org/downloads/\033]8;;\a, or by running ",
+      "\033]8;;rstudio:run:reticulate::install_python()\a",
+      "`reticulate::install_python()`\033]8;;\a"
+    ), call. = FALSE)
   }
 }

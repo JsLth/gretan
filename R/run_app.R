@@ -13,6 +13,9 @@
 #' module IDs. In this case, logging is enabled only for these modules.
 #' @param reactlog Whether to enable logging using the reactlog package.
 #' For debugging purposes.
+#' @param python Path to a Python binary. Generally, run_app requires a
+#' Python version of 3.8 or higher and depends on the modules \code{numpy},
+#' \code{lightgbm}, and \code{pLAtYpus_TNO}.
 #' @param options Options for \code{\link[shiny]{shinyApp}}. Included for use
 #' in \code{electricShine}.
 #' @param prompt Whether to show a confirmation prompt before downloading
@@ -34,10 +37,15 @@
 #' @importFrom leaflet %>%
 run_app <- function(log = NULL,
                     reactlog = FALSE,
+                    python = NULL,
                     options = list(),
                     prompt = interactive(),
                     ...) {
   .dots <- list(...)
+  
+  if (!is.null(python)) {
+
+  }
 
   download_dependencies(prompt = prompt)
 
