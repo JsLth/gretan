@@ -75,7 +75,6 @@ mod_main_server <- function(id, tab) {
         var <- params$invar
         values <- params$values
         is_mode <- is.factor(values)
-        cb_ext <- getFromNamespace("cb_ext", as.environment("package:gretan"))
         cb_entry <- cb_ext[cb_ext$variable %in% var, ]
 
         question <- cb_entry$question

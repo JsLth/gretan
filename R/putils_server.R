@@ -523,7 +523,7 @@ getGretaOption <- function(name, default = NULL) {
 protect_html <- function(x) HTML(as.character(x))
 
 quietly <- function(x) {
-  capture.output(
+  utils::capture.output(
     return(suppressMessages(suppressWarnings(x)))
   )
 }

@@ -271,7 +271,10 @@ mod_stakeholder_server <- function(id, tab) {
       country <- input$plot_control_country
       table <- reticulate::py_to_r(tables[[2]][[input$plot_control_country]])
       names(table) <- c("Time", "Citizens", "Business", "Government")
-      table <- cbind(Time = table$Time, stack(table, select = names(table)[-1]))
+      table <- cbind(
+        Time = table$Time,
+        utils::stack(table, select = names(table)[-1])
+      )
       names(table) <- c("Time", "Engagement level", "Stakeholder")
 
       p <- ggplot2::ggplot(data = table) +
