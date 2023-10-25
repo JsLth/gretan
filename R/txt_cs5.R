@@ -175,7 +175,7 @@ txts$main$cs5 <- list(
         relationships among the three actors are not based on equality
         and collaboration, but rather top-down authoritative approaches.
         However, when asked about the preferred relationships, most of the
-        actors´ state that <b>more collaborative and balanced relationships are
+        actors state that <b>more collaborative and balanced relationships are
         convenient to increase energy citizenship</b>. In this case, the main
         discrepancy is shown by policymakers that do not consider that a
         more collaborative relation with citizens is needed. <br>
