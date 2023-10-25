@@ -1,5 +1,7 @@
 interactionSlider <- function(id, value) {
-  if (!length(value)) return(div())
+  if (!length(value)) {
+    return(div())
+  }
 
   params <- strsplit(id, "__")[[1]]
   stakeholder <- params[params %in% c("citizens", "business", "government")]
