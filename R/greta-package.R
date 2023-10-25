@@ -6,6 +6,5 @@
 NULL
 
 globalVariables(c(
-  "category", "Spatial lag", "Total amount", "Municipality", "Stable income",
-  "Age"
+  "category", "Time", "Engagement level", "Stakeholder"
 ))
