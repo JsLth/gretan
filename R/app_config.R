@@ -106,39 +106,51 @@ download_dependencies <- function(prompt = interactive()) {
 
 
 check_python <- function(python = NULL, prompt = interactive()) {
+  if (isTRUE(getOption("app.prod"))) return(invisible())
+  deps <- c("numpy", "lightgbm", "pLAtYpus_TNO")
+  
   if (!is.null(python)) {
     reticulate::use_python(python, required = TRUE)
 
     if (prompt) {
       pkgs <- reticulate::py_list_packages(python = python)$package
 
-      if (!all(c("numpy", "lightgbm", "pLAtYpus_TNO") %in% pkgs)) {
-        cat(
+      if (!all(deps %in% pkgs)) {
+        cat2(
           "GRETA Analytics requires the following Python dependencies,",
-          "not all of which are currently installed:\n",
-          "  - numpy\n",
-          "  - lightgbm\n",
-          "  - pLAtYpus_TNO\n"
+          "not all of which are currently installed:"
         )
-        answer <- readline("Install Python dependencies? [y/N]")
+        cat2(paste(paste("  -", deps), collapse = "\n"))
+        if (!prompt) {
+          stop(
+            "Missing Python dependencies: ",
+            paste(deps[!deps %in% pkgs], collapse = ", ")
+          )
+        } else {
+          answer <- readline("Install Python dependencies? [y/N]")
+        }
 
         if (!identical(answer, "y")) {
           return(invisible())
         }
 
-        reticulate::py_install(
-          packages = c("numpy", "lightgbm", "pLAtYpus_TNO")
-        )
+        reticulate::py_install(packages = deps)
       }
     }
   } else {
-    stop(paste0(
-      "The gretan package needs a working installation ",
-      "of Python 3.8 or higher.\nPython can be downloaded under ",
-      "\033]8;;https://www.python.org/downloads/\ahttps://www.",
-      "python.org/downloads/\033]8;;\a, or by running ",
-      "\033]8;;rstudio:run:reticulate::install_python()\a",
-      "`reticulate::install_python()`\033]8;;\a"
-    ), call. = FALSE)
+    cat2("Looking for Python...")
+    if (!reticulate::py_available(initialize = TRUE)) {
+      stop(paste0(
+        "The gretan package needs a working installation ",
+        "of Python 3.8 or higher.\nPython can be downloaded under ",
+        "\033]8;;https://www.python.org/downloads/\ahttps://www.",
+        "python.org/downloads/\033]8;;\a, or by running ",
+        "\033]8;;rstudio:run:reticulate::install_python()\a",
+        "`reticulate::install_python()`\033]8;;\a"
+      ), call. = FALSE)
+    } else {
+      cat2("Using:")
+      print(reticulate::py_config())
+    }
   }
 }
