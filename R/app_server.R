@@ -15,28 +15,34 @@ app_server <- function(input, output, session) {
 
 
   if (Sys.info()[["user"]] == "shiny") {
-    Sys.setenv(PYTHON_PATH = "/usr/bin/python3")
-    Sys.setenv(VIRTUALENV_NAME = "gretan")
-    Sys.setenv(RETICULATE_PYTHON = "/home/shiny/.virtualenvs/gretan/bin/python")
-    envdir <- Sys.getenv("VIRTUALENV_NAME")
-    envs <- reticulate::virtualenv_list()
-
-    if (!envdir %in% envs) {
-      deps <- c("numpy", "lightgbm", "pLAtYpus_TNO==1.0.4")
-      reticulate::virtualenv_create(
-        envname = envdir,
-        python = Sys.getenv("PYTHON_PATH")
-      )
-      reticulate::virtualenv_install(
-        envdir,
-        packages = deps,
-        ignore_installed = TRUE,
-        pip_options = "--ignore-requires-python"
-      )
+    if (nzchar(app_sys("gretanenv"))) {
+      Sys.setenv(RETICULATE_PYTHON = app_sys("gretanenv/bin/python3.11"))
+      reticulate::use_python(Sys.getenv("RETICULATE_PYTHON"), required = TRUE)
+      print(reticulate::py_version())
+    } else {
+      Sys.setenv(PYTHON_PATH = "/usr/bin/python3")
+      Sys.setenv(VIRTUALENV_NAME = "gretan")
+      Sys.setenv(RETICULATE_PYTHON = "/home/shiny/.virtualenvs/gretan/bin/python")
+      envdir <- Sys.getenv("VIRTUALENV_NAME")
+      envs <- reticulate::virtualenv_list()
+      
+      if (!envdir %in% envs) {
+        deps <- c("numpy", "lightgbm", "pLAtYpus_TNO==1.0.4")
+        reticulate::virtualenv_create(
+          envname = envdir,
+          python = Sys.getenv("PYTHON_PATH")
+        )
+        reticulate::virtualenv_install(
+          envdir,
+          packages = deps,
+          ignore_installed = TRUE,
+          pip_options = "--ignore-requires-python"
+        )
+      }
+      
+      reticulate::use_virtualenv(virtualenv = envdir, required = TRUE)
+      print(reticulate::py_version())
     }
-
-    reticulate::use_virtualenv(virtualenv = envdir, required = TRUE)
-    print(reticulate::py_version())
   }
 
 
@@ -79,6 +85,29 @@ app_server <- function(input, output, session) {
   } else {
     onSessionEnded(fun = shutdown)
   }
+  
+  
+  # Confirmation when exit button is clicked
+  observe({
+    shinyWidgets::ask_confirmation(
+      "confirm_exit",
+      title = "Attention!",
+      type = "warning",
+      text = "Do you really want to exit the application?",
+      btn_labels = c("Yes, exit!", "No, cancel!"),
+      btn_colors = c("#bf616a", "#cfcfcf"),
+      closeOnClickOutside = FALSE,
+      allowEscapeKey = TRUE
+    )
+  }) %>%
+    bindEvent(input$exit)
+  
+  # Do exit after confirmation
+  observe({
+    if (isFALSE(input$confirm_exit))
+      stopApp()
+  }) %>%
+    bindEvent(input$confirm_exit)
 
 
   # Track tab selection ----

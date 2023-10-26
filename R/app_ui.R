@@ -124,6 +124,15 @@ app_ui <- function(theme = NULL,
         corp_logo("tecnalia"), corp_logo("cleanwatts"), corp_logo("tno"),
         corp_logo("isi"), corp_logo("kaskas")
       ),
+      if (isTRUE(as.logical(Sys.getenv("WITHIN_ELECTRON")))) {
+        bs4Dash::appButton(
+          inputId = "exit",
+          label = "Exit",
+          width = "50px",
+          color = NULL,
+          class = "exit-button"
+        )
+      },
       title = HTML(paste(
         img(src = "www/greta_flash.svg", width = 50, height = 50),
         span("GRETA Analytics", class = "brand-text")
