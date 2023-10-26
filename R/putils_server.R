@@ -114,16 +114,21 @@ rlang_error_to_html <- function(e, ...) {
 # Send info message
 send_info <- function(text,
                       title = "Info",
+                      btn_colors = "#5E81AC",
                       btn_labels = "Got it!",
                       closeOnClickOutside = FALSE,
                       ...,
                       session = getDefaultReactiveDomain()) {
+  .dots <- list(...)
+  btn_colors <- .dots$btn_colors %||% "#FFCA2B"
+  btn_labels <- .dots$btn_labels %||% "Got it!"
+  
   shinyWidgets::sendSweetAlert(
     title = title,
     text = text,
     type = "info",
     html = TRUE,
-    btn_colors = "#5E81AC",
+    btn_colors = btn_colors,
     btn_labels = btn_labels,
     closeOnClickOutside = closeOnClickOutside,
     ...
@@ -133,15 +138,21 @@ send_info <- function(text,
 # Send error message
 send_error <- function(text,
                        title = "Oops!",
+                       btn_colors = "#BF616A",
+                       btn_labels = "Got it!",
                        ...,
                        session = getDefaultReactiveDomain()) {
+  .dots <- list(...)
+  btn_colors <- .dots$btn_colors %||% "#FFCA2B"
+  btn_labels <- .dots$btn_labels %||% "Got it!"
+  
   shinyWidgets::sendSweetAlert(
     title = title,
     text = text,
     type = "error",
     html = TRUE,
-    btn_colors = "#BF616A",
-    btn_labels = "Got it!",
+    btn_colors = btn_colors,
+    btn_labels = btn_labels,
     closeOnClickOutside = FALSE,
     ...
   )
@@ -150,6 +161,8 @@ send_error <- function(text,
 
 send_warning <- function(text,
                          title = "Attention!",
+                         btn_colors = "#FFCA2B",
+                         btn_labels = "Got it!",
                          ...,
                          session = getDefaultReactiveDomain()) {
   shinyWidgets::sendSweetAlert(
@@ -157,8 +170,8 @@ send_warning <- function(text,
     text = text,
     type = "warning",
     html = TRUE,
-    btn_colors = "#FFCA2B",
-    btn_labels = "Got it!",
+    btn_colors = btn_colors,
+    btn_labels = btn_labels,
     closeOnClickOutside = FALSE,
     ...
   )
