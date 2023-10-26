@@ -16,3 +16,4 @@ ocm_all_stations.json
 ocm_all_stations.rds
 electron.R
 shiny-run.R
+gretanenv.tar.gz
