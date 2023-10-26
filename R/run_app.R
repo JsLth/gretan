@@ -43,10 +43,7 @@ run_app <- function(log = NULL,
                     ...) {
   .dots <- list(...)
 
-  if (!is.null(python)) {
-
-  }
-
+  check_python(python, prompt = prompt)
   download_dependencies(prompt = prompt)
 
   if (reactlog) {
