@@ -430,6 +430,33 @@ a.logo {
 }
 
 
+.exit-button {
+  background-color: transparent !important;
+  border-color: transparent !important;
+  color: #000 !important;
+  margin-top: auto !important;
+  margin-bottom: auto !important;
+}
+
+
+.exit-button:hover {
+  color: #bf616a !important;
+}
+
+
+.exit-button:before {
+  content: "\f52a";
+  font-family: "FontAwesome";
+  font-size: 20px;
+}
+
+
+.exit-button:hover:before {
+  content: "\f52b";
+  font-family: "FontAwesome";
+}
+
+
 .swal-hide-icon {
   display: none !important;
 }
