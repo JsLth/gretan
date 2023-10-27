@@ -42,7 +42,8 @@ Suggests:
     curl,
     gargle,
     googledrive,
-    shinylogs
+    shinylogs,
+    processx
 Config/testthat/edition: 3
 Encoding: UTF-8
 Language: en-US
