@@ -476,7 +476,7 @@ mod_persona_server <- function(id) {
         wait_for_python(proc)
         setGretaOption(proc = NULL)
       }
-      
+
       # Load model
       model <- isolate(model())
 
