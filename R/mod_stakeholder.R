@@ -142,10 +142,17 @@ mod_stakeholder_server <- function(id, tab) {
     changed <- reactive(input$changed)
     init_ctrl <- rep(FALSE, 3)
     init_slider <- reactiveVal()
+    reset <- reactiveVal(FALSE)
 
     init_waiter <- waiter::Waiter$new(
       id = ns(c("plot", "map")),
       html = tagList(waiter::spin_pulse(), h4("Updating database...")),
+      color = "rgba(179, 221, 254, 1)"
+    )
+    
+    py_waiter <- waiter::Waiter$new(
+      id = ns(c("plot", "map")),
+      html = tagList(waiter::spin_pulse(), h4("Configuring...")),
       color = "rgba(179, 221, 254, 1)"
     )
 
@@ -161,14 +168,9 @@ mod_stakeholder_server <- function(id, tab) {
       color = "rgba(179, 221, 254, 1)"
     )
 
-    # Import platypus ----
-    platypus <- reactive({
-      reticulate::import("pLAtYpus_TNO", convert = FALSE)$GRETA_tool
-    })
-
     # Load parameters ----
     parameters <- reactive({
-      plat <- platypus()
+      plat <- isolate(platypus())
       params <- plat$cook$parameters_from_TOML(
         app_sys("extdata/stakeholder/pLAtYpus.toml")
       )
@@ -183,24 +185,42 @@ mod_stakeholder_server <- function(id, tab) {
     })
 
     # Handle reset ----
+    platypus <- reactiveVal()
     observe({
+      req(identical(session$userData$tab, "stakeholder"))
+      py_waiter$show()
+      proc <- getGretaOption("proc")
+      if (inherits(proc, "process")) {
+        wait_for_python(proc)
+        setGretaOption(proc = NULL)
+      }
+      log_it("Importing pLAtYpus model")
+      plat <- reticulate::import_from_path(
+        "GRETA_tool",
+        path = app_sys("extdata/stakeholder/src"),
+        convert = FALSE
+      )
+      platypus(plat)
+      py_waiter$hide()
       init_waiter$show()
       on.exit(init_waiter$hide())
       log_it("Resetting database to survey")
-      reticulate::py_capture_output(platypus()$reset_to_survey(parameters()))
+      reticulate::py_capture_output(plat$reset_to_survey(parameters()))
       init_ctrl <<- rep(FALSE, 3)
       reset(TRUE)
     }) %>%
-      bindEvent(input$reset, ignoreInit = TRUE)
-
+      bindEvent(input$reset)
+    
     observe({
       req(identical(tab(), "stakeholder"))
       shinyjs::click("reset")
     }) %>%
       bindEvent(tab())
 
+
     # Dispatch to submodules ----
     observe({
+      req(identical(session$userData$tab, "stakeholder"))
       if (identical(input$control, "Initial yes") && !init_ctrl[1]) {
         mod_stakeholder_initialyes_server(
           "initialyes",
@@ -233,7 +253,7 @@ mod_stakeholder_server <- function(id, tab) {
         init_ctrl[3] <<- TRUE
       }
     }) %>%
-      bindEvent(input$control, reset())
+      bindEvent(input$control, input$reset)
 
 
     # Collect output tables ----
@@ -260,7 +280,7 @@ mod_stakeholder_server <- function(id, tab) {
       is_control <- any(startsWith(changed(), ns(allowed_ctrl)))
       is_slider <- any(startsWith(changed(), ns(allowed_slider)))
       is_valid <- is_control || is_slider
-      is_init <- changed() %in% isolate(init_slider()) || is_control
+      is_init <- !changed() %in% isolate(init_slider()) || is_control
       is_reset <- isTRUE(reset())
 
       req((is_valid && is_init) || is_reset, cancelOutput = TRUE)
@@ -310,7 +330,7 @@ mod_stakeholder_server <- function(id, tab) {
     }) %>%
       bindEvent(
         changed(),
-        reset(),
+        input$reset,
         input$plot_control_country,
         input$plot_control_product,
         input$plot_control_stakeholder
@@ -329,7 +349,7 @@ mod_stakeholder_server <- function(id, tab) {
       is_control <- any(startsWith(changed(), ns(allowed_ctrl)))
       is_slider <- any(startsWith(changed(), ns(allowed_slider)))
       is_valid <- is_control || is_slider
-      is_init <- changed() %in% isolate(init_slider()) || is_control
+      is_init <- !changed() %in% isolate(init_slider()) || is_control
       is_reset <- isTRUE(reset())
 
       req((is_valid && is_init) || is_reset, cancelOutput = TRUE)
@@ -378,14 +398,14 @@ mod_stakeholder_server <- function(id, tab) {
     }) %>%
       bindEvent(
         changed(),
-        reset(),
+        input$reset,
         input$plot_control_country,
         input$plot_control_product,
         input$plot_control_stakeholder
       )
 
-    outputOptions(output, "map", priority = 1)
-    outputOptions(output, "plot", priority = 1)
+    outputOptions(output, "map", priority = 0)
+    outputOptions(output, "plot", priority = 0)
   })
 }
 
@@ -538,7 +558,7 @@ mod_stakeholder_initialyes_server <- function(id,
       out_id <- paste0("control__", country)
       products <- get_text("params", "product")
       stakeholders <- get_text("params", "stakeholder")
-      plat <- plat()
+      plat <- isolate(plat())
       con <- plat$sqlite3$connect(
         app_sys("extdata/stakeholder/output/pLAtYpus.sqlite3")
       )
@@ -558,6 +578,7 @@ mod_stakeholder_initialyes_server <- function(id,
           list(id = id, value = value)
         })
       })
+      init(c(init(), meta[[3]][[3]]$id))
 
       output[[out_id]] <- renderUI({
         fluidRow(
@@ -619,9 +640,7 @@ mod_stakeholder_initialyes_server <- function(id,
     observe({
       changed <- changed()
       req(startsWith(changed, ns("initial_yes")))
-      is_init <- changed %in% isolate(init())
-      isolate(init(c(init(), changed())))
-      req(is_init)
+      req(changed %in% isolate(init()))
       execute_safely({
         plat <- isolate(plat())
         params <- isolate(params())
@@ -650,7 +669,7 @@ mod_stakeholder_intentionweight_server <- function(id,
       out_id <- paste0("control__", category)
       products <- get_text("params", "product")
       stakeholders <- get_text("params", "stakeholder")
-      plat <- plat()
+      plat <- isolate(plat())
       con <- plat$sqlite3$connect(
         app_sys("extdata/stakeholder/output/pLAtYpus.sqlite3")
       )
@@ -665,6 +684,7 @@ mod_stakeholder_intentionweight_server <- function(id,
           list(id = id, value = value)
         })
       })
+      init(c(init(), meta[[3]][[3]]$id))
 
       output[[out_id]] <- renderUI({
         fluidRow(
@@ -727,9 +747,7 @@ mod_stakeholder_intentionweight_server <- function(id,
     observe({
       changed <- changed()
       req(startsWith(changed, ns("intention_weight")))
-      is_init <- changed %in% isolate(init())
-      isolate(init(c(init(), changed())))
-      req(is_init)
+      req(changed %in% isolate(init()))
       execute_safely({
         plat <- isolate(plat())
         params <- isolate(params())
@@ -753,7 +771,7 @@ mod_stakeholder_surveytopic_server <- function(id,
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    plat <- plat()
+    plat <- isolate(plat())
     con <- plat$sqlite3$connect(
       app_sys("extdata/stakeholder/output/pLAtYpus.sqlite3")
     )
@@ -785,6 +803,7 @@ mod_stakeholder_surveytopic_server <- function(id,
               list(id = id, value = value)
             })
           })
+          init(c(init(), meta[[3]][[3]]$id))
 
           output[[out_id]] <- renderUI({
             fluidRow(
@@ -849,9 +868,7 @@ mod_stakeholder_surveytopic_server <- function(id,
     observe({
       changed <- changed()
       req(startsWith(changed, ns("surveytopic")))
-      is_init <- changed %in% isolate(init())
-      isolate(init(c(init(), changed())))
-      req(is_init)
+      req(changed %in% isolate(init()))
       execute_safely({
         plat <- isolate(plat())
         params <- isolate(params())

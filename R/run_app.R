@@ -26,10 +26,12 @@
 #' \describe{
 #'   \item{\code{console}}{Enables internal live console to execute R
 #'   commands within the app. Strictly for internal use. Console can be
-#'   accessed by pressing Ctrl + Shift + D}
+#'   accessed by pressing Ctrl + Shift + D.}
 #'   \item{\code{track}}{Enables user metrics tracking. Requires a valid
 #'   key to upload collected data to Google Drive stored in the environment
 #'   variable \code{GDRIVE_KEY}.}
+#'   \item{\code{proc}}{\code{Background process of class \code{process}
+#'   specifying code to execute while configuring. Internal use only.}}
 #' }
 #'
 #' @export
@@ -43,8 +45,8 @@ run_app <- function(log = NULL,
                     ...) {
   .dots <- list(...)
 
-  check_python(python, prompt = prompt)
-  download_dependencies(prompt = prompt)
+  proc <- check_python(python, prompt = prompt)
+  check_download_prompt(prompt = prompt)
 
   if (reactlog) {
     if (!requireNamespace("reactlog")) {
@@ -65,6 +67,7 @@ run_app <- function(log = NULL,
 
     .dots$console <- FALSE
     .dots$track <- TRUE
+    .dots$proc <- proc
   }
 
   with_greta_options(

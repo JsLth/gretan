@@ -2,10 +2,19 @@
 # To deploy, run: rsconnect::deployApp()
 # Or use the blue button on top of this file
 
+# Deployment on shinyapps.io ----
+# rsconnect::deployApp(
+#   appName = "greta-analytics",
+#   appTitle = "GRETA Analytics",
+#   server = "shinyapps.io",
+#   account = "projectgreta",
+# )
+
 # force dependencies
 requireNamespace("googledrive")
 requireNamespace("gargle")
 requireNamespace("shinylogs")
+requireNamespace("processx")
 
 pkgload::load_all(export_all = FALSE, helpers = FALSE, attach_testthat = FALSE)
 

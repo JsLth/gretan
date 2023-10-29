@@ -533,6 +533,38 @@ getGretaOption <- function(name, default = NULL) {
   option
 }
 
+
+setGretaOption <- function(...) {
+  .dots <- list(...)
+  opts <- getGretaOption()
+  for (name in names(.dots))
+    opts[[name]] <- .dots[[name]]
+  shinyOptions(greta_options = opts)
+}
+
+
+wait_for_python <- function(proc) {
+  log_it("Waiting for Python setup")
+  while (isTRUE(proc$is_alive())) {
+    Sys.sleep(1)
+    # err <- proc$read_error()
+    # if (nzchar(err)) {
+    #   execute_safely({
+    #     stop(paste(
+    #       "An error occurred while configuring Python:\n",
+    #       err
+    #     ))
+    #   })
+    # }
+  }
+  reticulate::use_virtualenv(
+    Sys.getenv("VIRTUALENV_NAME"),
+    required = TRUE
+  )
+  print(reticulate::py_config())
+}
+
+
 protect_html <- function(x) HTML(as.character(x))
 
 quietly <- function(x) {

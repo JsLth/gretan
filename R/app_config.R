@@ -44,6 +44,22 @@ gretan_deps <- function() {
     plat_alt = list(
       src = "https://github.com/TNO/pLAtYpus/raw/main/output/pLAtYpus_only_survey.sqlite3",
       dest = file.path(app_sys("extdata/stakeholder"), "output/pLAtYpus_only_survey.sqlite3")
+    ),
+    plat_src = list(
+      src = c(
+        "https://raw.githubusercontent.com/TNO/pLAtYpus/main/src/pLAtYpus_TNO/GRETA_tool.py",
+        "https://raw.githubusercontent.com/TNO/pLAtYpus/main/src/pLAtYpus_TNO/scores.py",
+        "https://raw.githubusercontent.com/TNO/pLAtYpus/main/src/pLAtYpus_TNO/solver.py",
+        "https://raw.githubusercontent.com/TNO/pLAtYpus/main/src/pLAtYpus_TNO/maps.py",
+        "https://raw.githubusercontent.com/TNO/ETS_CookBook/main/src/ETS_CookBook/ETS_CookBook.py"
+      ),
+      dest = c(
+        file.path(app_sys("extdata/stakeholder"), "src/GRETA_tool.py"),
+        file.path(app_sys("extdata/stakeholder"), "src/scores.py"),
+        file.path(app_sys("extdata/stakeholder"), "src/solver.py"),
+        file.path(app_sys("extdata/stakeholder"), "src/maps.py"),
+        file.path(app_sys("extdata/stakeholder"), "src/ETS_CookBook.py")
+      )
     )
   )
 }
@@ -52,40 +68,48 @@ gretan_deps <- function() {
 has_dependencies <- function(vec = FALSE) {
   deps <- gretan_deps()
   needed <- c(
-    !file.exists(deps$plat_db$dest),
-    !file.exists(deps$plat_alt$dest)
+    !all(file.exists(deps$plat_db$dest)),
+    !all(file.exists(deps$plat_alt$dest)),
+    !all(file.exists(deps$plat_src$dest))
   )
 
   if (vec) !needed else !any(needed)
 }
 
 
-download_dependencies <- function(prompt = interactive()) {
-  if (!dir.exists(file.path(app_sys("extdata/stakeholder"), "output"))) {
-    dir.create(file.path(app_sys("extdata/stakeholder"), "output"))
+check_download_prompt <- function(prompt = interactive()) {
+  needed <- !has_dependencies(vec = TRUE)
+  
+  if (all(!needed)) {
+    return(invisible())
   }
+  
+  if (isTRUE(prompt)) {
+    sizes <- c(28.7, 28.7, 0.06)[needed]
+    answer <- readline(sprintf(
+      "Install dependencies? This will download %s MB of data. [y/N] ",
+      sum(sizes)
+    ))
+    
+    if (!identical(answer, "y")) {
+      stop("Dependencies needed to start the Shiny app")
+    }
+  }
+}
 
+
+download_dependencies <- function() {
   needed <- !has_dependencies(vec = TRUE)
 
   if (all(!needed)) {
     return(invisible())
   }
 
-  if (isTRUE(prompt)) {
-    sizes <- c(28.7, 28.7)[needed]
-    answer <- readline(sprintf(
-      "Install dependencies? This will download %s MB of data. [y/N] ",
-      sum(sizes)
-    ))
-
-    if (!identical(answer, "y")) {
-      stop("Dependencies needed to start the Shiny app")
-    }
-  }
-
   deps <- gretan_deps()
 
   if (needed[1]) {
+    out_dir <- file.path(app_sys("extdata/stakeholder"), "output")
+    if (!dir.exists(out_dir)) dir.create(out_dir)
     cat("Downloading pLAtYpus model database\n")
     curl::curl_download(
       url = deps$plat_db$src,
@@ -102,29 +126,73 @@ download_dependencies <- function(prompt = interactive()) {
       quiet = FALSE
     )
   }
+  
+  if (needed[3]) {
+    src_dir <- file.path(app_sys("extdata/stakeholder"), "src")
+    if (!dir.exists(src_dir)) dir.create(src_dir)
+    curl::multi_download(
+      urls = deps$plat_src$src,
+      destfiles = deps$plat_src$dest
+    )
+    
+    # Replace some lines that are specific for Python modules
+    for (file in deps$plat_src$dest) {
+      lines <- readLines(file)
+      lines <- gsub("ModuleNotFoundError", "ImportError", lines, fixed = TRUE)
+      lines <- gsub("from ETS_CookBook import", "import", lines, fixed = TRUE)
+      writeLines(lines, file)
+    }
+  }
 }
 
 
 check_python <- function(python = NULL, prompt = interactive()) {
-  if (isTRUE(getOption("app.prod"))) return(invisible())
-  deps <- c("numpy", "lightgbm", "pLAtYpus_TNO")
+  if (isTRUE(getOption("app.prod"))) {
+    Sys.setenv(PYTHON_PATH = "/usr/bin/python3")
+    Sys.setenv(VIRTUALENV_NAME = "gretan")
+    Sys.setenv(RETICULATE_PYTHON = "/home/shiny/.virtualenvs/gretan/bin/python")
+    envdir <- Sys.getenv("VIRTUALENV_NAME")
+    envs <- reticulate::virtualenv_list()
+    
+    if (!envdir %in% envs) {
+      proc <- processx::process$new(
+        command = "sh",
+        args = "python_setup.sh",
+        echo_cmd = TRUE,
+        stdout = "|",
+        stderr = "|"
+      )
+      return(proc)
+    }
+    return(invisible())
+  }
   
   if (!is.null(python)) {
     reticulate::use_python(python, required = TRUE)
 
     if (prompt) {
       pkgs <- reticulate::py_list_packages(python = python)$package
+      deps <- readLines(app_sys("requirements.txt"))
+      dep_names <- vapply(
+        strsplit(deps, "==", fixed = TRUE),
+        FUN = "[",
+        1,
+        FUN.VALUE = character(1)
+      )
 
-      if (!all(deps %in% pkgs)) {
+      if (!all(dep_names %in% pkgs)) {
         cat2(
-          "GRETA Analytics requires the following Python dependencies,",
-          "not all of which are currently installed:"
+          "GRETA Analytics requires the following Python dependencies",
+          "which are not currently installed:"
         )
-        cat2(paste(paste("  -", deps), collapse = "\n"))
+        cat2(paste(
+          paste("  -", dep_names[!dep_names %in% pkgs]),
+          collapse = "\n"
+        ))
         if (!prompt) {
           stop(
             "Missing Python dependencies: ",
-            paste(deps[!deps %in% pkgs], collapse = ", ")
+            paste(dep_names[!dep_names %in% pkgs], collapse = ", ")
           )
         } else {
           answer <- readline("Install Python dependencies? [y/N]")
@@ -153,4 +221,6 @@ check_python <- function(python = NULL, prompt = interactive()) {
       print(reticulate::py_config())
     }
   }
+  
+  return(invisible())
 }

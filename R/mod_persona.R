@@ -470,6 +470,13 @@ mod_persona_server <- function(id) {
     results <- reactive(execute_safely({
       waitress$start()
 
+      # Wait for Python
+      proc <- getGretaOption("proc")
+      if (inherits(proc, "process")) {
+        wait_for_python(proc)
+        setGretaOption(proc = NULL)
+      }
+      
       # Load model
       model <- isolate(model())
 
