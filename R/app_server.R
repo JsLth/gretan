@@ -14,36 +14,64 @@ app_server <- function(input, output, session) {
   }
 
 
-  if (Sys.info()[["user"]] == "shiny") {
-    if (nzchar(app_sys("gretanenv"))) {
-      Sys.setenv(RETICULATE_PYTHON = app_sys("gretanenv/bin/python3.11"))
-      reticulate::use_python(Sys.getenv("RETICULATE_PYTHON"), required = TRUE)
-      print(reticulate::py_version())
-    } else {
-      Sys.setenv(PYTHON_PATH = "/usr/bin/python3")
-      Sys.setenv(VIRTUALENV_NAME = "gretan")
-      Sys.setenv(RETICULATE_PYTHON = "/home/shiny/.virtualenvs/gretan/bin/python")
-      envdir <- Sys.getenv("VIRTUALENV_NAME")
-      envs <- reticulate::virtualenv_list()
-      
-      if (!envdir %in% envs) {
-        deps <- c("numpy", "lightgbm", "pLAtYpus_TNO==1.0.4")
-        reticulate::virtualenv_create(
-          envname = envdir,
-          python = Sys.getenv("PYTHON_PATH")
-        )
-        reticulate::virtualenv_install(
-          envdir,
-          packages = deps,
-          ignore_installed = TRUE,
-          pip_options = "--ignore-requires-python"
-        )
+  download_dependencies()
+
+  proc <- getGretaOption("proc")
+  if (inherits(proc, "process") && isTRUE(proc$is_alive())) {
+    bs4Dash::createAlert(
+      id = "dep_alert",
+      options = list(
+        content = "Please note that some dependencies are being installed
+          right now! Some sections might need a bit of loading time.",
+        title = "Dependencies are loading...",
+        closable = TRUE,
+        status = "info",
+        elevation = 4,
+        width = 6
+      )
+    )
+    
+    observe({
+      req(input$dep_alert)
+      if (!inherits(proc, "process") || isFALSE(proc$is_alive())) {
+        bs4Dash::closeAlert("dep_alert")
       }
-      
-      reticulate::use_virtualenv(virtualenv = envdir, required = TRUE)
-      print(reticulate::py_version())
-    }
+      invalidateLater(1000)
+    })
   }
+  
+
+  # Python handling on shinyapps.io
+  # if (Sys.info()[["user"]] == "shiny") {
+  #   if (nzchar(app_sys("gretanenv"))) {
+  #     Sys.setenv(RETICULATE_PYTHON = app_sys("gretanenv/bin/python3.11"))
+  #     reticulate::use_python(Sys.getenv("RETICULATE_PYTHON"), required = TRUE)
+  #     print(reticulate::py_version())
+  #   } else {
+  #     Sys.setenv(PYTHON_PATH = "/usr/bin/python3")
+  #     Sys.setenv(VIRTUALENV_NAME = "gretan")
+  #     Sys.setenv(RETICULATE_PYTHON = "/home/shiny/.virtualenvs/gretan/bin/python")
+  #     envdir <- Sys.getenv("VIRTUALENV_NAME")
+  #     envs <- reticulate::virtualenv_list()
+  #     
+  #     if (!envdir %in% envs) {
+  #       deps <- c("numpy", "lightgbm", "pLAtYpus_TNO==1.0.4")
+  #       reticulate::virtualenv_create(
+  #         envname = envdir,
+  #         python = Sys.getenv("PYTHON_PATH")
+  #       )
+  #       reticulate::virtualenv_install(
+  #         envdir,
+  #         packages = deps,
+  #         ignore_installed = TRUE,
+  #         pip_options = "--ignore-requires-python"
+  #       )
+  #     }
+  #     
+  #     reticulate::use_virtualenv(virtualenv = envdir, required = TRUE)
+  #     print(reticulate::py_version())
+  #   }
+  # }
 
 
   # Track user metrics ----
@@ -114,6 +142,7 @@ app_server <- function(input, output, session) {
   tabsel <- reactive(
     {
       log_it(sprintf("Changed active module to {%s}", input$sidebar))
+      session$userData$tab <- input$sidebar
       input$sidebar
     },
     label = "track tab selection"

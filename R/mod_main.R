@@ -33,6 +33,13 @@ mod_main_ui <- function(id) {
     mod_cs3_ui(ns("cs3")),
     mod_cs4_ui(ns("cs4")),
     mod_cs5_ui(ns("cs5")),
+    if (!is.null(getGretaOption("proc"))) {
+      div(id = "dep_alert", style = style(
+        position = "fixed",
+        bottom = "0",
+        right = "-400px"
+      ))
+    },
     if (isTRUE(getGretaOption("console", FALSE))) {
       keys::keysInput(ns("debug"), "ctrl+shift+d")
     },
