@@ -11,7 +11,7 @@ txts$main$stakeholder <- list(
   date = "13-10-2023",
   what = list(
     title = "What are stakeholder interactions?",
-    content = "This model (pLAtYpus) looks at the <b>engagement levels</b> of three
+    content = HTML("This model (pLAtYpus) looks at the <b>engagement levels</b> of three
       types of stakeholders (citizens, business, governments) for three
       sustainable initiatives (autonomous cars, sustainable transport,
       cooperative self-generation). The engagement levels cover the
@@ -35,11 +35,11 @@ txts$main$stakeholder <- list(
       basis, showing the engagement levels of the three types of stakeholders,
       and maps that compare the long-term engagement levels of stakeholders
       across countries. The users of this tool can look at the impact of
-      the various input parameters by changing the slider values below."
+      the various input parameters by changing the slider values below.")
   ),
   how = list(
     title = "How can we model them?",
-    content = "We compute the engagement levels by balancing to rates,
+    content = HTML("We compute the engagement levels by balancing to rates,
       namely the rate at which a stakeholder adopts/engages into a given
       sustainable initiative, and the rate at which they leave/disengage
       from the sustainable initiative. Generally, these rates are computed
@@ -63,7 +63,7 @@ txts$main$stakeholder <- list(
       stakeholders will have been reached and most practical obstacles
       will disappear with time and technology improvements). As such,
       the focus of the plots shown here should be the long-term values
-      (which are shown in the maps)."
+      (which are shown in the maps).")
   ),
   params = list(
     countries = c(
