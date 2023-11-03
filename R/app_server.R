@@ -30,7 +30,7 @@ app_server <- function(input, output, session) {
         width = 6
       )
     )
-    
+
     observe({
       req(input$dep_alert)
       if (!inherits(proc, "process") || isFALSE(proc$is_alive())) {
@@ -39,7 +39,7 @@ app_server <- function(input, output, session) {
       invalidateLater(1000)
     })
   }
-  
+
 
   # Python handling on shinyapps.io
   # if (Sys.info()[["user"]] == "shiny") {
@@ -53,7 +53,7 @@ app_server <- function(input, output, session) {
   #     Sys.setenv(RETICULATE_PYTHON = "/home/shiny/.virtualenvs/gretan/bin/python")
   #     envdir <- Sys.getenv("VIRTUALENV_NAME")
   #     envs <- reticulate::virtualenv_list()
-  #     
+  #
   #     if (!envdir %in% envs) {
   #       deps <- c("numpy", "lightgbm", "pLAtYpus_TNO==1.0.4")
   #       reticulate::virtualenv_create(
@@ -67,7 +67,7 @@ app_server <- function(input, output, session) {
   #         pip_options = "--ignore-requires-python"
   #       )
   #     }
-  #     
+  #
   #     reticulate::use_virtualenv(virtualenv = envdir, required = TRUE)
   #     print(reticulate::py_version())
   #   }
@@ -113,8 +113,8 @@ app_server <- function(input, output, session) {
   } else {
     onSessionEnded(fun = shutdown)
   }
-  
-  
+
+
   # Confirmation when exit button is clicked
   observe({
     shinyWidgets::ask_confirmation(
@@ -129,11 +129,12 @@ app_server <- function(input, output, session) {
     )
   }) %>%
     bindEvent(input$exit)
-  
+
   # Do exit after confirmation
   observe({
-    if (isFALSE(input$confirm_exit))
+    if (isFALSE(input$confirm_exit)) {
       stopApp()
+    }
   }) %>%
     bindEvent(input$confirm_exit)
 

@@ -122,7 +122,7 @@ send_info <- function(text,
   .dots <- list(...)
   btn_colors <- .dots$btn_colors %||% "#FFCA2B"
   btn_labels <- .dots$btn_labels %||% "Got it!"
-  
+
   shinyWidgets::sendSweetAlert(
     title = title,
     text = text,
@@ -145,7 +145,7 @@ send_error <- function(text,
   .dots <- list(...)
   btn_colors <- .dots$btn_colors %||% "#FFCA2B"
   btn_labels <- .dots$btn_labels %||% "Got it!"
-  
+
   shinyWidgets::sendSweetAlert(
     title = title,
     text = text,
@@ -537,8 +537,9 @@ getGretaOption <- function(name, default = NULL) {
 setGretaOption <- function(...) {
   .dots <- list(...)
   opts <- getGretaOption()
-  for (name in names(.dots))
+  for (name in names(.dots)) {
     opts[[name]] <- .dots[[name]]
+  }
   shinyOptions(greta_options = opts)
 }
 

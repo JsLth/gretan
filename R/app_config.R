@@ -79,18 +79,18 @@ has_dependencies <- function(vec = FALSE) {
 
 check_download_prompt <- function(prompt = interactive()) {
   needed <- !has_dependencies(vec = TRUE)
-  
+
   if (all(!needed)) {
     return(invisible())
   }
-  
+
   if (isTRUE(prompt)) {
     sizes <- c(28.7, 28.7, 0.06)[needed]
     answer <- readline(sprintf(
       "Install dependencies? This will download %s MB of data. [y/N] ",
       sum(sizes)
     ))
-    
+
     if (!identical(answer, "y")) {
       stop("Dependencies needed to start the Shiny app")
     }
@@ -126,7 +126,7 @@ download_dependencies <- function() {
       quiet = FALSE
     )
   }
-  
+
   if (needed[3]) {
     src_dir <- file.path(app_sys("extdata/stakeholder"), "src")
     if (!dir.exists(src_dir)) dir.create(src_dir)
@@ -134,7 +134,7 @@ download_dependencies <- function() {
       urls = deps$plat_src$src,
       destfiles = deps$plat_src$dest
     )
-    
+
     # Replace some lines that are specific for Python modules
     for (file in deps$plat_src$dest) {
       lines <- readLines(file)
@@ -153,7 +153,7 @@ check_python <- function(python = NULL, prompt = interactive()) {
     Sys.setenv(RETICULATE_PYTHON = "/home/shiny/.virtualenvs/gretan/bin/python")
     envdir <- Sys.getenv("VIRTUALENV_NAME")
     envs <- reticulate::virtualenv_list()
-    
+
     if (!envdir %in% envs) {
       proc <- processx::process$new(
         command = "sh",
@@ -166,7 +166,7 @@ check_python <- function(python = NULL, prompt = interactive()) {
     }
     return(invisible())
   }
-  
+
   if (!is.null(python)) {
     reticulate::use_python(python, required = TRUE)
 
@@ -221,6 +221,6 @@ check_python <- function(python = NULL, prompt = interactive()) {
       print(reticulate::py_config())
     }
   }
-  
+
   return(invisible())
 }

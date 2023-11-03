@@ -149,7 +149,7 @@ mod_stakeholder_server <- function(id, tab) {
       html = tagList(waiter::spin_pulse(), h4("Updating database...")),
       color = "rgba(179, 221, 254, 1)"
     )
-    
+
     py_waiter <- waiter::Waiter$new(
       id = ns(c("plot", "map")),
       html = tagList(waiter::spin_pulse(), h4("Configuring...")),
@@ -210,7 +210,7 @@ mod_stakeholder_server <- function(id, tab) {
       reset(TRUE)
     }) %>%
       bindEvent(input$reset)
-    
+
     observe({
       req(identical(tab(), "stakeholder"))
       shinyjs::click("reset")
