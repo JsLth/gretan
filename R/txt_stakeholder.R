@@ -29,7 +29,7 @@ txts$main$stakeholder <- list(
       (including trust or knowledge of each other). In some cases
       (strong distrust of government or given companies, e.g.), this
       interaction could even lead to negative feedback.<br><br>
-    
+
       This section of GRETA Analytics demonstrates how engagement levels of
       stakeholders develop over time and space. We have diagrams both on a country
       basis, showing the engagement levels of the three types of stakeholders,
