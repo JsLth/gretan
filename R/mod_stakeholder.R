@@ -215,7 +215,7 @@ mod_stakeholder_server <- function(id, tab) {
       req(identical(tab(), "stakeholder"))
       shinyjs::click("reset")
     }) %>%
-      bindEvent(tab())
+      bindEvent(tab(), once = TRUE)
 
 
     # Dispatch to submodules ----
