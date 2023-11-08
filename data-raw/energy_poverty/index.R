@@ -64,16 +64,14 @@ pov <- readRDS("data-ext/survey_resampled.rds") %>%
     "c16", # Cooling system
     "c18", # Heating system
     "c19", # Heating system configuration
-    "c26", # Energy costs
     "c28", # Consensual energy poverty
     "c29", # Housing type
     "c30", # Housing area
     "c31", # Housing age
     "c48", # Household size
     "c49", # Tenancy
-    "c51", # Special conditions
-    "c54" # Income
-  )), "id", "nuts0", "nuts1", "nuts2", -"c51_4")
+    "c51" # Special conditions
+  )), "uuid", "nuts0", "nuts1", "nuts2", -"c51_4")
 
 cb <- readRDS("data-ext/codebook.rds") %>%
   filter(variable %in% names(pov))
@@ -124,7 +122,6 @@ vars_lookup <- list(
   cond_heat = "c51_2",
   cond_trans = "c51_3",
   cond_support = "c51_5",
-  income = "c54",
 
   # behavioral variables
   behav_unplug = "c6_1",
@@ -147,7 +144,6 @@ vars_lookup <- list(
   heat_config = "c19",
 
   # energy affordability variables
-  energy_cost = "c26",
   ability_to_pay = "c28_1",
   supplier_threat = "c28_2",
   safety_winter = "c28_3",
@@ -161,7 +157,7 @@ vars_lookup <- list(
 )
 
 
-pov <- do.call(select, c(list(pov), vars_lookup, "id", "nuts0", "nuts1", "nuts2"))
+pov <- do.call(select, c(list(pov), vars_lookup, "uuid", "nuts0", "nuts1", "nuts2"))
 
 
 
@@ -174,6 +170,8 @@ pov <- pov %>%
   )) %>%
   ### Unify binary codings ----
   mutate(across(where(is.logical), .fns = as.numeric)) %>%
+  ### Square age ----
+  mutate(age = age ^ 2) %>%
   ### Convert Yes/No to binary ----
   mutate(across(
     where(~ identical(unique(na.omit(as.character(.x))), c("Yes", "No"))),
@@ -199,14 +197,6 @@ pov <- pov %>%
         "Owner, no outstanding mortgage or housing loan"
       ),
       FALSE, TRUE
-    ),
-    income = if_else(
-      income %in% c(
-        "Finding it very difficult to live on current income",
-        "Finding it difficult to live on current income",
-        "Coping on current income"
-      ),
-      TRUE, FALSE
     ),
     gender = if_else(
       gender %in% "Male",
@@ -258,7 +248,7 @@ print(skim(st_drop_geometry(pov)))
 loc <- st_geometry(pov)
 
 pov_for_pca <- pov %>%
-  select(!any_of(c("id", "nuts0", "nuts1", "nuts2", "geometry"))) %>%
+  select(!any_of(c("uuid", "nuts0", "nuts1", "nuts2", "geometry"))) %>%
   st_drop_geometry() %>%
   # scale() %>%
   # as_tibble() %>%
@@ -318,9 +308,9 @@ pov_for_pca <- pov %>%
 
 ## Define subindex indicators ----
 subind_vars <- list(
-  afford = c("ability_to_pay", "supplier_threat", "safety_summer", "safety_winter", "income"),
+  afford = c("ability_to_pay", "supplier_threat", "safety_summer", "safety_winter"),
   access = c("no_central", "lacks_heating", "lacks_cooling"),
-  housing = c("detached", "house_area", "house_age", "is_tenant", "energy_cost"),
+  housing = c("detached", "house_area", "house_age", "is_tenant"),
   social = c("not_male", "unemployed", "lacks_education", "household"),
   cond = c("cond_support", "cond_trans", "cond_heat", "cond_air"),
   behav = c("behav_unplug", "behav_products", "behav_lights", "behav_share", "behav_carpool", "behav_car"),
@@ -337,6 +327,24 @@ subind_nm <- list(
   behav = "Energy behavior",
   know = "Energy literacy"
 )
+
+
+multistage_pca <- function(pca) {
+  lambda <- pca$sdev ^ 2
+  PC <- pca$x
+  d <- length(lambda)
+  I <- NULL
+  
+  for (i in nrow(PC)) {
+    for (j in 1:d) {
+      for (k in 1:d) {
+        I[j] <- sum(lambda[j] * PC[i, k])
+      }
+    }
+  }
+  
+  I / sum(lambda)
+}
 
 
 ## Perform 1st stage PCA ----
