@@ -118,6 +118,15 @@ app_ui <- function(theme = NULL,
         ), class = "logo"
       ),
       span(style = "display:inline-block; width: 100%"), # logos at the end of header
+      div(
+        a(
+          icon("github"),
+          href = "https://github.com/JsLth/gretan",
+          height = "37em",
+          style = "height: 3.2em; padding: 0.8em; font-size: 1em"
+        ),
+        class = "logo"
+      ),
       div( # insert logos in a grid
         class = "container-logo",
         corp_logo("gesis"), corp_logo("lut"), corp_logo("unibo"),

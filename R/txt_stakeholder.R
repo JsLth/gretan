@@ -11,11 +11,59 @@ txts$main$stakeholder <- list(
   date = "13-10-2023",
   what = list(
     title = "What are stakeholder interactions?",
-    content = "Lorem ipsum dolor sit amet consectetur adipiscing elit Quisque tellus urna placerat in tortor ac imperdiet sollicitudin mi Integer vel dolor mollis feugiat sem eu porttitor elit Sed aliquam urna sed placerat euismod In risus sem ornare nec malesuada eu ornare quis dui Nunc finibus fermentum sollicitudin Fusce vel imperdiet mi ac faucibus leo Cras massa massa ultricies et justo vitae molestie auctor turpis Vestibulum euismod porta risus euismod dapibus Nullam facilisis ipsum sed est tempor et aliquam sapien auctor Aliquam velit ligula convallis a dui id varius bibendum quam Cras malesuada nec justo sed aliquet Fusce urna magna malesuada tempus pharetra in fringilla iaculis mi Morbi rutrum iaculis convallis Cras et elit velit Suspendisse eget elit blandit egestas odio at ullamcorper lectus Nulla metus diam elementum ac arcu vitae pharetra dignissim neque Etiam at elit dignissim suscipit nulla ac gravida eros Donec feugiat mi sed purus egestas convallis Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae In quis scelerisque elit Mauris viverra sem ac turpis eleifend sodales Nullam at turpis a ex euismod consectetur ac a lectus Curabitur imperdiet faucibus accumsan Vestibulum venenatis ac nisi sed aliquam Nulla lacinia imperdiet urna quis tincidunt tellus feugiat ut Phasellus congue ante lacus vel consectetur velit convallis mollis Morbi volutpat fermentum sem eu sodales Sed venenatis blandit massa sed rhoncus dui Etiam augue nisl luctus sit amet interdum at ullamcorper nec lectus Donec tincidunt mattis nunc et tincidunt Quisque eu sem lacus Vivamus quis venenatis mi Mauris"
+    content = HTML("This model (pLAtYpus) looks at the <b>engagement levels</b> of three
+      types of stakeholders (citizens, business, governments) for three
+      sustainable initiatives (autonomous cars, sustainable transport,
+      cooperative self-generation). The engagement levels cover the
+      various ways the stakeholders engage with the sustainable
+      initiatives, including purchasing the product/service,
+      producing it, or promoting/subsidizing it. The engagement
+      levels of the various stakeholders are not independent of each
+      other. Rather, there are interactions between them. The engagement
+      level of a given stakeholder will be influenced by the engagement
+      levels of all three stakeholders (i.e. including themselves). For
+      example, citizens will be more engaged if the government promotes
+      autonomous cars, if businesses produce them, and if other citizens
+      purchase them. The degree to which these engagement levels vary depends
+      on the situation and on the relations between the stakeholders
+      (including trust or knowledge of each other). In some cases
+      (strong distrust of government or given companies, e.g.), this
+      interaction could even lead to negative feedback.<br><br>
+
+      This section of GRETA Analytics demonstrates how engagement levels of
+      stakeholders develop over time and space. We have diagrams both on a country
+      basis, showing the engagement levels of the three types of stakeholders,
+      and maps that compare the long-term engagement levels of stakeholders
+      across countries. The users of this tool can look at the impact of
+      the various input parameters by changing the slider values below.")
   ),
   how = list(
     title = "How can we model them?",
-    content = "Lorem ipsum dolor sit amet consectetur adipiscing elit Quisque tellus urna placerat in tortor ac imperdiet sollicitudin mi Integer vel dolor mollis feugiat sem eu porttitor elit Sed aliquam urna sed placerat euismod In risus sem ornare nec malesuada eu ornare quis dui Nunc finibus fermentum sollicitudin Fusce vel imperdiet mi ac faucibus leo Cras massa massa ultricies et justo vitae molestie auctor turpis Vestibulum euismod porta risus euismod dapibus Nullam facilisis ipsum sed est tempor et aliquam sapien auctor Aliquam velit ligula convallis a dui id varius bibendum quam Cras malesuada nec justo sed aliquet Fusce urna magna malesuada tempus pharetra in fringilla iaculis mi Morbi rutrum iaculis convallis Cras et elit velit Suspendisse eget elit blandit egestas odio at ullamcorper lectus Nulla metus diam elementum ac arcu vitae pharetra dignissim neque Etiam at elit dignissim suscipit nulla ac gravida eros Donec feugiat mi sed purus egestas convallis Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae In quis scelerisque elit Mauris viverra sem ac turpis eleifend sodales Nullam at turpis a ex euismod consectetur ac a lectus Curabitur imperdiet faucibus accumsan Vestibulum venenatis ac nisi sed aliquam Nulla lacinia imperdiet urna quis tincidunt tellus feugiat ut Phasellus congue ante lacus vel consectetur velit convallis mollis Morbi volutpat fermentum sem eu sodales Sed venenatis blandit massa sed rhoncus dui Etiam augue nisl luctus sit amet interdum at ullamcorper nec lectus Donec tincidunt mattis nunc et tincidunt Quisque eu sem lacus Vivamus quis venenatis mi Mauris"
+    content = HTML("We compute the engagement levels by balancing to rates,
+      namely the rate at which a stakeholder adopts/engages into a given
+      sustainable initiative, and the rate at which they leave/disengage
+      from the sustainable initiative. Generally, these rates are computed
+      looking at three phases. The first phase is the <b>Attention phase</b>, which
+      takes into account inertia/habit effects. This includes both the fact
+      that stakeholder make such decisions on a cyclical basis (average
+      vehicle ownership time, factory retooling, legislative cycles, etc)
+      and the fact that stakeholders will stick to their habitual behaviour,
+      unless something compels them to look at alternatives. The second
+      phase is the <b>Enable phase</b>, which says that the stakeholders may face
+      obstacles that would prevent them from considering a switch (for
+      example not having the means or knowledge to change, or because the
+      alternative would prevent them from performing their desired
+      activities). The third phase in the <b>Intention phase</b>, where the
+      stakeholders balance out the pros and cons of a switch. Examples of
+      such elements include (but are not limited to) extra costs and
+      complexity versus social desirability/need to conform and benefits
+      to the environment. For the GRETA project, only the third phase was
+      implemented, due to data availability issues. Note that the first
+      two phases mostly impact the ramp-up of engagement (as all
+      stakeholders will have been reached and most practical obstacles
+      will disappear with time and technology improvements). As such,
+      the focus of the plots shown here should be the long-term values
+      (which are shown in the maps).")
   ),
   params = list(
     countries = c(

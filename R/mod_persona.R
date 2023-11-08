@@ -410,7 +410,7 @@ mod_persona_server <- function(id) {
           function(i) {
             answer <- input[[paste0("question", i)]]
             if (!is.null(answer)) {
-              !is.na(input[[paste0("question", i)]])
+              nzchar(input[[paste0("question", i)]])
             } else {
               FALSE
             }
