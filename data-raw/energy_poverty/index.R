@@ -171,7 +171,7 @@ pov <- pov %>%
   ### Unify binary codings ----
   mutate(across(where(is.logical), .fns = as.numeric)) %>%
   ### Square age ----
-  mutate(age = age ^ 2) %>%
+  mutate(age = age^2) %>%
   ### Convert Yes/No to binary ----
   mutate(across(
     where(~ identical(unique(na.omit(as.character(.x))), c("Yes", "No"))),
@@ -330,11 +330,11 @@ subind_nm <- list(
 
 
 multistage_pca <- function(pca) {
-  lambda <- pca$sdev ^ 2
+  lambda <- pca$sdev^2
   PC <- pca$x
   d <- length(lambda)
   I <- NULL
-  
+
   for (i in nrow(PC)) {
     for (j in 1:d) {
       for (k in 1:d) {
@@ -342,7 +342,7 @@ multistage_pca <- function(pca) {
       }
     }
   }
-  
+
   I / sum(lambda)
 }
 
