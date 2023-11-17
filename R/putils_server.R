@@ -457,7 +457,10 @@ log_it <- function(log = NULL,
     ns <- " "
   }
 
-  cat2(sprintf("%s %s%s%s", time, type, ns, log), file = out, append = TRUE)
+  if (isTRUE(as.logical(Sys.getenv("WITHIN_ELECTRON"))))
+    cat2(sprintf("%s%s", ns, log), file = out, append = TRUE)
+  else
+    cat2(sprintf("%s %s%s%s", time, type, ns, log), file = out, append = TRUE)
 
   if (!is.null(details)) {
     log_details(details)
