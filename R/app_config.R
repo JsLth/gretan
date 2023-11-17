@@ -171,7 +171,9 @@ check_python <- function(python = NULL, prompt = interactive()) {
     pypath <- "resources/app/app/python/python-3.11.5.amd64/python.exe"
     Sys.setenv(RETICULATE_PYTHON = pypath)
     cat2("Internal WD:", getwd())
+    cat2("Python path:", pypath)
     cat2("Python exists:", file.exists(pypath))
+    print(reticulate::py_discover_config())
     reticulate::use_python(pypath, required = TRUE)
     return()
   }
