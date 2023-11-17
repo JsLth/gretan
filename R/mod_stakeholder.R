@@ -174,13 +174,8 @@ mod_stakeholder_server <- function(id, tab) {
       params <- plat$cook$parameters_from_TOML(
         app_sys("extdata/stakeholder/pLAtYpus.toml")
       )
-      input_dir <- app_sys("extdata/stakeholder/input")
       output_dir <- app_sys("extdata/stakeholder/output")
       params$files$output_folder <- output_dir
-      params$survey$data$output$output_folder <- input_dir
-      params$survey$data$source$source_folder <- input_dir
-      if (!dir.exists(input_dir)) dir.create(input_dir)
-      if (!dir.exists(output_dir)) dir.create(output_dir)
       params
     })
 
