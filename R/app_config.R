@@ -147,7 +147,7 @@ download_dependencies <- function() {
 
 
 check_python <- function(python = NULL, prompt = interactive()) {
-  if (isTRUE(getOption("app.prod"))) {
+  if (Sys.info()[['user']] == 'shiny') {
     Sys.setenv(PYTHON_PATH = "/usr/bin/python3")
     Sys.setenv(VIRTUALENV_NAME = "gretan")
     Sys.setenv(RETICULATE_PYTHON = "/home/shiny/.virtualenvs/gretan/bin/python")
@@ -164,7 +164,16 @@ check_python <- function(python = NULL, prompt = interactive()) {
       )
       return(proc)
     }
-    return(invisible())
+    return()
+  }
+  
+  if (isTRUE(as.logical(Sys.getenv("WITHIN_ELECTRON")))) {
+    pypath <- "resources/app/app/python/python-3.11.5.amd64/python.exe"
+    Sys.setenv(RETICULATE_PYTHON = pypath)
+    cat2("Internal WD:", getwd())
+    cat2("Python exists:", file.exists(pypath))
+    reticulate::use_python(pypath, required = TRUE)
+    return()
   }
 
   if (!is.null(python)) {
