@@ -47,6 +47,20 @@ system2(
   args = c("-m", "pip", "install", "-r", normalizePath("inst/requirements.txt"))
 )
 
+bgjs <- readLines("electron/gretan/src/background.js")
+
+bgjs <- bgjs[-seq(240, 244)]
+bgjs <- append(bgjs, after = 239, values = c(
+  "      if (process.env.GRETAN_EXIT === 'safe') {",
+  "        dialog.showMessageBoxSync({",
+  "          message: \"The R Shiny process quit unexpectedly.\\nCheck the logs under  %USERPROFILE%\\\\AppData\\\\Roaming\\\\\" + app.getName() + \"\\\\main.log\",",
+  "          type: \"error\",",
+  "          title: \"The R Shiny process quit unexpectedly\"",
+  "        })",
+  "      }"
+))
+writeLines(bgjs, "electron/gretan/src/background.js")
+
 # Build electron app
 run_build_release(
   "C:/Users/PC/AppData/Local/R/win-library/4.3/electricShine/nodejs/node-v14.17.3-win-x64",

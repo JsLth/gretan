@@ -133,10 +133,15 @@ app_server <- function(input, output, session) {
   # Do exit after confirmation
   observe({
     if (isFALSE(input$confirm_exit)) {
+      Sys.setenv(GRETAN_EXIT = "safe")
       stopApp()
     }
   }) %>%
     bindEvent(input$confirm_exit)
+  
+  if (is_electron()) {
+    onFlushed(function() Sys.unsetenv("GRETAN_EXIT"))
+  }
 
 
   # Track tab selection ----
