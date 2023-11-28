@@ -14,13 +14,13 @@ The package is licensed under Apache 2.0.
 
 ## Getting started
 
-### Deployment
+### Web deployment
 
 The app is deployed on [shinyapps.io](shinyapps.io) and can be accessed using the following link: https://projectgreta.shinyapps.io/greta-analytics.
 
 ### Binaries
 
-The app is deployed as an Electron app using [`{electricShine}`](https://github.com/chasemc/electricShine). Binaries are released in the [OPCE database](https://zenodo.org/communities/greta/) of the GRETA project.
+The app is deployed as an Electron app using [`{electricShine}`](https://github.com/chasemc/electricShine). Binaries are released in the [OPCE database](https://zenodo.org/communities/greta/) of the GRETA project or [here](https://github.com/JsLth/gretan/releases).
 
 ### Running in R
 
