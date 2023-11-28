@@ -167,8 +167,11 @@ check_python <- function(python = NULL, prompt = interactive()) {
     return()
   }
   
-  if (isTRUE(as.logical(Sys.getenv("WITHIN_ELECTRON")))) {
+  if (is_electron()) {
     pypath <- "resources/app/app/python/python-3.11.5.amd64/python.exe"
+    user <- normalizePath(Sys.getenv("USERPROFILE"), "/")
+    appdata <- file.path(user, "AppData/Local/Programs/gretan")
+    pypath <- file.path(appdata, pypath)
     Sys.setenv(RETICULATE_PYTHON = pypath)
     cat2("Internal WD:", getwd())
     cat2("Python path:", pypath)
