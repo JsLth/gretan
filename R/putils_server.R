@@ -457,7 +457,7 @@ log_it <- function(log = NULL,
     ns <- " "
   }
 
-  if (isTRUE(as.logical(Sys.getenv("WITHIN_ELECTRON"))))
+  if (is_electron())
     cat2(sprintf("%s%s", ns, log), file = out, append = TRUE)
   else
     cat2(sprintf("%s %s%s%s", time, type, ns, log), file = out, append = TRUE)
@@ -477,6 +477,11 @@ log_details <- function(logs, session = getDefaultReactiveDomain()) {
 shutdown <- function() {
   log_it("Shutting down app")
   stopApp()
+}
+
+
+is_electron <- function() {
+  isTRUE(as.logical(Sys.getenv("WITHIN_ELECTRON")))
 }
 
 

@@ -133,7 +133,7 @@ app_ui <- function(theme = NULL,
         corp_logo("tecnalia"), corp_logo("cleanwatts"), corp_logo("tno"),
         corp_logo("isi"), corp_logo("kaskas")
       ),
-      if (isTRUE(as.logical(Sys.getenv("WITHIN_ELECTRON")))) {
+      if (is_electron()) {
         bs4Dash::appButton(
           inputId = "exit",
           label = "Exit",
