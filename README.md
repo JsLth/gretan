@@ -1,6 +1,7 @@
 <!-- badges: start -->
 
-[![R-CMD-check](https://github.com/JsLth/gretan/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/JsLth/gretan/actions/workflows/R-CMD-check.yaml) [![codecov](https://codecov.io/gh/JsLth/gretan/graph/badge.svg?token=0J1PYCDSPS)](https://codecov.io/gh/JsLth/gretan) [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10051980.svg)](https://doi.org/10.5281/zenodo.10051980)
+[![R-CMD-check](https://github.com/JsLth/gretan/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/JsLth/gretan/actions/workflows/R-CMD-check.yaml) [![codecov](https://codecov.io/gh/JsLth/gretan/graph/badge.svg?token=0J1PYCDSPS)](https://codecov.io/gh/JsLth/gretan) [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10214281.svg)](https://doi.org/10.5281/zenodo.10214281)
+
 
 <!-- badges: end -->
 
@@ -20,7 +21,7 @@ The app is deployed on [shinyapps.io](shinyapps.io) and can be accessed using th
 
 ### Binaries
 
-The app is deployed as an Electron app using [`{electricShine}`](https://github.com/chasemc/electricShine). Binaries are released in the [OPCE database](https://zenodo.org/communities/greta/) of the GRETA project or [here](https://github.com/JsLth/gretan/releases).
+The app is deployed as an Electron app using [`{electricShine}`](https://github.com/chasemc/electricShine). Binaries are available [here](https://github.com/JsLth/gretan/releases).
 
 ### Running in R
 
