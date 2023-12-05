@@ -68,9 +68,11 @@ GRETA Analytics was mainly developed by [Jonas Lieth](mailto:jonas.lieth@gesis.o
   <tr>
     <td><a href="https://projectgreta.eu/wp-content/uploads/2023/01/GRETA_D3_4_Case-study-4-report_v1_0.pdf">Case study "UR Beroa" wrap-up</a>
   <tr>
-    <td rowspan="2"><a href="https://www.unibo.it/">University of Bologna</a></td>
+    <td rowspan="3"><a href="https://www.unibo.it/">University of Bologna</a></td>
     <td><a href="https://projectgreta.eu/wp-content/uploads/2023/01/GRETA_D3_1_Case-study-1-report_v1_0.pdf">Case study "Pilastro-Roveri" wrap-up</a></td>
   </tr>
+  <tr>
+    <td><a href="https://projectgreta.eu/wp-content/uploads/2022/02/GRETA_D5_1_Taxonomy-of-geographical-levels-and-drivers_v1_0.pdf">Taxonomy of geographical levels</a></td>
   <tr>
     <td>Fragility index</td>
   </tr>
