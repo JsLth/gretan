@@ -13,7 +13,7 @@ GRETA Analytics (package name: `{gretan}`) is the GIS tool of the GRETA project 
 
 The package is licensed under Apache 2.0.
 
-## Getting started
+## Access
 
 ### Web deployment
 
