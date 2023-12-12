@@ -38,6 +38,39 @@ The Shiny app can then be run using the following command:
 run_greta()
 ```
 
+
+## Citation
+
+To cite the `gretan` package in a publication use:
+
+Lieth, J. (2023). GRETA Analytics: GIS tool of the GRETA project. https://doi.org/10.5281/zenodo.10214281, https://github.com/JsLth/gretan
+
+A journal article is planned, but not yet published. Until then, you can cite original GRETA deliverable:
+
+Abel, D., Jünger, S., Lieth, J., Massari, M., Boulanger, S.O.M. (2022). Interrelations among different types of citizens in different geographic contexts. D5.2 of the Horizon 2020 project GRETA, EC grant agreement n°101022317, Cologne, Germany.
+
+BibTeX entries for LaTeX users:
+
+```
+@Manual{,
+  title = {gretan: The official GIS tool of the GRETA project},
+  year = {2023},
+  author = {Jonas Lieth},
+  note = {R package version 0.5.2},
+  doi = {10.5281/zenodo.10214281},
+  url = {https://github.com/JsLth/gretan}
+}
+```
+```
+@techreport{,
+  author = {Abel, Dennis and Jünger, Stefan and Lieth, Jonas and Massari, Martina and S.O.M., Boulanger},
+  title = {Interrelations among different types of citizens in different geographic contexts},
+  type = {{D5.2 of the Horizon 2020 project GRETA, EC grant agreement n°101022317}},
+  year = {2022},
+  address = {Cologne, Germany}
+}
+```
+
 ## Acknowledgements
 
 GRETA Analytics was mainly developed by [Jonas Lieth](mailto:jonas.lieth@gesis.org) from [GESIS - Leibniz Institute for the Social Sciences](https://www.gesis.org/en/). The package and Shiny app was made possible thanks to the valuable contributions from various institutions including:
