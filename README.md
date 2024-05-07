@@ -1,6 +1,7 @@
 <!-- badges: start -->
 
-[![R-CMD-check](https://github.com/JsLth/gretan/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/JsLth/gretan/actions/workflows/R-CMD-check.yaml) [![codecov](https://codecov.io/gh/JsLth/gretan/graph/badge.svg?token=0J1PYCDSPS)](https://codecov.io/gh/JsLth/gretan) [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10051980.svg)](https://doi.org/10.5281/zenodo.10051980)
+[![R-CMD-check](https://github.com/JsLth/gretan/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/JsLth/gretan/actions/workflows/R-CMD-check.yaml) [![codecov](https://codecov.io/gh/JsLth/gretan/graph/badge.svg?token=0J1PYCDSPS)](https://codecov.io/gh/JsLth/gretan) [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10214281.svg)](https://doi.org/10.5281/zenodo.10214281)
+
 
 <!-- badges: end -->
 
@@ -12,7 +13,7 @@ GRETA Analytics (package name: `{gretan}`) is the GIS tool of the GRETA project 
 
 The package is licensed under Apache 2.0.
 
-## Getting started
+## Access
 
 ### Web deployment
 
@@ -20,7 +21,7 @@ The app is deployed on [shinyapps.io](shinyapps.io) and can be accessed using th
 
 ### Binaries
 
-The app is deployed as an Electron app using [`{electricShine}`](https://github.com/chasemc/electricShine). Binaries are released in the [OPCE database](https://zenodo.org/communities/greta/) of the GRETA project or [here](https://github.com/JsLth/gretan/releases).
+The app is deployed as an Electron app using [`{electricShine}`](https://github.com/chasemc/electricShine). Binaries are available [here](https://github.com/JsLth/gretan/releases).
 
 ### Running in R
 
@@ -44,6 +45,38 @@ required dependencies.
 ## Contributing
 
 GRETA Analytics is designed to incorporate contributions from researchers and stakeholders. If you have conducted research and/or data analyses related to energy citizenship, energy transitions, energy justice, or anything energy in the EU, take a look at our [contribution guidelines](CONTRIBUTION.md).
+
+## Citation
+
+To cite the `gretan` package in a publication use:
+
+Lieth, J. (2023). GRETA Analytics: GIS tool of the GRETA project. https://doi.org/10.5281/zenodo.10214281, https://github.com/JsLth/gretan
+
+A journal article is planned, but not yet published. Until then, you can cite original GRETA deliverable:
+
+Abel, D., Jünger, S., Lieth, J., Massari, M., Boulanger, S.O.M. (2022). Interrelations among different types of citizens in different geographic contexts. D5.2 of the Horizon 2020 project GRETA, EC grant agreement n°101022317, Cologne, Germany.
+
+BibTeX entries for LaTeX users:
+
+```
+@Manual{,
+  title = {gretan: The official GIS tool of the GRETA project},
+  year = {2023},
+  author = {Jonas Lieth},
+  note = {R package version 0.5.2},
+  doi = {10.5281/zenodo.10214281},
+  url = {https://github.com/JsLth/gretan}
+}
+```
+```
+@techreport{,
+  author = {Abel, Dennis and Jünger, Stefan and Lieth, Jonas and Massari, Martina and S.O.M., Boulanger},
+  title = {Interrelations among different types of citizens in different geographic contexts},
+  type = {{D5.2 of the Horizon 2020 project GRETA, EC grant agreement n°101022317}},
+  year = {2022},
+  address = {Cologne, Germany}
+}
+```
 
 ## Acknowledgements
 
@@ -75,9 +108,11 @@ GRETA Analytics was mainly developed by [Jonas Lieth](mailto:jonas.lieth@gesis.o
   <tr>
     <td><a href="https://projectgreta.eu/wp-content/uploads/2023/01/GRETA_D3_4_Case-study-4-report_v1_0.pdf">Case study "UR Beroa" wrap-up</a>
   <tr>
-    <td rowspan="2"><a href="https://www.unibo.it/">University of Bologna</a></td>
+    <td rowspan="3"><a href="https://www.unibo.it/">University of Bologna</a></td>
     <td><a href="https://projectgreta.eu/wp-content/uploads/2023/01/GRETA_D3_1_Case-study-1-report_v1_0.pdf">Case study "Pilastro-Roveri" wrap-up</a></td>
   </tr>
+  <tr>
+    <td><a href="https://projectgreta.eu/wp-content/uploads/2022/02/GRETA_D5_1_Taxonomy-of-geographical-levels-and-drivers_v1_0.pdf">Taxonomy of geographical levels</a></td>
   <tr>
     <td>Fragility index</td>
   </tr>

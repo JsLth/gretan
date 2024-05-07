@@ -1,6 +1,6 @@
 Package: gretan
 Title: The official GIS tool of the GRETA project
-Version: 0.8.3
+Version: 0.8.4
 Authors@R: 
     person("Jonas", "Lieth", , "jonas.lieth@gesis.org", role = c("cre", "aut"))
 Description: Visualize and explore the results from the GRETA project. Quickly 
