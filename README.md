@@ -44,7 +44,7 @@ required dependencies.
 
 ## Contributing
 
-GRETA Analytics is designed to incorporate contributions from researchers and stakeholders. If you have conducted research and/or data analyses related to energy citizenship, energy transitions, energy justice, or anything energy in the EU, take a look at our [contribution guidelines](CONTRIBUTION.md).
+GRETA Analytics is designed to incorporate contributions from researchers and stakeholders. If you have conducted research and/or data analyses related to energy citizenship, energy transitions, energy justice, or anything energy in the EU, take a look at our [contribution guidelines](CONTRIBUTING.md).
 
 ## Citation
 
