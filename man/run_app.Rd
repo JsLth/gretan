@@ -17,6 +17,7 @@ run_app(
 run_greta(
   log = NULL,
   reactlog = FALSE,
+  python = NULL,
   options = list(),
   prompt = interactive(),
   ...
@@ -47,10 +48,12 @@ arguments:
 \describe{
   \item{\code{console}}{Enables internal live console to execute R
   commands within the app. Strictly for internal use. Console can be
-  accessed by pressing Ctrl + Shift + D}
+  accessed by pressing Ctrl + Shift + D.}
   \item{\code{track}}{Enables user metrics tracking. Requires a valid
   key to upload collected data to Google Drive stored in the environment
   variable \code{GDRIVE_KEY}.}
+  \item{\code{proc}}{Background process of class \code{process}
+  specifying code to execute while configuring. Internal use only.}
 }}
 }
 \description{

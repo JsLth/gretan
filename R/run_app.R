@@ -30,8 +30,8 @@
 #'   \item{\code{track}}{Enables user metrics tracking. Requires a valid
 #'   key to upload collected data to Google Drive stored in the environment
 #'   variable \code{GDRIVE_KEY}.}
-#'   \item{\code{proc}}{\code{Background process of class \code{process}
-#'   specifying code to execute while configuring. Internal use only.}}
+#'   \item{\code{proc}}{Background process of class \code{process}
+#'   specifying code to execute while configuring. Internal use only.}
 #' }
 #'
 #' @export
@@ -86,12 +86,14 @@ run_app <- function(log = NULL,
 #' @export
 run_greta <- function(log = NULL,
                       reactlog = FALSE,
+                      python = NULL,
                       options = list(),
                       prompt = interactive(),
                       ...) {
   run_app(
     log = log,
     reactlog = reactlog,
+    python = python,
     options = options,
     prompt = prompt,
     ...

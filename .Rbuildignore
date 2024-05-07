@@ -1,4 +1,10 @@
 ^.*\.Rproj$
+^.*\.exe$
+^.*\.drawio$
+^.*\.pptx$
+^.*\.sh$
+^.*\.pdf$
+^t5_2_development.*
 ^\.Rproj\.user$
 ^\.RDataTmp$
 ^data-raw$
@@ -26,3 +32,5 @@ $run_dev.*
 ^inst/extdata/stakeholder/\.rscignore$
 ^.*\.sqlite3
 ^gretan\.log$
+^backup$
+^CONTRIBUTING.md$

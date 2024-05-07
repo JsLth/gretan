@@ -1,6 +1,6 @@
 Package: gretan
 Title: The official GIS tool of the GRETA project
-Version: 0.8.1
+Version: 0.8.3
 Authors@R: 
     person("Jonas", "Lieth", , "jonas.lieth@gesis.org", role = c("cre", "aut"))
 Description: Visualize and explore the results from the GRETA project. Quickly 
@@ -43,9 +43,10 @@ Suggests:
     gargle,
     googledrive,
     shinylogs,
-    processx
+    processx,
+    devtools
 Config/testthat/edition: 3
 Encoding: UTF-8
 Language: en-US
 LazyData: true
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.1

@@ -334,8 +334,8 @@ popover2 <- function(id,
 #'   function() eval(parse(text = expr), envir = pframe)
 #' }
 #'
-#' fun1 <- lapply(1:3, testf)
-#' fun2 <- lapply(1:3, \(x) with_eval_args(testf(x)))
+#' fun1 <- lapply(1:3, funfact)
+#' fun2 <- lapply(1:3, \(x) with_eval_args(funfact(x)))
 #' for (f in fun1) print(f())
 #' for (f in fun2) print(f())
 #' @noRd

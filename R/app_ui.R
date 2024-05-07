@@ -160,6 +160,7 @@ app_ui <- function(theme = NULL,
       )),
       bs4Dash::sidebarMenu(
         id = "sidebar",
+        flat = TRUE,
         tags$form(
           class = "sidebar-form",
           span(
@@ -244,8 +245,7 @@ app_ui <- function(theme = NULL,
           text = get_text("enpov", "shortitle"),
           icon = icon(get_text("enpov", "icon")),
           tabName = "enpov"
-        ),
-        flat = TRUE
+        )
       ),
       skin = "light",
       minified = TRUE,

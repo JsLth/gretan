@@ -49,3 +49,9 @@ vignettes/*.pdf
 
 # External
 *.jar
+
+# Other
+*.pptx
+*.exe
+*.drawio
+*.pdf

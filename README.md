@@ -37,6 +37,14 @@ The Shiny app can then be run using the following command:
 run_greta()
 ```
 
+Note that `gretan` requires a working Python >= 3.11 installation. Once installed,
+`run_greta()` tries to automatically detect Python and optionally installs all
+required dependencies.
+
+## Contributing
+
+GRETA Analytics is designed to incorporate contributions from researchers and stakeholders. If you have conducted research and/or data analyses related to energy citizenship, energy transitions, energy justice, or anything energy in the EU, take a look at our [contribution guidelines](CONTRIBUTION.md).
+
 ## Acknowledgements
 
 GRETA Analytics was mainly developed by [Jonas Lieth](mailto:jonas.lieth@gesis.org) from [GESIS - Leibniz Institute for the Social Sciences](https://www.gesis.org/en/). The package and Shiny app was made possible thanks to the valuable contributions from various institutions including:
