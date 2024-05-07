@@ -138,7 +138,7 @@ app_server <- function(input, output, session) {
     }
   }) %>%
     bindEvent(input$confirm_exit)
-  
+
   if (is_electron()) {
     onFlushed(function() Sys.unsetenv("GRETAN_EXIT"))
   }

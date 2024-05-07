@@ -1,28 +1,28 @@
 #' Add new module
-#' 
+#'
 #' @description
 #' Adds a new module to the dashboard.
 #' In particular, adds two new files \code{mod_{id}.R} and \code{txt_{id}.R}
 #' and modifies two more files \code{app_ui.R} and \code{mod_main.R}. After
 #' running this function, you should have a minimum working prototype of a
 #' new tab that can be manually filled with content.
-#' 
+#'
 #' You need to run \code{devtools::load_all()} before using this function to
 #' ensure that code files are editable.
-#' 
+#'
 #' @param id Identifier of the new module. Should be an abbreviation of the
 #' title, i.e. "Data explorer" -> "exp" or "Case Study 5" -> "cs5"
 #' @param write Whether to write the new code to files or just print it to
 #' the console. Set to FALSE by default to prevent accidents.
-#' 
+#'
 #' @details
 #' Since this function modifies source code, run \code{devtools::load_all()}
 #' after adding a new module. Otherwise, the changes made by this function will
 #' not be immediately adopted.
-#' 
+#'
 #' Before modifying any code files, \code{add_module} stores the old files
 #' in the folder \code{backup}.
-#' 
+#'
 #' @note
 #' These functions are not exported because they can only be used in developer
 #' mode. To use these functions, run gretan from source.
@@ -33,7 +33,7 @@ add_module <- function(id, write = FALSE) {
       " Run `devtools::load_all()` to load gretan in developer mode."
     ))
   }
-  
+
   # find paths
   mod_file <- file.path(
     base::system.file(package = "gretan"),
@@ -45,13 +45,13 @@ add_module <- function(id, write = FALSE) {
   )
   app_ui <- base::system.file("R/app_ui.R", package = "gretan")
   mod_main <- base::system.file("R/mod_main.R", package = "gretan")
-  
+
   # create code strings
   mod_code <- new_mod(id)
   txt_code <- new_txt(id)
   ui_code <- add_tab_to_app_ui(id)
   main_code <- add_mod_to_mod_main(id)
-  
+
   if (write) {
     # create backup
     dir.create(app_sys("backup"), showWarnings = FALSE)
@@ -63,7 +63,7 @@ add_module <- function(id, write = FALSE) {
       base::system.file("backup", package = "gretan"),
       "mod_main.R"
     ))
-    
+
     # write new files
     cat(sprintf("- Adding %s", basename(mod_file)), "\n")
     cat(mod_code, file = mod_file, sep = "\n")
@@ -97,14 +97,14 @@ add_module <- function(id, write = FALSE) {
 recover_app <- function() {
   app_file <- app_sys("backup/app_ui.R")
   main_file <- app_sys("backup/mod_main.R")
-  
+
   if (file.exists(app_file)) {
     cat("- Recovering app_ui.R", "\n")
     file.copy(app_file, to = app_sys("R/app_ui.R"), overwrite = TRUE)
   } else {
     warning("Backup file for app_ui.R does not exist")
   }
-  
+
   if (file.exists(app_file)) {
     cat("- Recovering mod_main.R", "\n")
     file.copy(main_file, to = app_sys("R/mod_main.R"), overwrite = TRUE)
@@ -163,7 +163,7 @@ add_tab_to_app_ui <- function(id) {
     "%s)",
     sep = "\n"
   ), ws, ws, id, ws, id, ws, id, ws)
-  
+
   ui_code[last_tab] <- paste0(last_line, ",")
   ui_code <- append(ui_code, ui_new, after = last_tab)
   ui_code
