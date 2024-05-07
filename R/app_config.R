@@ -6,11 +6,11 @@
 #'
 #' @noRd
 app_sys <- function(...) {
-  path <- base::system.file(..., package = "gretan")
+  path <- system.file(..., package = "gretan")
   
   # for rsconnect
   if (!nchar(path)) {
-    path <- file.path("inst", ...)
+    path <- file.path(...)
   }
 
   path
