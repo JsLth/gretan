@@ -7,7 +7,7 @@
 #' @noRd
 app_sys <- function(...) {
   path <- base::system.file(..., package = "gretan")
-  
+
   # for rsconnect
   if (!nchar(path)) {
     path <- file.path("inst", ...)
@@ -147,7 +147,7 @@ download_dependencies <- function() {
 
 
 check_python <- function(python = NULL, prompt = interactive()) {
-  if (Sys.info()[['user']] == 'shiny') {
+  if (Sys.info()[["user"]] == "shiny") {
     Sys.setenv(PYTHON_PATH = "/usr/bin/python3")
     Sys.setenv(VIRTUALENV_NAME = "gretan")
     Sys.setenv(RETICULATE_PYTHON = "/home/shiny/.virtualenvs/gretan/bin/python")
@@ -166,7 +166,7 @@ check_python <- function(python = NULL, prompt = interactive()) {
     }
     return()
   }
-  
+
   if (is_electron()) {
     pypath <- "resources/app/app/python/python-3.11.5.amd64/python.exe"
     user <- normalizePath(Sys.getenv("USERPROFILE"), "/")
