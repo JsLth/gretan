@@ -6,13 +6,8 @@
 #'
 #' @noRd
 app_sys <- function(...) {
-<<<<<<< HEAD
   path <- system.file(..., package = "gretan")
-  
-=======
-  path <- base::system.file(..., package = "gretan")
 
->>>>>>> 54f4a2cb0469312b5ca1964b847af8f9378ff77d
   # for rsconnect
   if (!nchar(path)) {
     path <- file.path(...)
