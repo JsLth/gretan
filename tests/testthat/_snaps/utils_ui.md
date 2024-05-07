@@ -75,7 +75,7 @@
           </div>
           <div class="collapse show leaflet-info-body" id="test">this is a panel</div>
         </div>
-        <script>$(".draggable").draggable();</script>
+        <script>$(".draggable").draggable({cancel: ".shiny-input-container,.html-widget,input,textarea,button,select,option"});</script>
       </div>
 
 ---
@@ -97,7 +97,7 @@
           </div>
           <div class="collapse show leaflet-info-body" id="test"></div>
         </div>
-        <script>$(".draggable").draggable();</script>
+        <script>$(".draggable").draggable({cancel: ".shiny-input-container,.html-widget,input,textarea,button,select,option"});</script>
       </div>
 
 ---
@@ -119,7 +119,7 @@
           </div>
           <div class="collapse show leaflet-info-body" id="test"></div>
         </div>
-        <script>$(".draggable").draggable();</script>
+        <script>$(".draggable").draggable({cancel: ".shiny-input-container,.html-widget,input,textarea,button,select,option"});</script>
       </div>
 
 ---
@@ -141,7 +141,7 @@
           </div>
           <div class="collapse show leaflet-info-body" id="test"></div>
         </div>
-        <script>$(".draggable").draggable();</script>
+        <script>$(".draggable").draggable({cancel: ".shiny-input-container,.html-widget,input,textarea,button,select,option"});</script>
       </div>
 
 ---
@@ -163,7 +163,7 @@
           </div>
           <div class="collapse show leaflet-info-body" id="test"></div>
         </div>
-        <script>$(".draggable").draggable();</script>
+        <script>$(".draggable").draggable({cancel: ".shiny-input-container,.html-widget,input,textarea,button,select,option"});</script>
       </div>
 
 # groupRadioButtons works
