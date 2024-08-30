@@ -74,26 +74,6 @@ txts$main$home <- list(
             icon = icon("arrow-right"),
             class = "home-arrow"
           )
-        ),
-        tags$li(
-          HTML("Find out how living environments steer the public social media
-               discourse on energy transition and environmental change."),
-          actionLink(
-            "welcome-li-attitudes",
-            label = "",
-            icon = icon("arrow-right"),
-            class = "home-arrow"
-          )
-        ),
-        tags$li(
-          HTML("Learn about the uneven geographies of energy research and
-               its thematic versatility.\u2800"),
-          actionLink(
-            "welcome-li-research",
-            label = "",
-            icon = icon("arrow-right"),
-            class = "home-arrow"
-          )
         )
       ),
       p2(
