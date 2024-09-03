@@ -19,7 +19,6 @@ mod_enpov_ui <- function(id) {
           width = 12,
           get_text("introduction", "content")
         ),
-        
         bs4Dash::box(
           title = get_text("")
         )
