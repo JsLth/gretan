@@ -1,7 +1,3 @@
-get_question <- function(var) {
-  cb_ext[cb_ext$og_var %in% var, ]$question[1]
-}
-
 var_names <- list(
   pay_worries = "Payment worries",
   supp_threat = "Supplier threat",
@@ -96,14 +92,14 @@ txts$main$enpov <- list(
         ),
         Indicator = unlist(var_names, use.names = FALSE),
         Description = c(
-          get_question("c28_1"),
-          get_question("c28_2"),
-          get_question("c28_3"),
-          get_question("c28_4"),
+          "How often did you worry that you wouldnt be able to pay your home energy bill?",
+          "How often did you have a supplier threaten you to disconnect your electricity or home heating fuel service, or discontinue making fuel deliveries?",
+          "During the winter months, how often did you keep your home at a temperature that you felt was unsafe or unhealthy?",
+          "During the summer months, how often did you keep your home at a temperature that you felt was unsafe or unhealthy?",
           "Binary indicator measuring whether a person lives in a detached or semi-detached house.",
-          get_question("c30"),
+          "What is the housing area of your home?",
           "Binary indicator whether respondent is a tenant or not.",
-          get_question("c5"),
+          "Where do you live?",
           "Chronical disease or disability that requires special care for transport.",
           "Chronical disease or disability that requires more heating.",
           "Chronical disease or disability that requires more air",
@@ -121,6 +117,18 @@ txts$main$enpov <- list(
         )
       )
     )
+  ),
+  index_map = list(
+    title = "Energy vulnerability in the EU",
+    content = p2(HTML(
+      "The map below shows the different facets of energy vulnerability in
+      the EU. Each point on the map represents a household, smoothed across
+      the nearest 100 households. In other words, the energy vulnerability
+      index for each household is the mean of its nearest neighbors. One
+      apparent take-away is the clear north-south descent. Countries in the
+      South of Europe are visibly more vulnerable to energy poverty than
+      those in the North."
+    ))
   ),
   references = list(
     title = "References",

@@ -18,6 +18,10 @@ mod_enpov_ui <- function(id) {
           status = "primary",
           width = 12,
           get_text("introduction", "content")
+        ),
+        
+        bs4Dash::box(
+          title = get_text("")
         )
       ),
       col_6(
