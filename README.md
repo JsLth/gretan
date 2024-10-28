@@ -70,14 +70,14 @@ BibTeX entries for LaTeX users:
 ```
 ```
 @article{,
-	author = {Lieth, Jonas and Abel, Dennis and J{\ifmmode\ddot{u}\else\"{u}\fi}nger, Stefan},
-	title = {{GRETA analytics: Communicating the spatial dimension of energy citizenship using a collaborative Shiny app}},
-	journal = {SoftwareX},
-	volume = {27},
-	pages = {101800},
-	year = {2024},
-	publisher = {Elsevier},
-	doi = {10.1016/j.softx.2024.101800}
+  author = {Lieth, Jonas and Abel, Dennis and J{\ifmmode\ddot{u}\else\"{u}\fi}nger, Stefan},
+  title = {{GRETA analytics: Communicating the spatial dimension of energy citizenship using a collaborative Shiny app}},
+  journal = {SoftwareX},
+  volume = {27},
+  pages = {101800},
+  year = {2024},
+  publisher = {Elsevier},
+  doi = {10.1016/j.softx.2024.101800}
 }
 ```
 
