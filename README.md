@@ -52,9 +52,9 @@ To cite the `gretan` package in a publication use:
 
 Lieth, J. (2023). GRETA Analytics: GIS tool of the GRETA project. https://doi.org/10.5281/zenodo.10214281, https://github.com/JsLth/gretan
 
-A journal article is planned, but not yet published. Until then, you can cite original GRETA deliverable:
+You can also cite the journal article discussing the development and architecture of the app/package:
 
-Abel, D., Jünger, S., Lieth, J., Massari, M., Boulanger, S.O.M. (2022). Interrelations among different types of citizens in different geographic contexts. D5.2 of the Horizon 2020 project GRETA, EC grant agreement n°101022317, Cologne, Germany.
+Lieth, J., Abel, D., & Jünger, S. (2024). GRETA analytics: Communicating the spatial dimension of energy citizenship using a collaborative Shiny app. SoftwareX, 27, 101800. doi: 10.1016/j.softx.2024.101800
 
 BibTeX entries for LaTeX users:
 
@@ -69,12 +69,15 @@ BibTeX entries for LaTeX users:
 }
 ```
 ```
-@techreport{,
-  author = {Abel, Dennis and Jünger, Stefan and Lieth, Jonas and Massari, Martina and S.O.M., Boulanger},
-  title = {Interrelations among different types of citizens in different geographic contexts},
-  type = {{D5.2 of the Horizon 2020 project GRETA, EC grant agreement n°101022317}},
-  year = {2022},
-  address = {Cologne, Germany}
+@article{,
+	author = {Lieth, Jonas and Abel, Dennis and J{\ifmmode\ddot{u}\else\"{u}\fi}nger, Stefan},
+	title = {{GRETA analytics: Communicating the spatial dimension of energy citizenship using a collaborative Shiny app}},
+	journal = {SoftwareX},
+	volume = {27},
+	pages = {101800},
+	year = {2024},
+	publisher = {Elsevier},
+	doi = {10.1016/j.softx.2024.101800}
 }
 ```
 
