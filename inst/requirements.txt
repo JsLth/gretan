@@ -6,6 +6,6 @@ requests==2.32.2
 openpyxl==3.1.2
 xarray==2023.7.0
 geopandas==0.13.2
-lightgbm==4.1.0
+lightgbm==4.6.0
 tomli==2.0.1
 Jinja2==3.1.5
